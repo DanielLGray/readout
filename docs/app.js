@@ -380,6 +380,8 @@ function openInfo() {
     el("p", {}, "The colored scale borrows the PET hot-iron map. Solid badges come from PubMed’s indexing. Dashed badges were detected from words in the abstract (for example “retrospective”), so treat them as a hint. Sample size is read from the abstract the same way."),
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
+    el("h3", {}, "News"),
+    el("p", {}, "Industry and business headlines come from each outlet’s public feed (AuntMinnie, Radiology Business, Imaging Technology News, The Imaging Wire and others; the list is in config/news.yaml). Readout shows the headline and the outlet’s own short summary; tapping opens the full article on the outlet’s site. “Top stories” are stories more than one publisher covered this week."),
     el("h3", {}, "Sources"),
     el("p", {}, "PubMed (NLM), NIH iCite, ClinicalTrials.gov. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
 }

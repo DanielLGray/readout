@@ -4,6 +4,7 @@ A personal body-imaging literature app for your iPhone. It shows each new paper 
 
 - **Feed** (updated daily): new papers from radiology, nuclear medicine and high-impact clinical journals, filtered to abdomen and pelvis. Each card shows the authors' conclusion, an evidence-strength scale, sample size, and topic tags.
 - **Explore** (updated weekly): about 30 curated topics, compared with the period before and adjusted for how fast imaging research grows overall. You also get an evidence ladder for each topic, its most-cited papers (NIH iCite), guidelines and consensus papers, newly registered trials (ClinicalTrials.gov), and phrases that are new in or fading from body-imaging titles.
+- **News** (updated every 6 hours): radiology industry and business headlines from AuntMinnie, Radiology Business, Imaging Technology News, The Imaging Wire, AuntMinnie Europe, Signify Research and MedTech Dive (imaging stories only). You also get the stories several publishers covered this week, trending headline phrases, and chips for policy and payment, workforce, AI and software, business and deals, FDA and safety, and equipment. Tapping a headline opens the article on the outlet's site.
 - **No AI rewriting.** Everything comes from PubMed, iCite and ClinicalTrials.gov. The code that reads abstracts only cuts journal boilerplate (copyright lines, "supplemental material is available…").
 
 It's free to run. GitHub does the daily work and hosts the app, and Safari installs it on your Home Screen. You don't need the App Store, a Mac or an Apple developer account.
@@ -56,6 +57,7 @@ From then on, the feed updates every morning and the trends every Monday, with n
 Everything you'd want to change lives in two text files in `config/`. You can edit them on github.com (tap the file, then the pencil).
 
 - **`config/feeds.yaml`** sets the journals, the abdomen/pelvis word filter, the organ-system chips, and how long cards stay (180 days by default).
+- **`config/news.yaml`** lists the news outlets (each with backup feed addresses) and the words behind each business category. The **Update news** run's summary shows which address each outlet is using.
 - **`config/topics.yaml`** holds the Explore topics. Each one is a PubMed query, so you can copy a block, give it a new `id` and `name`, and write the query the way you would in PubMed. Add a `trials:` line to also count new ClinicalTrials.gov registrations.
 
 After editing, run **Update trends** from the Actions tab. Its first step, *Check every query against PubMed*, prints a table in the run summary showing how many papers each topic matches, along with any PubMed warnings (for example, a quoted phrase PubMed doesn't recognize). A topic with very few papers usually means the query is too narrow.

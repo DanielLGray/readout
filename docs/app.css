@@ -322,7 +322,7 @@ a { color: inherit; }
 
 /* ── news ───────────────────────────────────────────────────────────────── */
 .news { padding: 0 16px 24px; }
-.story > button { width: 100%; text-align: left; padding: 12px 0; display: grid; gap: 4px; }
+.row.story > button { width: 100%; text-align: left; padding: 12px 0; display: grid; grid-template-columns: 1fr; gap: 4px; }
 .story-title { font: 600 17px/1.35 var(--serif); }
 .story-meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .story-meta .cover { color: var(--heat-text); font-weight: 700; }

@@ -34,10 +34,12 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
         except (HttpError, Exception) as exc:      # bad address, block, or unreadable feed: try the next
             status["tried"].append(f"{url} → {type(exc).__name__}: {str(exc)[:80]}")
             continue
+        if items:
+            status["ok"] = True                    # the feed works, even if nothing passes the filter today
         if need:
             items = [i for i in items if need.search(i["title"] + " " + i.get("summary", ""))]
         if not items:
-            status["tried"].append(f"{url} → no stories")
+            status["tried"].append(f"{url} → no {'matching ' if need else ''}stories")
             continue
         used.append(url)
         for i in items:
@@ -49,6 +51,8 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
     if found:
         got = list(found.values())
         status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
+    elif status["ok"]:
+        status["url"] = "works; no imaging stories right now"
     return list(found.values()), status
 
 
