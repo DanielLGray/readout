@@ -26,6 +26,7 @@ says say said announces announced launches launched unveils unveiled receives re
 first study studies finds found shows show could may might will report reports company companies system
 systems center centers year years week today latest top best update news rsna webinar podcast video
 people young older big win better chance back way help need needs key amid after over more most less
+many much so very really just still even get gets got make makes
 """.split())
 
 
@@ -220,8 +221,12 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
         cands = sorted((k for k in rc if rc[k] >= 2 and len(srcs[k]) >= 2),
                        key=lambda k: (len(srcs[k]), rc[k]), reverse=True)
     chosen: list[str] = []
+    docs = {k: {i for _, i in ids[k]} for k in cands[:200]}
     for k in cands:
         if any(_contains(k, c) for c in chosen):
+            continue
+        # two halves of the same headline ("loses measles elimination" / "elimination status")
+        if any(len(docs.get(k, set()) & docs[c]) >= 0.6 * len(docs.get(k, set()) | docs[c]) for c in chosen if c in docs):
             continue
         chosen.append(k)
         if len(chosen) >= top_n:

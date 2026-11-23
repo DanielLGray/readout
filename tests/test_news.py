@@ -94,3 +94,12 @@ def test_double_escaped_html_and_sister_sites():
     assert news.top_stories([a, b], now, group_of=groups) == []       # same publisher: not "covered by 2"
     c = dict(a, id="3", link="c", source="Radiology Business", title="MRI monitoring may be unnecessary in older MS patients")
     assert len(news.top_stories([a, b, c], now, group_of=groups)) == 1
+
+
+def test_trending_merges_halves_of_one_headline():
+    arch = []
+    for n, src in enumerate(["A", "B", "C"]):
+        arch.append({"id": f"m{n}", "title": "US loses measles elimination status after 25 years", "source": src,
+                     "date": "2026-11-22T10:00:00Z"})
+    terms = [t["term"] for t in news.trending(arch, NOW, 7, 28)["terms"]]
+    assert sum("measles" in t or "elimination" in t for t in terms) == 1, terms
