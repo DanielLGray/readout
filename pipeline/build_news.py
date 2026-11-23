@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -19,8 +20,13 @@ def news_http() -> Http:
 
 
 def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dict]":
+    """Try the outlet's addresses in order; the first that returns stories wins
+    (or, with merge: true, every address that works is used)."""
     status = {"name": src["name"], "home": src.get("home", ""), "ok": False, "url": None, "count": 0,
               "newest": None, "tried": []}
+    need = re.compile(src["require"], re.I) if src.get("require") else None
+    found: dict[str, dict] = {}
+    used = []
     for url in src.get("urls", []):
         try:
             text = http.request("GET", url, {}, expect_json=False)
@@ -28,12 +34,22 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
         except (HttpError, Exception) as exc:      # bad address, block, or unreadable feed: try the next
             status["tried"].append(f"{url} → {type(exc).__name__}: {str(exc)[:80]}")
             continue
+        if need:
+            items = [i for i in items if need.search(i["title"] + " " + i.get("summary", ""))]
         if not items:
             status["tried"].append(f"{url} → no stories")
             continue
-        status.update(ok=True, url=url, count=len(items), newest=max(i["date"] for i in items))
-        return items, status
-    return [], status
+        used.append(url)
+        for i in items:
+            key = i["title"].lower()
+            if key not in found or len(i.get("summary", "")) > len(found[key].get("summary", "")):
+                found[key] = i
+        if not src.get("merge"):
+            break
+    if found:
+        got = list(found.values())
+        status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
+    return list(found.values()), status
 
 
 def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
@@ -58,14 +74,14 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             it["categories"] = news.categorize(it, compiled)
             items[it["id"]] = it
 
-    # same headline from one outlet under two links: keep one
-    seen, unique = set(), []
-    for it in sorted(items.values(), key=lambda i: i["date"], reverse=True):
-        key = (it["source"], it["title"].lower())
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(it)
+    # one copy per headline per publisher (sister sites syndicate): keep the one with a summary
+    group_of = {src["name"]: src.get("group", src["name"]) for src in cfg.get("sources", [])}
+    best: dict[tuple, dict] = {}
+    for it in sorted(items.values(), key=lambda i: i["date"]):
+        key = (group_of.get(it["source"], it["source"]), it["title"].lower())
+        if key not in best or len(it.get("summary", "")) > len(best[key].get("summary", "")):
+            best[key] = it
+    unique = sorted(best.values(), key=lambda i: i["date"], reverse=True)
 
     cutoff = news._utc(now - timedelta(days=int(settings.get("keep_days", 120))))
     kept = [i for i in unique if i["date"] >= cutoff][: int(settings.get("max_items", 1500))]
@@ -84,8 +100,9 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         "generated": now_iso(),
         "sources": statuses,
         "categories": {k: v["label"] for k, v in cfg.get("categories", {}).items()},
-        "top_stories": news.top_stories(kept, now),
-        "trending": {"week": news.trending(arch, now, 7, 28), "month": news.trending(arch, now, 30, 90)},
+        "top_stories": news.top_stories(kept, now, group_of=group_of),
+        "trending": {"week": news.trending(arch, now, 7, 28, group_of=group_of),
+                     "month": news.trending(arch, now, 30, 90, group_of=group_of)},
         "items": kept,
     }
     write_json(path, out)

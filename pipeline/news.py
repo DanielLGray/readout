@@ -46,7 +46,8 @@ def parse_date(s: str) -> Optional[datetime]:
 
 
 def clean_text(s: str) -> str:
-    s = re.sub(r"<[^>]+>", " ", s or "")
+    s = html.unescape(s or "")                 # some feeds escape their HTML twice ("&lt;p&gt;")
+    s = re.sub(r"<[^>]+>", " ", s)
     s = html.unescape(s)
     s = re.sub(r"\bThe post .{3,200}? appeared first on .{2,80}?\.?\s*$", "", s)
     s = re.sub(r"\b(Continue reading|Read more|READ MORE)\b.*$", "", s, flags=re.I)
@@ -142,8 +143,11 @@ def _words(title: str) -> set:
     return out
 
 
-def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8) -> list[dict]:
-    """Stories several outlets covered in the last `days` days, most-covered first."""
+def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
+                group_of: Optional[dict] = None) -> list[dict]:
+    """Stories several publishers covered in the last `days` days, most-covered first.
+    `group_of` maps sister outlets to one publisher so syndicated copies count once."""
+    group_of = group_of or {}
     cutoff = _utc(now - timedelta(days=days))
     recent = sorted((i for i in items if i["date"] >= cutoff), key=lambda i: i["date"])
     clusters: list[dict] = []
@@ -166,17 +170,18 @@ def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8)
     out = []
     for c in clusters:
         sources = sorted({i["source"] for i in c["items"]})
-        if len(sources) < 2:
+        if len({group_of.get(i["source"], i["source"]) for i in c["items"]}) < 2:
             continue
         lead = max(c["items"], key=lambda i: (len(i.get("summary", "")), i["date"]))
         out.append({"title": lead["title"], "date": max(i["date"] for i in c["items"]),
                     "sources": sources, "items": [i["id"] for i in sorted(c["items"], key=lambda i: i["date"], reverse=True)]})
-    out.sort(key=lambda c: (len(c["sources"]), c["date"]), reverse=True)
+    out.sort(key=lambda c: (len({group_of.get(x, x) for x in c["sources"]}), c["date"]), reverse=True)
     return out[:limit]
 
 
 # ── trending phrases in headlines ────────────────────────────────────────────
-def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top_n: int = 12) -> dict:
+def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top_n: int = 12,
+             group_of: Optional[dict] = None) -> dict:
     """archive: [{id, title, source, date}]. Compares the last `days` days with
     the `prior_days` before. Until enough history builds up, ranks by how many
     outlets covered a phrase instead ("coverage")."""
@@ -197,21 +202,22 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
     for a, ks in recent:
         for k in ks:
             rc[k] += 1
-            srcs[k].add(a["source"])
+            srcs[k].add((group_of or {}).get(a["source"], a["source"]))
             ids[k].append((a["date"], a["id"]))
     for _, ks in prior:
         for k in ks:
             pc[k] += 1
+    growth = []
     if P >= 40:
-        basis = "growth"
-        score = lambda k: (((rc[k] + 1) / max(R, 1)) / ((pc[k] + 1) / P)) * math.log(rc[k] + 1)
-        cands = [k for k in rc if rc[k] >= 3 and len(srcs[k]) >= 2
-                 and ((rc[k] + 1) / max(R, 1)) / ((pc[k] + 1) / P) >= 1.5]
-    else:
+        ratio = lambda k: ((rc[k] + 1) / max(R, 1)) / ((pc[k] + 1) / P)
+        growth = sorted((k for k in rc if rc[k] >= 3 and len(srcs[k]) >= 2 and ratio(k) >= 1.5),
+                        key=lambda k: ratio(k) * math.log(rc[k] + 1), reverse=True)
+    if len(growth) >= 4:
+        basis, cands = "growth", growth
+    else:                                      # not enough history yet: what most outlets are covering
         basis = "coverage"
-        score = lambda k: (len(srcs[k]), rc[k])
-        cands = [k for k in rc if rc[k] >= 2 and len(srcs[k]) >= 2]
-    cands.sort(key=score, reverse=True)
+        cands = sorted((k for k in rc if rc[k] >= 2 and len(srcs[k]) >= 2),
+                       key=lambda k: (len(srcs[k]), rc[k]), reverse=True)
     chosen: list[str] = []
     for k in cands:
         if any(_contains(k, c) for c in chosen):

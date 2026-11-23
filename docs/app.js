@@ -72,6 +72,8 @@ const S = {
   win: store.get("win", "2"),
   saved: store.get("saved", {}),
   newIds: new Set(), list: [], rendered: 0, loadedAt: 0, exploreKey: null,
+  news: null, newsCat: "all", newsTerm: null, newsSpan: store.get("newsSpan", "week"), newsShown: 40,
+  newsNew: new Set(), newsKey: null,
 };
 
 async function loadJSON(path) {
@@ -88,6 +90,11 @@ function markNew() {
 }
 function rememberSeen() {
   if (S.feed) store.set("prevIds", S.feed.items.map((i) => i.pmid));
+  if (S.news) store.set("prevNewsIds", S.news.items.map((i) => i.id));
+}
+function markNewsNew() {
+  const prev = store.get("prevNewsIds", null);
+  S.newsNew = prev && S.news ? new Set(S.news.items.map((i) => i.id).filter((id) => !prev.includes(id))) : new Set();
 }
 
 function paperOf(ref) {
@@ -610,6 +617,103 @@ function closeTopic() {
   if (S.tab === "explore") renderExplore();   // no-op unless the window was changed on the topic page
 }
 
+// ── news ───────────────────────────────────────────────────────────────────
+function agoShort(iso) {
+  const h = (Date.now() - new Date(iso).getTime()) / 36e5;
+  if (h < 1) return "now";
+  if (h < 24) return `${Math.round(h)} h`;
+  const d = Math.round(h / 24);
+  return d < 14 ? `${d} d` : fmtDate(iso.slice(0, 10));
+}
+
+function newsItemEl(it) {
+  const cats = (it.categories || []).map((c) => S.news.categories?.[c]).filter(Boolean);
+  return el("li", { class: "news-item" },
+    el("a", { href: it.link, target: "_blank", rel: "noopener" },
+      el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date)),
+        S.newsNew.has(it.id) ? el("span", { class: "tag-new" }, "New") : null),
+      el("span", { class: "news-title" }, it.title),
+      it.summary ? el("span", { class: "news-teaser" }, it.summary) : null,
+      cats.length ? el("span", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null));
+}
+
+function storyEl(st, byId) {
+  const links = el("div", { class: "story-links", hidden: true },
+    st.items.map((id) => byId[id]).filter(Boolean).map((it) =>
+      el("a", { href: it.link, target: "_blank", rel: "noopener" }, `${it.source}: ${it.title}`)));
+  const btn = el("button", { "aria-expanded": "false", onclick: () => {
+    const open = links.hidden; links.hidden = !open; btn.setAttribute("aria-expanded", String(open));
+  } },
+  el("span", { class: "story-title" }, st.title),
+  el("span", { class: "story-meta" },
+    el("span", { class: "cover" }, `${st.sources.length} outlets`),
+    el("span", {}, st.sources.join(", ")),
+    el("span", {}, agoShort(st.date))));
+  return el("li", { class: "row story" }, btn, links);
+}
+
+function renderNews(force) {
+  const view = $("#view-news");
+  const n = S.news;
+  const key = `${n?.generated}|${S.newsCat}|${S.newsTerm?.key}|${S.newsSpan}|${S.newsShown}`;
+  if (!force && key === S.newsKey && view.childElementCount) return;
+  const keep = S.newsKey && S.newsKey.split("|")[0] === String(n?.generated) ? view.scrollTop : 0;
+  S.newsKey = key;
+  view.replaceChildren();
+  if (!n) {
+    view.append(el("section", { class: "empty", style: "height:100%" },
+      el("h2", { text: "No news yet" }),
+      el("p", { text: "Headlines arrive with the “Update news” job on GitHub, which runs every 6 hours. You can also run it from the Actions tab." }),
+      el("button", { class: "btn", onclick: () => reload(true) }, "Check again")));
+    return;
+  }
+  const byId = Object.fromEntries(n.items.map((i) => [i.id, i]));
+  const tr = n.trending?.[S.newsSpan] || { terms: [] };
+  const spanSeg = el("div", { class: "seg", role: "group", "aria-label": "Trending window", style: "grid-template-columns:repeat(2,1fr)" },
+    [["week", "This week"], ["month", "This month"]].map(([k, l]) => el("button", { "aria-pressed": String(S.newsSpan === k),
+      onclick: () => { S.newsSpan = k; S.newsTerm = null; store.set("newsSpan", k); renderNews(true); } }, l)));
+
+  let list = n.items;
+  if (S.newsTerm) {
+    const ids = new Set(S.newsTerm.ids);
+    list = list.filter((i) => ids.has(i.id));
+  } else if (S.newsCat !== "all") {
+    list = list.filter((i) => (i.categories || []).includes(S.newsCat));
+  }
+  const chips = el("div", { class: "news-chips", role: "group", "aria-label": "Filter headlines" },
+    [["all", "All"], ...Object.entries(n.categories || {})].map(([k, l]) => el("button", {
+      class: "chip", "aria-pressed": String(!S.newsTerm && S.newsCat === k),
+      onclick: () => { S.newsCat = k; S.newsTerm = null; S.newsShown = 40; renderNews(true); } }, l)));
+  const working = (n.sources || []).filter((x) => x.ok).map((x) => x.name);
+  const failing = (n.sources || []).filter((x) => !x.ok).map((x) => x.name);
+
+  view.append(el("div", { class: "news" },
+    el("p", { class: "ex-note" }, `Radiology industry and business headlines, updated ${ago(n.generated)}. Tap a headline to read it on the outlet’s site.`),
+    section("Top stories", "Covered by more than one outlet in the last 7 days.",
+      (n.top_stories || []).map((st) => storyEl(st, byId)), "No story has been picked up by several outlets this week."),
+    el("section", { class: "sect" },
+      el("h2", {}, "Trending in headlines"),
+      el("p", { class: "sub" }, tr.basis === "growth"
+        ? `Phrases used more than in the ${S.newsSpan === "week" ? "4 weeks" : "3 months"} before. Tap one to see the stories.`
+        : "Phrases most outlets are using. Trend lines start once a few weeks of headlines build up. Tap one to see the stories."),
+      spanSeg,
+      el("div", { class: "term-chips", style: "margin-top:12px" },
+        (tr.terms || []).length ? tr.terms.map((t) => el("button", {
+          class: "term-chip", "aria-pressed": String(S.newsTerm?.key === t.key),
+          onclick: () => { S.newsTerm = S.newsTerm?.key === t.key ? null : t; S.newsShown = 40; renderNews(true); } },
+          t.term, el("b", {}, String(t.count)))) : el("p", { class: "nothing" }, "Not enough headlines yet."))),
+    el("section", { class: "sect" },
+      el("h2", {}, S.newsTerm ? `Stories on “${S.newsTerm.term}”` : "Latest"),
+      chips,
+      list.length ? el("ul", { class: "rows" }, list.slice(0, S.newsShown).map(newsItemEl))
+        : el("p", { class: "nothing" }, "No headlines in this category yet."),
+      list.length > S.newsShown ? el("button", { class: "act more-btn", style: "padding:0 18px",
+        onclick: () => { S.newsShown += 40; renderNews(true); } }, `Show more (${list.length - S.newsShown} left)`) : null),
+    el("p", { class: "fine", style: "margin-top:24px" },
+      `From ${working.join(", ") || "no outlets yet"}.` + (failing.length ? ` Not reachable right now: ${failing.join(", ")}.` : ""))));
+  view.scrollTop = keep;
+}
+
 // ── saved ──────────────────────────────────────────────────────────────────
 function renderSaved() {
   const view = $("#view-saved");
@@ -635,7 +739,9 @@ function renderSaved() {
 // ── tabs, header, boot ─────────────────────────────────────────────────────
 function updateHeadNote() {
   const note = $("#head-note");
-  if (S.tab === "feed" && S.newIds.size) note.textContent = `${S.newIds.size} new`;
+  if (S.tab === "news" && S.newsNew.size) note.textContent = `${S.newsNew.size} new`;
+  else if (S.tab === "news" && S.news) note.textContent = `Updated ${ago(S.news.generated)}`;
+  else if (S.tab === "feed" && S.newIds.size) note.textContent = `${S.newIds.size} new`;
   else if (S.tab === "feed" && S.feed) note.textContent = `Updated ${ago(S.feed.generated)}`;
   else note.textContent = "";
 }
@@ -645,24 +751,32 @@ function switchTab(tab) {
   document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   $("#view-feed").hidden = tab !== "feed";
   $("#view-explore").hidden = tab !== "explore";
+  $("#view-news").hidden = tab !== "news";
   $("#view-saved").hidden = tab !== "saved";
   $("#chips").hidden = tab !== "feed";
-  $("#title").textContent = { feed: "Readout", explore: "Explore", saved: "Saved" }[tab];
+  $("#title").textContent = { feed: "Readout", news: "News", explore: "Explore", saved: "Saved" }[tab];
   updateHeadNote();
   if (tab === "explore") renderExplore();
+  if (tab === "news") renderNews();
   if (tab === "saved") renderSaved();
 }
 
 async function reload(announce) {
   const before = new Set((S.feed?.items || []).map((i) => i.pmid));
-  const was = { feed: S.feed?.generated, explore: S.explore?.generated };
-  const [feed, explore] = await Promise.all([
+  const was = { feed: S.feed?.generated, explore: S.explore?.generated, news: S.news?.generated };
+  const [feed, explore, newsData] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/explore.json").catch(() => null),
+    loadJSON("data/news.json").catch(() => null),
   ]);
+  if (newsData) S.news = newsData;
+  const newsChanged = !S.news || S.news.generated !== was.news;
+  markNewsNew();
+  if (newsChanged) S.newsKey = null;
+  if (S.tab === "news" && (announce || newsChanged)) renderNews();
   if (feed) S.feed = feed;
   if (explore) S.explore = explore;
-  if (feed || explore) S.loadedAt = Date.now();
+  if (feed || explore || newsData) S.loadedAt = Date.now();
   const feedChanged = !S.feed || S.feed.generated !== was.feed;
   const exploreChanged = !S.explore || S.explore.generated !== was.explore;
   markNew();

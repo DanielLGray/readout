@@ -77,3 +77,14 @@ def test_build_news(env):
     # second run: stable ids, no duplicates
     out2 = build_news.run(env, NOW)
     assert len(out2["items"]) == 6
+
+
+def test_double_escaped_html_and_sister_sites():
+    assert news.clean_text("&lt;p&gt;About 35% of beneficiaries&lt;/p&gt;") == "About 35% of beneficiaries"
+    now = NOW
+    a = {"id": "1", "title": "Older patients with MS may not need frequent MRI monitoring", "link": "a", "source": "AuntMinnie", "date": "2026-11-23T10:00:00Z", "summary": ""}
+    b = dict(a, id="2", link="b", source="AuntMinnie Europe")
+    groups = {"AuntMinnie": "am", "AuntMinnie Europe": "am"}
+    assert news.top_stories([a, b], now, group_of=groups) == []       # same publisher: not "covered by 2"
+    c = dict(a, id="3", link="c", source="Radiology Business", title="MRI monitoring may be unnecessary in older MS patients")
+    assert len(news.top_stories([a, b, c], now, group_of=groups)) == 1

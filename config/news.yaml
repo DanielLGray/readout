@@ -19,35 +19,36 @@ settings:
   archive_days: 730       # headlines kept (titles only) for trend analysis
 
 sources:
+  # group: outlets from the same publisher that share stories count once
+  # merge: use every working address (an RSS feed plus a sitemap gives more stories)
+  # require: keep only stories whose headline/summary match (for general medtech outlets)
   - name: AuntMinnie
+    group: auntminnie
     home: https://www.auntminnie.com
+    merge: true
     urls:
       - https://www.auntminnie.com/rss
-      - https://www.auntminnie.com/feed
-      - http://cdn.auntminnie.com/rss/rss.aspx
       - https://www.auntminnie.com/sitemap-google-news.xml
+
+  - name: AuntMinnie Europe
+    group: auntminnie
+    home: https://www.auntminnieeurope.com
+    merge: true
+    urls:
+      - https://www.auntminnieeurope.com/feed
+      - https://www.auntminnieeurope.com/sitemap-google-news.xml
 
   - name: Radiology Business
     home: https://radiologybusiness.com
     urls:
       - https://radiologybusiness.com/rss.xml
       - https://radiologybusiness.com/feed
-      - https://radiologybusiness.com/rss
-      - https://radiologybusiness.com/sitemap-google-news.xml
-
-  - name: Health Imaging
-    home: https://healthimaging.com
-    urls:
-      - https://healthimaging.com/rss.xml
-      - https://healthimaging.com/feed
-      - https://healthimaging.com/rss
 
   - name: Imaging Technology News
     home: https://www.itnonline.com
+    merge: true
     urls:
       - https://www.itnonline.com/rss.xml
-      - https://www.itnonline.com/rss
-      - https://www.itnonline.com/feed
       - https://www.itnonline.com/sitemap-google-news.xml
 
   - name: The Imaging Wire
@@ -55,27 +56,17 @@ sources:
     urls:
       - https://theimagingwire.com/feed/
 
-  - name: Diagnostic Imaging
-    home: https://www.diagnosticimaging.com
+  - name: MedTech Dive
+    home: https://www.medtechdive.com
+    require: "imaging|radiolog|\\bMRI\\b|\\bCT\\b|\\bPET\\b|ultrasound|X-ray|scanner|mammogra|theranostic|radiopharm|Healthineers|GE HealthCare|Philips|Canon Medical|Hologic|Fujifilm|RadNet"
     urls:
-      - https://www.diagnosticimaging.com/rss
-      - https://www.diagnosticimaging.com/rss.xml
-      - https://www.diagnosticimaging.com/sitemap-google-news.xml
+      - https://www.medtechdive.com/feeds/news/
 
-  - name: Applied Radiology
-    home: https://appliedradiology.com
+  - name: Signify Research
+    home: https://www.signifyresearch.net
+    require: "imaging|radiolog|\\bMRI\\b|\\bCT\\b|\\bPET\\b|ultrasound|X-ray|PACS|enterprise imaging|mammogra|theranostic|AI"
     urls:
-      - https://appliedradiology.com/rss
-      - https://appliedradiology.com/feed
-      - https://appliedradiology.com/rss.xml
-
-  - name: AuntMinnie Europe
-    home: https://www.auntminnieeurope.com
-    urls:
-      - https://www.auntminnieeurope.com/rss
-      - https://www.auntminnieeurope.com/feed
-      - http://cdn.auntminnieeurope.com/rss/rss.aspx
-      - https://www.auntminnieeurope.com/sitemap-google-news.xml
+      - https://www.signifyresearch.net/feed/
 
 # Business categories (chips in the News tab). A story gets every category
 # whose words appear in its headline or summary (case-insensitive, word start).
