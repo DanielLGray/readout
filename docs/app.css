@@ -121,7 +121,7 @@ a { color: inherit; }
 .chip-topic { border-color: var(--focus); color: var(--ink); }
 
 .tabs {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--line); background: var(--bg);
   padding-bottom: var(--bottom);
 }
@@ -320,7 +320,27 @@ a { color: inherit; }
 
 .saved-list { list-style: none; margin: 0; padding: 0 16px; }
 
-/* ── news ───────────────────────────────────────────────────────────────── */
+/* ── news cards in the feed ─────────────────────────────────────────────── */
+.kind-label { font-size: 13px; color: var(--muted); }
+.news-card .kind-label::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px;
+  background: var(--h3); margin-right: 8px; vertical-align: 1px; }
+.news-headline { margin: 0; font: 600 25px/1.3 var(--serif); letter-spacing: -0.005em; }
+.news-card .news-teaser { margin: 0; font: 400 17px/1.5 var(--serif); color: var(--muted);
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.news-card .news-teaser.l2, .news-card .news-teaser.l3, .news-card .news-teaser.l4 { font-size: 16px; }
+.top-card { gap: 14px; }
+.top-lists { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start; gap: 14px; }
+.top-h { margin: 0 0 4px; font-size: 14px; color: var(--muted); font-weight: 700; }
+.top-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.top-list button { width: 100%; text-align: left; padding: 8px 0; display: grid; gap: 2px; border-bottom: 1px solid var(--line); }
+.top-title { font: 600 17px/1.32 var(--serif); }
+.top-meta { font-size: 13px; color: var(--heat-text); }
+@media (max-height: 760px) {
+  .news-headline { font-size: 21px; }
+  .top-title { font-size: 15.5px; }
+}
+
+/* ── news lists (sheets) ───────────────────────────────────────────────── */
 .news { padding: 0 16px 24px; }
 .row.story > button { width: 100%; text-align: left; padding: 12px 0; display: grid; grid-template-columns: 1fr; gap: 4px; }
 .story-title { font: 600 17px/1.35 var(--serif); }

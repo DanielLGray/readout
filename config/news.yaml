@@ -132,14 +132,6 @@ sources:
       - https://www.nature.com/nature.rss
       - https://feeds.nature.com/nature/rss/current
 
-  - name: New Scientist
-    kind: science
-    max_per_day: 6
-    home: https://www.newscientist.com
-    urls:
-      - https://www.newscientist.com/subject/health/feed/
-      - https://www.newscientist.com/feed/home/
-
   - name: Science News
     kind: science
     max_per_day: 6

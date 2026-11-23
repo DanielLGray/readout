@@ -25,6 +25,7 @@ radiology radiologist radiologists imaging medical health healthcare hospital ho
 says say said announces announced launches launched unveils unveiled receives received names named new
 first study studies finds found shows show could may might will report reports company companies system
 systems center centers year years week today latest top best update news rsna webinar podcast video
+people young older big win better chance back way help need needs key amid after over more most less
 """.split())
 
 

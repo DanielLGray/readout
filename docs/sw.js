@@ -1,5 +1,5 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback). */
-const VERSION = "readout-v3";
+const VERSION = "readout-v4";
 const SHELL = [
   "./", "index.html", "app.css", "app.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
