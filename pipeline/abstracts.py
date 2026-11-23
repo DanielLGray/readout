@@ -134,23 +134,31 @@ def _about_this_study(text: str, pattern: str, flags=re.I) -> bool:
     return False
 
 
-_GUIDE_TITLE = re.compile(r"\b(consensus|guidelines?|white paper|position (statement|paper)|practice recommendations|"
-                          r"expert recommendations|joint recommendations)\b", re.I)
-_GUIDE_NOT = re.compile(r"(guidelines?[- ](defined|based|concordant|discordant|recommended|directed|adherent)|"
-                        r"(adherence|according|compliance|concordance|outside|beyond) (to |with )?(the )?(\w+ )?guidelines?|"
-                        r"(reader|interobserver|inter-reader|radiologist) consensus|consensus (reading|read|review)\b)", re.I)
+# Title wording that means the paper IS guidance (not a study or review about guidance)
+_GUIDE_TITLE = re.compile(
+    r"\b(consensus|expert) (statement|recommendations?|guidelines?|guidance|report|document|algorithm)s?\b"
+    r"|\b(delphi|international|expert|multidisciplinary|national|global|joint|society|panel|interdisciplinary) consensus\b"
+    r"|\bconsensus (on|for)\b"
+    r"|\bguidelines? (for|on)\b|\bguidelines?\W+(update|summary|part)\b|\bguidelines and recommendations\b"
+    r"|\b(clinical )?practice (guidelines?|update|parameter|recommendations)\b"
+    r"|\bguidance (on|for)\b|\bwhite paper\b|\bposition (statement|paper)\b"
+    r"|\bappropriateness criteria\b|\bESR Essentials\b", re.I)
+_GUIDE_ORG = re.compile(r"\b([Rr]ecommendations|[Gg]uidelines?) (from|of|by) (the )?[A-Z]")
+_GUIDE_NOT = re.compile(
+    r"\b(comparison|comparing|compared|analysis|review|evaluat\w*|performance|accuracy|adherence|concordance|"
+    r"concordant|implementation|implications|based on|according to|following|bridging|illustrations|comments|"
+    r"navigating|large language|GPT|chatbot|case of|rare case|molecular subtype|controvers\w+|contemporary|"
+    r"updated guidelines|putting|prediction|validation|real-world|guideline-defined|guideline-based)\b", re.I)
 
 
 def is_guideline(rec: dict) -> Optional[str]:
-    """'pubmed', 'text' or None."""
+    """'pubmed' when NLM indexed it as guidance, 'text' when the title says it is, else None."""
     pts = set(rec.get("pub_types", []))
     if pts & {"Guideline", "Practice Guideline", "Consensus Development Conference",
               "Consensus Development Conference, NIH", "Consensus Statement"}:
         return "pubmed"
     title = rec.get("title", "")
-    if _GUIDE_TITLE.search(title) and not _GUIDE_NOT.search(title):
-        return "text"
-    if re.search(r"\brecommendations (from|of|by) (the )?[A-Z]", title):
+    if (_GUIDE_TITLE.search(title) or _GUIDE_ORG.search(title)) and not _GUIDE_NOT.search(title):
         return "text"
     return None
 

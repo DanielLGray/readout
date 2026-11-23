@@ -202,3 +202,24 @@ def test_data_split_is_not_randomized_trial_and_review_titles():
     assert labels(r) == {"Retrospective"}
     assert labels(_rec("CT-based machine learning in acute pancreatitis: a narrative review",
                        "Predominantly retrospective evidence and limited prospective assessment.")) == {"Review"}
+
+
+def test_guideline_titles_real_examples():
+    from pipeline.abstracts import is_guideline
+    yes = ["EORTC consensus recommendations on the optimal management of colorectal cancer liver metastases.",
+           "Chinese expert consensus on conversion and perioperative therapy of primary liver cancer (2024 edition).",
+           "EFSUMB Guidelines on Multiparametric Ultrasound of the Scrotum.",
+           "Defining Radiological Healing in Perianal Fistulizing Crohn's Disease: A Global Expert Delphi Consensus.",
+           "ASO Practice Guidelines Series: Resectable Colorectal Cancer.",
+           "Guidelines for Diagnosis, Reporting and Management of Intraductal Papillary Neoplasm of the Bile Duct"]
+    no = ["From guidelines to precision care: How contemporary evidence is transforming IPMN management.",
+          "Comparison of Four Diagnostic Guidelines for Hepatocellular Carcinoma Using Gadoxetic Acid-enhanced Liver MRI.",
+          "Fibroblast activation protein identifies Consensus Molecular Subtype 4 in colorectal cancer",
+          "Cultural bias in large language models' ability to follow neuroradiology guidelines.",
+          "Adnexal Mass Imaging: Contemporary Guidelines for Clinical Practice.",
+          "A Rare Case of Orbital Metastasis: Challenges of FDG PET/CT and the Search for Consensus",
+          "Gallbladder polyps: ultrasound diagnosis, updated guidelines, and clinical management."]
+    for t in yes:
+        assert is_guideline(_rec(t, "x")) == "text", t
+    for t in no:
+        assert is_guideline(_rec(t, "x")) is None, t
