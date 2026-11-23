@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from . import news
+from .abstracts import compile_systems, tag_systems
 from .common import CACHE, DATA, load_yaml, now_iso, read_json, write_json
 from .http import Http, HttpError, log
 
@@ -48,6 +49,12 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
                 found[key] = i
         if not src.get("merge"):
             break
+    cap = src.get("max_per_day")
+    if cap and found:                              # busy outlets: keep the newest few per day
+        by_day: dict[str, list] = {}
+        for i in sorted(found.values(), key=lambda i: i["date"], reverse=True):
+            by_day.setdefault(i["date"][:10], []).append(i)
+        found = {i["title"].lower(): i for day in by_day.values() for i in day[:int(cap)]}
     if found:
         got = list(found.values())
         status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
@@ -65,17 +72,21 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     old = read_json(path, {}) or {}
     items = {i["id"]: i for i in old.get("items", [])}
     compiled = news.compile_categories(cfg.get("categories", {}))
+    systems = compile_systems((load_yaml("feeds.yaml") or {}).get("systems", {}))
 
     statuses = []
     for src in cfg.get("sources", []):
         got, status = fetch_source(http, src, now)
+        status["kind"] = src.get("kind", "industry")
         statuses.append(status)
         log(f"  {src['name']}: {status['count']} stories" + (f" via {status['url']}" if status["ok"] else " — no working feed"))
         for it in got:
             prev = items.get(it["id"])
             if prev:                       # keep the first date we saw; refresh text
                 it["date"] = min(prev["date"], it["date"])
-            it["categories"] = news.categorize(it, compiled)
+            it["kind"] = src.get("kind", "industry")
+            it["categories"] = news.categorize(it, compiled) if it["kind"] == "industry" else []
+            it["systems"] = tag_systems({"title": it["title"], "sections": [{"text": it.get("summary", "")}]}, systems)
             items[it["id"]] = it
 
     # one copy per headline per publisher (sister sites syndicate): keep the one with a summary
@@ -87,26 +98,33 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             best[key] = it
     unique = sorted(best.values(), key=lambda i: i["date"], reverse=True)
 
-    cutoff = news._utc(now - timedelta(days=int(settings.get("keep_days", 120))))
-    kept = [i for i in unique if i["date"] >= cutoff][: int(settings.get("max_items", 1500))]
+    cut = {"industry": news._utc(now - timedelta(days=int(settings.get("keep_days", 120)))),
+           "science": news._utc(now - timedelta(days=int(settings.get("science_keep_days", 30))))}
+    kept = [i for i in unique if i["date"] >= cut.get(i.get("kind", "industry"), cut["industry"])]
+    kept = kept[: int(settings.get("max_items", 4000))]
 
     # titles-only archive for trends, kept longer than the tab
     apath = CACHE / "news_archive.json"
     archive = read_json(apath, {}) or {}
     for i in kept:
-        archive[i["id"]] = [i["date"], i["title"], i["source"]]
+        archive[i["id"]] = [i["date"], i["title"], i["source"], i.get("kind", "industry")]
     acut = news._utc(now - timedelta(days=int(settings.get("archive_days", 730))))
     archive = {k: v for k, v in archive.items() if v[0] >= acut}
     write_json(apath, archive, compact=False)
-    arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2]} for k, v in archive.items()]
+    arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
+            for k, v in archive.items()]
+    kinds = ("industry", "science")
 
     out = {
         "generated": now_iso(),
         "sources": statuses,
         "categories": {k: v["label"] for k, v in cfg.get("categories", {}).items()},
-        "top_stories": news.top_stories(kept, now, group_of=group_of),
-        "trending": {"week": news.trending(arch, now, 7, 28, group_of=group_of),
-                     "month": news.trending(arch, now, 30, 90, group_of=group_of)},
+        "kinds": {"industry": "Radiology industry", "science": "Science & health"},
+        "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now, group_of=group_of)
+                        for k in kinds},
+        "trending": {k: {"week": news.trending([a for a in arch if a["kind"] == k], now, 7, 28, group_of=group_of),
+                         "month": news.trending([a for a in arch if a["kind"] == k], now, 30, 90, group_of=group_of)}
+                     for k in kinds},
         "items": kept,
     }
     write_json(path, out)
@@ -119,7 +137,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         with open(summary, "a", encoding="utf-8") as f:
             f.write("### Readout news feeds\n\n" + "\n".join(rows) + "\n")
     ok = sum(1 for s in statuses if s["ok"])
-    log(f"News: {len(kept)} stories from {ok}/{len(statuses)} outlets, {len(out['top_stories'])} top stories")
+    log(f"News: {len(kept)} stories from {ok}/{len(statuses)} outlets, "
+        f"{sum(len(v) for v in out['top_stories'].values())} top stories")
     return out
 
 

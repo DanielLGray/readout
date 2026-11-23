@@ -46,12 +46,14 @@ def env(tmp_path, monkeypatch):
             {"name": "Biz", "urls": ["https://biz.test/atom"]},
             {"name": "Minnie", "urls": ["https://minnie.test/sitemap-google-news.xml"]},
             {"name": "Dead", "urls": ["https://dead.test/rss"]},
+            {"name": "SciWire", "kind": "science", "max_per_day": 1, "urls": ["https://sci.test/feed"]},
         ],
         "categories": {"policy": {"label": "Policy", "words": ["CMS", "Medicare", "fee schedule"]}},
     })
     pages = {"https://wire.test/feed": (FIX / "news_rss.xml").read_text(),
              "https://biz.test/atom": (FIX / "news_atom.xml").read_text(),
-             "https://minnie.test/sitemap-google-news.xml": (FIX / "news_sitemap.xml").read_text()}
+             "https://minnie.test/sitemap-google-news.xml": (FIX / "news_sitemap.xml").read_text(),
+             "https://sci.test/feed": (FIX / "news_atom.xml").read_text().replace("example-business", "example-sci")}
     def transport(method, url, params):
         return (200, pages[url]) if url in pages else (404, "not found")
     return Http(transport=transport, sleep=lambda s: None, retries=1)
@@ -62,21 +64,25 @@ def test_build_news(env):
     by = {s["name"]: s for s in out["sources"]}
     assert by["Wire"]["ok"] and by["Wire"]["url"] == "https://wire.test/feed"     # fell back to 2nd address
     assert not by["Dead"]["ok"]
-    assert len(out["items"]) == 6
+    sci = [i for i in out["items"] if i["kind"] == "science"]
+    assert len(sci) == 2 and all(not i["categories"] for i in sci)   # 1 per day cap; 2 different days
+    assert len(out["items"]) == 8
     assert out["items"] == sorted(out["items"], key=lambda i: i["date"], reverse=True)
-    fee = [i for i in out["items"] if "fee schedule" in i["title"].lower()]
+    fee = [i for i in out["items"] if "fee schedule" in i["title"].lower() and i["kind"] == "industry"]
     assert all("policy" in i["categories"] for i in fee)
     # the fee-schedule story ran in three outlets: it leads the top stories
-    top = out["top_stories"][0]
+    top = out["top_stories"]["industry"][0]
     assert len(top["sources"]) == 3 and "fee schedule" in top["title"].lower()
     # no history yet: trending is ranked by coverage across outlets
-    week = out["trending"]["week"]
+    week = out["trending"]["industry"]["week"]
     assert week["basis"] == "coverage"
     terms = [t["term"].lower() for t in week["terms"]]
     assert any("fee schedule" in t for t in terms) and any("photon-counting" in t for t in terms)
     # second run: stable ids, no duplicates
     out2 = build_news.run(env, NOW)
-    assert len(out2["items"]) == 6
+    assert len(out2["items"]) == 8
+    assert all("systems" in i for i in out2["items"])
+    assert out2["top_stories"]["science"] == []        # one science outlet: nothing "covered by several"
 
 
 def test_double_escaped_html_and_sister_sites():

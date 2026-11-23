@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Readout — radiology industry & business news
+# Readout — news: radiology industry outlets + general science & health outlets
 #
 # Each outlet lists one or more feed addresses. The news job tries them in
 # order and uses the first that returns stories, so a site redesign that
@@ -14,9 +14,14 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
-  keep_days: 120          # stories older than this leave the tab
-  max_items: 1500
+  keep_days: 120          # radiology industry stories older than this leave the feed
+  science_keep_days: 30   # science & health stories (many more of them) leave sooner
+  max_items: 4000
   archive_days: 730       # headlines kept (titles only) for trend analysis
+
+# kind: industry (default) = radiology industry & business outlets
+#       science            = general science & health outlets
+# max_per_day: keep at most this many stories per day from an outlet
 
 sources:
   # group: outlets from the same publisher that share stories count once
@@ -67,6 +72,110 @@ sources:
     require: "imaging|radiolog|\\bMRI\\b|\\bCT\\b|\\bPET\\b|ultrasound|X-ray|PACS|enterprise imaging|mammogra|theranostic|AI"
     urls:
       - https://www.signifyresearch.net/feed/
+
+  # ── Science & health ──────────────────────────────────────────────────────
+  - name: STAT
+    kind: science
+    max_per_day: 10
+    home: https://www.statnews.com
+    urls:
+      - https://www.statnews.com/feed/
+
+  - name: KFF Health News
+    kind: science
+    max_per_day: 6
+    home: https://kffhealthnews.org
+    urls:
+      - https://kffhealthnews.org/feed/
+
+  - name: NPR Health
+    kind: science
+    max_per_day: 6
+    home: https://www.npr.org/sections/health
+    urls:
+      - https://feeds.npr.org/1128/rss.xml
+
+  - name: MedPage Today
+    kind: science
+    max_per_day: 8
+    home: https://www.medpagetoday.com
+    urls:
+      - https://www.medpagetoday.com/rss/headlines.xml
+
+  - name: BBC Health
+    kind: science
+    max_per_day: 6
+    home: https://www.bbc.com/news/health
+    urls:
+      - https://feeds.bbci.co.uk/news/health/rss.xml
+
+  - name: ScienceDaily
+    kind: science
+    max_per_day: 8
+    home: https://www.sciencedaily.com/news/health_medicine/
+    urls:
+      - https://www.sciencedaily.com/rss/top/health.xml
+      - https://www.sciencedaily.com/rss/health_medicine.xml
+
+  - name: Science
+    kind: science
+    max_per_day: 6
+    home: https://www.science.org/news
+    urls:
+      - https://www.science.org/rss/news_current.xml
+
+  - name: Nature
+    kind: science
+    max_per_day: 6
+    home: https://www.nature.com/news
+    urls:
+      - https://www.nature.com/nature.rss
+      - https://feeds.nature.com/nature/rss/current
+
+  - name: New Scientist
+    kind: science
+    max_per_day: 6
+    home: https://www.newscientist.com
+    urls:
+      - https://www.newscientist.com/subject/health/feed/
+      - https://www.newscientist.com/feed/home/
+
+  - name: Science News
+    kind: science
+    max_per_day: 6
+    home: https://www.sciencenews.org
+    urls:
+      - https://www.sciencenews.org/feed
+
+  - name: Scientific American
+    kind: science
+    max_per_day: 6
+    home: https://www.scientificamerican.com
+    urls:
+      - https://www.scientificamerican.com/platform/syndication/rss/
+      - http://rss.sciam.com/ScientificAmerican-Global
+
+  - name: The Conversation
+    kind: science
+    max_per_day: 6
+    home: https://theconversation.com/us/health
+    urls:
+      - https://theconversation.com/us/health/articles.atom
+
+  - name: Ars Technica
+    kind: science
+    max_per_day: 4
+    home: https://arstechnica.com/science/
+    urls:
+      - https://feeds.arstechnica.com/arstechnica/science
+
+  - name: NIH News
+    kind: science
+    max_per_day: 6
+    home: https://www.nih.gov/news-events/news-releases
+    urls:
+      - https://www.nih.gov/news-releases/feed.xml
+      - https://www.nih.gov/news-events/news-releases/feed
 
 # Business categories (chips in the News tab). A story gets every category
 # whose words appear in its headline or summary (case-insensitive, word start).
