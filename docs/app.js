@@ -352,7 +352,7 @@ function openAbstract(it) {
     secs.length
       ? secs.map((s) => el("section", { class: "abs-sec" + (s.cat === "CONCLUSIONS" ? " key" : "") },
         s.label ? el("h3", {}, s.label) : null, el("p", {}, s.text)))
-      : el("p", { class: "sample" }, "PubMed has no abstract for this record yet."),
+      : el("p", { class: "sample" }, "PubMed has no abstract for this paper. Open it on PubMed or the journal’s site to read it."),
     el("div", { class: "link-row" }, links, actionsEl(it, false).children[1]));
 }
 
