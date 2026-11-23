@@ -12,7 +12,8 @@ from urllib.parse import urlparse
 
 import requests
 
-USER_AGENT = "Readout/1.0 (personal literature reader; https://github.com/)"
+USER_AGENT = "Mozilla/5.0 (compatible; Readout/1.0; personal literature reader; +https://github.com/DanielLGray/readout)"
+ACCEPT = "application/json, application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8"
 
 
 class HttpError(RuntimeError):
@@ -24,7 +25,7 @@ Transport = Callable[[str, str, dict], "tuple[int, str]"]
 
 
 def _requests_transport(method: str, url: str, params: dict) -> "tuple[int, str]":
-    headers = {"User-Agent": USER_AGENT}
+    headers = {"User-Agent": USER_AGENT, "Accept": ACCEPT}
     if method == "POST":
         r = requests.post(url, data=params, headers=headers, timeout=60)
     else:

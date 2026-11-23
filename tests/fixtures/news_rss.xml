@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC test feed shaped like a WordPress RSS feed. Not real stories. -->
+<rss version="2.0"><channel><title>Example Imaging Wire</title>
+<item><title>CMS finalizes 2027 fee schedule cut for radiology</title>
+<link>https://example-wire.test/cms-fee-schedule?utm_source=rss&amp;utm_medium=feed</link>
+<pubDate>Sun, 22 Nov 2026 14:00:00 +0000</pubDate>
+<description><![CDATA[<p>The Centers for Medicare &amp; Medicaid Services finalized a conversion factor cut that radiology groups say will hit outpatient imaging. Here is a much longer second sentence that keeps going so that the teaser has to be cut somewhere reasonable for the card.</p><p>The post CMS finalizes 2027 fee schedule cut appeared first on Example Imaging Wire.</p>]]></description></item>
+<item><title>Vendor X acquires AI startup Y for $200M</title>
+<link>https://example-wire.test/vendor-x-acquires-y</link>
+<pubDate>Sat, 21 Nov 2026 10:00:00 +0000</pubDate>
+<description>Vendor X said the deal adds an AI triage platform.</description></item>
+</channel></rss>

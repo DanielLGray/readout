@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SYNTHETIC Atom feed. Not real stories. -->
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Example Business</title>
+<entry><title>Medicare fee schedule cut finalized, radiology groups push back</title>
+<link href="https://example-business.test/news/fee-schedule-cut"/><updated>2026-11-22T18:30:00Z</updated>
+<summary>Radiology groups criticized the final fee schedule.</summary></entry>
+<entry><title>Photon-counting CT installations double at academic centers</title>
+<link href="https://example-business.test/news/pcct-installs"/><updated>2026-11-20T09:00:00Z</updated>
+<summary>Sites report faster adoption.</summary></entry>
+</feed>

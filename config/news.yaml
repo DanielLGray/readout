@@ -1,0 +1,100 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Readout — radiology industry & business news
+#
+# Each outlet lists one or more feed addresses. The news job tries them in
+# order and uses the first that returns stories, so a site redesign that
+# breaks one address doesn't break the tab. Accepted formats: RSS, Atom, and
+# Google News sitemaps (sitemap-google-news.xml).
+#
+# The app shows each story's headline, outlet, date and the short summary the
+# outlet puts in its own feed, and links to the article on the outlet's site.
+#
+# Add an outlet: copy a block. Remove one: delete it. The "Check news feeds"
+# step of the Update news run reports which address each outlet is using.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  keep_days: 120          # stories older than this leave the tab
+  max_items: 1500
+  archive_days: 730       # headlines kept (titles only) for trend analysis
+
+sources:
+  - name: AuntMinnie
+    home: https://www.auntminnie.com
+    urls:
+      - https://www.auntminnie.com/rss
+      - https://www.auntminnie.com/feed
+      - http://cdn.auntminnie.com/rss/rss.aspx
+      - https://www.auntminnie.com/sitemap-google-news.xml
+
+  - name: Radiology Business
+    home: https://radiologybusiness.com
+    urls:
+      - https://radiologybusiness.com/rss.xml
+      - https://radiologybusiness.com/feed
+      - https://radiologybusiness.com/rss
+      - https://radiologybusiness.com/sitemap-google-news.xml
+
+  - name: Health Imaging
+    home: https://healthimaging.com
+    urls:
+      - https://healthimaging.com/rss.xml
+      - https://healthimaging.com/feed
+      - https://healthimaging.com/rss
+
+  - name: Imaging Technology News
+    home: https://www.itnonline.com
+    urls:
+      - https://www.itnonline.com/rss.xml
+      - https://www.itnonline.com/rss
+      - https://www.itnonline.com/feed
+      - https://www.itnonline.com/sitemap-google-news.xml
+
+  - name: The Imaging Wire
+    home: https://theimagingwire.com
+    urls:
+      - https://theimagingwire.com/feed/
+
+  - name: Diagnostic Imaging
+    home: https://www.diagnosticimaging.com
+    urls:
+      - https://www.diagnosticimaging.com/rss
+      - https://www.diagnosticimaging.com/rss.xml
+      - https://www.diagnosticimaging.com/sitemap-google-news.xml
+
+  - name: Applied Radiology
+    home: https://appliedradiology.com
+    urls:
+      - https://appliedradiology.com/rss
+      - https://appliedradiology.com/feed
+      - https://appliedradiology.com/rss.xml
+
+  - name: AuntMinnie Europe
+    home: https://www.auntminnieeurope.com
+    urls:
+      - https://www.auntminnieeurope.com/rss
+      - https://www.auntminnieeurope.com/feed
+      - http://cdn.auntminnieeurope.com/rss/rss.aspx
+      - https://www.auntminnieeurope.com/sitemap-google-news.xml
+
+# Business categories (chips in the News tab). A story gets every category
+# whose words appear in its headline or summary (case-insensitive, word start).
+categories:
+  policy:
+    label: Policy & payment
+    words: [CMS, Medicare, Medicaid, reimbursement, fee schedule, MPFS, OPPS, prior authorization, payer, payers, insurer, insurance, coverage, legislation, Congress, bill, lawmakers, No Surprises Act, price transparency, RVU, CPT, appropriate use, site-neutral, MIPS, final rule, proposed rule]
+  workforce:
+    label: Workforce
+    words: [shortage, workforce, burnout, staffing, recruit, residency, residents, salary, salaries, compensation, technologist, technologists, teleradiology, locum, hiring, layoff, job, jobs, wellness, diversity]
+  ai_industry:
+    label: AI & software
+    words: [AI, artificial intelligence, algorithm, deep learning, machine learning, large language, LLM, ChatGPT, generative, foundation model, autonomous, software, PACS, cloud, cybersecurity, informatics, enterprise imaging, reporting platform]
+  deals:
+    label: Business & deals
+    words: [acquire, acquires, acquisition, acquired, merger, merge, private equity, funding, raises, investment, investor, IPO, earnings, revenue, quarter, partnership, partners with, joint venture, deal, bankruptcy, closes, expands, expansion, imaging center, outpatient, Radiology Partners, RadNet, Akumin]
+  regulatory:
+    label: FDA & safety
+    words: [FDA, 510(k), clearance, cleared, approval, approves, approved, recall, warning, safety, MQSA, shortage of contrast, contrast shortage, isotope, Mo-99, helium, lawsuit, malpractice, settlement, court, DOJ, fraud, breach]
+  technology:
+    label: Equipment & tech
+    words: [scanner, photon-counting, MRI, CT, PET, SPECT, ultrasound, X-ray, mammography, theranostics, radiopharmaceutical, tracer, installation, installs, launches, unveils, debuts, helium-free, low-field]

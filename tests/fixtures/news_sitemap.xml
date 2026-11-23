@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC Google News sitemap. Not real stories. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+<url><loc>https://example-minnie.test/article/1/cms-fee-schedule-final-rule</loc>
+<news:news><news:publication><news:name>Example</news:name><news:language>en</news:language></news:publication>
+<news:publication_date>2026-11-22T20:04:31.000Z</news:publication_date><news:title>CMS fee schedule final rule cuts radiology payments</news:title></news:news></url>
+<url><loc>https://example-minnie.test/article/2/photon-counting-ct</loc>
+<news:news><news:publication><news:name>Example</news:name><news:language>en</news:language></news:publication>
+<news:publication_date>2026-11-19T08:00:00Z</news:publication_date><news:title>Photon-counting CT installations double</news:title></news:news></url>
+</urlset>

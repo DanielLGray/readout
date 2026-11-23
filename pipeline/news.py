@@ -1,0 +1,227 @@
+"""Radiology industry news: parse outlet feeds, group the same story across
+outlets, and find phrases trending in headlines."""
+from __future__ import annotations
+
+import hashlib
+import html
+import math
+import re
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+from xml.etree import ElementTree as ET
+
+import feedparser
+
+from .terms import STOP, _contains, display, phrases
+
+SITEMAP_NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+NEWS_NS = "{http://www.google.com/schemas/sitemap-news/0.9}"
+
+# words that say nothing about what a headline is about
+NEWS_GENERIC = set("""
+radiology radiologist radiologists imaging medical health healthcare hospital hospitals patient patients
+says say said announces announced launches launched unveils unveiled receives received names named new
+first study studies finds found shows show could may might will report reports company companies system
+systems center centers year years week today latest top best update news rsna webinar podcast video
+""".split())
+
+
+def _utc(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def parse_date(s: str) -> Optional[datetime]:
+    if not s:
+        return None
+    s = s.strip()
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M%z", "%Y-%m-%d"):
+        try:
+            dt = datetime.strptime(s.replace("Z", "+0000"), fmt)
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
+def clean_text(s: str) -> str:
+    s = re.sub(r"<[^>]+>", " ", s or "")
+    s = html.unescape(s)
+    s = re.sub(r"\bThe post .{3,200}? appeared first on .{2,80}?\.?\s*$", "", s)
+    s = re.sub(r"\b(Continue reading|Read more|READ MORE)\b.*$", "", s, flags=re.I)
+    return " ".join(s.split())
+
+
+def teaser(s: str, limit: int = 220) -> str:
+    """The outlet's own summary, cut to a teaser so the article stays the place to read it."""
+    s = clean_text(s)
+    if len(s) <= limit:
+        return s
+    cut = s[:limit].rsplit(" ", 1)[0].rstrip(",;:—-")
+    return cut + "…"
+
+
+def clean_link(url: str) -> str:
+    u = urlparse(url.strip())
+    q = [(k, v) for k, v in parse_qsl(u.query) if not k.lower().startswith(("utm_", "mc_", "fbclid", "gclid"))]
+    return urlunparse(u._replace(query=urlencode(q), fragment=""))
+
+
+def item_id(link: str, title: str, source: str) -> str:
+    key = link or f"{source}|{title.lower()}"
+    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
+
+
+def parse_feed(text: str, source: str, now: datetime) -> list[dict]:
+    """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}]."""
+    head = text.lstrip()[:600]
+    if "<urlset" in head:
+        return _parse_sitemap(text, source, now)
+    d = feedparser.parse(text)
+    out = []
+    for e in d.entries:
+        title = clean_text(e.get("title", ""))
+        link = clean_link(e.get("link", "") or "")
+        if not title or not link:
+            continue
+        t = e.get("published_parsed") or e.get("updated_parsed")
+        when = datetime(*t[:6], tzinfo=timezone.utc) if t else now
+        summary = e.get("summary", "") or (e.get("content") or [{}])[0].get("value", "")
+        out.append({"id": item_id(link, title, source), "title": title, "link": link, "source": source,
+                    "date": _utc(min(when, now)), "summary": teaser(summary)})
+    return out
+
+
+def _parse_sitemap(text: str, source: str, now: datetime) -> list[dict]:
+    root = ET.fromstring(text)
+    out = []
+    for u in root.iter(f"{SITEMAP_NS}url"):
+        loc = (u.findtext(f"{SITEMAP_NS}loc") or "").strip()
+        news = u.find(f"{NEWS_NS}news")
+        if not loc or news is None:
+            continue
+        title = clean_text(news.findtext(f"{NEWS_NS}title") or "")
+        when = parse_date(news.findtext(f"{NEWS_NS}publication_date") or "") or now
+        if title:
+            link = clean_link(loc)
+            out.append({"id": item_id(link, title, source), "title": title, "link": link, "source": source,
+                        "date": _utc(min(when, now)), "summary": ""})
+    return out
+
+
+# ── categories ───────────────────────────────────────────────────────────────
+def compile_categories(cfg: dict) -> dict:
+    out = {}
+    for key, c in cfg.items():
+        pats = []
+        for w in c["words"]:
+            esc = re.escape(w).replace(r"\ ", r"[\s-]")
+            if w.isupper() and len(w) <= 5:
+                pats.append(re.compile(r"(?<![A-Za-z0-9])" + esc + r"(?![A-Za-z])"))
+            else:
+                pats.append(re.compile(r"(?<![A-Za-z])" + esc, re.I))
+        out[key] = pats
+    return out
+
+
+def categorize(item: dict, compiled: dict) -> list[str]:
+    text = item["title"] + " " + item.get("summary", "")
+    return [k for k, pats in compiled.items() if any(p.search(text) for p in pats)]
+
+
+# ── the same story across outlets ────────────────────────────────────────────
+def _words(title: str) -> set:
+    toks = re.findall(r"[A-Za-z0-9][A-Za-z0-9\-]+", title)
+    out = set()
+    for t in toks:
+        lw = t.lower()
+        if lw in STOP or lw in NEWS_GENERIC or len(lw) < 3:
+            continue
+        out.add(lw[:-1] if lw.endswith("s") and len(lw) >= 4 and not lw.endswith(("ss", "us", "is")) else lw)
+    return out
+
+
+def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8) -> list[dict]:
+    """Stories several outlets covered in the last `days` days, most-covered first."""
+    cutoff = _utc(now - timedelta(days=days))
+    recent = sorted((i for i in items if i["date"] >= cutoff), key=lambda i: i["date"])
+    clusters: list[dict] = []
+    for it in recent:
+        w = _words(it["title"])
+        if len(w) < 2:
+            continue
+        best, best_sim = None, 0.0
+        for c in clusters:
+            for other in c["words"]:            # compare with each headline already in the story
+                inter = len(w & other)
+                sim = inter / max(1, min(len(w), len(other)))
+                if inter >= 2 and sim > best_sim:
+                    best, best_sim = c, sim
+        if best is not None and best_sim >= 0.5:
+            best["items"].append(it)
+            best["words"].append(w)
+        else:
+            clusters.append({"items": [it], "words": [w]})
+    out = []
+    for c in clusters:
+        sources = sorted({i["source"] for i in c["items"]})
+        if len(sources) < 2:
+            continue
+        lead = max(c["items"], key=lambda i: (len(i.get("summary", "")), i["date"]))
+        out.append({"title": lead["title"], "date": max(i["date"] for i in c["items"]),
+                    "sources": sources, "items": [i["id"] for i in sorted(c["items"], key=lambda i: i["date"], reverse=True)]})
+    out.sort(key=lambda c: (len(c["sources"]), c["date"]), reverse=True)
+    return out[:limit]
+
+
+# ── trending phrases in headlines ────────────────────────────────────────────
+def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top_n: int = 12) -> dict:
+    """archive: [{id, title, source, date}]. Compares the last `days` days with
+    the `prior_days` before. Until enough history builds up, ranks by how many
+    outlets covered a phrase instead ("coverage")."""
+    r_cut, p_cut = now - timedelta(days=days), now - timedelta(days=days + prior_days)
+    recent, prior = [], []
+    surfaces: dict[str, Counter] = defaultdict(Counter)
+    for a in archive:
+        when = parse_date(a["date"])
+        if not when or when < p_cut:
+            continue
+        ph = {k: v for k, v in phrases(a["title"]).items()
+              if not any(w in NEWS_GENERIC for w in (k.split()[0], k.split()[-1]))}
+        for k, v in ph.items():
+            surfaces[k][v] += 1
+        (recent if when >= r_cut else prior).append((a, set(ph)))
+    R, P = len(recent), len(prior)
+    rc, pc, srcs, ids = Counter(), Counter(), defaultdict(set), defaultdict(list)
+    for a, ks in recent:
+        for k in ks:
+            rc[k] += 1
+            srcs[k].add(a["source"])
+            ids[k].append((a["date"], a["id"]))
+    for _, ks in prior:
+        for k in ks:
+            pc[k] += 1
+    if P >= 40:
+        basis = "growth"
+        score = lambda k: (((rc[k] + 1) / max(R, 1)) / ((pc[k] + 1) / P)) * math.log(rc[k] + 1)
+        cands = [k for k in rc if rc[k] >= 3 and len(srcs[k]) >= 2
+                 and ((rc[k] + 1) / max(R, 1)) / ((pc[k] + 1) / P) >= 1.5]
+    else:
+        basis = "coverage"
+        score = lambda k: (len(srcs[k]), rc[k])
+        cands = [k for k in rc if rc[k] >= 2 and len(srcs[k]) >= 2]
+    cands.sort(key=score, reverse=True)
+    chosen: list[str] = []
+    for k in cands:
+        if any(_contains(k, c) for c in chosen):
+            continue
+        chosen.append(k)
+        if len(chosen) >= top_n:
+            break
+    return {
+        "basis": basis, "days": days, "titles_recent": R, "titles_prior": P,
+        "terms": [{"term": display(k, surfaces[k]), "key": k, "count": rc[k], "prior": pc[k],
+                   "sources": sorted(srcs[k]), "ids": [i for _, i in sorted(ids[k], reverse=True)][:20]}
+                  for k in chosen],
+    }

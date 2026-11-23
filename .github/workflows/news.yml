@@ -1,0 +1,36 @@
+name: Update news
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"     # every 6 hours
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readout-data
+  cancel-in-progress: false
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Pull headlines
+        run: python -m pipeline.build_news
+      - name: Save to the repository
+        run: |
+          git config user.name "readout-bot"
+          git config user.email "readout-bot@users.noreply.github.com"
+          git add docs/data cache
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "News update $(date -u +%F\ %H:%M)"
+          git pull --rebase --autostash
+          git push
