@@ -72,3 +72,18 @@ def test_check_queries(env):
     assert report.count("| topic |") == len(world.tcfg["topics"])
     assert "| stream | body_journals |" in report
     assert "| journal | Radiology |" in report
+
+
+def test_fetch_retries_truncated_xml(env):
+    from pipeline.pubmed import PubMed
+    world, _ = env
+    calls = {"n": 0}
+    def flaky(method, url, params):
+        if url.endswith("efetch.fcgi"):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return 200, "<PubmedArticleSet><PubmedArticle><Medline"   # cut off mid-response
+        return world.transport(method, url, params)
+    pm = PubMed(Http(transport=flaky, sleep=lambda s: None))
+    pmid = next(iter(world.papers))
+    assert pm.fetch([pmid])[0]["pmid"] == pmid and calls["n"] == 2

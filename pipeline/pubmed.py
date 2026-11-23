@@ -88,9 +88,16 @@ class PubMed:
         out: list[dict] = []
         for i in range(0, len(pmids), FETCH_BATCH):
             batch = pmids[i:i + FETCH_BATCH]
-            xml = self.http.post_text(f"{EUTILS}/efetch.fcgi",
-                                      dict(self.base, id=",".join(batch), retmode="xml"))
-            out.extend(parse_articles(xml))
+            for attempt in (1, 2, 3):
+                xml = self.http.post_text(f"{EUTILS}/efetch.fcgi",
+                                          dict(self.base, id=",".join(batch), retmode="xml"))
+                try:
+                    out.extend(parse_articles(xml))
+                    break
+                except ET.ParseError as exc:     # truncated or HTML error page
+                    log(f"  PubMed sent unreadable XML ({exc}); retry {attempt}/3")
+                    if attempt == 3:
+                        raise
         return out
 
     def summaries(self, pmids: Iterable[str]) -> list[dict]:
