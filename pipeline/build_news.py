@@ -59,7 +59,7 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
         got = list(found.values())
         status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
     elif status["ok"]:
-        status["url"] = "works; no imaging stories right now"
+        status["url"] = "works; no matching stories right now"
     return list(found.values()), status
 
 
