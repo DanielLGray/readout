@@ -29,6 +29,13 @@ people young older big win better chance back way help need needs key amid after
 many much so very really just still even get gets got make makes
 """.split())
 
+# headline verbs: fine for matching stories, useless at the edge of a trending phrase
+HEADLINE_VERBS = set("""
+lose loses lost double doubles doubled rise rises rising fall falls cut cuts find finds shows win wins
+see sees hit hits face faces plan plans warn warns add adds approve approves approved clear clears
+join joins drop drops boost boosts slow slows grow grows grew end ends start starts begin begins
+""".split())
+
 
 def _utc(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -218,14 +225,18 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
     r_cut, p_cut = now - timedelta(days=days), now - timedelta(days=days + prior_days)
     recent, prior = [], []
     surfaces: dict[str, Counter] = defaultdict(Counter)
+    where: dict[str, list] = defaultdict(list)      # how far into the headline a phrase starts
     for a in archive:
         when = parse_date(a["date"])
         if not when or when < p_cut:
             continue
+        edge = NEWS_GENERIC | HEADLINE_VERBS
         ph = {k: v for k, v in phrases(a["title"]).items()
-              if not any(w in NEWS_GENERIC for w in (k.split()[0], k.split()[-1]))}
+              if not any(w in edge for w in (k.split()[0], k.split()[-1]))}
+        low = a["title"].lower()
         for k, v in ph.items():
             surfaces[k][v] += 1
+            where[k].append(max(0, low.find(v.lower())) / max(1, len(low)))
         (recent if when >= r_cut else prior).append((a, set(ph)))
     R, P = len(recent), len(prior)
     rc, pc, srcs, ids = Counter(), Counter(), defaultdict(set), defaultdict(list)
@@ -246,8 +257,10 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
         basis, cands = "growth", growth
     else:                                      # not enough history yet: what most outlets are covering
         basis = "coverage"
+        # ties go to the phrase nearer the start of headlines (the subject comes first)
+        lead = lambda k: sum(where[k]) / len(where[k]) if where[k] else 1
         cands = sorted((k for k in rc if rc[k] >= 2 and len(srcs[k]) >= 2),
-                       key=lambda k: (len(srcs[k]), rc[k]), reverse=True)
+                       key=lambda k: (-len(srcs[k]), -rc[k], lead(k)))
     chosen: list[str] = []
     docs = {k: {i for _, i in ids[k]} for k in cands[:200]}
     for k in cands:

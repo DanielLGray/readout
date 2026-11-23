@@ -25,6 +25,9 @@ const ICONS = {
   saved: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7.5h14V12"/></svg>',
   pubmed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v6H4V6h6"/></svg>',
+  listen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>',
   read: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11v14H6a2 2 0 0 1-2-2z"/><path d="M15 9h4v8a2 2 0 0 1-2 2h-2"/><path d="M7.5 9h4.5M7.5 12.5h4.5"/></svg>',
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
 };
@@ -106,8 +109,15 @@ function topicName(id) {
   return S.feed?.topics?.[id]?.name || S.explore?.topics?.find((t) => t.id === id)?.name || id;
 }
 
-const KINDS = [["all", "Everything"], ["papers", "Papers"], ["industry", "Industry news"], ["science", "Science & health"]];
-const SCIENCE_PER_SOURCE_PER_DAY = 2;   // in Everything, so papers aren't buried
+const NEWS_PER_SOURCE_PER_DAY = 2;      // in Everything, busy outlets add at most this many a day
+const ROTATION = ["paper", "industry", "science", "paper", "health", "sff"];   // Everything takes turns in this order
+
+function newsKinds() {
+  const k = S.news?.kinds;
+  if (k) return k;
+  return S.news ? { industry: "Industry news", science: "Science & health" } : {};
+}
+const kindOf = (n) => n.kind || "industry";
 
 function renderChips() {
   const box = $("#chips");
@@ -117,8 +127,7 @@ function renderChips() {
     box.append(el("button", { class: "chip chip-topic", "aria-pressed": "true", onclick: () => { S.topic = null; refreshFeed(); } },
       `${topicName(S.topic)}  ✕`));
   }
-  for (const [k, label] of KINDS) {
-    if (k !== "all" && k !== "papers" && !S.news) continue;
+  for (const [k, label] of [["all", "Everything"], ["papers", "Papers"], ...Object.entries(newsKinds())]) {
     box.append(el("button", { class: "chip", "aria-pressed": String(S.kind === k && !S.topic),
       onclick: () => { S.kind = k; S.topic = null; if (k !== "papers" && k !== "all") S.strong = false; refreshFeed(); } }, label));
   }
@@ -143,27 +152,28 @@ function filtered() {
   if (S.topic) papers = papers.filter((i) => (i.topics || []).includes(S.topic));
   if (S.topic || S.strong || S.kind === "papers") return papers;
   // news
-  let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: i.kind || "industry" }));
+  let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
   if (S.system !== "all") news = news.filter((i) => (i.systems || []).includes(S.system));
   const tops = S.system === "all" && hasTopStories() ? [{ type: "top", key: "top" }] : [];
-  if (S.kind === "industry" || S.kind === "science") return tops.concat(news.filter((i) => i.kind === S.kind));
-  // Everything: take turns (paper, industry, science), each stream newest first, so the
-  // newest papers sit at the top even though news arrives hours sooner than PubMed records
+  if (S.kind !== "all") return tops.concat(news.filter((i) => i.kind === S.kind));
+  // Everything: take turns (papers twice per round), each stream newest first, so the newest
+  // papers sit at the top even though news arrives hours sooner than PubMed records
   const perSource = new Map();
   const byTime = (a, b) => (a.date < b.date ? 1 : -1);
-  const queues = {
-    paper: papers,
-    industry: news.filter((n) => n.kind !== "science").sort(byTime),
-    science: news.filter((n) => n.kind === "science").sort(byTime).filter((n) => {
+  const queues = { paper: papers };
+  for (const n of news.sort(byTime)) {
+    if (n.kind !== "industry") {                    // busy outlets: a couple a day in Everything
       const k = `${dayOf(n)}|${n.source}`;
       const c = perSource.get(k) || 0;
       perSource.set(k, c + 1);
-      return c < SCIENCE_PER_SOURCE_PER_DAY;
-    }),
-  };
+      if (c >= NEWS_PER_SOURCE_PER_DAY) continue;
+    }
+    (queues[n.kind] = queues[n.kind] || []).push(n);
+  }
+  const order = ROTATION.concat(Object.keys(queues).filter((k) => !ROTATION.includes(k)));
   const out = tops.slice();
-  while (queues.paper.length || queues.industry.length || queues.science.length) {
-    for (const k of ["paper", "industry", "science"]) if (queues[k].length) out.push(queues[k].shift());
+  while (Object.values(queues).some((q) => q.length)) {
+    for (const k of order) if (queues[k]?.length) out.push(queues[k].shift());
   }
   return out;
 }
@@ -279,21 +289,44 @@ function newsCardEl(it) {
       el("span", {}, agoShort(it.date)),
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
-    el("div", { class: "kind-label" }, it.kind === "science" ? "Science & health news" : "Radiology industry news"),
+    el("div", { class: "kind-label", "data-kind": it.kind },
+      newsKinds()[it.kind] || "News", it.audio ? el("span", { class: "pod" }, `Podcast${it.duration ? `, ${it.duration} min` : ""}`) : null),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
       el("h2", { class: "news-headline" }, it.title),
       it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
-    el("div", { class: "actions", style: "grid-template-columns:repeat(3,1fr)" },
+    el("div", { class: "actions", style: `grid-template-columns:repeat(${it.audio ? 4 : 3},1fr)` },
+      it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
       el("a", { class: "act", href: it.link, target: "_blank", rel: "noopener" }, icon(ICONS.read), "Read"),
       saveBtn,
       el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share")));
 }
 
+// ── podcast player: keeps playing while you scroll ─────────────────────────
+function play(it) {
+  const a = $("#pl-audio");
+  if (a.dataset.id !== it.id) {
+    a.src = it.audio;
+    a.dataset.id = it.id;
+    $("#pl-title").textContent = it.title;
+    $("#pl-src").textContent = it.source;
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: it.title, artist: it.source, album: "Readout" });
+    }
+  }
+  $("#player").hidden = false;
+  a.play().catch(() => toast("Couldn’t start the audio. Try Read to open the episode page."));
+}
+function syncPlayer() {
+  const a = $("#pl-audio");
+  $("#pl-toggle").replaceChildren(icon(a.paused ? ICONS.play : ICONS.pause));
+  $("#pl-toggle").setAttribute("aria-label", a.paused ? "Play" : "Pause");
+}
+
 function topStoryLists() {
   const t = S.news?.top_stories || {};
-  if (Array.isArray(t)) return [["Radiology industry", t]];
-  return [["Radiology industry", t.industry || []], ["Science & health", t.science || []]].filter(([, l]) => l.length);
+  if (Array.isArray(t)) return [["Industry news", t]];
+  return Object.entries(newsKinds()).map(([k, label]) => [label, t[k] || [], k]).filter(([, l]) => l.length);
 }
 
 function topCardEl() {
@@ -304,7 +337,7 @@ function topCardEl() {
     el("div", { class: "top-lists" },
       topStoryLists().map(([label, list]) => el("section", {},
         el("h3", { class: "top-h" }, label),
-        el("ol", { class: "top-list" }, list.slice(0, label === "Science & health" ? 3 : 4).map((st) =>
+        el("ol", { class: "top-list" }, list.slice(0, topStoryLists().length > 2 ? 2 : 3).map((st) =>
           el("li", {}, el("button", { onclick: () => openStory(st, byId) },
             el("span", { class: "top-title" }, st.title),
             el("span", { class: "top-meta" }, `${st.sources.length} outlets: ${st.sources.join(", ")}`)))))))),
@@ -495,7 +528,7 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news, day by day. Radiology industry news comes from AuntMinnie, Radiology Business, Imaging Technology News, The Imaging Wire and others; science and health news from STAT, KFF Health News, NPR, MedPage Today, ScienceDaily, Science, Nature, New Scientist and others (the list is in config/news.yaml). In Everything, each science outlet contributes at most two stories a day; pick Science & health to see them all. Cards show the headline and the outlet’s own short summary; Read opens the article on the outlet’s site. The first card lists stories more than one publisher covered this week."),
+    el("p", {}, "The feed mixes papers with four kinds of news: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science for everyone (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Smithsonian, Live Science, NASA…) and sci-fi & fantasy (Reactor, Locus, File 770, io9, Den of Geek). The full list is in config/news.yaml. In Everything they take turns with papers, and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Sources"),
     el("p", {}, "PubMed (NLM), NIH iCite, ClinicalTrials.gov. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
 }
@@ -643,7 +676,7 @@ function newsTrendsEl() {
   if (!n?.trending) return null;
   const byKind = n.trending.week ? { industry: n.trending } : n.trending;      // older files had one set
   const byId = Object.fromEntries(n.items.map((i) => [i.id, i]));
-  const groups = [["industry", "Radiology industry"], ["science", "Science & health"]].filter(([k]) => byKind[k]);
+  const groups = Object.entries(newsKinds()).filter(([k]) => byKind[k]);
   const span = S.newsSpan;
   return el("section", { class: "sect" },
     el("h2", {}, "In the news"),
@@ -874,6 +907,10 @@ function boot() {
   $("#btn-refresh").addEventListener("click", () => reload(true));
   $("#btn-info").addEventListener("click", openInfo);
   $("#topic-back").addEventListener("click", closeTopic);
+  const pa = $("#pl-audio");
+  $("#pl-toggle").addEventListener("click", () => (pa.paused ? pa.play().catch(() => {}) : pa.pause()));
+  $("#pl-close").addEventListener("click", () => { pa.pause(); $("#player").hidden = true; });
+  ["play", "pause", "ended"].forEach((ev) => pa.addEventListener(ev, syncPlayer));
   $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;

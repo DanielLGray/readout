@@ -75,8 +75,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     systems = compile_systems((load_yaml("feeds.yaml") or {}).get("systems", {}))
 
     statuses = []
+    junk = re.compile(cfg["exclude"], re.I) if cfg.get("exclude") else None
     for src in cfg.get("sources", []):
         got, status = fetch_source(http, src, now)
+        if junk and src.get("kind", "industry") != "industry":    # shopping / promotional posts
+            got = [i for i in got if not junk.search(i["title"])]
         status["kind"] = src.get("kind", "industry")
         statuses.append(status)
         log(f"  {src['name']}: {status['count']} stories" + (f" via {status['url']}" if status["ok"] else " — no working feed"))
@@ -103,7 +106,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     cut_industry = news._utc(now - timedelta(days=int(settings.get("keep_days", 120))))
     cut_other = news._utc(now - timedelta(days=other_days))
     kept = [i for i in unique
-            if i["date"] >= (cut_industry if i.get("kind", "industry") == "industry" else cut_other)]
+            if i["date"] >= (cut_industry if i.get("kind", "industry") == "industry" else cut_other)
+            and not (junk and i.get("kind", "industry") != "industry" and junk.search(i["title"]))]
     kept = kept[: int(settings.get("max_items", 4000))]
 
     # titles-only archive for trends, kept longer than the tab

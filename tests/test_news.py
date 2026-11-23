@@ -112,3 +112,14 @@ def test_podcast_episodes_keep_audio():
     assert news._duration("754") == 13 and news._duration("1:02:03") == 62 and news._duration("") is None
     rss = news.parse_feed((FIX / "news_rss.xml").read_text(), "Wire", NOW)
     assert "audio" not in rss[0]
+
+
+def test_promotional_posts_excluded(env, monkeypatch):
+    base = build_news.load_yaml("news.yaml")
+    cfg = dict(base, exclude="gift guide|\\bdeals\\b|fee schedule")
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: cfg)
+    out = build_news.run(env, NOW)
+    sci = [i for i in out["items"] if i["kind"] == "science"]
+    ind = [i for i in out["items"] if i["kind"] == "industry"]
+    assert all("fee schedule" not in i["title"].lower() for i in sci)      # filtered outside industry
+    assert any("fee schedule" in i["title"].lower() for i in ind)          # industry untouched

@@ -28,6 +28,10 @@ kinds:
 
 # max_per_day: keep at most this many stories per day from an outlet
 
+# Shopping and promotional posts never make a card (not applied to industry news,
+# where "deal" means an acquisition).
+exclude: "gift guide|\\bdeals\\b|deal of the day|\\bon sale\\b|% off|coupon|black friday|cyber monday|prime day|sponsored|best .{0,40} to buy|our favorite .{0,30} for 20\\d\\d|subscribe now"
+
 sources:
   # group: outlets from the same publisher that share stories count once
   # merge: use every working address (an RSS feed plus a sitemap gives more stories)
@@ -250,13 +254,6 @@ sources:
       - https://www.nasa.gov/news-release/feed/
       - https://www.nasa.gov/feed/
 
-  - name: The Guardian Science
-    kind: science
-    max_per_day: 4
-    home: https://www.theguardian.com/science
-    urls:
-      - https://www.theguardian.com/science/rss
-
   - name: Atlas Obscura
     kind: science
     max_per_day: 2
@@ -286,16 +283,6 @@ sources:
     urls:
       - https://file770.com/feed/
 
-  - name: io9
-    kind: sff
-    max_per_day: 5
-    home: https://gizmodo.com/io9
-    require: "sci-?fi|science fiction|fantasy|star wars|star trek|doctor who|dune|tolkien|lord of the rings|game of thrones|house of the dragon|marvel|\\bDC\\b|superman|batman|alien|predator|godzilla|avatar|foundation|the expanse|three-body|hugo|nebula|trailer|novel"
-    urls:
-      - https://gizmodo.com/io9/rss
-      - https://gizmodo.com/tag/io9/feed
-      - https://gizmodo.com/feed
-
   - name: Den of Geek
     kind: sff
     max_per_day: 4
@@ -303,6 +290,32 @@ sources:
     require: "sci-?fi|science fiction|fantasy|star wars|star trek|doctor who|dune|tolkien|lord of the rings|game of thrones|house of the dragon|witcher|wheel of time|marvel|\\bDC\\b|alien|predator|godzilla|avatar|foundation|the expanse|three-body|stranger things|fallout|the last of us"
     urls:
       - https://www.denofgeek.com/feed/
+
+  - name: Polygon
+    kind: sff
+    max_per_day: 3
+    home: https://www.polygon.com
+    require: "sci-?fi|science fiction|fantasy|star wars|star trek|doctor who|dune|tolkien|lord of the rings|game of thrones|house of the dragon|witcher|wheel of time|alien|predator|godzilla|avatar|foundation|the expanse|three-body|fallout|the last of us|mass effect|warhammer|dungeons|D&D"
+    urls:
+      - https://www.polygon.com/rss/index.xml
+      - https://www.polygon.com/feed/
+
+  - name: Inverse
+    kind: sff
+    max_per_day: 4
+    home: https://www.inverse.com
+    require: "sci-?fi|science fiction|fantasy|star wars|star trek|doctor who|dune|tolkien|lord of the rings|game of thrones|alien|avatar|foundation|the expanse|three-body|stranger things|fallout|marvel|superhero|trailer|novel|book"
+    urls:
+      - https://www.inverse.com/rss
+      - https://www.inverse.com/feed
+
+  - name: Strange Horizons
+    kind: sff
+    max_per_day: 3
+    home: http://strangehorizons.com
+    urls:
+      - http://strangehorizons.com/feed/
+      - https://strangehorizons.com/feed/
 
 # Business categories (chips in the News tab). A story gets every category
 # whose words appear in its headline or summary (case-insensitive, word start).

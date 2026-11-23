@@ -38,6 +38,15 @@
     <main class="view" id="view-explore" aria-label="Explore" hidden></main>
     <main class="view" id="view-saved" aria-label="Saved" hidden></main>
 
+    <div class="player" id="player" hidden>
+      <button class="icon-btn" id="pl-toggle" aria-label="Play"></button>
+      <div class="pl-text"><b id="pl-title"></b><span id="pl-src"></span></div>
+      <button class="icon-btn" id="pl-close" aria-label="Stop and close player">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <audio id="pl-audio" preload="none"></audio>
+    </div>
+
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="feed" aria-selected="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>
