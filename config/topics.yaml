@@ -1,0 +1,209 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Readout — curated Explore topics
+#
+# Each topic is a PubMed query. The weekly Explore job counts papers per
+# window (1, 2, 5 years), compares with the window before, adjusts for the
+# growth of imaging literature overall, and finds the most-cited papers,
+# guidelines/consensus papers and newly registered clinical trials.
+#
+#   id:      short unique key (letters, numbers, underscores)
+#   name:    what the app shows
+#   system:  one of liver, pancreas_biliary, gi, gu, gyn, onc_nm, tech_ai
+#   query:   PubMed query (title/abstract words [tiab], MeSH [mh] …)
+#   trials:  optional ClinicalTrials.gov search words (adds a "trials" signal)
+#
+# Add a topic: copy a block, change id/name/query. Remove one: delete it.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Denominator for "adjusted for field growth": all imaging papers.
+baseline_query: >-
+  imaging[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab] OR "computed tomography"[tiab] OR
+  ultrasonograph*[tiab] OR "positron emission"[tiab] OR radiolog*[tiab]
+
+topics:
+  # ── Liver ──────────────────────────────────────────────────────────────────
+  - id: lirads
+    name: LI-RADS & HCC diagnosis
+    system: liver
+    query: '"LI-RADS"[tiab] OR LIRADS[tiab] OR "Liver Imaging Reporting and Data System"[tiab]'
+    trials: LI-RADS
+
+  - id: amri_hcc
+    name: Abbreviated MRI for HCC surveillance
+    system: liver
+    query: '("abbreviated MRI"[tiab] OR "abbreviated magnetic resonance"[tiab] OR "abbreviated protocol"[tiab] OR "abbreviated MR"[tiab]) AND (hepatocellular[tiab] OR HCC[tiab] OR liver[tiab] OR cirrho*[tiab])'
+    trials: abbreviated MRI hepatocellular carcinoma
+
+  - id: liver_quant
+    name: Liver fat & fibrosis quantification
+    system: liver
+    query: '(PDFF[tiab] OR "proton density fat fraction"[tiab] OR "MR elastography"[tiab] OR "magnetic resonance elastography"[tiab] OR "shear wave elastography"[tiab] OR "transient elastography"[tiab]) AND (liver[tiab] OR hepatic[tiab] OR MASLD[tiab] OR NAFLD[tiab] OR steato*[tiab])'
+    trials: liver elastography
+
+  - id: hbp_agents
+    name: Gadoxetate & hepatobiliary-phase MRI
+    system: liver
+    query: 'gadoxetic[tiab] OR gadoxetate[tiab] OR "Gd-EOB-DTPA"[tiab] OR "hepatobiliary phase"[tiab]'
+
+  - id: crlm
+    name: Colorectal liver metastases imaging
+    system: liver
+    query: '("liver metastases"[tiab] OR "liver metastasis"[tiab] OR "hepatic metastases"[tiab] OR "colorectal liver"[tiab]) AND colorectal[tiab] AND (MRI[tiab] OR "magnetic resonance"[tiab] OR CT[tiab] OR "computed tomography"[tiab] OR PET[tiab] OR imaging[tiab])'
+
+  # ── Pancreas & biliary ─────────────────────────────────────────────────────
+  - id: panc_cyst
+    name: Pancreatic cysts & IPMN
+    system: pancreas_biliary
+    query: 'IPMN[tiab] OR "intraductal papillary mucinous"[tiab] OR "pancreatic cyst"[tiab] OR "pancreatic cysts"[tiab] OR "pancreatic cystic"[tiab]'
+    trials: pancreatic cyst
+
+  - id: pdac_imaging
+    name: Pancreatic cancer detection & staging
+    system: pancreas_biliary
+    query: '("pancreatic ductal adenocarcinoma"[tiab] OR "pancreatic cancer"[tiab] OR PDAC[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab] OR "early detection"[tiab] OR prediagnostic[tiab] OR resectab*[tiab])'
+    trials: pancreatic cancer early detection imaging
+
+  - id: biliary
+    name: Cholangiocarcinoma, PSC & MRCP
+    system: pancreas_biliary
+    query: '(cholangiocarcinoma[tiab] OR "primary sclerosing cholangitis"[tiab] OR MRCP[tiab] OR "magnetic resonance cholangiopancreatography"[tiab]) AND (imaging[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab] OR CT[tiab] OR MRCP[tiab])'
+
+  # ── GI & peritoneum ────────────────────────────────────────────────────────
+  - id: rectal_mri
+    name: Rectal cancer MRI & watch-and-wait
+    system: gi
+    query: '("rectal cancer"[tiab] OR "rectal adenocarcinoma"[tiab]) AND (MRI[tiab] OR "magnetic resonance"[tiab] OR "watch-and-wait"[tiab] OR "watch and wait"[tiab] OR "organ preservation"[tiab])'
+    trials: rectal cancer MRI
+
+  - id: ibd_imaging
+    name: "Crohn disease: enterography & bowel US"
+    system: gi
+    query: 'enterography[tiab] OR "intestinal ultrasound"[tiab] OR "bowel ultrasound"[tiab] OR (crohn*[tiab] AND (MRI[tiab] OR "magnetic resonance"[tiab] OR ultrasound[tiab]))'
+    trials: intestinal ultrasound Crohn
+
+  - id: peritoneal
+    name: Peritoneal metastases imaging
+    system: gi
+    query: '("peritoneal carcinomatosis"[tiab] OR "peritoneal metastases"[tiab] OR "peritoneal metastasis"[tiab] OR "peritoneal cancer index"[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab] OR PET[tiab] OR imaging[tiab])'
+
+  - id: acute_abdomen
+    name: Acute abdomen CT (appendicitis, obstruction, ischemia)
+    system: gi
+    query: '(appendicitis[tiab] OR "bowel obstruction"[tiab] OR "mesenteric ischemia"[tiab] OR "bowel ischemia"[tiab] OR "acute abdomen"[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR ultrasound[tiab] OR MRI[tiab])'
+
+  # ── GU & adrenal ───────────────────────────────────────────────────────────
+  - id: prostate_mri
+    name: Prostate MRI & PI-RADS
+    system: gu
+    query: '"PI-RADS"[tiab] OR PIRADS[tiab] OR "biparametric MRI"[tiab] OR "biparametric magnetic resonance"[tiab] OR (prostat*[tiab] AND ("multiparametric MRI"[tiab] OR mpMRI[tiab]))'
+    trials: prostate MRI
+
+  - id: psma_pet
+    name: PSMA PET
+    system: onc_nm
+    query: 'PSMA[tiab] AND (PET[tiab] OR "positron emission"[tiab])'
+    trials: PSMA PET
+
+  - id: renal_mass
+    name: Renal masses, Bosniak & ccLS
+    system: gu
+    query: '(Bosniak[tiab] OR "renal mass"[tiab] OR "renal masses"[tiab] OR "small renal mass"[tiab] OR "renal cyst"[tiab] OR "renal cystic"[tiab] OR "clear cell likelihood"[tiab]) AND (CT[tiab] OR MRI[tiab] OR "computed tomography"[tiab] OR "magnetic resonance"[tiab] OR CEUS[tiab] OR "contrast-enhanced ultrasound"[tiab] OR imaging[tiab])'
+
+  - id: adrenal
+    name: Adrenal incidentalomas
+    system: gu
+    query: 'adrenal[tiab] AND (incidentaloma*[tiab] OR "adrenal mass"[tiab] OR "adrenal masses"[tiab] OR "adrenal nodule"[tiab] OR "adrenal nodules"[tiab] OR "adrenal lesion"[tiab] OR "adrenal lesions"[tiab] OR "adrenal adenoma"[tiab])'
+
+  - id: bladder_virads
+    name: Bladder cancer MRI & VI-RADS
+    system: gu
+    query: '"VI-RADS"[tiab] OR VIRADS[tiab] OR ("bladder cancer"[tiab] AND (MRI[tiab] OR "magnetic resonance"[tiab]))'
+
+  # ── Gyn & pelvis ───────────────────────────────────────────────────────────
+  - id: orads
+    name: O-RADS & adnexal masses
+    system: gyn
+    query: '"O-RADS"[tiab] OR ORADS[tiab] OR ("adnexal mass"[tiab] AND (ultrasound[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab])) OR ("adnexal masses"[tiab] AND (ultrasound[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab]))'
+
+  - id: endometriosis
+    name: Endometriosis imaging
+    system: gyn
+    query: 'endometriosis[tiab] AND (MRI[tiab] OR "magnetic resonance"[tiab] OR ultrasound[tiab] OR sonograph*[tiab] OR ultrasonograph*[tiab])'
+    trials: endometriosis MRI
+
+  - id: gyn_onc_mri
+    name: Cervical & endometrial cancer MRI staging
+    system: gyn
+    query: '("cervical cancer"[tiab] OR "endometrial cancer"[tiab] OR "endometrial carcinoma"[tiab]) AND (MRI[tiab] OR "magnetic resonance"[tiab]) AND (staging[tiab] OR FIGO[tiab])'
+
+  # ── Oncology & nuclear medicine ────────────────────────────────────────────
+  - id: fapi
+    name: FAPI PET
+    system: onc_nm
+    query: '(FAPI[tiab] OR "fibroblast activation protein"[tiab]) AND (PET[tiab] OR "positron emission"[tiab])'
+    trials: FAPI PET
+
+  - id: theranostics
+    name: Radioligand therapy & theranostics
+    system: onc_nm
+    query: '177Lu[tiab] OR "Lu-177"[tiab] OR lutetium[tiab] OR "radioligand therapy"[tiab] OR "peptide receptor radionuclide"[tiab] OR PRRT[tiab] OR theranostic*[tiab]'
+    trials: radioligand therapy
+
+  - id: net_sstr
+    name: Neuroendocrine tumors & SSTR PET
+    system: onc_nm
+    query: 'neuroendocrine[tiab] AND (DOTATATE[tiab] OR DOTATOC[tiab] OR DOTANOC[tiab] OR "somatostatin receptor"[tiab] OR SSTR[tiab])'
+
+  - id: response_criteria
+    name: Response criteria (RECIST, iRECIST, PERCIST)
+    system: onc_nm
+    query: 'RECIST[tiab] OR iRECIST[tiab] OR mRECIST[tiab] OR PERCIST[tiab] OR "Deauville"[tiab]'
+
+  - id: total_body_pet
+    name: Total-body / long-axial FOV PET
+    system: onc_nm
+    query: '"total-body PET"[tiab] OR "total body PET"[tiab] OR "long axial field"[tiab] OR "long-axial field"[tiab] OR LAFOV[tiab] OR uEXPLORER[tiab]'
+
+  # ── Technique & AI ─────────────────────────────────────────────────────────
+  - id: pcct
+    name: Photon-counting CT
+    system: tech_ai
+    query: '("photon-counting"[tiab] OR "photon counting"[tiab]) AND (CT[tiab] OR "computed tomography"[tiab])'
+    trials: photon-counting CT
+
+  - id: dect_abd
+    name: Dual-energy / spectral CT of the abdomen
+    system: tech_ai
+    query: '("dual-energy"[tiab] OR "dual energy"[tiab] OR "spectral CT"[tiab] OR "spectral computed tomography"[tiab]) AND (abdom*[tiab] OR liver[tiab] OR pancrea*[tiab] OR renal[tiab] OR kidney[tiab] OR bowel[tiab] OR pelvi*[tiab])'
+
+  - id: dl_recon
+    name: Deep learning reconstruction & dose reduction
+    system: tech_ai
+    query: '"deep learning reconstruction"[tiab] OR "deep learning image reconstruction"[tiab] OR "deep learning-based reconstruction"[tiab] OR "deep-learning reconstruction"[tiab] OR DLIR[tiab] OR "AI-based reconstruction"[tiab]'
+
+  - id: llm_radiology
+    name: Large language models in radiology
+    system: tech_ai
+    query: '("large language model"[tiab] OR "large language models"[tiab] OR LLM[tiab] OR LLMs[tiab] OR ChatGPT[tiab] OR "GPT-4"[tiab]) AND (radiolog*[tiab] OR imaging[tiab])'
+    trials: large language model radiology
+
+  - id: opportunistic_ct
+    name: Opportunistic CT & body composition
+    system: tech_ai
+    query: '("opportunistic screening"[tiab] OR "opportunistic CT"[tiab] OR "body composition"[tiab] OR sarcopenia[tiab]) AND (CT[tiab] OR "computed tomography"[tiab])'
+
+  - id: radiomics_body
+    name: Radiomics in body imaging
+    system: tech_ai
+    query: 'radiomic*[tiab] AND (liver[tiab] OR hepat*[tiab] OR pancrea*[tiab] OR renal[tiab] OR kidney[tiab] OR prostat*[tiab] OR rectal[tiab] OR colorectal[tiab] OR gastric[tiab] OR ovar*[tiab] OR cervical[tiab] OR endometri*[tiab] OR bladder[tiab] OR adrenal[tiab])'
+
+  - id: ceus
+    name: Contrast-enhanced ultrasound (CEUS)
+    system: tech_ai
+    query: '"contrast-enhanced ultrasound"[tiab] OR "contrast-enhanced ultrasonography"[tiab] OR CEUS[tiab]'
+    trials: contrast-enhanced ultrasound
+
+  - id: contrast_safety
+    name: Contrast safety (CA-AKI, gadolinium)
+    system: tech_ai
+    query: '"gadolinium retention"[tiab] OR "gadolinium deposition"[tiab] OR "contrast-associated acute kidney"[tiab] OR "contrast-induced nephropathy"[tiab] OR "contrast-induced acute kidney"[tiab] OR "post-contrast acute kidney"[tiab] OR "nephrogenic systemic fibrosis"[tiab]'

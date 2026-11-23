@@ -1,0 +1,159 @@
+<?xml version="1.0" ?>
+<!-- SYNTHETIC test records shaped like real PubMed efetch XML. Not real papers. -->
+<!DOCTYPE PubmedArticleSet>
+<PubmedArticleSet>
+  <!-- 1: Radiology-style structured abstract with RSNA boilerplate in the conclusion -->
+  <PubmedArticle>
+    <MedlineCitation Status="PubMed-not-MEDLINE" Owner="NLM">
+      <PMID Version="1">90000001</PMID>
+      <Article PubModel="Print-Electronic">
+        <Journal>
+          <JournalIssue CitedMedium="Internet"><Volume>317</Volume><Issue>2</Issue>
+            <PubDate><Year>2026</Year><Month>Nov</Month></PubDate></JournalIssue>
+          <Title>Radiology</Title><ISOAbbreviation>Radiology</ISOAbbreviation>
+        </Journal>
+        <ArticleTitle>Abbreviated MRI versus Ultrasound for HCC Surveillance: A <i>Prospective</i> Multicenter Comparison</ArticleTitle>
+        <ELocationID EIdType="doi" ValidYN="Y">10.9999/synthetic.1</ELocationID>
+        <Abstract>
+          <AbstractText Label="Background" NlmCategory="BACKGROUND">Surveillance ultrasound has limited sensitivity in patients with obesity.</AbstractText>
+          <AbstractText Label="Purpose" NlmCategory="OBJECTIVE">To compare abbreviated MRI with US for early-stage HCC detection.</AbstractText>
+          <AbstractText Label="Materials and Methods" NlmCategory="METHODS">This prospective study enrolled 1,284 participants with cirrhosis at 9 centers between January 2021 and June 2024.</AbstractText>
+          <AbstractText Label="Results" NlmCategory="RESULTS">Per-patient sensitivity was 83% vs 51% (P &lt; .001).</AbstractText>
+          <AbstractText Label="Conclusion" NlmCategory="CONCLUSIONS">Abbreviated MRI detected more early-stage HCC than US, with similar specificity. © RSNA, 2026 Supplemental material is available for this article. See also the editorial by Doe in this issue.</AbstractText>
+        </Abstract>
+        <AuthorList CompleteYN="Y">
+          <Author ValidYN="Y"><LastName>Alpha</LastName><ForeName>Ann</ForeName><Initials>A</Initials></Author>
+          <Author ValidYN="Y"><LastName>Beta</LastName><ForeName>Bo</ForeName><Initials>B</Initials></Author>
+          <Author ValidYN="Y"><LastName>Gamma</LastName><ForeName>Cy</ForeName><Initials>C</Initials></Author>
+          <Author ValidYN="Y"><LastName>Delta</LastName><ForeName>Di</ForeName><Initials>D</Initials></Author>
+        </AuthorList>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType UI="D016428">Journal Article</PublicationType></PublicationTypeList>
+        <ArticleDate DateType="Electronic"><Year>2026</Year><Month>11</Month><Day>18</Day></ArticleDate>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <History>
+        <PubMedPubDate PubStatus="entrez"><Year>2026</Year><Month>11</Month><Day>18</Day><Hour>6</Hour></PubMedPubDate>
+        <PubMedPubDate PubStatus="pubmed"><Year>2026</Year><Month>11</Month><Day>19</Day></PubMedPubDate>
+      </History>
+      <ArticleIdList><ArticleId IdType="pubmed">90000001</ArticleId><ArticleId IdType="doi">10.9999/synthetic.1</ArticleId></ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+
+  <!-- 2: RadioGraphics-style unstructured educational review -->
+  <PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+      <PMID Version="1">90000002</PMID>
+      <Article PubModel="Print">
+        <Journal>
+          <JournalIssue CitedMedium="Internet"><PubDate><MedlineDate>2026 Sep-Oct</MedlineDate></PubDate></JournalIssue>
+          <Title>Radiographics : a review publication of the Radiological Society of North America, Inc</Title>
+          <ISOAbbreviation>Radiographics</ISOAbbreviation>
+        </Journal>
+        <ArticleTitle>Pancreatic Cystic Lesions: An Imaging Primer.</ArticleTitle>
+        <Abstract>
+          <AbstractText>Pancreatic cysts are found in up to 15% of abdominal MRI examinations. This article reviews the imaging features that distinguish IPMN from serous cystadenoma, e.g. a central scar vs. communication with the duct. Management depends on worrisome features. ©RSNA, 2026 Test Your Knowledge questions for this article are available in the supplemental material.</AbstractText>
+        </Abstract>
+        <AuthorList><Author><LastName>Epsilon</LastName><Initials>E</Initials></Author></AuthorList>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType>Journal Article</PublicationType><PublicationType>Review</PublicationType></PublicationTypeList>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <History><PubMedPubDate PubStatus="entrez"><Year>2026</Year><Month>9</Month><Day>2</Day></PubMedPubDate></History>
+      <ArticleIdList><ArticleId IdType="pubmed">90000002</ArticleId><ArticleId IdType="pmc">PMC0000002</ArticleId></ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+
+  <!-- 3: Eur Radiol-style with clinical relevance statement + key points; meta-analysis -->
+  <PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+      <PMID Version="1">90000003</PMID>
+      <Article PubModel="Print-Electronic">
+        <Journal><JournalIssue><PubDate><Year>2026</Year><Month>10</Month><Day>5</Day></PubDate></JournalIssue>
+          <Title>European radiology</Title><ISOAbbreviation>Eur Radiol</ISOAbbreviation></Journal>
+        <ArticleTitle>Biparametric versus multiparametric prostate MRI: a systematic review and meta-analysis</ArticleTitle>
+        <Abstract>
+          <AbstractText Label="OBJECTIVES" NlmCategory="OBJECTIVE">To compare bpMRI and mpMRI for clinically significant prostate cancer.</AbstractText>
+          <AbstractText Label="MATERIALS AND METHODS" NlmCategory="METHODS">We searched three databases and included 31 studies (8,412 patients).</AbstractText>
+          <AbstractText Label="RESULTS" NlmCategory="RESULTS">Pooled sensitivity did not differ (0.87 vs 0.88).</AbstractText>
+          <AbstractText Label="CONCLUSION" NlmCategory="CONCLUSIONS">Biparametric MRI performed similarly to multiparametric MRI for csPCa detection.</AbstractText>
+          <AbstractText Label="CLINICAL RELEVANCE STATEMENT" NlmCategory="CONCLUSIONS">Omitting contrast may shorten scans without loss of detection.</AbstractText>
+          <AbstractText Label="KEY POINTS" NlmCategory="UNASSIGNED">Question Is contrast needed? Findings No difference. Clinical relevance Shorter protocols.</AbstractText>
+        </Abstract>
+        <AuthorList><Author><LastName>Zeta</LastName><Initials>Z</Initials></Author><Author><CollectiveName>Synthetic Prostate Group</CollectiveName></Author></AuthorList>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType>Journal Article</PublicationType><PublicationType>Meta-Analysis</PublicationType><PublicationType>Systematic Review</PublicationType></PublicationTypeList>
+        <ArticleDate DateType="Electronic"><Year>2026</Year><Month>10</Month><Day>1</Day></ArticleDate>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <History><PubMedPubDate PubStatus="entrez"><Year>2026</Year><Month>10</Month><Day>1</Day></PubMedPubDate></History>
+      <ArticleIdList><ArticleId IdType="pubmed">90000003</ArticleId><ArticleId IdType="doi">10.9999/synthetic.3</ArticleId></ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+
+  <!-- 4: retracted, unstructured original research -->
+  <PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+      <PMID Version="1">90000004</PMID>
+      <Article PubModel="Print">
+        <Journal><JournalIssue><PubDate><Year>2025</Year><Month>Mar</Month></PubDate></JournalIssue>
+          <Title>Abdominal radiology (New York)</Title><ISOAbbreviation>Abdom Radiol (NY)</ISOAbbreviation></Journal>
+        <ArticleTitle>Renal mass radiomics for grade prediction</ArticleTitle>
+        <Abstract><AbstractText>We retrospectively analyzed 212 patients with renal masses. A radiomics model achieved an AUC of 0.91. Radiomics may predict grade before surgery. Further validation is needed.</AbstractText></Abstract>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType>Journal Article</PublicationType><PublicationType>Retracted Publication</PublicationType></PublicationTypeList>
+      </Article>
+      <CommentsCorrectionsList><CommentsCorrections RefType="RetractionIn"><RefSource>Synthetic retraction</RefSource></CommentsCorrections></CommentsCorrectionsList>
+    </MedlineCitation>
+    <PubmedData>
+      <History><PubMedPubDate PubStatus="entrez"><Year>2025</Year><Month>2</Month><Day>10</Day></PubMedPubDate></History>
+      <ArticleIdList><ArticleId IdType="pubmed">90000004</ArticleId></ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+
+  <!-- 5: no abstract yet (in-process record) -->
+  <PubmedArticle>
+    <MedlineCitation Status="In-Process" Owner="NLM">
+      <PMID Version="1">90000005</PMID>
+      <Article PubModel="Electronic">
+        <Journal><JournalIssue><PubDate><Year>2026</Year><Month>Nov</Month><Day>20</Day></PubDate></JournalIssue>
+          <Title>AJR. American journal of roentgenology</Title><ISOAbbreviation>AJR Am J Roentgenol</ISOAbbreviation></Journal>
+        <ArticleTitle>Photon-Counting CT of the Pancreas</ArticleTitle>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType>Journal Article</PublicationType></PublicationTypeList>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <History><PubMedPubDate PubStatus="entrez"><Year>2026</Year><Month>11</Month><Day>21</Day></PubMedPubDate></History>
+      <ArticleIdList><ArticleId IdType="pubmed">90000005</ArticleId></ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+
+  <!-- 6: AJR-style with Clinical Impact; RCT; mixed prospective/retrospective wording -->
+  <PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+      <PMID Version="1">90000006</PMID>
+      <Article PubModel="Print-Electronic">
+        <Journal><JournalIssue><PubDate><Year>2026</Year><Month>Aug</Month></PubDate></JournalIssue>
+          <Title>AJR. American journal of roentgenology</Title><ISOAbbreviation>AJR Am J Roentgenol</ISOAbbreviation></Journal>
+        <ArticleTitle>Oral Contrast Omission for Emergency Abdominal CT: A Randomized Controlled Trial</ArticleTitle>
+        <Abstract>
+          <AbstractText Label="BACKGROUND" NlmCategory="BACKGROUND">Oral contrast delays emergency CT.</AbstractText>
+          <AbstractText Label="METHODS" NlmCategory="METHODS">Adults (n = 640) were randomly assigned to oral contrast or none.</AbstractText>
+          <AbstractText Label="RESULTS" NlmCategory="RESULTS">Diagnostic accuracy was 94% vs 93%.</AbstractText>
+          <AbstractText Label="CONCLUSION" NlmCategory="CONCLUSIONS">Omitting oral contrast did not reduce accuracy. Clinical trial registration no. NCT00000000.</AbstractText>
+          <AbstractText Label="CLINICAL IMPACT" NlmCategory="CONCLUSIONS">Departments can omit oral contrast for most emergency abdominal CT.</AbstractText>
+        </Abstract>
+        <Language>eng</Language>
+        <PublicationTypeList><PublicationType>Journal Article</PublicationType><PublicationType>Randomized Controlled Trial</PublicationType></PublicationTypeList>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <History><PubMedPubDate PubStatus="entrez"><Year>2026</Year><Month>8</Month><Day>3</Day></PubMedPubDate></History>
+      <ArticleIdList><ArticleId IdType="pubmed">90000006</ArticleId></ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+</PubmedArticleSet>

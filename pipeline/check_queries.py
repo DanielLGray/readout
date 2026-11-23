@@ -1,0 +1,44 @@
+"""Sanity-check every query in config/ against live PubMed.
+
+    python -m pipeline.check_queries
+
+Prints how many papers each stream/topic matches and any PubMed warnings
+(e.g. a quoted phrase PubMed doesn't recognise). Run it after editing the
+YAML files. In GitHub Actions the table also lands in the run summary."""
+from __future__ import annotations
+
+import os
+from datetime import timedelta
+
+from .common import fill, load_yaml, today
+from .http import default_http
+from .pubmed import PubMed
+
+
+def main(http=None) -> str:
+    cfg, tcfg = load_yaml("feeds.yaml"), load_yaml("topics.yaml")
+    pm = PubMed(http or default_http())
+    t = today()
+    rows = []
+    for s in cfg["streams"]:
+        q = fill(s["query"], cfg)
+        n = pm.esearch(q, datetype="edat", reldate=30)[0]
+        rows.append(("stream", s["id"], f"{n} in last 30 days", "; ".join(pm.warnings.get(q, []))))
+    for tp in tcfg["topics"]:
+        q = " ".join(tp["query"].split())
+        n = pm.count(q, t - timedelta(days=1825), t)
+        flag = " ⚠ very few" if n < 40 else ""
+        rows.append(("topic", tp["id"], f"{n} in 5 years{flag}", "; ".join(pm.warnings.get(q, []))))
+    lines = ["| kind | id | papers | PubMed notes |", "|---|---|---|---|"]
+    lines += [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in rows]
+    report = "\n".join(lines)
+    print(report)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write("### Readout query check\n\n" + report + "\n")
+    return report
+
+
+if __name__ == "__main__":
+    main()

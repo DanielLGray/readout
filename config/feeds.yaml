@@ -1,0 +1,120 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Readout — feed configuration
+#
+# Everything here is a PubMed query, so every card in the app traces back to a
+# PubMed record (PMID) with the authors' own abstract. Edit freely:
+#   • add/remove journals in `journals`
+#   • widen/narrow the body-imaging filter in `body_filter`
+#   • add whole new streams at the bottom
+# Placeholders {journals}, {nm_journals}, {general_journals}, {body_filter},
+# {imaging_terms} and {exclude} are filled in from the blocks below.
+# Query syntax help: https://pubmed.ncbi.nlm.nih.gov/help/
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  first_run_days: 45        # how far back the very first run looks
+  recheck_days: 10          # later runs re-check this many days (abstracts often arrive late)
+  keep_days: 180            # cards older than this drop out of the feed
+  max_items: 900            # hard cap on cards kept in the feed
+
+# Radiology journals that carry most body-imaging research and education.
+journals:
+  - '"Radiology"[ta]'
+  - '"Radiographics"[ta]'
+  - '"AJR Am J Roentgenol"[ta]'
+  - '"Eur Radiol"[ta]'
+  - '"Abdom Radiol (NY)"[ta]'
+  - '"Invest Radiol"[ta]'
+  - '"Radiol Imaging Cancer"[ta]'
+  - '"J Magn Reson Imaging"[ta]'
+  - '"Eur J Radiol"[ta]'
+  - '"Korean J Radiol"[ta]'
+  - '"Insights Imaging"[ta]'
+  - '"Radiol Artif Intell"[ta]'
+  - '"J Am Coll Radiol"[ta]'
+
+# Nuclear medicine journals (filtered to body/oncologic content below).
+nm_journals:
+  - '"J Nucl Med"[ta]'
+  - '"Eur J Nucl Med Mol Imaging"[ta]'
+  - '"Clin Nucl Med"[ta]'
+  - '"Semin Nucl Med"[ta]'
+
+# High-impact clinical journals — only imaging papers are pulled from these.
+general_journals:
+  - '"N Engl J Med"[ta]'
+  - '"Lancet"[ta]'
+  - '"JAMA"[ta]'
+  - '"BMJ"[ta]'
+  - '"Lancet Oncol"[ta]'
+  - '"JAMA Oncol"[ta]'
+  - '"J Clin Oncol"[ta]'
+  - '"Gastroenterology"[ta]'
+  - '"Hepatology"[ta]'
+  - '"J Hepatol"[ta]'
+  - '"Eur Urol"[ta]'
+  - '"Ann Intern Med"[ta]'
+
+# Abdomen & pelvis vocabulary (title/abstract words). Keeps neuro/MSK/breast
+# papers out of the radiology-journal stream.
+body_filter: >-
+  liver[tiab] OR hepat*[tiab] OR cirrho*[tiab] OR "LI-RADS"[tiab] OR HCC[tiab] OR
+  pancrea*[tiab] OR IPMN[tiab] OR biliary[tiab] OR "bile duct"[tiab] OR cholangi*[tiab] OR
+  gallbladder[tiab] OR spleen[tiab] OR splenic[tiab] OR
+  bowel[tiab] OR colon[tiab] OR colorectal[tiab] OR rectal[tiab] OR rectum[tiab] OR
+  gastric[tiab] OR esophag*[tiab] OR duoden*[tiab] OR crohn*[tiab] OR colitis[tiab] OR
+  appendic*[tiab] OR peritone*[tiab] OR mesenter*[tiab] OR retroperiton*[tiab] OR
+  enterograph*[tiab] OR hernia[tiab] OR abdom*[tiab] OR pelvi*[tiab] OR
+  kidney*[tiab] OR renal[tiab] OR adrenal[tiab] OR bladder[tiab] OR urothel*[tiab] OR
+  prostat*[tiab] OR "PI-RADS"[tiab] OR Bosniak[tiab] OR testic*[tiab] OR scrot*[tiab] OR
+  uterine[tiab] OR uterus[tiab] OR endometri*[tiab] OR ovar*[tiab] OR adnexa*[tiab] OR
+  "O-RADS"[tiab] OR "cervical cancer"[tiab] OR cervix[tiab] OR placenta*[tiab] OR
+  neuroendocrine[tiab] OR PSMA[tiab] OR DOTATATE[tiab] OR lymphoma[tiab]
+
+imaging_terms: >-
+  imaging[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab] OR "computed tomography"[tiab] OR
+  CT[tiab] OR ultrasound[tiab] OR ultrasonograph*[tiab] OR sonograph*[tiab] OR PET[tiab] OR
+  "positron emission"[tiab] OR radiolog*[tiab] OR scintigraph*[tiab] OR SPECT[tiab]
+
+# Publication types that never make a useful card.
+exclude: >-
+  "Published Erratum"[pt] OR "Retraction of Publication"[pt] OR Editorial[pt] OR
+  Letter[pt] OR Comment[pt] OR News[pt]
+
+streams:
+  - id: body_journals
+    name: Body imaging — radiology journals
+    query: '({journals}) AND ({body_filter}) NOT ({exclude})'
+
+  - id: nm_body
+    name: Nuclear medicine — body & oncology
+    query: '({nm_journals}) AND ({body_filter}) NOT ({exclude})'
+
+  - id: general_imaging
+    name: High-impact journals — imaging papers
+    query: '({general_journals}) AND ({imaging_terms}) AND ({body_filter}) NOT ({exclude})'
+
+# Organ-system chips in the Feed. Each card gets every system whose words
+# appear in its title or abstract (case-insensitive, word-start match).
+systems:
+  liver:
+    label: Liver
+    words: [liver, hepat, cirrho, LI-RADS, LIRADS, HCC, steato, MASLD, MASH, NAFLD, NASH, portal vein, gadoxet]
+  pancreas_biliary:
+    label: Pancreas & biliary
+    words: [pancrea, IPMN, biliary, bile duct, cholangi, gallbladder, MRCP, ampulla, PDAC]
+  gi:
+    label: GI & peritoneum
+    words: [bowel, colon, colorectal, rectal, rectum, gastric, stomach, esophag, oesophag, duoden, small intestin, crohn, colitis, appendic, peritone, mesenter, hernia, enterograph]
+  gu:
+    label: GU & adrenal
+    words: [kidney, renal, adrenal, bladder, ureter, urothel, prostat, testic, scrot, PI-RADS, PIRADS, Bosniak, VI-RADS]
+  gyn:
+    label: Gyn & pelvis
+    words: [uterus, uterine, endometri, ovary, ovarian, adnex, cervical cancer, cervix, O-RADS, placenta, fibroid, leiomyom, vulv, vagin, pelvic floor]
+  onc_nm:
+    label: Onc & NM
+    words: [PET, PSMA, FAPI, DOTATATE, DOTATOC, theranost, radioligand, PRRT, lutetium, 177Lu, Lu-177, SPECT, scintigra, FDG, radiopharm, RECIST, PERCIST, radionuclide]
+  tech_ai:
+    label: Tech & AI
+    words: [deep learning, artificial intelligence, machine learning, radiomic, large language, LLM, ChatGPT, GPT-4, photon-counting, photon counting, dual-energy, dual energy, spectral CT, image reconstruction, neural network, foundation model, convolutional]

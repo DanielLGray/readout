@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Readout</title>
+  <meta name="description" content="Body imaging research, led by each paper's own conclusion.">
+  <meta name="theme-color" content="#171b1f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#e7ecef" media="(prefers-color-scheme: light)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Readout">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preload" href="fonts/literata-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="head">
+      <div class="head-row">
+        <h1 class="wordmark" id="title">Readout</h1>
+        <span class="head-note" id="head-note"></span>
+        <button class="icon-btn" id="btn-refresh" aria-label="Check for new papers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-info" aria-label="How cards are built">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/></svg>
+        </button>
+      </div>
+      <nav class="chips" id="chips" aria-label="Filter the feed"></nav>
+    </header>
+
+    <main class="view feed" id="view-feed" aria-label="Feed"></main>
+    <main class="view" id="view-explore" aria-label="Explore" hidden></main>
+    <main class="view" id="view-saved" aria-label="Saved" hidden></main>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="feed" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>
+        Feed
+      </button>
+      <button class="tab" role="tab" data-tab="explore" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V13M9.3 20V9M14.6 20v-5M20 20V4"/></svg>
+        Explore
+      </button>
+      <button class="tab" role="tab" data-tab="saved" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>
+        Saved
+      </button>
+    </nav>
+  </div>
+
+  <section class="overlay" id="topic" aria-hidden="true">
+    <div class="ov-head">
+      <button class="icon-btn" id="topic-back" aria-label="Back to Explore">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h1 id="topic-title"></h1>
+    </div>
+    <div class="ov-body" id="topic-body"></div>
+  </section>
+
+  <div class="sheet" id="sheet" aria-hidden="true">
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-title" id="sheet-card"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

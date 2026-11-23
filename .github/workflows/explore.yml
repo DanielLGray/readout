@@ -1,0 +1,44 @@
+name: Update trends
+
+on:
+  schedule:
+    - cron: "43 4 * * 1"       # Mondays, 04:43 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readout-data
+  cancel-in-progress: false
+
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Check every query against PubMed
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+        run: python -m pipeline.check_queries
+      - name: Build topic trends
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+        run: python -m pipeline.build_explore
+      - name: Save to the repository
+        run: |
+          git config user.name "readout-bot"
+          git config user.email "readout-bot@users.noreply.github.com"
+          git add docs/data cache
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Trends update $(date -u +%F)"
+          git pull --rebase --autostash
+          git push
