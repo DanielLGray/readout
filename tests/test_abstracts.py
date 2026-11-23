@@ -147,3 +147,58 @@ def test_phrase_display_and_hyphen_suffixes():
     p2 = phrases("LI-RADS Category 3 Observations")
     assert "li" not in p2 and "rads category" not in p2
     assert "invited commentary" not in phrases("Invited Commentary: Liver MRI")
+
+
+def _rec(title, text, pts=(), label="", cat=""):
+    return {"title": title, "journal": "J", "pub_types": list(pts),
+            "sections": [{"label": label, "cat": cat, "text": text}]}
+
+
+def test_design_ignores_other_and_future_studies():
+    from pipeline.abstracts import design
+    labels = lambda r: {b["label"] for b in design(r)["badges"]}
+    # "randomised trials are needed" is not a randomized trial
+    assert "Randomized trial" not in labels(_rec("Neoadjuvant therapy in HCC (PRIME): a phase 2 study",
+        "We enrolled 30 patients. Later-phase randomised trials are needed to confirm efficacy."))
+    # images being randomized is a reader study, not an RCT
+    assert "Randomized trial" not in labels(_rec("Risk-adapted MRI protocols",
+        "Overall, 1170 datasets were randomly assigned to 10 expert radiologists."))
+    # a real RCT
+    assert "Randomized trial" in labels(_rec("Drug X in MASH",
+        "Eligible participants were randomly assigned (1:1) to drug X or placebo."))
+    # reviews and case reports don't get prospective/RCT badges from background sentences
+    assert labels(_rec("90Y dosimetry: a practical framework", "Prospective studies have demonstrated benefit.",
+                       pts=["Review"])) == {"Review"}
+    # "pending prospective validation" is not a prospective study
+    assert "Prospective" not in labels(_rec("A PET-sparing algorithm",
+        "Methods: We retrospectively analyzed 300 patients. Results: Good. "
+        "Conclusion: Useful, pending independent, prospective outcome-based validation."))
+    # meta-analysis only when the title says so
+    assert "Meta-analysis" not in labels(_rec("MRI benchmarks: a large cohort study",
+        "We compared with a published worldwide meta-analysis dataset of 13,330 patients."))
+
+
+def test_guideline_detection():
+    from pipeline.abstracts import is_guideline
+    assert is_guideline(_rec("ESR Essentials: MRI of the scrotum-practice recommendations by the ESUR", "x"))
+    assert is_guideline(_rec("SAR consensus statement on pancreatic cyst reporting", "x"))
+    assert not is_guideline(_rec("Noninvasive diagnosis of HCC outside guideline-defined high-risk populations", "x"))
+    assert not is_guideline(_rec("Overuse in large language model recommendations for Choosing Wisely", "x"))
+    assert not is_guideline(_rec("Adherence to ACR guidelines in incidental adrenal nodules", "x"))
+
+
+def test_notices_detected():
+    from pipeline.abstracts import is_notice
+    assert is_notice(_rec("The PRIMARY score on PSMA PET: a systematic review and meta-analysis: Erratum.", ""))
+    assert is_notice(_rec("Correction to: Photon-counting CT of the liver", ""))
+    assert not is_notice(_rec("Motion correction for liver MRI", "x"))
+
+
+def test_data_split_is_not_randomized_trial_and_review_titles():
+    from pipeline.abstracts import design
+    labels = lambda r: {b["label"] for b in design(r)["badges"]}
+    r = _rec("MRI radiomics for HRD status in ovarian cancer",
+             "133 patients were retrospectively enrolled and were randomly allocated to a training set (n = 93) and a validation set.")
+    assert labels(r) == {"Retrospective"}
+    assert labels(_rec("CT-based machine learning in acute pancreatitis: a narrative review",
+                       "Predominantly retrospective evidence and limited prospective assessment.")) == {"Review"}

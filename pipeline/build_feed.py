@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Optional
 
-from .abstracts import compile_systems, refresh, to_card
+from .abstracts import compile_systems, is_notice, refresh, to_card
 from .common import DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import MAX_IDS, PubMed
@@ -71,6 +71,9 @@ def run(http: Optional[Http] = None) -> dict:
     new = 0
     for rec in recs:
         pmid = rec["pmid"]
+        if is_notice(rec):          # erratum / correction / retraction notices
+            items.pop(pmid, None)
+            continue
         prev = items.get(pmid, {})
         card = to_card(rec, compiled)
         card["streams"] = sorted(found.get(pmid, set()) | set(prev.get("streams", [])))
@@ -88,7 +91,8 @@ def run(http: Optional[Http] = None) -> dict:
 
     # 5 — prune and sort
     keep_days = int(settings.get("keep_days", 180))
-    kept = [it for it in items.values() if _age_days(it.get("added") or it.get("seen"), t) <= keep_days]
+    kept = [it for it in items.values()
+            if _age_days(it.get("added") or it.get("seen"), t) <= keep_days and not is_notice(it)]
     kept.sort(key=lambda it: (it.get("added") or "", it.get("seen") or "", int(it["pmid"])), reverse=True)
     kept = kept[: int(settings.get("max_items", 900))]
 

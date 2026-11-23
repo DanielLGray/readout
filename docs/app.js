@@ -71,7 +71,7 @@ const S = {
   system: "all", strong: false, topic: null,
   win: store.get("win", "2"),
   saved: store.get("saved", {}),
-  newIds: new Set(), list: [], rendered: 0,
+  newIds: new Set(), list: [], rendered: 0, loadedAt: 0, exploreKey: null,
 };
 
 async function loadJSON(path) {
@@ -88,6 +88,11 @@ function markNew() {
 }
 function rememberSeen() {
   if (S.feed) store.set("prevIds", S.feed.items.map((i) => i.pmid));
+}
+
+function paperOf(ref) {
+  // explore.json lists papers by PMID; older files embedded them
+  return typeof ref === "string" ? S.explore?.papers?.[ref] : ref;
 }
 
 function topicName(id) {
@@ -190,7 +195,7 @@ function lenClass(t) {
   return n <= 170 ? "" : n <= 300 ? "l2" : n <= 480 ? "l3" : "l4";
 }
 
-function evidenceEl(design, small) {
+function evidenceEl(design, small, sample) {
   const badges = design?.badges || [];
   const s = design?.strength || 0;
   const main = badges.filter((b) => b.strength > 0).sort((a, b) => b.strength - a.strength)[0];
@@ -203,7 +208,8 @@ function evidenceEl(design, small) {
     small ? null : rest.map((b) => el("span", {
       class: "badge" + (b.source === "text" ? " text" : ""),
       title: b.source === "text" ? "Detected from the abstract’s wording" : "From PubMed indexing",
-    }, b.label)));
+    }, b.label)),
+    sample ? el("span", { class: "sample" }, sample) : null);
 }
 
 function cardEl(it) {
@@ -227,9 +233,7 @@ function cardEl(it) {
       extra ? el("div", { class: "extra" },
         el("div", { class: "extra-label" }, extra.label),
         el("p", { class: "extra-text" }, extra.text)) : null)),
-    el("div", {},
-      evidenceEl(it.design),
-      it.sample ? el("div", { class: "sample", style: "margin-top:6px;font-size:14px" }, it.sample) : null),
+    evidenceEl(it.design, false, it.sample),
     (it.topics || []).length ? el("div", { class: "topic-tags" },
       it.topics.slice(0, 3).map((t) => el("button", { class: "topic-tag", onclick: () => { S.topic = t; S.system = "all"; refreshFeed(); } }, topicName(t)))) : null,
     actionsEl(it, true));
@@ -258,8 +262,17 @@ function fitCard(card) {
   card.querySelector(".more-note")?.remove();
   const extra = box.querySelector(".extra");
   if (extra) extra.hidden = false;
+  const sizes = ["", "l2", "l3", "l4"];
+  const base = p.dataset.size ?? (p.dataset.size = sizes.find((c) => c && p.classList.contains(c)) || "");
+  sizes.forEach((c) => c && p.classList.remove(c));
+  if (base) p.classList.add(base);
   const over = () => inner.scrollHeight > box.clientHeight + 1;
   if (over() && extra) extra.hidden = true;
+  // smaller type before cutting text: the conclusion is the point of the card
+  for (let i = sizes.indexOf(base) + 1; over() && i < sizes.length; i++) {
+    sizes.forEach((c) => c && p.classList.remove(c));
+    p.classList.add(sizes[i]);
+  }
   if (!over()) return;
   const note = el("button", { class: "concl-label more-note",
     onclick: () => openAbstract(S.list.find((i) => i.pmid === card.dataset.pmid)) }, "Continues in the abstract");
@@ -397,7 +410,8 @@ function spark(counts, win, g, opts = {}) {
 
 function topicRow(tp, mode) {
   const w = tp.windows?.[S.win] || {};
-  const few = (w.recent || 0) < (S.explore.min_recent?.[S.win] || 0);
+  const min = S.explore.min_recent?.[S.win] || 0;
+  const few = (w.recent || 0) < min && (w.prior || 0) < min;
   let fig, figClass = "", sub;
   if (mode === "influence") {
     fig = (w.influence || 0).toFixed(1);
@@ -449,9 +463,13 @@ function section(title, sub, rows, emptyText) {
     rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "nothing" }, emptyText || "Nothing this time."));
 }
 
-function renderExplore() {
+function renderExplore(force) {
   const view = $("#view-explore");
   const x = S.explore;
+  const key = `${x?.generated}|${S.win}`;
+  if (!force && key === S.exploreKey && view.childElementCount) return;   // already showing this
+  const keep = S.exploreKey && S.exploreKey.split("|")[0] === String(x?.generated) ? view.scrollTop : 0;
+  S.exploreKey = key;
   view.replaceChildren();
   if (!x) {
     view.append(el("section", { class: "empty", style: "height:100%" },
@@ -467,7 +485,7 @@ function renderExplore() {
   const terms = x.terms?.[S.win] || {};
 
   const wrap = el("div", { class: "explore" },
-    segEl(renderExplore),
+    segEl(() => renderExplore(true)),
     el("p", { class: "ex-note" }, `Papers in the last ${yrs} compared with the ${yrs} before, adjusted for how fast imaging research grew overall. Updated ${ago(x.generated)}.`),
     section("Breakouts", "At least doubled their share of imaging research.",
       pick(L.breakouts).map((t) => topicRow(t, "growth")), "No topic doubled in this window."),
@@ -492,6 +510,7 @@ function renderExplore() {
   }
   wrap.append(all);
   view.append(wrap);
+  view.scrollTop = keep;
 }
 
 function paperEl(p, opts = {}) {
@@ -561,10 +580,10 @@ function openTopic(id) {
       el("section", { class: "sect" },
         el("h2", {}, "Most-cited papers"),
         el("p", { class: "sub" }, S.win === "1" ? "Citations so far. One year is early, so read these as a first signal." : "Ranked by citations per year (NIH iCite)."),
-        (w.top || []).length ? (w.top || []).map((p) => paperEl(p)) : el("p", { class: "nothing" }, "No citation data yet for this window.")),
+        (w.top || []).length ? (w.top || []).map(paperOf).filter(Boolean).map((p) => paperEl(p)) : el("p", { class: "nothing" }, "No citation data yet for this window.")),
       el("section", { class: "sect" },
         el("h2", {}, "Guidelines and consensus"),
-        (w.guidelines || []).length ? w.guidelines.map((p) => paperEl(p)) : el("p", { class: "nothing" }, "None published in this window.")),
+        (w.guidelines || []).length ? w.guidelines.map(paperOf).filter(Boolean).map((p) => paperEl(p)) : el("p", { class: "nothing" }, "None published in this window.")),
       el("section", { class: "sect" },
         el("h2", {}, "Go further"),
         el("div", { class: "link-row" },
@@ -588,13 +607,14 @@ function closeTopic() {
   const ov = $("#topic");
   ov.classList.remove("open");
   ov.setAttribute("aria-hidden", "true");
-  if (S.tab === "explore") renderExplore();
+  if (S.tab === "explore") renderExplore();   // no-op unless the window was changed on the topic page
 }
 
 // ── saved ──────────────────────────────────────────────────────────────────
 function renderSaved() {
   const view = $("#view-saved");
   const items = Object.values(S.saved).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+  const keep = view.scrollTop;
   view.replaceChildren();
   if (!items.length) {
     view.append(el("section", { class: "empty", style: "height:100%" },
@@ -609,6 +629,7 @@ function renderSaved() {
   view.append(
     el("div", { class: "saved-tools" }, el("button", { class: "act", style: "padding:0 14px", onclick: copy }, "Copy list")),
     el("div", { class: "saved-list" }, items.map((i) => paperEl(i))));
+  view.scrollTop = keep;
 }
 
 // ── tabs, header, boot ─────────────────────────────────────────────────────
@@ -634,15 +655,22 @@ function switchTab(tab) {
 
 async function reload(announce) {
   const before = new Set((S.feed?.items || []).map((i) => i.pmid));
+  const was = { feed: S.feed?.generated, explore: S.explore?.generated };
   const [feed, explore] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/explore.json").catch(() => null),
   ]);
   if (feed) S.feed = feed;
   if (explore) S.explore = explore;
+  if (feed || explore) S.loadedAt = Date.now();
+  const feedChanged = !S.feed || S.feed.generated !== was.feed;
+  const exploreChanged = !S.explore || S.explore.generated !== was.explore;
   markNew();
-  refreshFeed();
-  if (S.tab === "explore") renderExplore();
+  // rebuilding resets scroll position, so only do it when something changed (or the user asked)
+  if (announce || feedChanged) refreshFeed();
+  else updateHeadNote();
+  if (exploreChanged) S.exploreKey = null;
+  if (S.tab === "explore" && (announce || exploreChanged)) renderExplore();
   if (announce) {
     if (!feed) toast("Couldn’t reach the feed. Showing what’s on this phone.");
     else {
@@ -663,10 +691,13 @@ function boot() {
     if ($("#sheet").classList.contains("open")) closeSheet();
     else if ($("#topic").classList.contains("open")) closeTopic();
   });
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") rememberSeen(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") rememberSeen();
+    else if (Date.now() - S.loadedAt > 60 * 60 * 1000) reload(false);   // home-screen apps stay open for days
+  });
   window.addEventListener("pagehide", rememberSeen);
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => S.tab === "feed" && refreshFeed(), 250); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(fitAll, 200); });
   document.fonts?.ready.then(fitAll);
   document.fonts?.addEventListener?.("loadingdone", fitAll);
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});

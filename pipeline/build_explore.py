@@ -19,7 +19,7 @@ from datetime import date, timedelta
 from typing import Optional
 
 from . import ctgov, icite, terms
-from .abstracts import compile_systems, to_card
+from .abstracts import compile_systems, is_guideline, is_notice, to_card
 from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import PubMed
@@ -51,9 +51,9 @@ def _adj_growth(r: int, p: int, R: int, P: int) -> Optional[float]:
     return round((r / R) / (p / P) - 1, 3)
 
 
-def _slim(card: dict, m: Optional[dict] = None) -> dict:
-    keep = ("pmid", "title", "journal", "authors", "added", "epub", "ppub", "doi", "pmcid", "design",
-            "sample", "conclusion", "extras", "retracted", "concern")
+def _paper(card: dict, m: Optional[dict] = None) -> dict:
+    keep = ("pmid", "title", "journal", "authors", "added", "epub", "ppub", "doi", "pmcid", "pub_types", "design",
+            "sample", "conclusion", "extras", "sections", "retracted", "concern")
     out = {k: card.get(k) for k in keep}
     if m:
         out["metrics"] = m
@@ -61,7 +61,7 @@ def _slim(card: dict, m: Optional[dict] = None) -> dict:
 
 
 def topic_block(pm: PubMed, http: Http, tp: dict, win: dict, years: list[int], base: dict,
-                compiled: dict, t: date) -> dict:
+                compiled: dict, t: date, papers: dict) -> dict:
     q = " ".join(tp["query"].split())
     year_counts = [pm.count(q, date(y, 1, 1), min(date(y, 12, 31), t)) for y in years]
 
@@ -107,18 +107,22 @@ def topic_block(pm: PubMed, http: Http, tp: dict, win: dict, years: list[int], b
                                    if scored else 0)
 
     want = list(dict.fromkeys([p for w in win for p in tops[w]] + gids))
-    cards = {c["pmid"]: c for c in (to_card(r, compiled) for r in pm.fetch(want))} if want else {}
+    recs = {r["pmid"]: r for r in pm.fetch(want)} if want else {}
+    cards = {pmid: to_card(r, compiled) for pmid, r in recs.items() if not is_notice(r)}
+    for pmid, c in cards.items():
+        papers[pmid] = _paper(c, met.get(pmid))
 
     for w, wd in win.items():
-        per_w[w]["top"] = [_slim(cards[p], met.get(p)) for p in tops[w] if p in cards]
+        per_w[w]["top"] = [p for p in tops[w] if p in cards]
         g_in = []
         for p in gids:
             c = cards.get(p)
-            if not c:
+            # PubMed's title-word search is broad ("guideline-defined"); keep real guidance only
+            if not c or not is_guideline(recs[p]):
                 continue
             d = (c.get("epub") or c.get("ppub") or c.get("added") or "")[:10]
             if d and d >= wd["start"].isoformat()[: len(d)]:
-                g_in.append(_slim(c, met.get(p)))
+                g_in.append(p)
         per_w[w]["guidelines"] = g_in[:6]
 
     if tp.get("trials"):
@@ -192,6 +196,8 @@ def run(http: Optional[Http] = None) -> dict:
     compiled = compile_systems(cfg["systems"])
     old = read_json(DATA / "explore.json", {}) or {}
     old_topics = {tp["id"]: tp for tp in old.get("topics", [])}
+    old_papers = old.get("papers", {})
+    papers: dict[str, dict] = {}
 
     log("Explore: baseline")
     bq = " ".join(tcfg["baseline_query"].split())
@@ -206,11 +212,17 @@ def run(http: Optional[Http] = None) -> dict:
     for i, tp in enumerate(tcfg["topics"], 1):
         log(f"Explore: [{i}/{len(tcfg['topics'])}] {tp['name']}")
         try:
-            topics_out.append(topic_block(pm, http, tp, win, years, base, compiled, t))
+            topics_out.append(topic_block(pm, http, tp, win, years, base, compiled, t, papers))
         except Exception as exc:
             log(f"  failed ({exc}); keeping last week's numbers")
-            if tp["id"] in old_topics:
-                topics_out.append(dict(old_topics[tp["id"]], stale=True))
+            prev = old_topics.get(tp["id"])
+            if prev and all(isinstance(p, str) for w in prev.get("windows", {}).values()
+                            for p in w.get("top", []) + w.get("guidelines", [])):
+                topics_out.append(dict(prev, stale=True))
+                for w in prev["windows"].values():
+                    for p in w.get("top", []) + w.get("guidelines", []):
+                        if p in old_papers:
+                            papers.setdefault(p, old_papers[p])
 
     log("Explore: emerging terms")
     try:
@@ -227,6 +239,7 @@ def run(http: Optional[Http] = None) -> dict:
         "baseline": base,
         "systems": {k: v["label"] for k, v in cfg["systems"].items()},
         "topics": topics_out,
+        "papers": papers,
         "lists": lists_for(topics_out),
         "terms": term_data,
         "min_recent": {str(k): v for k, v in MIN_RECENT.items()},

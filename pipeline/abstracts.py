@@ -99,11 +99,60 @@ def conclusion(rec: dict) -> "tuple[dict, list[dict]]":
 
 
 # ── study design ────────────────────────────────────────────────────────────
+# Inline headings in unlabeled abstracts ("Methods: ... Results: ... Conclusion: ...")
+_INLINE_METHODS = re.compile(
+    r"(?:^|[.!?)\]]\s+)(?:Materials and Methods|Patients and Methods|Methods?|Design)\s*:?\s+(?=[A-Z0-9(])"
+    r"(.+?)(?=(?:[.!?)\]]\s+)(?:Conclusions?|Interpretation)\s*:?\s+[A-Z0-9(]|$)", re.S)
+
+# A mention that is about other or future work, not this study ("prospective studies are needed")
+_NOT_THIS_STUDY_AFTER = re.compile(r"\b(needed|warranted|required|should|future|further|pending|planned|ongoing|"
+                                   r"would|could|lacking|limited|scarce|remain|are few)\b", re.I)
+_NOT_THIS_STUDY_BEFORE = re.compile(r"\b(future|further|pending|need for|require[sd]?|no|previous|prior|one small|"
+                                    r"existing|larger|additional|independent|confirmatory)\W+(\w+\W+)?$", re.I)
+
+
 def _methods_text(rec: dict) -> str:
     secs = rec.get("sections", [])
     m = [s["text"] for s in secs if s["cat"] in ("METHODS", "RESULTS")
-         or re.search(r"method|design|setting|participant|patient|result", s["label"], re.I)]
-    return " ".join(m) if m else " ".join(s["text"] for s in secs)
+         or re.search(r"method|design|setting|participant|patient|result|study type|population", s["label"], re.I)]
+    if m:
+        return " ".join(m)
+    full = " ".join(s["text"] for s in secs)
+    inline = _INLINE_METHODS.search(full)
+    return inline.group(1) if inline else full
+
+
+def _about_this_study(text: str, pattern: str, flags=re.I) -> bool:
+    """True if `pattern` appears in a sentence that describes this study."""
+    for m in re.finditer(pattern, text, flags):
+        sentence_rest = re.split(r"(?<=[.;])\s", text[m.end():m.end() + 80], maxsplit=1)[0]
+        if _NOT_THIS_STUDY_AFTER.search(sentence_rest):
+            continue
+        if _NOT_THIS_STUDY_BEFORE.search(text[max(0, m.start() - 40):m.start()]):
+            continue
+        return True
+    return False
+
+
+_GUIDE_TITLE = re.compile(r"\b(consensus|guidelines?|white paper|position (statement|paper)|practice recommendations|"
+                          r"expert recommendations|joint recommendations)\b", re.I)
+_GUIDE_NOT = re.compile(r"(guidelines?[- ](defined|based|concordant|discordant|recommended|directed|adherent)|"
+                        r"(adherence|according|compliance|concordance|outside|beyond) (to |with )?(the )?(\w+ )?guidelines?|"
+                        r"(reader|interobserver|inter-reader|radiologist) consensus|consensus (reading|read|review)\b)", re.I)
+
+
+def is_guideline(rec: dict) -> Optional[str]:
+    """'pubmed', 'text' or None."""
+    pts = set(rec.get("pub_types", []))
+    if pts & {"Guideline", "Practice Guideline", "Consensus Development Conference",
+              "Consensus Development Conference, NIH", "Consensus Statement"}:
+        return "pubmed"
+    title = rec.get("title", "")
+    if _GUIDE_TITLE.search(title) and not _GUIDE_NOT.search(title):
+        return "text"
+    if re.search(r"\brecommendations (from|of|by) (the )?[A-Z]", title):
+        return "text"
+    return None
 
 
 def design(rec: dict) -> dict:
@@ -112,57 +161,81 @@ def design(rec: dict) -> dict:
     pts = set(rec.get("pub_types", []))
     title = rec.get("title", "")
     methods = _methods_text(rec)
-    alltext = title + " " + " ".join(s["text"] for s in rec.get("sections", []))
+    systematic = bool(pts & {"Systematic Review", "Meta-Analysis"}) or re.search(r"systematic(ally)? review|meta-analy", title, re.I)
+    review_title = re.search(r"\breview\b|\bprimer\b|\bpictorial\b|what the radiologist needs to know", title, re.I)
+    narrative = (bool(pts & {"Review", "Case Reports"}) or bool(review_title)) and not systematic
     badges: list[dict] = []
 
     def add(label, source, strength):
         badges.append({"label": label, "source": source, "strength": strength})
 
-    if pts & {"Guideline", "Practice Guideline", "Consensus Development Conference",
-              "Consensus Development Conference, NIH"}:
-        add("Guideline / consensus", "pubmed", 4)
-    elif re.search(r"\b(consensus|guidelines?|white paper|position (statement|paper)|recommendations)\b", title, re.I):
-        add("Guideline / consensus", "text", 4)
+    g = is_guideline(rec)
+    if g:
+        add("Guideline / consensus", g, 4)
 
+    # meta-analyses and systematic reviews say so in their titles
     if "Meta-Analysis" in pts:
         add("Meta-analysis", "pubmed", 4)
-    elif re.search(r"meta-analy", title + " " + methods, re.I):
+    elif re.search(r"meta-analy", title, re.I):
         add("Meta-analysis", "text", 4)
     elif "Systematic Review" in pts:
         add("Systematic review", "pubmed", 4)
-    elif re.search(r"systematic(ally)? review", title + " " + methods, re.I):
+    elif re.search(r"systematic(ally)? review", title, re.I):
         add("Systematic review", "text", 4)
 
     if "Randomized Controlled Trial" in pts:
         add("Randomized trial", "pubmed", 4)
-    elif re.search(r"randomi[sz]ed (controlled |clinical )?trial|were randomi[sz]ed|randomly assigned", alltext, re.I):
+    elif not narrative and (
+            re.search(r"\brandomi[sz]ed\b", title, re.I) and not re.search(r"non-?randomi[sz]ed", title, re.I)
+            or _about_this_study(methods, r"(?<!non-)(?<!non)\brandomi[sz]ed (controlled |clinical |phase \w+ )?trial")
+            or any(not re.search(r"(dataset|image|case|exam|scan|reader|order|sequence|lesion|slice|video)s?\W+(\w+\W+){0,3}$",
+                                 methods[max(0, m.start() - 50):m.start()], re.I)
+                   # "randomly allocated to a training set" is a data split, not a trial
+                   and not re.search(r"training|validation|test(ing)? (set|cohort)|derivation|development|internal|cohorts in",
+                                     methods[m.end():m.end() + 60], re.I)
+                   for m in re.finditer(r"\b(were|was) randomi[sz]ed|randomly (assigned|allocated)", methods, re.I))):
         add("Randomized trial", "text", 4)
 
     has_meta = any(b["strength"] == 4 and "Guideline" not in b["label"] for b in badges)
-    if not has_meta:
-        pro = re.search(r"\bprospective", methods, re.I)
-        retro = re.search(r"\bretrospective", methods, re.I)
+    if not has_meta and not narrative:
+        pro = _about_this_study(methods, r"\bprospective(ly)?\b") or re.search(r"\bprospective\b", title, re.I)
+        retro = _about_this_study(methods, r"\bretrospective(ly)?\b") or re.search(r"\bretrospective\b", title, re.I)
         if pro and retro:
             add("Prospective + retrospective data", "text", 2)
         elif pro:
             add("Prospective", "text", 3)
         elif retro:
             add("Retrospective", "text", 2)
-        if re.search(r"secondary analysis|post[- ]hoc analysis", alltext, re.I):
+        if re.search(r"secondary analysis|post[- ]hoc analysis", title + " " + methods, re.I):
             add("Secondary analysis", "text", 2)
 
     if "Multicenter Study" in pts:
         add("Multicenter", "pubmed", 0)
-    elif re.search(r"multi-?cent(er|re)|multi-?institution|multi-?site|\d+ (centers|centres|institutions|hospitals)", methods, re.I):
+    elif not narrative and re.search(
+            r"multi-?cent(er|re)|multi-?institution|multi-?site|\b([2-9]|\d{2,}) (centers|centres|institutions|hospitals|sites)",
+            title + " " + methods, re.I):
         add("Multicenter", "text", 0)
 
     if "Case Reports" in pts:
         add("Case report", "pubmed", 1)
     elif "Review" in pts and not has_meta:
         add("Review", "pubmed", 1)
+    elif review_title and not has_meta and not systematic:
+        add("Review", "text", 1)
 
     strength = max([b["strength"] for b in badges], default=0)
     return {"badges": badges, "strength": strength}
+
+
+_NOTICE = re.compile(r"(^\s*(erratum|corrigendum|correction|retraction|retracted|expression of concern|withdrawn)\b|"
+                     r"[:\-–]\s*(erratum|corrigendum|correction|retraction|expression of concern)\.?\s*$)", re.I)
+
+
+def is_notice(rec: dict) -> bool:
+    """Erratum, correction and retraction notices: not papers to read."""
+    pts = set(rec.get("pub_types", []))
+    return bool(pts & {"Published Erratum", "Retraction of Publication", "Retraction Notice", "Expression of Concern"}) \
+        or bool(_NOTICE.search(rec.get("title", "")))
 
 
 # ── sample size ─────────────────────────────────────────────────────────────

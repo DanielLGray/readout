@@ -50,8 +50,12 @@ def test_explore(env):
     assert "llm_radiology" in lists["breakouts"] + lists["rising"]
     assert "radiomics_body" in out["lists"]["5"]["cooling"]
     assert topics["psma_pet"]["windows"]["5"]["top"], "top papers present"
-    top = topics["psma_pet"]["windows"]["5"]["top"][0]
+    top = out["papers"][topics["psma_pet"]["windows"]["5"]["top"][0]]
     assert top["conclusion"]["text"] and top["metrics"]["cites"] > 0
+    assert top["sections"], "full abstract kept so the app's Abstract button works"
+    for t in out["topics"]:
+        for w in t["windows"].values():
+            assert all(p in out["papers"] for p in w["top"] + w["guidelines"])
     assert topics["psma_pet"]["windows"]["1"]["trials"]["recent"] is not None
     assert len(topics["lirads"]["years"]) == 11
     terms = out["terms"]["2"]["emerging"]

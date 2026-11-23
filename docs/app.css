@@ -93,7 +93,8 @@ a { color: inherit; }
 
 .head {
   padding: calc(var(--top) + 10px) 16px 0;
-  background: var(--bg);
+  /* iOS draws white status-bar text over the page: keep a dark band under it in light mode too */
+  background: linear-gradient(#171b1f, #171b1f) top / 100% var(--top) no-repeat, var(--bg);
   border-bottom: 1px solid var(--line);
   z-index: 5;
 }
@@ -189,7 +190,7 @@ a { color: inherit; }
 .ev-main { font-weight: 700; }
 .badge { font-size: 13px; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
 .badge.text { border-style: dashed; }
-.sample { color: var(--muted); }
+.sample { color: var(--muted); font-size: 14px; }
 
 .topic-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .topic-tag { font-size: 13px; color: var(--muted); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
@@ -256,6 +257,7 @@ a { color: inherit; }
 .overlay.open { transform: none; }
 .ov-head {
   padding: calc(var(--top) + 8px) 8px 8px; display: flex; align-items: center; gap: 4px;
+  background: linear-gradient(#171b1f, #171b1f) top / 100% var(--top) no-repeat, var(--bg);
   border-bottom: 1px solid var(--line);
 }
 .ov-head h1 { margin: 0; font: 600 18px/1.25 var(--serif); flex: 1; padding-right: 8px; }
@@ -319,6 +321,15 @@ a { color: inherit; }
 .saved-list { list-style: none; margin: 0; padding: 0 16px; }
 .saved-list .paper:last-child { border-bottom: 0; }
 .saved-tools { display: flex; gap: 8px; padding: 12px 16px 0; }
+
+/* short phones (iPhone SE/mini): give the conclusion the room */
+@media (max-height: 760px) {
+  .card { gap: 9px; padding-top: 14px; padding-bottom: 10px; }
+  .card-title { font-size: 16px; }
+  .card-title.clamp { -webkit-line-clamp: 2; }
+  .act { height: 38px; }
+  .topic-tags .topic-tag:nth-child(n+2) { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .overlay, .sheet, .sheet-card, .toast { transition: none; }

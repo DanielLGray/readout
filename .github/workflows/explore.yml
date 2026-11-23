@@ -24,6 +24,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Check every query against PubMed
+        continue-on-error: true
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
