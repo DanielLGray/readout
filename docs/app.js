@@ -49,6 +49,7 @@ function ago(iso) {
 }
 function pct(g) {
   if (g == null) return "new";
+  if (g >= 4) return `${Math.round(g + 1)}×`;
   const v = Math.round(g * 100);
   return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) + "%";
 }

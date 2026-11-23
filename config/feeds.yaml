@@ -13,7 +13,7 @@
 
 settings:
   first_run_days: 45        # how far back the very first run looks
-  recheck_days: 10          # later runs re-check this many days (abstracts often arrive late)
+  recheck_days: 30          # later runs re-check this many days (abstracts often arrive weeks late)
   keep_days: 180            # cards older than this drop out of the feed
   max_items: 900            # hard cap on cards kept in the feed
 

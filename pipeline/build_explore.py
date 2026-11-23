@@ -28,7 +28,7 @@ WINDOWS = {1: 365, 2: 730, 5: 1826}
 MIN_RECENT = {1: 15, 2: 25, 5: 40}      # fewer papers than this → too small to call a trend
 
 EVIDENCE = {
-    "guideline": '(Guideline[pt] OR "Practice Guideline"[pt] OR "Consensus Development Conference"[pt] OR '
+    "guideline": '(Guideline[pt] OR "Practice Guideline"[pt] OR '
                  'consensus[ti] OR guideline[ti] OR guidelines[ti] OR "white paper"[ti] OR '
                  '"position statement"[ti] OR "position paper"[ti])',
     "meta": '("Meta-Analysis"[pt] OR "Systematic Review"[pt] OR "meta-analysis"[ti] OR "systematic review"[ti])',

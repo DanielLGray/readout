@@ -29,13 +29,28 @@ update practice radiology radiologic radiological radiologist radiologists assoc
 prospective retrospective multicenter multicentre center centre institution correlation characteristics
 evaluating assessing comparing compared improved improving improve versus validation development external
 internal cross sectional population based level levels type types group groups rate rates
+commentary invited essentials narrative panel society european directions future room reading reply
+erratum correction perspective pictorial primer editorial making decision lessons learned
 """.split())
+
+# second halves of hyphen compounds that can be cut off ("MASLD-related" → "MASLD")
+SEPARABLE = set("related based associated derived guided assisted driven specific naive free like induced dependent matched adjusted".split())
 
 TOKEN = re.compile(r"[A-Za-z0-9]+")
 ACRONYMS = {"ct", "mri", "mr", "pet", "us", "ai", "psma", "fapi", "hcc", "llm", "llms", "dect", "pcct",
             "ceus", "mrcp", "ipmn", "pdac", "rcc", "net", "sstr", "fdg", "spect", "dwi", "adc", "cad"}
 
 MIN_RECENT = {1: 8, 2: 12, 5: 20}
+
+
+def _fold(word: str) -> str:
+    """Key for counting: lowercase, simple plurals merged ("models" → "model").
+    Acronyms are left alone ("RADS" stays "rads")."""
+    lw = word.lower()
+    plain = word.isalpha() and word[1:].islower()          # "models" or "Models", not "RADS"
+    if plain and len(word) > 4 and lw.endswith("s") and not lw.endswith(("ss", "us", "is")):
+        return lw[:-1]
+    return lw
 
 
 def phrases(title: str) -> dict[str, str]:
@@ -54,9 +69,11 @@ def phrases(title: str) -> dict[str, str]:
             # never cut a hyphenated compound (keeps "LI-RADS", "watch-and-wait" whole)
             before = title[toks[i - 1].end():toks[i].start()] if i > 0 else " "
             after = title[toks[j].end():toks[j + 1].start()] if j + 1 < len(toks) else " "
-            if before == "-" or after == "-":
+            nxt = toks[j + 1].group(0).lower() if j + 1 < len(toks) else ""
+            if before == "-" or (after == "-" and nxt not in SEPARABLE):
                 continue
-            words = [t.group(0).lower() for t in toks[i:j + 1]]
+            raw = [t.group(0) for t in toks[i:j + 1]]
+            words = [w.lower() for w in raw]
             if words[0] in STOP or words[-1] in STOP:
                 continue
             # "CT for pancreatic": a stopword inside a phrase only counts when hyphenated
@@ -76,7 +93,7 @@ def phrases(title: str) -> dict[str, str]:
                     continue
                 if all(w in ACRONYMS for w in words):
                     continue
-            out[" ".join(words)] = surface
+            out[" ".join(_fold(w) for w in raw)] = surface
     return out
 
 
@@ -87,10 +104,16 @@ def _contains(a: str, b: str) -> bool:
 
 
 def display(canon: str, surfaces: Counter) -> str:
-    if surfaces:
-        s = surfaces.most_common(1)[0][0]
-        return s[:1].lower() + s[1:] if s[:1].isupper() and not s[:2].isupper() else s
-    return canon
+    """Most common spelling, minus Title Case: acronyms and words with digits keep
+    their case ("photon-Counting CT" → "photon-counting CT")."""
+    if not surfaces:
+        return canon
+    s = surfaces.most_common(1)[0][0]
+    def fix(word: str) -> str:
+        if word.isupper() or sum(c.isupper() for c in word) >= 2 or any(c.isdigit() for c in word):
+            return word
+        return word.lower()
+    return re.sub(r"[A-Za-z0-9]+", lambda m: fix(m.group(0)), s)
 
 
 def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15) -> dict:

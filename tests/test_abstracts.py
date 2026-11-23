@@ -105,10 +105,11 @@ def test_clean_and_sentences():
 def test_phrases():
     p = phrases("Photon-Counting CT for Pancreatic Cancer Detection")
     assert "photon counting ct" in p and p["photon counting ct"] == "Photon-Counting CT"
+    assert "large language model" in phrases("Large Language Models in Radiology")      # plural folded
     assert "ct" not in p                      # bare acronym dropped
     assert "for pancreatic" not in p          # stopword edge
     p2 = phrases("Large language models: a review")
-    assert "large language models" in p2
+    assert "large language model" in p2
     assert "models a" not in p2               # no joining across ':'
 
 
@@ -133,3 +134,16 @@ def test_refresh_reprocesses_stored_card():
             "conclusion": {"kind": "closing", "label": "x", "text": "old"}}
     refresh(card, SYSTEMS)
     assert card["conclusion"]["text"] == "The method is accurate and fast."
+
+
+def test_phrase_display_and_hyphen_suffixes():
+    from collections import Counter
+    from pipeline.terms import display
+    assert display("photon counting ct", Counter({"Photon-Counting CT": 3})) == "photon-counting CT"
+    assert display("li rads v2024", Counter({"LI-RADS v2024": 2})) == "LI-RADS v2024"
+    assert display("o rads mri", Counter({"O-RADS MRI": 2})) == "O-RADS MRI"
+    p = phrases("MASLD-related Fibrosis on MRI")
+    assert "masld" in p
+    p2 = phrases("LI-RADS Category 3 Observations")
+    assert "li" not in p2 and "rads category" not in p2
+    assert "invited commentary" not in phrases("Invited Commentary: Liver MRI")
