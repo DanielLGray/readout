@@ -47,6 +47,9 @@ _CONCL_LABEL = re.compile(
     re.IGNORECASE)
 
 
+_INLINE_CONCL = re.compile(r"(?:^|[.!?)\]]\s+)(Conclusions?|Interpretation)\s*:?\s+(?=[A-Z0-9(])((?:(?!\b(?:Conclusions?|Interpretation)\s*:?\s+[A-Z]).)+)$")
+
+
 def _nice_label(label: str) -> str:
     label = label.strip().rstrip(":")
     return label[:1].upper() + label[1:].lower() if label.isupper() else label
@@ -81,6 +84,10 @@ def conclusion(rec: dict) -> "tuple[dict, list[dict]]":
                 "text": primary["text"]}, extras
 
     full = " ".join(s["text"] for s in secs)
+    # Some records keep the headings inline: "... Results ... Conclusion AI demonstrated ..."
+    inline = _INLINE_CONCL.search(full)
+    if inline and len(inline.group(2)) >= 30:
+        return {"kind": "structured", "label": "Conclusion", "text": inline.group(2).strip()}, []
     sents = sentences(full)
     pts = set(rec.get("pub_types", []))
     is_review = bool(pts & {"Review", "Systematic Review"}) or rec.get("journal", "").lower() == "radiographics"
@@ -253,3 +260,18 @@ def to_card(rec: dict, systems_compiled: dict) -> dict:
         "retracted": rec.get("retracted", False),
         "concern": rec.get("concern", False),
     }
+
+
+def refresh(card: dict, systems_compiled: dict) -> dict:
+    """Re-derive the computed fields of a stored card from its stored abstract,
+    so parser improvements reach cards fetched on earlier days."""
+    rec = {"title": card.get("title", ""), "journal": card.get("journal", ""),
+           "pub_types": card.get("pub_types", []),
+           "sections": [{"label": s.get("label", ""), "cat": s.get("cat", ""), "text": s.get("text", "")}
+                        for s in card.get("sections", [])]}
+    if not rec["sections"]:
+        return card
+    primary, extras = conclusion(rec)
+    card.update(conclusion=primary, extras=extras, design=design(rec), sample=sample_size(rec),
+                systems=tag_systems(rec, systems_compiled))
+    return card

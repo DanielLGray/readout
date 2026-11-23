@@ -110,3 +110,26 @@ def test_phrases():
     p2 = phrases("Large language models: a review")
     assert "large language models" in p2
     assert "models a" not in p2               # no joining across ':'
+
+
+def test_inline_conclusion_heading():
+    rec = {"title": "AI for prostate MRI", "journal": "Radiology", "pub_types": [],
+           "sections": [{"label": "", "cat": "", "text": "Background Screening is hard. Purpose To test AI. "
+                         "Results AUC was 0.91 (95% CI: 0.88, 0.93). Conclusion AI performed comparably to radiologists. "
+                         "© RSNA, 2026"}]}
+    c, _ = conclusion(rec)
+    assert c["kind"] == "structured"
+    assert c["text"] == "AI performed comparably to radiologists."
+    # "conclusion" inside a normal sentence is not a heading
+    rec2 = {"title": "x", "journal": "J", "pub_types": [],
+            "sections": [{"label": "", "cat": "", "text": "We reached no firm conclusion about dosing in this group. More data are needed soon."}]}
+    assert conclusion(rec2)[0]["kind"] == "closing"
+
+
+def test_refresh_reprocesses_stored_card():
+    from pipeline.abstracts import refresh
+    card = {"title": "t", "journal": "Radiology", "pub_types": [],
+            "sections": [{"label": "", "cat": "", "text": "Results It worked well overall. Conclusion The method is accurate and fast."}],
+            "conclusion": {"kind": "closing", "label": "x", "text": "old"}}
+    refresh(card, SYSTEMS)
+    assert card["conclusion"]["text"] == "The method is accurate and fast."

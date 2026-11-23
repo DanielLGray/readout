@@ -132,6 +132,9 @@ class FakeWorld:
     # ── query evaluation ────────────────────────────────────────────────────
     def match(self, term: str):
         kind = self.queries.get(term)
+        if kind is None and "[ta]" in term and term.count('"') >= 2:
+            name = term.split('"')[1]
+            return [p for p in self.papers.values() if p["journal"] == name]
         if kind is None:
             raise KeyError(f"fake PubMed does not know this query: {term[:120]}")
         k, v = kind
@@ -158,7 +161,7 @@ class FakeWorld:
             hits = [p for p in hits if lo <= p[field] <= hi]
         if params.get("sort") == "pub_date":
             hits.sort(key=lambda p: p["date"], reverse=True)
-        count = len(hits) * (5 if self.queries[term][0] == "baseline" else 1)
+        count = len(hits) * (5 if self.queries.get(term, ("",))[0] == "baseline" else 1)
         retmax = int(params.get("retmax", 20))
         return {"esearchresult": {"count": str(count), "idlist": [p["pmid"] for p in hits[:retmax]]}}
 

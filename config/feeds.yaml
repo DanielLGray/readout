@@ -78,8 +78,7 @@ imaging_terms: >-
 
 # Publication types that never make a useful card.
 exclude: >-
-  "Published Erratum"[pt] OR "Retraction of Publication"[pt] OR Editorial[pt] OR
-  Letter[pt] OR Comment[pt] OR News[pt]
+  "Published Erratum"[pt] OR Editorial[pt] OR Letter[pt] OR Comment[pt] OR News[pt]
 
 streams:
   - id: body_journals

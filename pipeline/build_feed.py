@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Optional
 
-from .abstracts import compile_systems, to_card
+from .abstracts import compile_systems, refresh, to_card
 from .common import DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import MAX_IDS, PubMed
@@ -79,6 +79,12 @@ def run(http: Optional[Http] = None) -> dict:
         if not prev:
             new += 1
         items[pmid] = card
+
+    # apply the current parser to cards fetched on earlier days
+    fetched = {r["pmid"] for r in recs}
+    for pmid, it in items.items():
+        if pmid not in fetched:
+            refresh(it, compiled)
 
     # 5 — prune and sort
     keep_days = int(settings.get("keep_days", 180))

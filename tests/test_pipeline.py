@@ -67,3 +67,4 @@ def test_check_queries(env):
     report = check_queries.main(http)
     assert report.count("| topic |") == len(world.tcfg["topics"])
     assert "| stream | body_journals |" in report
+    assert "| journal | Radiology |" in report

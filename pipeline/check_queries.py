@@ -24,6 +24,14 @@ def main(http=None) -> str:
         q = fill(s["query"], cfg)
         n = pm.esearch(q, datetype="edat", reldate=30)[0]
         rows.append(("stream", s["id"], f"{n} in last 30 days", "; ".join(pm.warnings.get(q, []))))
+    # journal coverage: how much of each journal the body filter keeps (last 45 days)
+    body = " ".join(cfg.get("body_filter", "").split())
+    for key in ("journals", "nm_journals", "general_journals"):
+        for j in cfg.get(key, []):
+            total = pm.esearch(j, datetype="edat", reldate=45)[0]
+            kept = pm.esearch(f"({j}) AND ({body})", datetype="edat", reldate=45)[0]
+            rows.append(("journal", j.split('"')[1] if '"' in j else j,
+                         f"{kept} of {total} kept (45 days)", ""))
     for tp in tcfg["topics"]:
         q = " ".join(tp["query"].split())
         n = pm.count(q, t - timedelta(days=1825), t)
