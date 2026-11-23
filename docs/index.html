@@ -37,6 +37,7 @@
     <main class="view feed" id="view-feed" aria-label="Feed"></main>
     <main class="view" id="view-explore" aria-label="Explore" hidden></main>
     <main class="view" id="view-saved" aria-label="Saved" hidden></main>
+    <main class="view" id="view-tune" aria-label="Tune" hidden></main>
 
     <div class="player" id="player" hidden>
       <button class="icon-btn" id="pl-toggle" aria-label="Play"></button>
@@ -60,6 +61,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>
         Saved
       </button>
+      <button class="tab" role="tab" data-tab="tune" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>
+        Tune
+      </button>
     </nav>
   </div>
 
@@ -80,5 +85,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="app.js"></script>
+  <script src="tune.js"></script>
 </body>
 </html>

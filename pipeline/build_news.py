@@ -121,15 +121,31 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
             for k, v in archive.items()]
 
+    ts = settings.get("top_stories") or {}
+    top_cfg = {"days": int(ts.get("days", 7)), "limit": int(ts.get("per_kind", 8)),
+               "min_outlets": int(ts.get("min_outlets", 2)), "match": float(ts.get("match", 0.5))}
+    tr = settings.get("trending") or {}
+    spans = {"week": [int(x) for x in tr.get("week", [7, 28])], "month": [int(x) for x in tr.get("month", [30, 90])]}
+    n_terms = int(tr.get("phrases", 12))
     out = {
         "generated": now_iso(),
+        "settings": {
+            "keep_days": int(settings.get("keep_days", 120)), "other_keep_days": other_days,
+            "max_items": int(settings.get("max_items", 4000)), "archive_days": int(settings.get("archive_days", 730)),
+            "outlets": len(cfg.get("sources", [])), "promo_filter": bool(junk),
+            "top_stories": {"days": top_cfg["days"], "per_kind": top_cfg["limit"],
+                            "min_outlets": top_cfg["min_outlets"], "match": top_cfg["match"]},
+            "trending": {"week": spans["week"], "month": spans["month"], "phrases": n_terms},
+        },
         "sources": statuses,
         "categories": {k: v["label"] for k, v in cfg.get("categories", {}).items()},
         "kinds": cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"},
-        "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now, group_of=group_of)
+        "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now,
+                                            group_of=group_of, **top_cfg)
                         for k in kinds},
-        "trending": {k: {"week": news.trending([a for a in arch if a["kind"] == k], now, 7, 28, group_of=group_of),
-                         "month": news.trending([a for a in arch if a["kind"] == k], now, 30, 90, group_of=group_of)}
+        "trending": {k: {span: news.trending([a for a in arch if a["kind"] == k], now, d, p,
+                                             top_n=n_terms, group_of=group_of)
+                         for span, (d, p) in spans.items()}
                      for k in kinds},
         "items": kept,
     }

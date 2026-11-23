@@ -18,6 +18,15 @@ settings:
   other_keep_days: 21     # health, science and sci-fi stories (many more of them) leave sooner
   max_items: 4000
   archive_days: 730       # headlines kept (titles only) for trend analysis
+  top_stories:            # the first card in the feed
+    days: 7               # look back this many days
+    min_outlets: 2        # a story needs this many different publishers
+    match: 0.5            # how alike two headlines must be to count as one story (0–1)
+    per_kind: 8
+  trending:               # "In the news" on Explore
+    week: [7, 28]         # this week vs the 4 weeks before
+    month: [30, 90]       # this month vs the 3 months before
+    phrases: 12
 
 # Kinds of news, in the order the app shows them. Every outlet below has one.
 kinds:

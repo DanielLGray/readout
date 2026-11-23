@@ -123,3 +123,15 @@ def test_promotional_posts_excluded(env, monkeypatch):
     ind = [i for i in out["items"] if i["kind"] == "industry"]
     assert all("fee schedule" not in i["title"].lower() for i in sci)      # filtered outside industry
     assert any("fee schedule" in i["title"].lower() for i in ind)          # industry untouched
+
+
+def test_tuning_knobs_and_settings_block(env, monkeypatch):
+    base = build_news.load_yaml("news.yaml")
+    tuned = dict(base, settings={"keep_days": 120, "top_stories": {"min_outlets": 4, "days": 7},
+                                 "trending": {"phrases": 1}})
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: tuned)
+    out = build_news.run(env, NOW)
+    assert out["top_stories"]["industry"] == []            # the fee story had 3 outlets, 4 now required
+    assert len(out["trending"]["industry"]["week"]["terms"]) <= 1
+    s = out["settings"]
+    assert s["top_stories"]["min_outlets"] == 4 and s["outlets"] == 5 and s["trending"]["week"] == [7, 28]

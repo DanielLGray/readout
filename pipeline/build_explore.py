@@ -26,6 +26,22 @@ from .pubmed import PubMed
 
 WINDOWS = {1: 365, 2: 730, 5: 1826}
 MIN_RECENT = {1: 15, 2: 25, 5: 40}      # fewer papers than this → too small to call a trend
+# defaults for the trend rules; config/topics.yaml → settings overrides them
+RULES = {"min_papers": MIN_RECENT, "breakout": 1.0, "rising": 0.15, "cooling": -0.15,
+         "influential": 8, "title_phrases": 15}
+
+
+def rules_from(tcfg: dict) -> dict:
+    s = (tcfg or {}).get("settings") or {}
+    mp = {int(k): int(v) for k, v in (s.get("min_papers") or {}).items()}
+    return {
+        "min_papers": {w: mp.get(w, RULES["min_papers"][w]) for w in WINDOWS},
+        "breakout": float(s.get("breakout", RULES["breakout"])),
+        "rising": float(s.get("rising", RULES["rising"])),
+        "cooling": float(s.get("cooling", RULES["cooling"])),
+        "influential": int(s.get("influential", RULES["influential"])),
+        "title_phrases": int(s.get("title_phrases", RULES["title_phrases"])),
+    }
 
 EVIDENCE = {
     "guideline": '(Guideline[pt] OR "Practice Guideline"[pt] OR "Consensus Statement"[pt] OR '
@@ -141,19 +157,23 @@ def topic_block(pm: PubMed, http: Http, tp: dict, win: dict, years: list[int], b
     }
 
 
-def lists_for(topics: list[dict]) -> dict:
+def lists_for(topics: list[dict], rules: Optional[dict] = None) -> dict:
+    """Breakouts / rising / cooling / influential / practice per window.
+    The app repeats these rules on the phone, so keep the two in step (docs/app.js trendLists)."""
+    r = rules or RULES
     out = {}
     for w in WINDOWS:
         k = str(w)
-        ok = [tp for tp in topics if tp.get("windows", {}).get(k, {}).get("recent", 0) >= MIN_RECENT[w]]
+        mp = r["min_papers"][w]
+        ok = [tp for tp in topics if tp.get("windows", {}).get(k, {}).get("recent", 0) >= mp]
         g = lambda tp: tp["windows"][k]["growth"]
         new = [tp for tp in ok if g(tp) is None]
-        breakouts = new + sorted([tp for tp in ok if g(tp) is not None and g(tp) >= 1.0], key=g, reverse=True)
-        rising = sorted([tp for tp in ok if g(tp) is not None and 0.15 <= g(tp) < 1.0], key=g, reverse=True)
+        breakouts = new + sorted([tp for tp in ok if g(tp) is not None and g(tp) >= r["breakout"]], key=g, reverse=True)
+        rising = sorted([tp for tp in ok if g(tp) is not None and r["rising"] <= g(tp) < r["breakout"]], key=g, reverse=True)
         # cooling: judged on the earlier window, since a fading topic may now be small
-        was_big = [tp for tp in topics if tp.get("windows", {}).get(k, {}).get("prior", 0) >= MIN_RECENT[w]]
-        cooling = sorted([tp for tp in was_big if g(tp) is not None and g(tp) <= -0.15], key=g)
-        influential = sorted(ok, key=lambda tp: tp["windows"][k].get("influence", 0), reverse=True)[:8]
+        was_big = [tp for tp in topics if tp.get("windows", {}).get(k, {}).get("prior", 0) >= mp]
+        cooling = sorted([tp for tp in was_big if g(tp) is not None and g(tp) <= r["cooling"]], key=g)
+        influential = sorted(ok, key=lambda tp: tp["windows"][k].get("influence", 0), reverse=True)[:r["influential"]]
         practice = sorted([tp for tp in topics if tp.get("windows", {}).get(k, {}).get("guidelines")],
                           key=lambda tp: (len(tp["windows"][k]["guidelines"]),
                                           tp["windows"][k]["evidence"].get("guideline", 0)), reverse=True)
@@ -197,6 +217,7 @@ def run(http: Optional[Http] = None) -> dict:
     win = windows_for(t)
     years = list(range(t.year - 10, t.year + 1))
     compiled = compile_systems(cfg["systems"])
+    rules = rules_from(tcfg)
     old = read_json(DATA / "explore.json", {}) or {}
     old_topics = {tp["id"]: tp for tp in old.get("topics", [])}
     old_papers = old.get("papers", {})
@@ -229,7 +250,7 @@ def run(http: Optional[Http] = None) -> dict:
 
     log("Explore: emerging terms")
     try:
-        term_data = terms.analyze(build_corpus(pm, cfg, t), t)
+        term_data = terms.analyze(build_corpus(pm, cfg, t), t, top_n=rules["title_phrases"])
     except Exception as exc:
         log(f"  terms failed ({exc}); keeping last week's")
         term_data = old.get("terms", {})
@@ -243,9 +264,11 @@ def run(http: Optional[Http] = None) -> dict:
         "systems": {k: v["label"] for k, v in cfg["systems"].items()},
         "topics": topics_out,
         "papers": papers,
-        "lists": lists_for(topics_out),
+        "lists": lists_for(topics_out, rules),
         "terms": term_data,
-        "min_recent": {str(k): v for k, v in MIN_RECENT.items()},
+        "min_recent": {str(k): v for k, v in rules["min_papers"].items()},
+        "settings": dict(rules, min_papers={str(k): v for k, v in rules["min_papers"].items()},
+                         topics=len(tcfg["topics"])),
         "query_notes": {term[:160]: notes for term, notes in pm.warnings.items()},
     }
     write_json(DATA / "explore.json", out)

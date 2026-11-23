@@ -87,3 +87,21 @@ def test_fetch_retries_truncated_xml(env):
     pm = PubMed(Http(transport=flaky, sleep=lambda s: None))
     pmid = next(iter(world.papers))
     assert pm.fetch([pmid])[0]["pmid"] == pmid and calls["n"] == 2
+
+
+def test_trend_rules_from_config():
+    r = build_explore.rules_from({"settings": {"breakout": 2.0, "min_papers": {1: 5}}})
+    assert r["breakout"] == 2.0 and r["min_papers"] == {1: 5, 2: 25, 5: 40} and r["rising"] == 0.15
+    tps = [{"id": "a", "windows": {k: {"recent": 30, "prior": 10, "growth": 1.5, "evidence": {}} for k in ("1", "2", "5")}},
+           {"id": "b", "windows": {k: {"recent": 30, "prior": 30, "growth": 0.5, "evidence": {}} for k in ("1", "2", "5")}}]
+    assert build_explore.lists_for(tps)["2"]["breakouts"] == ["a"]
+    tight = build_explore.lists_for(tps, r)["2"]
+    assert tight["breakouts"] == [] and tight["rising"] == ["a", "b"]
+
+
+def test_outputs_carry_settings(env):
+    world, http = env
+    feed = build_feed.run(http)
+    assert feed["settings"]["keep_days"] == 180 and feed["settings"]["journals"] > 10
+    out = build_explore.run(http)
+    assert out["settings"]["breakout"] == 1.0 and out["settings"]["min_papers"]["2"] == 25

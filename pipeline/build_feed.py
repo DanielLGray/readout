@@ -101,6 +101,16 @@ def run(http: Optional[Http] = None) -> dict:
         "systems": {k: v["label"] for k, v in cfg["systems"].items()},
         "topics": {tp["id"]: {"name": tp["name"], "system": tp["system"]} for tp in tcfg.get("topics", [])},
         "streams": {s["id"]: s["name"] for s in cfg["streams"]},
+        "settings": {
+            "first_run_days": int(settings.get("first_run_days", 45)),
+            "recheck_days": int(settings.get("recheck_days", 10)),
+            "keep_days": keep_days,
+            "max_items": int(settings.get("max_items", 900)),
+            "journals": len(cfg.get("journals", [])),
+            "nm_journals": len(cfg.get("nm_journals", [])),
+            "general_journals": len(cfg.get("general_journals", [])),
+            "topics": len(tcfg.get("topics", [])),
+        },
         "items": kept,
     }
     write_json(path, out)

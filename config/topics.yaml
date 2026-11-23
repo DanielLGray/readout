@@ -15,6 +15,16 @@
 # Add a topic: copy a block, change id/name/query. Remove one: delete it.
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Trend rules for Explore. The app can override these on your phone (Tune tab);
+# these are the defaults it starts from, and what the weekly job uses.
+settings:
+  min_papers: {1: 15, 2: 25, 5: 40}   # a topic needs this many papers in a window before it can trend
+  breakout: 1.0          # Breakouts: share of imaging research up at least this much (1.0 = doubled)
+  rising: 0.15           # Rising: share up at least this much (0.15 = +15%)
+  cooling: -0.15         # Cooling: share down at least this much
+  influential: 8         # topics listed under Most influential
+  title_phrases: 15      # phrases listed under New in titles and Fading from titles
+
 # Denominator for "adjusted for field growth": all imaging papers.
 baseline_query: >-
   imaging[tiab] OR MRI[tiab] OR "magnetic resonance"[tiab] OR "computed tomography"[tiab] OR

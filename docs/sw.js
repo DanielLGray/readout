@@ -1,7 +1,7 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback). */
-const VERSION = "readout-v5";
+const VERSION = "readout-v6";
 const SHELL = [
-  "./", "index.html", "app.css", "app.js", "manifest.webmanifest",
+  "./", "index.html", "app.css", "app.js", "tune.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
   "fonts/literata-latin-opsz-normal.woff2", "fonts/literata-latin-ext-opsz-normal.woff2",
   "fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2", "fonts/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2",

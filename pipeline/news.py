@@ -181,7 +181,7 @@ def _words(title: str) -> set:
 
 
 def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
-                group_of: Optional[dict] = None) -> list[dict]:
+                group_of: Optional[dict] = None, min_outlets: int = 2, match: float = 0.5) -> list[dict]:
     """Stories several publishers covered in the last `days` days, most-covered first.
     `group_of` maps sister outlets to one publisher so syndicated copies count once."""
     group_of = group_of or {}
@@ -199,7 +199,7 @@ def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
                 sim = inter / max(1, min(len(w), len(other)))
                 if inter >= 2 and sim > best_sim:
                     best, best_sim = c, sim
-        if best is not None and best_sim >= 0.5:
+        if best is not None and best_sim >= match:
             best["items"].append(it)
             best["words"].append(w)
         else:
@@ -207,7 +207,7 @@ def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
     out = []
     for c in clusters:
         sources = sorted({i["source"] for i in c["items"]})
-        if len({group_of.get(i["source"], i["source"]) for i in c["items"]}) < 2:
+        if len({group_of.get(i["source"], i["source"]) for i in c["items"]}) < min_outlets:
             continue
         lead = max(c["items"], key=lambda i: (len(i.get("summary", "")), i["date"]))
         out.append({"title": lead["title"], "date": max(i["date"] for i in c["items"]),

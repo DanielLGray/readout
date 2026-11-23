@@ -38,6 +38,10 @@ From then on, the feed updates every morning and the trends every Monday, with n
 - **Save** keeps a paper on your phone even after it leaves the feed. **Saved → Copy list** copies the citations and links.
 - Tap a **topic tag** on a card to see only that topic. In **Explore**, tap a topic for its trend page, then **…cards in your feed** to jump back.
 - The **ⓘ** button explains how cards are built.
+- **Tune** has three parts:
+  - **Your reading:** what you read and opened over 7 or 30 days, by kind, outlet and organ system, plus what's in your feed right now. It's counted only on your phone.
+  - **Feed rules:** how many turns each kind gets in Everything, the per-outlet daily limit, newest-first or ranked paper order (freshness × evidence, study size, labeled conclusion and your organ systems), muted words and outlets, and Explore's trend thresholds. Changes apply on your phone right away.
+  - **Updates:** how each update job is doing, data-quality figures, the job's current settings, and buttons to edit its config file or run it on GitHub.
 
 ### What the labels mean
 
@@ -54,11 +58,11 @@ From then on, the feed updates every morning and the trends every Monday, with n
 
 ## Make it yours
 
-Everything you'd want to change lives in two text files in `config/`. You can edit them on github.com (tap the file, then the pencil).
+Everything you'd want to change lives in three text files in `config/`. You can edit them on github.com (tap the file, then the pencil), or jump there from **Tune → Updates**. Feed order, mutes and trend thresholds for your own phone are set in **Tune → Feed rules** instead and need no editing.
 
 - **`config/feeds.yaml`** sets the journals, the abdomen/pelvis word filter, the organ-system chips, and how long cards stay (180 days by default).
-- **`config/news.yaml`** lists the news outlets (each with backup feed addresses) and the words behind each business category. The **Update news** run's summary shows which address each outlet is using.
-- **`config/topics.yaml`** holds the Explore topics. Each one is a PubMed query, so you can copy a block, give it a new `id` and `name`, and write the query the way you would in PubMed. Add a `trials:` line to also count new ClinicalTrials.gov registrations.
+- **`config/news.yaml`** lists the news outlets (each with backup feed addresses) and the words behind each business category. Its `settings:` also set how long stories stay, what counts as a top story and the trending windows. The **Update news** run's summary shows which address each outlet is using.
+- **`config/topics.yaml`** holds the Explore topics and, under `settings:`, the trend rules (what counts as a breakout, rising or cooling topic). It also controls how many papers a topic needs before it can trend. Each topic is a PubMed query, so you can copy a block, give it a new `id` and `name`, and write the query the way you would in PubMed. Add a `trials:` line to also count new ClinicalTrials.gov registrations.
 
 After editing, run **Update trends** from the Actions tab. Its first step, *Check every query against PubMed*, prints a table in the run summary showing how many papers each topic matches, along with any PubMed warnings (for example, a quoted phrase PubMed doesn't recognize). A topic with very few papers usually means the query is too narrow.
 
