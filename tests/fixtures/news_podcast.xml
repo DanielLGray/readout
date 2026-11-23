@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC podcast feed shaped like an NPR podcast RSS. Not real episodes. -->
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"><channel><title>Example Short Science</title>
+<item><title>Why do cats purr? The physics of a mystery</title>
+<link>https://example-npr.test/2026/11/22/cats-purr</link>
+<pubDate>Sun, 22 Nov 2026 09:00:00 +0000</pubDate>
+<description>Scientists finally pin down how cats make that sound.</description>
+<enclosure url="https://example-npr.test/audio/cats.mp3?x=1" length="12345" type="audio/mpeg"/>
+<itunes:duration>00:12:34</itunes:duration></item>
+</channel></rss>

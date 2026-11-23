@@ -98,9 +98,12 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             best[key] = it
     unique = sorted(best.values(), key=lambda i: i["date"], reverse=True)
 
-    cut = {"industry": news._utc(now - timedelta(days=int(settings.get("keep_days", 120)))),
-           "science": news._utc(now - timedelta(days=int(settings.get("science_keep_days", 30))))}
-    kept = [i for i in unique if i["date"] >= cut.get(i.get("kind", "industry"), cut["industry"])]
+    kinds = list((cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"}).keys())
+    other_days = int(settings.get("other_keep_days", settings.get("science_keep_days", 30)))
+    cut_industry = news._utc(now - timedelta(days=int(settings.get("keep_days", 120))))
+    cut_other = news._utc(now - timedelta(days=other_days))
+    kept = [i for i in unique
+            if i["date"] >= (cut_industry if i.get("kind", "industry") == "industry" else cut_other)]
     kept = kept[: int(settings.get("max_items", 4000))]
 
     # titles-only archive for trends, kept longer than the tab
@@ -113,13 +116,12 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     write_json(apath, archive, compact=False)
     arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
             for k, v in archive.items()]
-    kinds = ("industry", "science")
 
     out = {
         "generated": now_iso(),
         "sources": statuses,
         "categories": {k: v["label"] for k, v in cfg.get("categories", {}).items()},
-        "kinds": {"industry": "Radiology industry", "science": "Science & health"},
+        "kinds": cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"},
         "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now, group_of=group_of)
                         for k in kinds},
         "trending": {k: {"week": news.trending([a for a in arch if a["kind"] == k], now, 7, 28, group_of=group_of),

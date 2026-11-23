@@ -15,12 +15,17 @@
 
 settings:
   keep_days: 120          # radiology industry stories older than this leave the feed
-  science_keep_days: 30   # science & health stories (many more of them) leave sooner
+  other_keep_days: 21     # health, science and sci-fi stories (many more of them) leave sooner
   max_items: 4000
   archive_days: 730       # headlines kept (titles only) for trend analysis
 
-# kind: industry (default) = radiology industry & business outlets
-#       science            = general science & health outlets
+# Kinds of news, in the order the app shows them. Every outlet below has one.
+kinds:
+  industry: Industry news
+  health: Health & medicine
+  science: Science
+  sff: Sci-fi & fantasy
+
 # max_per_day: keep at most this many stories per day from an outlet
 
 sources:
@@ -73,44 +78,44 @@ sources:
     urls:
       - https://www.signifyresearch.net/feed/
 
-  # ── Science & health ──────────────────────────────────────────────────────
+  # ── Health & medicine / science (professional) ───────────────────────────
   - name: STAT
-    kind: science
+    kind: health
     max_per_day: 10
     home: https://www.statnews.com
     urls:
       - https://www.statnews.com/feed/
 
   - name: KFF Health News
-    kind: science
+    kind: health
     max_per_day: 6
     home: https://kffhealthnews.org
     urls:
       - https://kffhealthnews.org/feed/
 
   - name: NPR Health
-    kind: science
+    kind: health
     max_per_day: 6
     home: https://www.npr.org/sections/health
     urls:
       - https://feeds.npr.org/1128/rss.xml
 
   - name: MedPage Today
-    kind: science
+    kind: health
     max_per_day: 8
     home: https://www.medpagetoday.com
     urls:
       - https://www.medpagetoday.com/rss/headlines.xml
 
   - name: BBC Health
-    kind: science
+    kind: health
     max_per_day: 6
     home: https://www.bbc.com/news/health
     urls:
       - https://feeds.bbci.co.uk/news/health/rss.xml
 
   - name: ScienceDaily
-    kind: science
+    kind: health
     max_per_day: 8
     home: https://www.sciencedaily.com/news/health_medicine/
     urls:
@@ -148,7 +153,7 @@ sources:
       - http://rss.sciam.com/ScientificAmerican-Global
 
   - name: The Conversation
-    kind: science
+    kind: health
     max_per_day: 6
     home: https://theconversation.com/us/health
     urls:
@@ -162,12 +167,142 @@ sources:
       - https://feeds.arstechnica.com/arstechnica/science
 
   - name: NIH News
-    kind: science
+    kind: health
     max_per_day: 6
     home: https://www.nih.gov/news-events/news-releases
     urls:
       - https://www.nih.gov/news-releases/feed.xml
       - https://www.nih.gov/news-events/news-releases/feed
+
+  # ── Science for everyone ─────────────────────────────────────────────────
+  - name: NPR Short Wave
+    kind: science
+    max_per_day: 3
+    home: https://www.npr.org/podcasts/510351/short-wave
+    urls:
+      - https://feeds.npr.org/510351/podcast.xml
+
+  - name: NPR Science
+    kind: science
+    max_per_day: 5
+    home: https://www.npr.org/sections/science/
+    urls:
+      - https://feeds.npr.org/1007/rss.xml
+
+  - name: Science Friday
+    kind: science
+    max_per_day: 3
+    home: https://www.sciencefriday.com
+    merge: true
+    urls:
+      - https://www.sciencefriday.com/feed/podcast/science-friday/
+      - https://www.sciencefriday.com/feed/
+
+  - name: Radiolab
+    kind: science
+    max_per_day: 2
+    home: https://radiolab.org
+    urls:
+      - https://feeds.simplecast.com/EmVW7VGp
+      - https://feeds.feedburner.com/radiolab
+
+  - name: Quanta Magazine
+    kind: science
+    max_per_day: 3
+    home: https://www.quantamagazine.org
+    urls:
+      - https://www.quantamagazine.org/feed/
+
+  - name: Smithsonian
+    kind: science
+    max_per_day: 4
+    home: https://www.smithsonianmag.com/science-nature/
+    urls:
+      - https://www.smithsonianmag.com/rss/science-nature/
+      - https://www.smithsonianmag.com/rss/latest_articles/
+
+  - name: Popular Science
+    kind: science
+    max_per_day: 4
+    home: https://www.popsci.com
+    urls:
+      - https://www.popsci.com/feed/
+
+  - name: Live Science
+    kind: science
+    max_per_day: 4
+    home: https://www.livescience.com
+    urls:
+      - https://www.livescience.com/feeds/all
+
+  - name: Space.com
+    kind: science
+    max_per_day: 3
+    home: https://www.space.com
+    urls:
+      - https://www.space.com/feeds/all
+
+  - name: NASA
+    kind: science
+    max_per_day: 3
+    home: https://www.nasa.gov/news/
+    urls:
+      - https://www.nasa.gov/news-release/feed/
+      - https://www.nasa.gov/feed/
+
+  - name: The Guardian Science
+    kind: science
+    max_per_day: 4
+    home: https://www.theguardian.com/science
+    urls:
+      - https://www.theguardian.com/science/rss
+
+  - name: Atlas Obscura
+    kind: science
+    max_per_day: 2
+    home: https://www.atlasobscura.com
+    urls:
+      - https://www.atlasobscura.com/feeds/latest
+
+  # ── Sci-fi & fantasy ─────────────────────────────────────────────────────
+  - name: Reactor
+    kind: sff
+    max_per_day: 5
+    home: https://reactormag.com
+    urls:
+      - https://reactormag.com/feed/
+
+  - name: Locus
+    kind: sff
+    max_per_day: 4
+    home: https://locusmag.com
+    urls:
+      - https://locusmag.com/feed/
+
+  - name: File 770
+    kind: sff
+    max_per_day: 4
+    home: https://file770.com
+    urls:
+      - https://file770.com/feed/
+
+  - name: io9
+    kind: sff
+    max_per_day: 5
+    home: https://gizmodo.com/io9
+    require: "sci-?fi|science fiction|fantasy|star wars|star trek|doctor who|dune|tolkien|lord of the rings|game of thrones|house of the dragon|marvel|\\bDC\\b|superman|batman|alien|predator|godzilla|avatar|foundation|the expanse|three-body|hugo|nebula|trailer|novel"
+    urls:
+      - https://gizmodo.com/io9/rss
+      - https://gizmodo.com/tag/io9/feed
+      - https://gizmodo.com/feed
+
+  - name: Den of Geek
+    kind: sff
+    max_per_day: 4
+    home: https://www.denofgeek.com
+    require: "sci-?fi|science fiction|fantasy|star wars|star trek|doctor who|dune|tolkien|lord of the rings|game of thrones|house of the dragon|witcher|wheel of time|marvel|\\bDC\\b|alien|predator|godzilla|avatar|foundation|the expanse|three-body|stranger things|fallout|the last of us"
+    urls:
+      - https://www.denofgeek.com/feed/
 
 # Business categories (chips in the News tab). A story gets every category
 # whose words appear in its headline or summary (case-insensitive, word start).

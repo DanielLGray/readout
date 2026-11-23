@@ -103,3 +103,12 @@ def test_trending_merges_halves_of_one_headline():
                      "date": "2026-11-22T10:00:00Z"})
     terms = [t["term"] for t in news.trending(arch, NOW, 7, 28)["terms"]]
     assert sum("measles" in t or "elimination" in t for t in terms) == 1, terms
+
+
+def test_podcast_episodes_keep_audio():
+    eps = news.parse_feed((FIX / "news_podcast.xml").read_text(), "Short", NOW)
+    assert eps[0]["audio"].startswith("https://example-npr.test/audio/cats.mp3")
+    assert eps[0]["duration"] == 13
+    assert news._duration("754") == 13 and news._duration("1:02:03") == 62 and news._duration("") is None
+    rss = news.parse_feed((FIX / "news_rss.xml").read_text(), "Wire", NOW)
+    assert "audio" not in rss[0]

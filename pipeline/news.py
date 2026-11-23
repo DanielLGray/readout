@@ -91,9 +91,37 @@ def parse_feed(text: str, source: str, now: datetime) -> list[dict]:
         t = e.get("published_parsed") or e.get("updated_parsed")
         when = datetime(*t[:6], tzinfo=timezone.utc) if t else now
         summary = e.get("summary", "") or (e.get("content") or [{}])[0].get("value", "")
-        out.append({"id": item_id(link, title, source), "title": title, "link": link, "source": source,
-                    "date": _utc(min(when, now)), "summary": teaser(summary)})
+        item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
+                "date": _utc(min(when, now)), "summary": teaser(summary)}
+        audio = _audio(e)                          # podcast episode: playable in the app
+        if audio:
+            item["audio"] = audio
+            dur = _duration(e.get("itunes_duration", ""))
+            if dur:
+                item["duration"] = dur
+        out.append(item)
     return out
+
+
+def _audio(e) -> str:
+    for enc in e.get("enclosures", []) or []:
+        href = enc.get("href", "")
+        if href.startswith("http") and (str(enc.get("type", "")).startswith("audio") or href.split("?")[0].endswith((".mp3", ".m4a"))):
+            return href
+    return ""
+
+
+def _duration(v: str) -> Optional[int]:
+    """iTunes duration ('1234', '12:34' or '1:02:03') → minutes."""
+    v = str(v or "").strip()
+    if not v:
+        return None
+    try:
+        parts = [int(float(x)) for x in v.split(":")]
+    except ValueError:
+        return None
+    secs = parts[0] if len(parts) == 1 else sum(p * 60 ** i for i, p in enumerate(reversed(parts)))
+    return max(1, round(secs / 60)) if secs else None
 
 
 def _parse_sitemap(text: str, source: str, now: datetime) -> list[dict]:
