@@ -102,8 +102,6 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             if prev:                       # keep the first date we saw; refresh text
                 it["date"] = min(prev["date"], it["date"])
             it["kind"] = src.get("kind", "industry")
-            it["categories"] = news.categorize(it, compiled) if it["kind"] == "industry" else []
-            it["systems"] = tag_systems({"title": it["title"], "sections": [{"text": it.get("summary", "")}]}, systems)
             items[it["id"]] = it
 
     # an outlet's skip/require rules also clear out stories stored before the rule existed
@@ -115,6 +113,9 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         return not (skip and skip.search(it["link"] + " " + it["title"])) and \
             not (need and not need.search(it["title"] + " " + it.get("summary", "")))
     items = {k: v for k, v in items.items() if allowed(v)}
+    for it in items.values():                  # every run, so word-list changes reach stored stories too
+        it["categories"] = news.categorize(it, compiled) if it.get("kind", "industry") == "industry" else []
+        it["systems"] = tag_systems({"title": it["title"], "sections": [{"text": it.get("summary", "")}]}, systems)
 
     # one copy per headline per publisher (sister sites syndicate): keep the one with a summary
     group_of = {src["name"]: src.get("group", src["name"]) for src in cfg.get("sources", [])}

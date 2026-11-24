@@ -179,6 +179,7 @@ function statsFor(days) {
 async function loadJSON(path) {
   const r = await fetch(path, { cache: "no-cache" });
   if (!r.ok) throw new Error(`${path}: ${r.status}`);
+  if (r.headers.get("x-readout-offline")) S.offline = true;      // the service worker's saved copy
   return r.json();
 }
 
@@ -465,11 +466,36 @@ function newsCardEl(it) {
 }
 
 // ── podcast player: keeps playing while you scroll ─────────────────────────
+// where you stopped in each episode, so a closed app or a new episode doesn't lose your place
+function savePos() {
+  const a = $("#pl-audio"), id = a.dataset.id;
+  if (!id || !isFinite(a.duration)) return;
+  const pos = store.get("pos", {}) || {};
+  if (a.ended || a.currentTime > a.duration - 20) delete pos[id];
+  else if (a.currentTime > 5) pos[id] = [Math.round(a.currentTime), Date.now()];
+  store.set("pos", Object.fromEntries(Object.entries(pos).sort((x, y) => y[1][1] - x[1][1]).slice(0, 40)));
+}
+const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function showProgress() {
+  const a = $("#pl-audio");
+  const d = a.duration, t = a.currentTime || 0;
+  $("#pl-prog").style.width = isFinite(d) && d ? `${(t / d) * 100}%` : "0";
+  const left = isFinite(d) ? Math.max(0, Math.round((d - t) / 60)) : null;
+  $("#pl-src").textContent = left == null ? a.dataset.src || "" : `${a.dataset.src} · ${left ? `${left} min left` : "ending"}`;
+}
 function play(it) {
   const a = $("#pl-audio");
   if (a.dataset.id !== it.id) {
+    savePos();                       // the episode you're leaving
     a.src = it.audio;
     a.dataset.id = it.id;
+    a.dataset.src = it.source;
+    const saved = (store.get("pos", {}) || {})[it.id];
+    if (saved) {
+      a.addEventListener("loadedmetadata", () => {
+        if (saved[0] < a.duration - 20) { a.currentTime = saved[0]; toast(`Picking up at ${clock(saved[0])}`); }
+      }, { once: true });
+    }
     $("#pl-title").textContent = it.title;
     $("#pl-src").textContent = it.source;
     if ("mediaSession" in navigator) {
@@ -641,7 +667,18 @@ async function share(it) {
 }
 
 // ── abstract sheet ─────────────────────────────────────────────────────────
+// while a sheet or the topic page is open, what's behind it can't be reached (VoiceOver, keyboard);
+// on close, focus returns to the button that opened it
+let sheetOpener = null, topicOpener = null;
+function setInert() {
+  const sheet = $("#sheet").classList.contains("open"), topic = $("#topic").classList.contains("open");
+  $(".app").inert = sheet || topic;
+  $("#topic").inert = !topic || sheet;
+  $("#sheet").inert = !sheet;
+}
+function refocus(elm) { if (elm?.isConnected && !elm.closest("[inert]")) elm.focus({ preventScroll: true }); }
 function openSheet(...content) {
+  if (!$("#sheet").classList.contains("open")) sheetOpener = document.activeElement;
   const card = $("#sheet-card");
   card.replaceChildren(
     el("div", { style: "display:flex;align-items:center" },
@@ -652,12 +689,15 @@ function openSheet(...content) {
   const sheet = $("#sheet");
   sheet.classList.add("open");
   sheet.setAttribute("aria-hidden", "false");
+  setInert();
   card.querySelector("button")?.focus({ preventScroll: true });
 }
 function closeSheet() {
   const sheet = $("#sheet");
   sheet.classList.remove("open");
   sheet.setAttribute("aria-hidden", "true");
+  setInert();
+  refocus(sheetOpener);
 }
 
 function openAbstract(it) {
@@ -1003,14 +1043,18 @@ function openTopic(id) {
   };
   draw();
   const ov = $("#topic");
+  if (!ov.classList.contains("open")) topicOpener = document.activeElement;
   ov.classList.add("open");
   ov.setAttribute("aria-hidden", "false");
+  setInert();
   $("#topic-back").focus({ preventScroll: true });
 }
 function closeTopic() {
   const ov = $("#topic");
   ov.classList.remove("open");
   ov.setAttribute("aria-hidden", "true");
+  setInert();
+  refocus(topicOpener);
   if (S.tab === "explore") renderExplore();   // no-op unless the window was changed on the topic page
 }
 
@@ -1063,7 +1107,8 @@ function renderSaved() {
 function updateHeadNote() {
   const note = $("#head-note");
   const fresh = S.list.filter((i) => (i.type === "paper" ? S.newIds.has(i.pmid) : i.type === "news" && S.newsNew.has(i.id))).length;
-  if (S.tab === "feed" && fresh) note.textContent = `${fresh} new`;
+  if (S.tab === "feed" && S.offline) note.textContent = S.feed ? `Offline · ${ago(S.feed.generated)}` : "Offline";
+  else if (S.tab === "feed" && fresh) note.textContent = `${fresh} new`;
   else if (S.tab === "feed" && S.feed) note.textContent = `Updated ${ago(S.feed.generated)}`;
   else note.textContent = "";
 }
@@ -1092,6 +1137,7 @@ function switchTab(tab) {
 async function reload(announce) {
   const before = new Set((S.feed?.items || []).map((i) => i.pmid));
   const was = { feed: S.feed?.generated, explore: S.explore?.generated, news: S.news?.generated };
+  S.offline = false;
   const [feed, explore, newsData] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/explore.json").catch(() => null),
@@ -1116,8 +1162,11 @@ async function reload(announce) {
   if (exploreChanged || newsChanged) S.exploreKey = null;
   if (S.tab === "explore" && (announce || exploreChanged)) renderExplore();
   if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged || exploreChanged)) renderTune(true);
+  if (!feed && !newsData && navigator.onLine === false) S.offline = true;
+  updateHeadNote();
   if (announce) {
-    if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");
+    if (S.offline) toast(`You’re offline. Showing what’s on this phone${S.feed ? ` (papers from ${ago(S.feed.generated)})` : ""}.`);
+    else if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");
     else {
       const added = (feed?.items || []).filter((i) => !before.has(i.pmid)).length;
       const fresh = S.newsNew.size;
@@ -1136,17 +1185,35 @@ function boot() {
   $("#pl-toggle").addEventListener("click", () => (pa.paused ? pa.play().catch(() => {}) : pa.pause()));
   $("#pl-close").addEventListener("click", () => { pa.pause(); $("#player").hidden = true; document.body.classList.remove("playing"); });
   ["play", "pause", "ended"].forEach((ev) => pa.addEventListener(ev, syncPlayer));
+  ["pause", "ended"].forEach((ev) => pa.addEventListener(ev, savePos));
+  let lastSave = 0;
+  pa.addEventListener("timeupdate", () => {
+    showProgress();
+    if (Date.now() - lastSave > 10000) { lastSave = Date.now(); savePos(); }
+  });
+  pa.addEventListener("loadedmetadata", showProgress);
+  const skip = (s) => { if (isFinite(pa.duration)) pa.currentTime = Math.max(0, Math.min(pa.duration - 1, pa.currentTime + s)); showProgress(); };
+  $("#pl-back").addEventListener("click", () => skip(-15));
+  if ("mediaSession" in navigator) {        // lock-screen buttons
+    const on = (action, fn) => { try { navigator.mediaSession.setActionHandler(action, fn); } catch { /* not supported */ } };
+    on("play", () => pa.play().catch(() => {}));
+    on("pause", () => pa.pause());
+    on("seekbackward", (d) => skip(-(d?.seekOffset || 15)));
+    on("seekforward", (d) => skip(d?.seekOffset || 30));
+    on("seekto", (d) => { if (d?.seekTime != null) { pa.currentTime = d.seekTime; showProgress(); } });
+  }
   $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
+  setInert();
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if ($("#sheet").classList.contains("open")) closeSheet();
     else if ($("#topic").classList.contains("open")) closeTopic();
   });
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") { rememberSeen(); saveStats(); }
+    if (document.visibilityState === "hidden") { rememberSeen(); saveStats(); savePos(); }
     else if (Date.now() - S.loadedAt > 60 * 60 * 1000) reload(false);   // home-screen apps stay open for days
   });
-  window.addEventListener("pagehide", () => { rememberSeen(); saveStats(); });
+  window.addEventListener("pagehide", () => { rememberSeen(); saveStats(); savePos(); });
   let rt;
   window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(fitAll, 200); });
   document.fonts?.ready.then(fitAll);

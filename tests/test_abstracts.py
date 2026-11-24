@@ -1,7 +1,7 @@
 """Unit tests for parsing and card building.  Run:  python -m pytest -q"""
 from pathlib import Path
 
-from pipeline.abstracts import clean, compile_systems, conclusion, design, sample_size, sentences, to_card
+from pipeline.abstracts import clean, compile_systems, conclusion, design, sample_size, sentences, tag_systems, to_card
 from pipeline.common import load_yaml
 from pipeline.pubmed import parse_articles
 from pipeline.terms import phrases
@@ -268,3 +268,11 @@ def test_sample_size_ignores_sex_breakdowns():
 def test_sample_size_keeps_cohort_followed_by_demographics():
     assert sample_size(_methods("A total of 237 patients (mean age, 29.4; 98 men) were followed.")) == "237 patients"
     assert sample_size(_methods("The cohort (412 patients) was scanned twice.")) == "412 patients"
+
+
+def test_system_words_skip_listed_endings():
+    comp = compile_systems(load_yaml("feeds.yaml")["systems"])
+    tag = lambda t: tag_systems({"title": t, "sections": []}, comp)
+    assert tag("Adrenaline and the science of thrill") == [] and tag("A colony on Mars") == []
+    assert tag("Bacterial colonization of central lines") == []
+    assert tag("Adrenal incidentaloma") == ["gu"] and tag("Colonoscopy after colon cancer") == ["gi"]

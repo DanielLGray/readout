@@ -43,7 +43,7 @@ _ISOTOPE = re.compile(r"\((\d{1,3}m?)\)\s?(?=[A-Z][a-z]?(?![a-z]))")
 # word pairs that make one term: a phrase may not start or end between them ("learning radiomics")
 COMPOUNDS = {("deep", "learning"), ("machine", "learning"), ("transfer", "learning"), ("federated", "learning"),
              ("transition", "zone"), ("peripheral", "zone"), ("central", "zone"), ("and", "data"),
-             ("reporting", "and"), ("imaging", "reporting"), ("data", "system")}
+             ("reporting", "and"), ("imaging", "reporting"), ("data", "system"), ("metabolic", "dysfunction")}
 _VERSION = re.compile(r"^[vV]\d+(?:\.\d+)*$")
 
 
@@ -122,6 +122,18 @@ def _contains(a: str, b: str) -> bool:
     return b2 in a2 or a2 in b2
 
 
+def _chain(a: str, b: str) -> "str | None":
+    """Join two displayed phrases that overlap end-to-start: "clear cell likelihood" +
+    "likelihood score" -> "clear cell likelihood score" (either order)."""
+    for x, y in ((a, b), (b, a)):
+        tx, ty = re.split(r"(\s+|-)", x), re.split(r"(\s+|-)", y)     # words at even places, separators odd
+        wx, wy = [w.lower() for w in tx[0::2]], [w.lower() for w in ty[0::2]]
+        for n in range(min(len(wx), len(wy)) - 1, 0, -1):
+            if wx[-n:] == wy[:n]:
+                return "".join(tx + ty[2 * n - 1:])
+    return None
+
+
 def display(canon: str, surfaces: Counter) -> str:
     """Most common spelling, minus Title Case: acronyms and words with digits keep
     their case ("photon-Counting CT" → "photon-counting CT")."""
@@ -173,7 +185,9 @@ def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15)
                         key=lambda c: (ratio(c), -pc[c]))
 
         def pick(cands, n, counts, pool):
+            """-> [(canonical, display override or None)]"""
             cands = cands[:300]
+            joined: dict[str, str] = {}
             want = set(cands)
             docs_of: dict[str, set] = defaultdict(set)
             for idx, (_, cs, _) in enumerate(pool):
@@ -181,9 +195,17 @@ def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15)
                     docs_of[c].add(idx)
             chosen: list[str] = []
             for c in cands:
-                # same papers under a different phrase (e.g. two halves of one title)
-                if any(len(docs_of[c] & docs_of[k]) >= 0.6 * len(docs_of[c] | docs_of[k]) and not _contains(c, k)
-                       for k in chosen):
+                # same papers under a different phrase (e.g. two halves of one title): "clear cell
+                # likelihood" + "likelihood score" read as one term; otherwise keep the longer one
+                same = [k for k in chosen if len(docs_of[c] & docs_of[k]) >= 0.6 * len(docs_of[c] | docs_of[k])
+                        and not _contains(c, k)]
+                if same:
+                    k = same[0]
+                    chain = _chain(joined.get(k) or display(k, surfaces[k]), display(c, surfaces[c]))
+                    if chain and len(chain) > len(joined.get(k, "")):
+                        joined[k] = chain
+                    elif not chain and len(c.split()) > len(k.split()) and counts[c] >= 0.8 * counts[k]:
+                        chosen[chosen.index(k)] = c
                     continue
                 clash = [k for k in chosen if _contains(c, k)]
                 if clash:
@@ -195,13 +217,13 @@ def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15)
                 if len(chosen) >= n:
                     break
                 chosen.append(c)
-            return chosen
+            return [(c, joined.get(c)) for c in chosen]
 
-        def describe(c, pool):
+        def describe(c, pool, shown=None):
             ex = sorted((x for x in pool if c in x[1]), key=lambda x: x[0], reverse=True)[:3]
             by_year = Counter(x[0].year for x in docs if c in x[1])
             return {
-                "term": display(c, surfaces[c]),
+                "term": shown or display(c, surfaces[c]),
                 "recent": rc[c], "prior": pc[c],
                 "ratio": round(ratio(c), 2),
                 "years": [by_year.get(y, 0) for y in years],
@@ -210,8 +232,8 @@ def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15)
             }
 
         out[str(w)] = {
-            "emerging": [describe(c, recent) for c in pick(emerging, top_n, rc, recent)],
-            "fading": [describe(c, prior) for c in pick(fading, 10, pc, prior)],
+            "emerging": [describe(c, recent, shown) for c, shown in pick(emerging, top_n, rc, recent)],
+            "fading": [describe(c, prior, shown) for c, shown in pick(fading, 10, pc, prior)],
             "docs_recent": R, "docs_prior": P,
         }
     out["years"] = years

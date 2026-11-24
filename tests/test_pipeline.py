@@ -105,3 +105,17 @@ def test_outputs_carry_settings(env):
     assert feed["settings"]["keep_days"] == 180 and feed["settings"]["journals"] > 10
     out = build_explore.run(http)
     assert out["settings"]["breakout"] == 1.0 and out["settings"]["min_papers"]["2"] == 25
+
+
+def test_overlapping_title_phrases_join():
+    from pipeline import terms
+    corpus = []
+    for i in range(60):           # prior window: unrelated titles
+        corpus.append({"pmid": f"p{i}", "date": f"2025-0{1 + i % 9}-15", "title": f"Liver MRI study number {i}", "journal": "J"})
+    for i in range(60):           # recent window: the new score shows up in many titles
+        t = "Clear cell likelihood score for small renal masses" if i < 30 else f"Kidney CT protocol {i}"
+        corpus.append({"pmid": f"r{i}", "date": f"2026-0{1 + i % 9}-10", "title": t, "journal": "J"})
+    out = terms.analyze(corpus, TODAY, windows=(1,))
+    got = [t["term"].lower() for t in out["1"]["emerging"]]
+    assert "clear cell likelihood score" in got
+    assert "likelihood score" not in got and "clear cell likelihood" not in got

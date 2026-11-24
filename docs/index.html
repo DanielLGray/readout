@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preload" href="fonts/literata-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="app.css?v=8">
+  <link rel="stylesheet" href="app.css?v=9">
 </head>
 <body>
   <div class="app">
@@ -40,8 +40,12 @@
     <main class="view" id="view-tune" aria-label="Tune" hidden></main>
 
     <div class="player" id="player" hidden>
+      <div class="pl-bar" aria-hidden="true"><i id="pl-prog"></i></div>
       <button class="icon-btn" id="pl-toggle" aria-label="Play"></button>
       <div class="pl-text"><b id="pl-title"></b><span id="pl-src"></span></div>
+      <button class="icon-btn" id="pl-back" aria-label="Back 15 seconds">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4 3.5v4h4"/></svg><b>15</b>
+      </button>
       <button class="icon-btn" id="pl-close" aria-label="Stop and close player">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
@@ -68,7 +72,7 @@
     </nav>
   </div>
 
-  <section class="overlay" id="topic" aria-hidden="true">
+  <section class="overlay" id="topic" aria-hidden="true" inert>
     <div class="ov-head">
       <button class="icon-btn" id="topic-back" aria-label="Back to Explore">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
@@ -78,13 +82,13 @@
     <div class="ov-body" id="topic-body"></div>
   </section>
 
-  <div class="sheet" id="sheet" aria-hidden="true">
+  <div class="sheet" id="sheet" aria-hidden="true" inert>
     <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-title" id="sheet-card"></div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=8"></script>
-  <script src="tune.js?v=8"></script>
+  <script src="app.js?v=9"></script>
+  <script src="tune.js?v=9"></script>
 </body>
 </html>

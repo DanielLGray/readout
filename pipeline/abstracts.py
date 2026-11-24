@@ -305,12 +305,15 @@ def compile_systems(systems_cfg: dict) -> dict:
     out = {}
     for key, cfg in systems_cfg.items():
         pats = []
-        for w in cfg["words"]:
+        for entry in cfg["words"]:
+            # a word, or {word: colon, not: "y|ies|ial"} to skip endings ("colon" but not "colony")
+            w, unless = (entry["word"], entry.get("not")) if isinstance(entry, dict) else (entry, None)
             esc = re.escape(w).replace(r"\ ", r"[\s-]")
+            tail = rf"(?!(?:{unless})(?![A-Za-z]))" if unless else ""
             if w.isupper() and len(w) <= 5:
                 pats.append(re.compile(r"(?<![A-Za-z0-9])" + esc + r"(?![A-Za-z])"))
             else:
-                pats.append(re.compile(r"(?<![A-Za-z])" + esc, re.I))
+                pats.append(re.compile(r"(?<![A-Za-z])" + esc + tail, re.I))
         out[key] = pats
     return out
 

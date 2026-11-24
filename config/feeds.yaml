@@ -104,10 +104,10 @@ systems:
     words: [pancrea, IPMN, biliary, bile duct, cholangi, gallbladder, MRCP, ampulla, PDAC]
   gi:
     label: GI & peritoneum
-    words: [bowel, colon, colorectal, rectal, rectum, gastric, stomach, esophag, oesophag, duoden, small intestin, crohn, colitis, appendic, peritone, mesenter, hernia, enterograph]
+    words: [bowel, {word: colon, not: "y|ies|ial|ials|i[sz]ation|i[sz]ed?|ist|ists|el|els"}, colorectal, rectal, rectum, gastric, stomach, esophag, oesophag, duoden, small intestin, crohn, colitis, appendic, peritone, mesenter, hernia, enterograph]
   gu:
     label: GU & adrenal
-    words: [kidney, renal, adrenal, bladder, ureter, urothel, prostat, testic, scrot, PI-RADS, PIRADS, Bosniak, VI-RADS]
+    words: [kidney, renal, {word: adrenal, not: "ine"}, bladder, ureter, urothel, prostat, testic, scrot, PI-RADS, PIRADS, Bosniak, VI-RADS]
   gyn:
     label: Gyn & pelvis
     words: [uterus, uterine, endometri, ovary, ovarian, adnex, cervical cancer, cervix, O-RADS, placenta, fibroid, leiomyom, vulv, vagin, pelvic floor]

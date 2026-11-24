@@ -1,6 +1,6 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback).
    On each app change, bump BUILD here and the ?v= numbers in index.html together. */
-const BUILD = "8";
+const BUILD = "9";
 const VERSION = `readout-v${BUILD}`;
 const SHELL = [
   "./", "index.html", `app.css?v=${BUILD}`, `app.js?v=${BUILD}`, `tune.js?v=${BUILD}`, "manifest.webmanifest",
@@ -19,6 +19,14 @@ self.addEventListener("activate", (e) => {
     .then(() => self.clients.claim()));
 });
 
+// the saved copy, marked so the app can say it's offline instead of "up to date"
+function offlineCopy(res) {
+  if (!res) return res;
+  const headers = new Headers(res.headers);
+  headers.set("x-readout-offline", "1");
+  return res.blob().then((body) => new Response(body, { status: res.status, statusText: res.statusText, headers }));
+}
+
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
@@ -27,7 +35,7 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(fetch(e.request).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(e.request, copy)); }
       return res;
-    }).catch(() => caches.match(e.request, { ignoreSearch: true })));
+    }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(offlineCopy)));
     return;
   }
   // app shell: cache first, refresh in the background
