@@ -1,0 +1,203 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Readout — Foundations: a reading path of landmark papers and guidelines.
+#
+# Shown in the app under Explore → Foundations, with your progress. Groups appear in
+# this order. Each paper is found by a PubMed search (`find`); when several papers
+# match, the most-cited one (NIH iCite) is used. Once a paper is right, its PMID can be
+# pinned with `pmid:` so it never changes.
+#
+#   label: what the app calls it      why: one line on why it matters
+#
+# Built monthly by the "Update foundations and classics" job, with the classics pool.
+# ─────────────────────────────────────────────────────────────────────────────
+
+title: Body imaging foundations
+about: The guidelines, reporting systems and landmark studies that body imaging is built on. Read them in any order; mark each one as you go.
+
+groups:
+  - id: start
+    name: Start here
+    items:
+      - label: ACR incidental findings, the first white paper
+        why: How the ACR approaches incidental findings on abdominal CT, the template for everything after it.
+        find: '"Managing incidental findings on abdominal CT"[ti] AND "J Am Coll Radiol"[ta]'
+      - label: Fleischner 2017 pulmonary nodules
+        why: What to do with the lung nodules that every abdominal CT catches at the bases.
+        find: '"Fleischner Society 2017"[ti]'
+      - label: Iodinated contrast and kidney disease (ACR–NKF)
+        why: The current consensus on contrast-associated kidney injury and when to hold contrast.
+        find: '"Iodinated Contrast Media"[ti] AND "Kidney Disease"[ti] AND "Consensus Statements"[ti]'
+      - label: Gadolinium and kidney disease (ACR–NKF)
+        why: Group II agents, NSF risk and what eGFR really means for MRI.
+        find: '"Gadolinium-based Contrast Media"[ti] AND "Kidney Disease"[ti] AND "Consensus Statements"[ti]'
+
+  - id: liver
+    name: Liver
+    items:
+      - label: LI-RADS v2018 (CT and MRI)
+        why: The scoring system for liver observations in patients at risk for hepatocellular carcinoma.
+        find: '"LI-RADS"[ti] AND "Version 2018"[ti] AND "Radiology"[ta]'
+      - label: Incidental liver lesions on CT (ACR)
+        why: Which incidental liver lesions need nothing, follow-up or MRI.
+        find: '"incidental liver lesions"[ti] AND "white paper"[ti]'
+      - label: Liver fat on CT and MRI
+        why: Proton density fat fraction and CT attenuation, the tools behind steatosis reports.
+        find: '"Quantification of Liver Fat Content with CT and MRI"[ti]'
+      - label: Liver ultrasound elastography (SRU)
+        why: Cut-offs for shear-wave elastography and how to report liver stiffness.
+        find: '"Liver Ultrasound Elastography"[ti] AND "Society of Radiologists in Ultrasound"[ti]'
+
+  - id: biliary
+    name: Gallbladder and bile ducts
+    items:
+      - label: Incidental gallbladder and biliary findings (ACR)
+        why: Wall thickening, polyps, sludge and ductal dilation found by chance.
+        find: '"gallbladder and biliary findings"[ti] AND "white paper"[ti]'
+      - label: Gallbladder polyps (SRU)
+        why: When a polyp needs follow-up, surgery or nothing at all.
+        find: '"Gallbladder Polyps"[ti] AND "Society of Radiologists in Ultrasound"[ti]'
+
+  - id: pancreas
+    name: Pancreas
+    items:
+      - label: Incidental pancreatic cysts (ACR)
+        why: Size- and age-based follow-up for the cysts found on one CT in fifty.
+        find: '"pancreatic cysts"[ti] AND "white paper"[ti] AND "J Am Coll Radiol"[ta]'
+      - label: Pancreatic cancer reporting template (SAR–APA)
+        why: How to stage and describe pancreatic adenocarcinoma so surgeons can decide on resection.
+        find: '"pancreatic ductal adenocarcinoma"[ti] AND "reporting template"[ti]'
+      - label: Revised Atlanta classification of acute pancreatitis
+        why: The shared vocabulary for collections, necrosis and severity.
+        find: '"revision of the Atlanta classification"[ti]'
+
+  - id: kidney
+    name: Kidneys and adrenals
+    items:
+      - label: Bosniak classification, version 2019
+        why: The updated CT and MRI rules for cystic renal masses.
+        find: '"Bosniak"[ti] AND "Version 2019"[ti]'
+      - label: Incidental renal masses on CT (ACR)
+        why: Which solid and cystic renal masses need more imaging.
+        find: '"incidental renal mass"[ti] AND "white paper"[ti]'
+      - label: Incidental adrenal masses (ACR)
+        why: "Washout, attenuation and size: the adrenal incidentaloma algorithm."
+        find: '"incidental adrenal masses"[ti] AND "white paper"[ti]'
+      - label: Adrenal adenoma washout CT
+        why: The study behind absolute and relative washout thresholds.
+        find: '"Adrenal masses"[ti] AND "unenhanced and delayed enhanced CT"[ti]'
+
+  - id: pelvis
+    name: Female pelvis
+    items:
+      - label: O-RADS US risk stratification
+        why: The ultrasound lexicon and risk categories for adnexal lesions.
+        find: '"O-RADS US Risk Stratification"[ti]'
+      - label: O-RADS MRI risk stratification
+        why: How MRI sorts sonographically indeterminate adnexal masses.
+        find: '"O-RADS MRI Risk Stratification System"[ti]'
+      - label: Simple adnexal cysts (SRU update)
+        why: Which simple cysts need no follow-up at all.
+        find: '"Simple Adnexal Cysts"[ti] AND "Consensus"[ti]'
+      - label: Incidental adnexal findings on CT and MRI (ACR)
+        why: The adnexal half of the ACR incidental findings series.
+        find: '"Incidental Adnexal Findings"[ti] AND "White Paper"[ti]'
+      - label: Endometrial cancer MRI staging (ESUR)
+        why: Protocol and staging for endometrial cancer on MRI.
+        find: '"Endometrial cancer"[ti] AND "European Society of Urogenital Radiology"[ti] AND "staging"[ti]'
+      - label: Cervical cancer MRI after FIGO 2018 (ESUR)
+        why: Staging, recurrence and follow-up of cervical cancer on MRI.
+        find: '"cervical cancer"[ti] AND "European Society of Urogenital Radiology"[ti] AND "FIGO"[ti]'
+      - label: Endometriosis MRI lexicon (SAR)
+        why: The shared terms for deep endometriosis on MRI.
+        find: '"endometriosis"[ti] AND "lexicon"[ti] AND "Society of Abdominal Radiology"[ti]'
+
+  - id: prostate
+    name: Prostate
+    items:
+      - label: PI-RADS version 2.1
+        why: The current scoring rules for prostate MRI.
+        find: '"Prostate Imaging Reporting and Data System Version 2.1"[ti]'
+      - label: PRECISION trial
+        why: MRI-targeted biopsy against standard biopsy, the trial that changed the pathway.
+        find: '"MRI-Targeted or Standard Biopsy for Prostate-Cancer Diagnosis"[ti]'
+      - label: PROMIS study
+        why: Multiparametric MRI as a triage test before biopsy.
+        find: '"PROMIS"[ti] AND "Lancet"[ta]'
+      - label: proPSMA trial
+        why: PSMA PET-CT against conventional imaging for staging high-risk prostate cancer.
+        find: '"proPSMA"[ti]'
+
+  - id: bowel
+    name: Bowel and rectum
+    items:
+      - label: CT and MR enterography in Crohn disease
+        why: The consensus on technique, findings and reporting for small bowel Crohn disease.
+        find: '"Consensus Recommendations"[ti] AND "Enterography"[ti] AND "Crohn"[ti]'
+      - label: Rectal cancer MRI (ESGAR 2016 consensus)
+        why: Protocol and the structured report for staging and restaging rectal cancer.
+        find: '"rectal cancer"[ti] AND "European Society of Gastrointestinal and Abdominal Radiology"[ti] AND "2016"[ti]'
+      - label: MERCURY study
+        why: MRI predicts a clear circumferential resection margin in rectal cancer.
+        find: '"predicting curative resection of rectal cancer"[ti]'
+      - label: CT colonography accuracy (ACRIN 6664)
+        why: The multicenter trial behind CT colonography for screening.
+        find: '"Accuracy of CT colonography for detection of large adenomas and cancers"[ti]'
+
+  - id: spleen
+    name: Spleen, nodes and vessels
+    items:
+      - label: Incidental splenic and nodal findings (ACR)
+        why: Splenic lesions and borderline nodes on abdominal CT.
+        find: '"splenic and nodal findings"[ti]'
+      - label: Incidental vascular findings (ACR)
+        why: Aneurysms, dissections and venous findings caught on abdominal imaging.
+        find: '"white paper"[ti] AND "vascular findings"[ti] AND "J Am Coll Radiol"[ta]'
+
+  - id: thyroid
+    name: Thyroid and chest on body scans
+    items:
+      - label: ACR TI-RADS
+        why: The point system for thyroid nodules on ultrasound.
+        find: '"TI-RADS"[ti] AND "White Paper"[ti]'
+      - label: Incidental thyroid nodules on CT and MRI (ACR)
+        why: When a thyroid nodule seen on CT needs an ultrasound.
+        find: '"incidental thyroid nodules"[ti] AND "white paper"[ti]'
+      - label: National Lung Screening Trial
+        why: Low-dose CT screening reduced lung cancer deaths by a fifth.
+        find: '"Reduced lung-cancer mortality with low-dose computed tomographic screening"[ti]'
+
+  - id: technique
+    name: Technique
+    items:
+      - label: Dual- and multi-energy CT
+        why: How spectral CT works and what iodine maps and virtual unenhanced images can do.
+        find: '"Dual- and Multi-Energy CT"[ti] AND "Principles"[ti]'
+      - label: Photon-counting CT
+        why: The detector technology now reaching clinical scanners.
+        find: '"Photon-counting CT"[ti] AND "Technical Principles and Clinical Prospects"[ti]'
+      - label: Diffusion-weighted MRI in the body
+        why: The basics of DWI and ADC for abdominal and pelvic oncology.
+        find: '"Diffusion-weighted MRI in the body"[ti]'
+      - label: "Radiomics: images are more than pictures"
+        why: The paper that launched radiomics, worth knowing to read the AI literature critically.
+        find: '"Radiomics: Images Are More than Pictures"[ti]'
+
+  - id: cardiac
+    name: Cardiac CT
+    items:
+      - label: CT for TAVR (SCCT expert consensus)
+        why: Acquisition, annulus measurement and access planning before transcatheter valves.
+        find: '"transcatheter aortic valve"[ti] AND "expert consensus"[ti] AND "Society of Cardiovascular Computed Tomography"[ti]'
+      - label: CAD-RADS 2.0
+        why: The reporting system for coronary CT angiography.
+        find: '"CAD-RADS"[ti] AND "2.0"[ti]'
+      - label: SCOT-HEART five-year outcomes
+        why: Coronary CTA in stable chest pain lowered heart attacks over five years.
+        find: '"Coronary CT Angiography and 5-Year Risk of Myocardial Infarction"[ti]'
+
+# The classic of the day: highly cited older papers from your areas' journals (same searches
+# as the feed), at least `min_age_years` old, ranked by citations per year.
+classics:
+  from_year: 2000
+  min_age_years: 5
+  per_area: 60
