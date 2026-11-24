@@ -109,7 +109,7 @@ def pick(rows: dict[str, dict], t: date, s: dict, areas: list[str]) -> dict:
                 pool = [r for r in pool if months(r["date"], t) >= s["min_age_months"]]
                 key = lambda r, a=a: (-proven(r, a, t), -r["cites"], r["pmid"])
             pool.sort(key=key)
-            room = 1.5 if a in s.get("_checked_areas", ()) else 1     # some will fail the area's rule
+            room = 1.5          # some drop out once fetched (no abstract, a reply, or the area's rule)
             out[w][a] = {"research": [r["pmid"] for r in pool if r["kind"] == "research"][:int(s["per_window"][w] * room)],
                          "other": [r["pmid"] for r in pool if r["kind"] == "other"][:int(s["other_per_window"] * room)]}
     return out
@@ -174,7 +174,6 @@ def run(http: Optional[Http] = None) -> dict:
                       "cites": m.get("cites", 0), "cpy": m.get("cpy", 0), "rcr": m.get("rcr"), "clin": m.get("clin", 0)}
     jtable = score(rows, t, s)
     rules = area_require(cfg.get("areas"))
-    s["_checked_areas"] = set(rules)
     windows = pick(rows, t, s, areas)
 
     chosen = list(dict.fromkeys(p for w in windows.values() for per in w.values() for lst in per.values() for p in lst))
