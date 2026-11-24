@@ -20,7 +20,7 @@ from datetime import date, timedelta
 from typing import Optional
 
 from . import icite
-from .abstracts import compile_systems, is_notice, to_card
+from .abstracts import compile_systems, is_guideline, is_notice, to_card
 from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import PubMed
@@ -42,11 +42,11 @@ def settings_from(cfg: dict) -> dict:
     return s
 
 
-def kind_of(types: list[str], research: Optional[bool]) -> Optional[str]:
+def kind_of(types: list[str], research: Optional[bool], title: str = "") -> Optional[str]:
     t = set(types)
     if t & SKIP_TYPES:
         return None
-    if t & OTHER_TYPES:
+    if t & OTHER_TYPES or is_guideline({"title": title, "pub_types": types}):    # "AASLD Practice Guideline on …"
         return "other"
     return None if research is False else "research"
 
@@ -101,7 +101,7 @@ def pick(rows: dict[str, dict], t: date, s: dict) -> dict:
 
 
 def build_corpus(pm: PubMed, cfg: dict, t: date, s: dict) -> dict[str, list]:
-    """{pmid: [date, journal, [types]]} for every stream paper in the last `years` years, cached."""
+    """{pmid: [date, journal, [types], title]} for every stream paper in the last `years` years, cached."""
     path = CACHE / "important_corpus.json"
     cache: dict = read_json(path, {}) or {}
     start = t - timedelta(days=round(365.25 * s["years"]) + 31)
@@ -111,11 +111,11 @@ def build_corpus(pm: PubMed, cfg: dict, t: date, s: dict) -> dict[str, list]:
         log(f"Important: {st['id']}: {n} papers since {start}")
         ids.extend(got)
     ids = list(dict.fromkeys(ids))
-    missing = [p for p in ids if p not in cache]
+    missing = [p for p in ids if len(cache.get(p) or []) < 4]
     log(f"Important: {len(ids)} papers, {len(missing)} new to the cache")
     for r in pm.summaries(missing):
         if r["date"]:
-            cache[r["pmid"]] = [r["date"], r["journal"], r["types"]]
+            cache[r["pmid"]] = [r["date"], r["journal"], r["types"], r["title"]]
     keep = set(ids)
     cache = {k: v for k, v in cache.items() if k in keep}
     # one record per line, sorted: weekly changes stay small in git
@@ -138,9 +138,9 @@ def run(http: Optional[Http] = None) -> dict:
     cites = icite.metrics(http, corpus.keys())
     rows: dict[str, dict] = {}
     skipped = 0
-    for pmid, (d, journal, types) in corpus.items():
+    for pmid, (d, journal, types, *rest) in corpus.items():
         m = cites.get(pmid, {})
-        kind = kind_of(types, m.get("research") if m else None)
+        kind = kind_of(types, m.get("research") if m else None, rest[0] if rest else "")
         if kind is None:
             skipped += 1
             continue

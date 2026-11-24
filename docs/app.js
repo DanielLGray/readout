@@ -80,6 +80,7 @@ const S = {
   newIds: new Set(), list: [], rendered: 0, loadedAt: 0, exploreKey: null,
   news: null, kind: "all", newsSpan: store.get("newsSpan", "week"), newsNew: new Set(),
   feedDirty: false, runs: null,
+  important: null, impWin: store.get("impWin", "1y"),
 };
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
@@ -93,6 +94,8 @@ const TUNE_DEFAULTS = {
   hidePending: false,   // hide papers whose abstract isn't in PubMed yet
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
+  impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
+  startOn: "all",       // the view the app opens on: all, papers or important
 };
 // stored settings are checked field by field, so an old or damaged copy can't break the app
 function loadTune() {
@@ -115,6 +118,8 @@ function loadTune() {
     fav: strs(t.fav), hidePending: t.hidePending === true,
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
+    impReviews: t.impReviews === true,
+    startOn: ["all", "papers", "important"].includes(t.startOn) ? t.startOn : "all",
   };
 }
 let T = loadTune();
@@ -226,6 +231,38 @@ function interleave(queues, weights) {
   return slots.map((x) => x[2]);
 }
 
+// ── most important papers: ranked weekly by citations against same-quarter papers ──
+const IMP_WINDOWS = [["6m", "New"], ["1y", "1 year"], ["3y", "3 years"]];
+function importantList(system = "all", strong = false, mute = null) {
+  const I = S.important;
+  if (!I) return [];
+  const win = I.windows?.[S.impWin] ? S.impWin : "1y";
+  const w = I.windows?.[win] || {};
+  const rank = new Map((w.research || []).concat(T.impReviews ? w.other || [] : []).map((p, i) => [p, i]));
+  let list = [...rank.keys()].map((p) => I.papers?.[p]).filter(Boolean).map((p) => ({ ...p, type: "paper" }));
+  if (T.impReviews) {                // one list: new by blended score, proven by citation percentile
+    const key = (p) => (win === "6m" ? p.impact?.score : p.impact?.pct) || 0;
+    list.sort((a, b) => key(b) - key(a) || (b.impact?.cites || 0) - (a.impact?.cites || 0));
+  }
+  if (system !== "all") list = list.filter((i) => (i.systems || []).includes(system));
+  if (strong) list = list.filter((i) => (i.design?.strength || 0) >= 3);
+  if (mute) list = list.filter((i) => !mute.test(i.title));
+  return list;
+}
+const topPct = (p) => (p >= 99.5 ? "top 1%" : `top ${Math.max(1, Math.round(100 - p))}%`);
+function impactEl(it) {
+  const m = it.impact;
+  if (!m) return null;
+  const lead = m.age >= 4
+    ? el("b", {}, `${topPct(m.pct)[0].toUpperCase()}${topPct(m.pct).slice(1)} for citations`)
+    : [el("b", {}, "New"), ` · ${it.journal} papers usually rank in the ${topPct(m.jpct)}`];
+  return el("div", { class: "impact" }, lead,
+    m.age >= 4 ? ` · ${plural(m.cites, "citation")}` : null,
+    m.rcr != null && m.age >= 4 ? ` · RCR ${m.rcr}` : null,
+    m.clin ? ` · cited in ${plural(m.clin, "clinical paper")}` : null,
+    m.kind === "other" ? el("span", { class: "imp-kind" }, "Review or guideline") : null);
+}
+
 function mutedRe() {
   const w = (T.mutedWords || []).map((x) => x.trim()).filter(Boolean);
   if (!w.length) return null;
@@ -269,13 +306,21 @@ function renderChips() {
     box.append(el("button", { class: "chip chip-topic", "aria-pressed": "true", onclick: () => { S.topic = null; refreshFeed(); } },
       `${topicName(S.topic)}  ✕`));
   }
-  for (const [k, label] of [["all", "Everything"], ["papers", "Papers"], ...Object.entries(newsKinds())]) {
-    box.append(el("button", { class: "chip", "aria-pressed": String(S.kind === k && !S.topic),
-      onclick: () => { S.kind = k; S.topic = null; if (k !== "papers" && k !== "all") S.strong = false; refreshFeed(); } }, label));
+  const kinds = [["all", "Everything"], ["papers", "Papers"], ...(S.important ? [["important", "Most important"]] : []), ...Object.entries(newsKinds())];
+  for (const [k, label] of kinds) {
+    box.append(el("button", { class: "chip" + (k === "important" ? " chip-imp" : ""), "aria-pressed": String(S.kind === k && !S.topic),
+      onclick: () => { S.kind = k; S.topic = null; if (!["papers", "all", "important"].includes(k)) S.strong = false; refreshFeed(); } }, label));
+  }
+  if (S.kind === "important" && !S.topic) {          // which list: new, or proven over 1 or 3 years
+    box.append(el("span", { class: "chip-sep", "aria-hidden": "true" }));
+    for (const [w, label] of IMP_WINDOWS) {
+      box.append(el("button", { class: "chip", "aria-pressed": String(S.impWin === w),
+        onclick: () => { S.impWin = w; store.set("impWin", w); refreshFeed(); } }, label));
+    }
   }
   box.append(el("span", { class: "chip-sep", "aria-hidden": "true" }));
   box.append(el("button", { class: "chip", "aria-pressed": String(S.strong),
-    onclick: () => { S.strong = !S.strong; if (S.strong && S.kind !== "papers") S.kind = "papers"; refreshFeed(); } }, "Strong evidence"));
+    onclick: () => { S.strong = !S.strong; if (S.strong && !["papers", "important"].includes(S.kind)) S.kind = "papers"; refreshFeed(); } }, "Strong evidence"));
   box.append(el("span", { class: "chip-sep", "aria-hidden": "true" }));
   const systems = S.feed?.systems || {};
   for (const [k, label] of Object.entries(systems)) {
@@ -293,6 +338,7 @@ function filtered(f = {}, report = null) {
   const drop = (why, n = 1) => { R[why] = (R[why] || 0) + n; };
   const mute = mutedRe();
   const mutedSrc = new Set(T.mutedSources || []);
+  if (kind === "important") return importantList(system, strong, mute);
   // papers
   let papers = (S.feed?.items || []).map((i) => ({ ...i, type: "paper" }));
   if (T.hidePending) papers = papers.filter((i) => (i.conclusion?.kind || "none") !== "none" || (drop("pending"), false));
@@ -352,6 +398,13 @@ function refreshFeed(keepKey) {
   S.list = filtered();
   S.rendered = 0;
   updateHeadNote();
+  if (!S.list.length && S.kind === "important" && !S.important) {
+    view.append(el("section", { class: "empty" },
+      el("h2", { text: "Not ranked yet" }),
+      el("p", { text: "Most important papers come from a weekly job. On GitHub, open Actions, choose “Update most important papers”, and run it. Then tap refresh here." }),
+      el("button", { class: "btn", onclick: () => { S.kind = "all"; refreshFeed(); } }, "Show everything")));
+    return;
+  }
   if (!S.list.length) {
     view.append(el("section", { class: "empty" },
       el("h2", { text: "Nothing matches these filters" }),
@@ -566,6 +619,7 @@ function paperCardEl(it) {
       it.translated ? el("span", { class: "lang", title: "PubMed’s English translation of the title" }, it.language ? `In ${it.language}` : "Translated title") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
+    impactEl(it),
     it.retracted ? el("div", { class: "warn" }, "Retracted. See the notice on PubMed before using this.") : null,
     it.concern ? el("div", { class: "warn" }, "Expression of concern published for this paper.") : null,
     el("h2", { class: "card-title clamp" }, it.title),
@@ -721,6 +775,9 @@ function openAbstract(it) {
     it.retracted ? el("div", { class: "warn", style: "margin-bottom:14px" }, "Retracted. Check the retraction notice on PubMed.") : null,
     evidenceEl(it.design),
     it.sample ? el("p", { class: "sample", style: "margin:6px 0 0;font-size:14px" }, `Sample: ${it.sample} (read from the abstract)`) : null,
+    it.impact ? el("p", { class: "imp-detail" }, it.impact.age >= 4
+      ? `${plural(it.impact.cites, "citation")}${it.impact.age >= 12 ? ` (${it.impact.cpy} a year)` : ""}${it.impact.rcr != null ? `, Relative Citation Ratio ${it.impact.rcr}` : ""}. Cited more than ${Math.floor(it.impact.pct)}% of body-imaging papers published in ${it.impact.q}.${it.impact.clin ? ` Cited in ${plural(it.impact.clin, "clinical paper")} (trials, guidelines).` : ""} Source: NIH iCite.`
+      : `Too new to judge by citations (${Math.round(it.impact.age)} months old). Papers in ${it.journal} from the last few years average the ${Math.round(it.impact.jpct)}th percentile for citations.`) : null,
     el("div", { style: "height:16px" }),
     secs.length
       ? secs.map((s) => el("section", { class: "abs-sec" + (s.cat === "CONCLUSIONS" ? " key" : "") },
@@ -748,6 +805,8 @@ function openInfo() {
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
     el("p", {}, "The feed mixes papers with four kinds of news: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science for everyone (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Smithsonian, Live Science, NASA…) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons, Inverse, Den of Geek…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
+    el("h3", {}, "Most important"),
+    el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),
     el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub."),
     el("h3", {}, "Sources"),
@@ -971,6 +1030,7 @@ function paperEl(p, opts = {}) {
     el("h3", { class: "paper-title" }, p.title),
     c.text ? el("div", { class: "concl-label" + (c.kind === "structured" ? "" : " soft") }, conclLabel(c)) : null,
     c.text ? el("p", { class: "paper-concl" }, c.text) : null,
+    p.impact ? impactEl(p) : null,
     m ? el("div", { class: "paper-metrics" },
       el("span", {}, el("b", {}, (m.cites || 0).toLocaleString()), " citations"),
       el("span", {}, el("b", {}, String(m.cpy ?? 0)), " a year"),
@@ -1113,6 +1173,7 @@ function updateHeadNote() {
   const note = $("#head-note");
   const fresh = S.list.filter((i) => (i.type === "paper" ? S.newIds.has(i.pmid) : i.type === "news" && S.newsNew.has(i.id))).length;
   if (S.tab === "feed" && S.offline) note.textContent = S.feed ? `Offline · ${ago(S.feed.generated)}` : "Offline";
+  else if (S.tab === "feed" && S.kind === "important" && S.important) note.textContent = `Ranked ${ago(S.important.generated)}`;
   else if (S.tab === "feed" && fresh) note.textContent = `${fresh} new`;
   else if (S.tab === "feed" && S.feed) note.textContent = `Updated ${ago(S.feed.generated)}`;
   else note.textContent = "";
@@ -1143,11 +1204,15 @@ async function reload(announce) {
   const before = new Set((S.feed?.items || []).map((i) => i.pmid));
   const was = { feed: S.feed?.generated, explore: S.explore?.generated, news: S.news?.generated };
   S.offline = false;
-  const [feed, explore, newsData] = await Promise.all([
+  const wasImp = S.important?.generated;
+  const [feed, explore, newsData, important] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/explore.json").catch(() => null),
     loadJSON("data/news.json").catch(() => null),
+    loadJSON("data/important.json").catch(() => null),
   ]);
+  if (important) S.important = important;
+  const impChanged = !!S.important && S.important.generated !== wasImp;
   if (newsData) S.news = newsData;
   const newsChanged = !!S.news && S.news.generated !== was.news;
   markNewsNew();
@@ -1160,7 +1225,7 @@ async function reload(announce) {
   // rebuilding resets scroll position, so only do it when something changed (or the user asked)
   // rebuilding resets the feed; when it's on screen keep your place (unless you tapped refresh),
   // when it isn't, rebuild on the way back
-  if (announce || feedChanged || newsChanged) {
+  if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp))) {
     if (S.tab === "feed") refreshFeed(announce ? null : currentKey());
     else { S.feedDirty = true; if (announce) S.lastKey = null; }
   } else updateHeadNote();
@@ -1224,6 +1289,7 @@ function boot() {
   document.fonts?.ready.then(fitAll);
   document.fonts?.addEventListener?.("loadingdone", fitAll);
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+  S.kind = T.startOn;
   reload(false);
 }
 boot();

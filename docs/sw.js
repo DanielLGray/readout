@@ -1,6 +1,6 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback).
    On each app change, bump BUILD here and the ?v= numbers in index.html together. */
-const BUILD = "10";
+const BUILD = "11";
 const VERSION = `readout-v${BUILD}`;
 const SHELL = [
   "./", "index.html", `app.css?v=${BUILD}`, `app.js?v=${BUILD}`, `tune.js?v=${BUILD}`, "manifest.webmanifest",

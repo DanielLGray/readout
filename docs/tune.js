@@ -214,7 +214,7 @@ function mixPreview(n) {
 }
 
 function algoPane() {
-  return [mixSection(), orderSection(), muteSection(), trendSection(),
+  return [importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
     el("section", { class: "sect" }, el("h2", {}, "Start over"),
       el("p", { class: "sub" }, "Puts the mix, paper order, mutes and trend rules back to how they came. Your reading history and saved items stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
@@ -222,6 +222,18 @@ function algoPane() {
         T = { ...TUNE_DEFAULTS, ...keep }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
         toast("Feed rules reset"); rerender();
       })))];
+}
+
+function importantSection() {
+  const I = S.important;
+  return el("section", { class: "sect", id: "tune-important" }, el("h2", {}, "Most important papers"),
+    el("p", { class: "sub" }, I
+      ? `Ranked weekly from ${I.stats.checked.toLocaleString()} papers in your journals over the last ${I.settings.years} years, by citations against papers of the same age.`
+      : "Ranked weekly by citations against papers of the same age. Not built yet."),
+    segPick("Open the app on", [["all", "Everything"], ["papers", "Papers"], ["important", "Most important"]], T.startOn,
+      (v) => { setTune({ startOn: v }); rerender(); }, "The view you see when you open Readout."),
+    switchRow("Include reviews, meta-analyses and guidelines", "Off: original research only.", T.impReviews,
+      (on) => { setTune({ impReviews: on }); rerender(); }));
 }
 
 function mixSection() {
@@ -372,6 +384,7 @@ const JOBS = {
   feed: { wf: "feed.yml", cfg: "feeds.yaml", every: 26, title: "Papers", sub: "PubMed, every morning" },
   news: { wf: "news.yml", cfg: "news.yaml", every: 7, title: "News", sub: "Outlet feeds, every 6 hours" },
   explore: { wf: "explore.yml", cfg: "topics.yaml", every: 8 * 24, title: "Trends", sub: "PubMed, iCite and ClinicalTrials.gov, every Monday" },
+  important: { wf: "important.yml", cfg: "feeds.yaml", every: 8 * 24, title: "Most important papers", sub: "PubMed and NIH iCite, every Tuesday" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;
@@ -413,7 +426,7 @@ function pipelinePane() {
   loadRuns();
   return [
     el("p", { class: "lede small" }, "Three jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
-    papersJob(), newsJob(), exploreJob(),
+    papersJob(), importantJob(), newsJob(), exploreJob(),
     el("p", { class: "fine" }, "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }
@@ -509,6 +522,33 @@ function newsJob() {
       `Headlines are kept ${Math.round(st.archive_days / 365 * 10) / 10} years for trend lines.`,
     ] : []),
     jobLinks("news", "Edit outlets and settings"));
+}
+
+function importantJob() {
+  const I = S.important;
+  const st = I?.stats || {}, set = I?.settings || {};
+  const sizes = (w) => `${I?.windows?.[w]?.research?.length ?? 0}`;
+  return el("section", { class: "sect job" }, el("h2", {}, JOBS.important.title), el("p", { class: "sub" }, JOBS.important.sub),
+    jobStatus("important", I?.generated),
+    !I ? el("p", { class: "nothing" }, "Not built yet.") : [
+      el("dl", { class: "facts" },
+        el("dt", {}, "Papers checked"), el("dd", {}, (st.checked || 0).toLocaleString()),
+        el("dt", {}, "Original research"), el("dd", {}, (st.research || 0).toLocaleString()),
+        el("dt", {}, "Reviews and guidelines"), el("dd", {}, (st.other || 0).toLocaleString()),
+        el("dt", {}, "Left out (case reports, editorials…)"), el("dd", {}, (st.skipped || 0).toLocaleString()),
+        el("dt", {}, "Cited at least once"), el("dd", {}, `${Math.round(100 * (st.with_citations || 0) / Math.max(1, st.kept || 1))}%`),
+        el("dt", {}, "Lists: new, 1 year, 3 years"), el("dd", {}, `${sizes("6m")}, ${sizes("1y")}, ${sizes("3y")}`)),
+      (st.journals || []).length ? [el("div", { class: "ctl-label" }, "Journals by citation record"),
+        el("p", { class: "fine", style: "margin-top:2px" }, "Average percentile of their papers that are 1 to 3 years old; new papers borrow it."),
+        el("dl", { class: "facts small" }, st.journals.slice(0, 10).map(([j, p, n]) => [el("dt", {}, j), el("dd", {}, `${Math.round(p)} · ${n.toLocaleString()} papers`)]))] : null,
+    ],
+    el("div", { class: "ctl-label" }, "Settings in config/feeds.yaml (important:)"),
+    settingsList(set.years ? [
+      `Looks back ${set.years} years over the same journals and filters as the feed.`,
+      `Keeps ${set.per_window["6m"]} new, ${set.per_window["1y"]} one-year and ${set.per_window["3y"]} three-year papers; ${set.other_per_window} reviews and guidelines per list.`,
+      `The 1- and 3-year lists skip papers younger than ${set.min_age_months} months.`,
+    ] : []),
+    jobLinks("important", "Edit settings"));
 }
 
 function exploreJob() {

@@ -84,6 +84,15 @@ imaging_terms: >-
   CT[tiab] OR ultrasound[tiab] OR ultrasonograph*[tiab] OR sonograph*[tiab] OR PET[tiab] OR
   "positron emission"[tiab] OR radiolog*[tiab] OR scintigraph*[tiab] OR SPECT[tiab]
 
+# For the high-impact general journals, imaging has to be what the paper is about: in its title,
+# or a major MeSH heading. (In the abstract alone it lets in drug trials that measured response on CT.)
+imaging_title: >-
+  imaging[ti] OR MRI[ti] OR "magnetic resonance"[ti] OR "computed tomography"[ti] OR CT[ti] OR
+  ultrasound[ti] OR ultrasonograph*[ti] OR sonograph*[ti] OR elastograph*[ti] OR PET[ti] OR
+  "positron emission"[ti] OR PSMA[ti] OR radiolog*[ti] OR radiomic*[ti] OR scintigraph*[ti] OR SPECT[ti] OR
+  theranostic*[ti] OR radioligand*[ti] OR radionuclide*[ti] OR lutetium[ti] OR DOTATATE[ti] OR
+  "Diagnostic Imaging"[majr] OR "Radiopharmaceuticals"[majr] OR "Radiology"[majr]
+
 # Publication types that never make a useful card.
 exclude: >-
   "Published Erratum"[pt] OR Editorial[pt] OR Letter[pt] OR Comment[pt] OR News[pt]
@@ -99,7 +108,7 @@ streams:
 
   - id: general_imaging
     name: High-impact journals — imaging papers
-    query: '({general_journals}) AND ({imaging_terms}) AND ({body_filter}) NOT ({exclude})'
+    query: '({general_journals}) AND ({imaging_title}) AND ({body_filter}) NOT ({exclude})'
 
 # Organ-system chips in the Feed. Each card gets every system whose words
 # appear in its title or abstract (case-insensitive, word-start match).
