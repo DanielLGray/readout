@@ -208,7 +208,10 @@ class FakeWorld:
         res = {"uids": [i for i in ids if i in self.papers]}
         for i in res["uids"]:
             p = self.papers[i]
-            res[i] = {"title": p["title"], "source": p["journal"], "sortpubdate": p["date"].strftime("%Y/%m/%d 00:00")}
+            pts = {"guideline": "Practice Guideline", "meta": "Meta-Analysis", "rct": "Randomized Controlled Trial"}
+            res[i] = {"title": p["title"], "source": p["journal"], "sortpubdate": p["date"].strftime("%Y/%m/%d 00:00"),
+                      "pubtype": ["Journal Article"] + ([pts[p["ev"]]] if p["ev"] in pts else []) +
+                                 (["Case Reports"] if int(i) % 23 == 0 else [])}
         return {"result": res}
 
     def icite(self, params: dict):
@@ -222,7 +225,8 @@ class FakeWorld:
             rows.append({"pmid": int(i), "year": p["date"].year, "citation_count": p["cites"],
                          "citations_per_year": p["cites"] / age,
                          "relative_citation_ratio": round(p["cites"] / age / 3, 2) if old_enough else None,
-                         "is_research_article": p["ev"] != "guideline"})
+                         "is_research_article": p["ev"] not in ("guideline", "meta"),
+                         "cited_by_clin": list(range(p["cites"] // 40))})
         return {"data": rows}
 
     def ctgov(self, params: dict):

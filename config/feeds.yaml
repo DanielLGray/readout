@@ -17,6 +17,14 @@ settings:
   keep_days: 180            # cards older than this drop out of the feed
   max_items: 900            # hard cap on cards kept in the feed
 
+# "Most important" in the app: every paper from the streams below over the last few years,
+# ranked by citations against papers published in the same quarter (NIH iCite). Built weekly.
+important:
+  years: 3                 # how far back to look
+  per_window: {6m: 60, 1y: 80, 3y: 120}   # original research papers kept per list
+  other_per_window: 20     # reviews, meta-analyses and guidelines kept per list (shown if you turn them on)
+  min_age_months: 4        # the 1- and 3-year lists skip papers younger than this (too new to judge)
+
 # Radiology journals that carry most body-imaging research and education.
 journals:
   - '"Radiology"[ta]'

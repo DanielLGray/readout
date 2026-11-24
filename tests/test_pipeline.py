@@ -119,3 +119,28 @@ def test_overlapping_title_phrases_join():
     got = [t["term"].lower() for t in out["1"]["emerging"]]
     assert "clear cell likelihood score" in got
     assert "likelihood score" not in got and "clear cell likelihood" not in got
+
+
+def test_important_papers(env, monkeypatch):
+    from pipeline import build_important
+    world, http = env
+    monkeypatch.setattr(build_important, "DATA", build_feed.DATA)
+    monkeypatch.setattr(build_important, "CACHE", build_explore.CACHE)
+    out = build_important.run(http)
+    st = out["stats"]
+    assert st["checked"] > 500 and st["skipped"] > 0 and st["research"] > st["other"] > 0
+    for w in ("6m", "1y", "3y"):
+        lst = out["windows"][w]["research"]
+        assert lst and all(p in out["papers"] for p in lst)
+        assert all(out["papers"][p]["impact"]["kind"] == "research" for p in lst)
+    # proven lists: ranked by same-quarter citation percentile, nothing too new to judge
+    pcts = [out["papers"][p]["impact"]["pct"] for p in out["windows"]["3y"]["research"]]
+    assert pcts == sorted(pcts, reverse=True) and pcts[0] >= 95
+    assert all(out["papers"][p]["impact"]["age"] >= 4 for p in out["windows"]["1y"]["research"])
+    # cards carry the authors' conclusion like the feed
+    card = out["papers"][out["windows"]["1y"]["research"][0]]
+    assert card["conclusion"]["text"] and card["impact"]["cites"] >= 0
+    assert out["stats"]["journals"] and all(0 <= j[1] <= 100 for j in out["stats"]["journals"])
+    # second run reuses the corpus cache
+    out2 = build_important.run(http)
+    assert out2["stats"]["checked"] == st["checked"]

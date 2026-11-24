@@ -116,6 +116,7 @@ class PubMed:
                     "title": r.get("title", ""),
                     "journal": r.get("source", ""),
                     "date": (r.get("sortpubdate") or "")[:10].replace("/", "-"),
+                    "types": [str(x) for x in r.get("pubtype", []) or []],
                 })
         return out
 

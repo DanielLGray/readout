@@ -9,7 +9,7 @@ from .http import Http, HttpError, log
 
 ICITE = "https://icite.od.nih.gov/api/pubs"
 BATCH = 200
-FIELDS = "pmid,year,citation_count,citations_per_year,relative_citation_ratio,is_research_article"
+FIELDS = "pmid,year,citation_count,citations_per_year,relative_citation_ratio,is_research_article,cited_by_clin"
 
 
 def metrics(http: Http, pmids: Iterable[str]) -> dict[str, dict]:
@@ -32,6 +32,7 @@ def metrics(http: Http, pmids: Iterable[str]) -> dict[str, dict]:
                 "cpy": round(float(row.get("citations_per_year") or 0), 2),
                 "rcr": (round(float(row["relative_citation_ratio"]), 2)
                         if row.get("relative_citation_ratio") not in (None, "") else None),
-                "research": bool(row.get("is_research_article")),
+                "research": row.get("is_research_article") in (True, "Yes", "yes", "true", 1),
+                "clin": len(row.get("cited_by_clin") or []) if isinstance(row.get("cited_by_clin"), list) else 0,
             }
     return out
