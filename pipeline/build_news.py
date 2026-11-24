@@ -130,6 +130,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             not (need and not need.search(it["title"] + " " + it.get("summary", "")))
     items = {k: v for k, v in items.items() if allowed(v)}
     for it in items.values():                  # every run, so word-list changes reach stored stories too
+        if it.get("summary"):                  # and summary clean-up changes (already a teaser: just tidy it)
+            it["summary"] = news.clean_text(it["summary"])
         it["categories"] = news.categorize(it, compiled) if it.get("kind", "industry") == "industry" else []
         it["systems"] = tag_systems({"title": it["title"], "sections": [{"text": it.get("summary", "")}]}, systems)
 

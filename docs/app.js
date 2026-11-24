@@ -316,8 +316,9 @@ function importantList(system = "all", strong = false, mute = null) {
   list.forEach((p) => {                 // show the percentile and area that earned its place
     if (!p.impact) return;
     const pc = p.impact.pcts || {};
+    const mine = areasOf(p);              // label only with an area the paper is actually in
     const area = areaPick() && pc[areaPick()] != null ? areaPick()
-      : Object.keys(pc).filter((a) => (T.areas[a] ?? 2) > 0).sort((x, y) => pc[y] - pc[x])[0];
+      : Object.keys(pc).filter((a) => (T.areas[a] ?? 2) > 0 && mine.includes(a)).sort((x, y) => pc[y] - pc[x])[0];
     if (area) p.impact = { ...p.impact, pct: pc[area], area };
   });
   if (system !== "all") list = list.filter((i) => (i.systems || []).includes(system));

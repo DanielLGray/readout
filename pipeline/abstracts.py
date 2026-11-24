@@ -12,6 +12,8 @@ _BOILER = re.compile(
     r"(published under a cc|creative commons|this is an open access article|"
     r"supplemental material is available|online supplemental material|supplementary material is available|"
     r"see also the (?:editorial|commentary|article)|see the (?:editorial|invited commentary|commentary)|"
+    r"see related (?:editorial|commentary|article)|"
+    r"^citation format|\bdoi:?\s*10\.\d{4,}/|"
     r"test your knowledge|quiz questions for this article|"
     r"^clinical trial registration|^trial registration|^registration:|^NCT\d{8}\.?$|"
     r"^keywords?:|^abbreviations?:|^funding:)",
@@ -20,10 +22,60 @@ _BOILER = re.compile(
 _ABBREV = ["vs.", "e.g.", "i.e.", "et al.", "approx.", "Fig.", "Figs.", "No.", "no.", "Dr.", "cf.", "ca.", "Ref."]
 
 
+# trial and review registrations: a registry number, or a sentence saying where it was registered
+_REGISTRY_ID = (r"(?:NCT\d{8}|ChiCTR[-\w]*?\d{6,}|ISRCTN\s*N?\d{6,}|UMIN\d{6,}|CRD\d{8,}|DRKS\d{6,}|ACTRN\d{10,}|"
+                r"jRCT[a-z]?\d{6,}|KCT\d{6,}|IRCT\d+\w*|CTRI/\d{4}/\d+/\d+|TCTR\d{8,}|PACTR\d{10,}|"
+                r"EudraCT\s*(?:No\.?|number)?\s*:?\s*\d{4}-\d{6}-\d{2})")
+_REG_ID = re.compile(_REGISTRY_ID, re.I)
+_REG_SENT = re.compile(r"clinicaltrials\.gov|\bPROSPERO\b|trial regist|regist(?:ered|ration|ry)\b[^.]*" + _REGISTRY_ID +
+                       r"|^(?:the |this )?(?:study|trial|protocol|review)\s+(?:was|is|has been)\s+(?:\w+ly\s+)?registered", re.I)
+_REG_PAREN = re.compile(r"\s*\([^()]*" + _REGISTRY_ID + r"[^()]*\)", re.I)
+
+
+def _registration(sent: str) -> bool:
+    if _REG_SENT.search(sent):
+        return True
+    if _REG_ID.search(sent):            # "NCT00047385, NCT02777996, and ISRCTN N30604390": numbers and little else
+        return len(re.findall(r"[A-Za-z]{3,}", _REG_ID.sub(" ", sent))) <= 3
+    return False
+
+
 def clean(text: str) -> str:
     text = _COPYRIGHT.sub("", text).strip()
-    kept = [s for s in sentences(text) if not _BOILER.search(s.strip())]
+    # bullet points ("…54 Gy.•MRI-based…"): make each one a sentence
+    text = re.sub(r"(?<=[^.!?:;\s])\s*•\s*", ". ", text)
+    text = re.sub(r"\s*•\s*", " ", text).strip()
+    text = re.sub(r"(?<!\.)\.\.(?!\.)", ".", text)            # "alone.." (a typo in the record)
+    kept = []
+    dropped = False
+    for s0 in sentences(text):
+        s = _REG_PAREN.sub("", s0).strip()       # "(NCT04689828)" inside a real sentence: drop just that
+        words = bool(re.search(r"[A-Za-z]{2}", s))
+        if (s != s0 or dropped) and not words:
+            continue                              # only the registration, or the "3417." left from "p. 3417"
+        dropped = False
+        if _BOILER.search(s):
+            dropped = True
+            continue
+        if _registration(s):
+            if len(s) <= 250:
+                dropped = True
+                continue
+            # a run-on (missing spaces after full stops) holding real text too: cut just the number and link
+            s = re.sub(r"\s*https?://\S+", "", _REG_ID.sub("", s)).strip()
+        kept.append(s)
     return " ".join(kept).strip()
+
+
+# sections some journals run into the conclusion without a label of their own (European Radiology,
+# Insights into Imaging): the card shows the conclusion up to them
+_RUN_ON = re.compile(r"(?<=[.!?])\s+(?:Critical relevance statement|CRITICAL RELEVANCE STATEMENT|Clinical relevance statement|"
+                     r"CLINICAL RELEVANCE STATEMENT|Key [Pp]oints?|KEY POINTS?|Key [Ff]indings|KEY FINDINGS)\s*:?\s+(?=[A-Z•·–-])")
+
+
+def _cut_run_on(text: str) -> str:
+    m = _RUN_ON.search(text)
+    return text[:m.start()].strip() if m and m.start() >= 30 else text
 
 
 def sentences(text: str) -> list[str]:
@@ -78,16 +130,30 @@ def conclusion(rec: dict) -> "tuple[dict, list[dict]]":
                 return 1
             return 2
         primary = sorted(concl, key=rank)[0]
-        extras = [{"label": _nice_label(s["label"]) or "Conclusions", "text": s["text"]}
+        extras = [{"label": _nice_label(s["label"]) or "Conclusions", "text": _cut_run_on(s["text"])}
                   for s in concl if s is not primary]
         return {"kind": "structured", "label": _nice_label(primary["label"]) or "Conclusion",
-                "text": primary["text"]}, extras
+                "text": _cut_run_on(primary["text"])}, extras
 
     full = " ".join(s["text"] for s in secs)
+    # an unlabeled abstract that ends in "Critical relevance statement …" / "KEY POINTS: • …": the
+    # statement is the authors' own summary; the bullets are not a conclusion
+    relevance = None
+    run_on = _RUN_ON.search(full)
+    if run_on and run_on.start() >= 30:
+        heading = full[run_on.start():run_on.end()].strip().rstrip(":")
+        rest = full[run_on.end():]
+        nxt = _RUN_ON.search(rest)
+        if re.match(r"(?:critical|clinical) relevance statement", heading, re.I):
+            relevance = {"kind": "structured", "label": _nice_label(heading).capitalize(),
+                         "text": (rest[:nxt.start()] if nxt else rest).strip()}
+        full = full[:run_on.start()].strip()
     # Some records keep the headings inline: "... Results ... Conclusion AI demonstrated ..."
     inline = _INLINE_CONCL.search(full)
     if inline and len(inline.group(2)) >= 30:
-        return {"kind": "structured", "label": "Conclusion", "text": inline.group(2).strip()}, []
+        return {"kind": "structured", "label": "Conclusion", "text": _cut_run_on(inline.group(2).strip())}, []
+    if relevance and len(relevance["text"]) >= 30:
+        return relevance, []
     sents = sentences(full)
     pts = set(rec.get("pub_types", []))
     is_review = bool(pts & {"Review", "Systematic Review"}) or rec.get("journal", "").lower() == "radiographics"

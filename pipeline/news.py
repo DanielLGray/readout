@@ -58,9 +58,14 @@ def clean_text(s: str) -> str:
     s = html.unescape(s or "")                 # some feeds escape their HTML twice ("&lt;p&gt;")
     s = re.sub(r"<[^>]+>", " ", s)
     s = html.unescape(s)
-    s = re.sub(r"\bThe post .{3,200}? appeared first on .{2,80}?\.?\s*$", "", s)
+    s = " ".join(s.split())                   # first, so line breaks inside the HTML don't hide the rules below
+    s = re.sub(r"\bThe post .{3,200}? (?:appeared first|first appeared) on .{2,80}?\.?$", "", s)
     s = re.sub(r"\b(Continue reading|Read more|READ MORE)\b.*$", "", s, flags=re.I)
-    return " ".join(s.split())
+    s = re.sub(r"^\([A-Z][\w .&'-]{1,40}\)\s*(?:--|—|–)\s*", "", s)                     # "(MedPage Today) -- "
+    s = re.sub(r"^(?:Listen (?:and|&) subscribe|Subscribe and listen|Listen) (?:on|to|wherever) [^.]{0,160}?\.\s*", "", s,
+               flags=re.I)                                                                  # podcast app promo
+    s = re.sub(r"^Note that some links may require registration or subscription\.\s*", "", s, flags=re.I)
+    return s.strip()
 
 
 def teaser(s: str, limit: int = 220) -> str:

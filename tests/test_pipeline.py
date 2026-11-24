@@ -214,3 +214,13 @@ def test_feed_survives_one_rejected_search(env, monkeypatch):
     monkeypatch.setattr(pubmed.PubMed, "esearch", lambda self, term, **kw: (_ for _ in ()).throw(RuntimeError("down")))
     with pytest.raises(RuntimeError, match="every PubMed search failed"):
         build_feed.run(http)
+
+
+def test_important_labels_only_shown_areas(env, monkeypatch):
+    world, http = env
+    from pipeline import build_important
+    monkeypatch.setattr(build_important, "DATA", build_feed.DATA)
+    monkeypatch.setattr(build_important, "CACHE", build_feed.DATA.parent / "cache")
+    out = build_important.run(http)
+    for p in out["papers"].values():
+        assert set(p["impact"]["pcts"]) <= set(p["areas"]) and p["impact"]["pct"] == max(p["impact"]["pcts"].values())

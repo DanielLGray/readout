@@ -226,3 +226,13 @@ def test_google_news_titles_credit_the_publisher():
                                             "urls": ["https://news.google.com/rss/search?q=x"]}, NOW)
     assert got[0]["title"] == "ACR outlines 2027 fee schedule impact"
     assert got[0]["summary"] == "Reported by Radiology Business"
+
+
+def test_summary_boilerplate():
+    from pipeline.news import teaser
+    assert teaser("<p>Galaxy survey results.</p>\n<p>The post <a href='x'>What Makes\nUp the Cosmos?</a> first appeared on <a>Quanta Magazine</a>.</p>") == \
+        "Galaxy survey results."
+    assert teaser("(MedPage Today) -- Weight loss may alter breast density.") == "Weight loss may alter breast density."
+    assert teaser("Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. In this episode we explore caves.") == \
+        "In this episode we explore caves."
+    assert teaser("Readers who listen to experts do better.") == "Readers who listen to experts do better."

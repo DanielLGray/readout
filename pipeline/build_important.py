@@ -187,7 +187,8 @@ def run(http: Optional[Http] = None) -> dict:
         card["areas"] = [a for a in r["areas"] if a not in rules or passes(rec, rules[a])]
         if not card["areas"]:
             continue
-        card["impact"] = {"pct": r["pct"], "pcts": r["pcts"], "jpct": r["jpct"], "cites": r["cites"], "cpy": r["cpy"], "rcr": r["rcr"],
+        pcts = {a: v for a, v in r["pcts"].items() if a in card["areas"]}     # only areas the paper is shown in
+        card["impact"] = {"pct": max(pcts.values()), "pcts": pcts, "jpct": r["jpct"], "cites": r["cites"], "cpy": r["cpy"], "rcr": r["rcr"],
                           "clin": r["clin"], "age": round(months(r["date"], t), 1), "q": quarter(r["date"]),
                           "kind": r["kind"], "score": r["score"]}
         papers[rec["pmid"]] = card

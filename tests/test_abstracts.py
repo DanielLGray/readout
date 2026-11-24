@@ -305,3 +305,38 @@ def test_cardiac_ct_rule_skips_spect_and_pet_ct():
     assert not passes(rec("Myocardial perfusion SPECT/CT after His bundle pacing"), rule)
     assert not passes(rec("Single-photon emission computed tomography in cardiac sarcoidosis"), rule)
     assert not passes(rec("Rubidium PET/CT myocardial blood flow"), rule)
+
+
+def _concl(text, label="CONCLUSIONS", cat="CONCLUSIONS", pts=()):
+    from pipeline.abstracts import conclusion
+    return conclusion({"sections": [{"label": label, "cat": cat, "text": text}], "pub_types": list(pts), "journal": ""})[0]
+
+
+def test_registration_lines_leave_the_conclusion():
+    cases = {
+        "Lesion conspicuity improved with CEM. ClinicalTrials.gov: NCT04437602": "Lesion conspicuity improved with CEM.",
+        "Lung-RADS may help. NCT00047385, NCT02777996, and ISRCTN N30604390": "Lung-RADS may help.",
+        "Benefit was seen. Chinese Clinical Trial Registry no. ChiCTR2300075711": "Benefit was seen.",
+        "Decline was domain specific. The study was registered on clinicaltrials.gov (NCT05384353) as of 20 May 2022.":
+            "Decline was domain specific.",
+        "In the PSMAfore trial (NCT04689828), 177Lu-PSMA-617 prolonged survival.": "In the PSMAfore trial, 177Lu-PSMA-617 prolonged survival.",
+        "Registry data suggest benefit (registration number: ChiCTR2100048093; date of registration: June 30, 2021).":
+            "Registry data suggest benefit.",
+        "Results may inform trials. See related commentary by Lee et al., p. 3417.": "Results may inform trials.",
+        "As recommended (Neuro Oncol. 2017;19(12):1576-87). Consider local rules.": "As recommended (Neuro Oncol. 2017;19(12):1576-87). Consider local rules.",
+    }
+    for text, want in cases.items():
+        assert _concl(text)["text"] == want, text
+
+
+def test_run_on_sections_and_bullets():
+    assert _concl("MRI after neoadjuvant therapy improves restaging. Critical relevance statement We summarize the evidence on MRI.")["text"] == \
+        "MRI after neoadjuvant therapy improves restaging."
+    assert _concl("Reports should list these features. KEY POINTS: • This paper recommends the minimum features.")["text"] == \
+        "Reports should list these features."
+    review = _concl("Spectral CT is reviewed here in depth for colorectal cancer staging. It covers basics. "
+                    "Critical relevance statement This article explores spectral CT in colorectal cancer. "
+                    "Key Points Spectral CT helps.", label="", cat="", pts=["Review"])
+    assert review["label"] == "Critical relevance statement" and review["text"] == "This article explores spectral CT in colorectal cancer."
+    bullets = _concl("•Dose escalation means over 54 Gy.•MRI-based GTV definition is central.•Delphi achieved consensus.", label="", cat="")
+    assert bullets["text"] == "MRI-based GTV definition is central. Delphi achieved consensus."
