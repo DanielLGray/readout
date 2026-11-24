@@ -527,6 +527,8 @@ function papersJob() {
       el("dl", { class: "facts" },
         el("dt", {}, "Cards in the feed"), el("dd", {}, items.length.toLocaleString()),
         el("dt", {}, "Added in the last 7 days"), el("dd", {}, week.toLocaleString())),
+      f?.settings && f.settings.ncbi_contact === false ? el("p", { class: "fine warn-text" },
+        "PubMed requests go out without a contact email. Add your email as the NCBI_EMAIL secret on GitHub (Settings → Secrets and variables → Actions), so NCBI can reach you instead of blocking the job if something goes wrong.") : null,
       f?.failed_streams?.length ? el("p", { class: "fine warn-text" },
         `Last run couldn’t search ${f.failed_streams.map((s) => f.streams?.[s] || s).join(", ")}; those papers will catch up on the next run. If this repeats, the search wording in config/feeds.yaml needs a look.`) : null,
       dayBars(perDay, [fmtDate(new Date(Date.now() - (daysBack - 1) * 864e5).toISOString().slice(0, 10)), "today"], { h: 48 }),

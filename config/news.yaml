@@ -4,7 +4,8 @@
 # Each outlet lists one or more feed addresses. The news job tries them in
 # order and uses the first that returns stories, so a site redesign that
 # breaks one address doesn't break the tab. Accepted formats: RSS, Atom, and
-# Google News sitemaps (sitemap-google-news.xml).
+# publishers' own news sitemaps (sitemap-google-news.xml). No Google News feeds:
+# Google's News terms allow personal use only, not display on a website.
 #
 # The app shows each story's headline, outlet, date and the short summary the
 # outlet puts in its own feed, and links to the article on the outlet's site.
@@ -35,6 +36,9 @@ settings:
     phrases: 12
 
 # Kinds of news, in the order the app shows them. Every outlet below has one.
+# industry and health stories that mention these also show under "ACR & societies"
+society_mentions: '\b(?:ACR|SNMMI|RSNA|SCCT|ASNC|EANM|ARRS|SIIM|SCMR)\b|(?i:American College of Radiology|Society of Nuclear Medicine|Radiological Society of North America|Society of Cardiovascular Computed Tomography|American Society of Nuclear Cardiology|European Association of Nuclear Medicine|European Society of Radiology|Society of Interventional Radiology|Society of Abdominal Radiology|Appropriateness Criteria|American Roentgen Ray Society)'
+
 kinds:
   industry: Industry news
   societies: ACR & societies
@@ -83,36 +87,55 @@ sources:
       - https://cardiovascularbusiness.com/rss.xml
       - https://cardiovascularbusiness.com/feed
 
-  # Societies. ACR, SNMMI and SCCT publish no news feed, so these are Google News searches for
-  # coverage of them; headlines end in " - Publisher", which google_news strips.
-  - name: ACR
-    kind: societies
-    google_news: true
-    max_per_day: 3
-    home: https://www.acr.org/news-and-publications/media-center
-    stale_days: 90             # posts a few times a month
-    merge: true
+  # Medical Xpress (Science X) allows its feeds on other sites, personal or commercial, as long as its
+  # credit stays and headlines and links are left as they are (verbatim). Shared stories go to the
+  # society feeds below, which come later and win.
+  - name: Medical Xpress Radiology
+    verbatim: true
+    max_per_day: 4
+    home: https://medicalxpress.com
     urls:
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22American+College+of+Radiology%22+when:120d
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22ACR+Appropriateness+Criteria%22+when:365d
+      - https://medicalxpress.com/rss-feed/diagnostic-radiology-news/
 
-  - name: SNMMI
+  # Societies. ACR, SNMMI and RSNA have no news feed of their own; their press releases reach
+  # Medical Xpress, which publishes a feed for each organization. SCCT publishes its own feed.
+  - name: ACR (via Medical Xpress)
     kind: societies
-    google_news: true
+    verbatim: true
     max_per_day: 3
-    home: https://snmmi.org
+    home: https://medicalxpress.com
     stale_days: 90
     urls:
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=SNMMI+OR+%22Society+of+Nuclear+Medicine+and+Molecular+Imaging%22+when:120d
+      - https://medicalxpress.com/rss-feed/partners/american-college-of-radiology/
+
+  - name: SNMMI (via Medical Xpress)
+    kind: societies
+    verbatim: true
+    max_per_day: 3
+    home: https://medicalxpress.com
+    stale_days: 90
+    merge: true
+    urls:
+      - https://medicalxpress.com/rss-feed/partners/society-of-nuclear-medicine-and-molecular-imaging/
+      - https://medicalxpress.com/rss-feed/partners/society-of-nuclear-medicine/
+
+  - name: RSNA (via Medical Xpress)
+    kind: societies
+    verbatim: true
+    max_per_day: 3
+    home: https://medicalxpress.com
+    stale_days: 90
+    urls:
+      - https://medicalxpress.com/rss-feed/partners/radiological-society-of-north-america/
 
   - name: SCCT
     kind: societies
-    google_news: true
     max_per_day: 3
     home: https://scct.org
     stale_days: 120
     urls:
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22Society+of+Cardiovascular+Computed+Tomography%22+OR+%22SCCT%22+cardiac+when:180d
+      - https://scct.org/news/news_rss.asp?cat=11632
+      - https://scct.org/news/news_rss.asp
 
   - name: Imaging Technology News
     home: https://www.itnonline.com
@@ -177,6 +200,7 @@ sources:
 
   - name: ScienceDaily
     kind: health
+    verbatim: true               # its feed terms: use on other sites, but don't edit the text or links
     max_per_day: 8
     home: https://www.sciencedaily.com/news/health_medicine/
     urls:
@@ -297,7 +321,6 @@ sources:
     urls:
       - https://www.livescience.com/feeds.xml
       - https://www.livescience.com/feeds/all
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=site:livescience.com+when:7d       # if the site turns readers away
 
   - name: Space.com
     kind: science
@@ -306,7 +329,6 @@ sources:
     urls:
       - https://www.space.com/feeds.xml
       - https://www.space.com/feeds/all
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=site:space.com+when:7d
 
   - name: NASA
     kind: science

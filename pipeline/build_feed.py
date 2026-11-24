@@ -5,6 +5,8 @@ merge into docs/data/feed.json.
 """
 from __future__ import annotations
 
+import os
+
 from datetime import date, timedelta
 from typing import Optional
 
@@ -152,6 +154,7 @@ def run(http: Optional[Http] = None) -> dict:
             "general_radiology_journals": len(cfg.get("general_radiology_journals", [])),
             "cardiac_journals": len(cfg.get("cardiac_journals", [])) + len(cfg.get("interventional_journals", [])),
             "topics": len(tcfg.get("topics", [])),
+            "ncbi_contact": bool(os.environ.get("NCBI_EMAIL", "").strip()),
         },
         "items": kept,
     }

@@ -27,7 +27,7 @@ You can do all of this in Safari on your iPhone. A computer is a bit easier.
    - choose **Update trends** and tap **Run workflow**. This takes 10–30 minutes the first time.
 6. **Install it on your iPhone.** Open `https://YOUR-GITHUB-USERNAME.github.io/readout/` in **Safari**. Tap **Share → Add to Home Screen → Add**. It now opens full screen from its own icon.
 
-From then on, the feed updates every morning and the trends every Monday, with no further action from you.
+From then on, the feed updates every night (3:17 AM Eastern, inside NCBI's off-peak hours for large jobs) and the trends every weekend, with no further action from you.
 
 ---
 
@@ -39,7 +39,7 @@ From then on, the feed updates every morning and the trends every Monday, with n
 - Tap a **topic tag** on a card to see only that topic. In **Explore**, tap a topic for its trend page, then **…cards in your feed** to jump back.
 - The **ⓘ** button explains how cards are built.
 - **Most important** (a chip in the feed) lists the papers cited far more than others of the same age. It draws on every paper from your journals over the last three years, ranked by citations against body-imaging papers from the same quarter (NIH iCite). **1 year** and **3 years** show proven original research; **New** covers the last six months, where a paper's journal record stands in until citations arrive. You can include reviews and guidelines, or open the app on this view, in Tune. It's rebuilt every Tuesday.
-- **Interests** (Tune → Interests): papers come from four areas: **nuclear medicine** (every paper in the NM journals), **body imaging**, **cardiac & vascular CT** (TAVR planning, CCTA, CT-FFR, calcium) and **general radiology** (Radiology, AJR, RadioGraphics, JACR). Set each to Off, Less, Normal or More; follow words like "TAVR" to get a **Following** chip; choose which organ-system chips show. Under **Papers** and **Most important**, area chips narrow the list to one area. ACR, SNMMI and SCCT news arrive as **ACR & societies**.
+- **Interests** (Tune → Interests): papers come from four areas: **nuclear medicine** (every paper in the NM journals), **body imaging**, **cardiac & vascular CT** (TAVR planning, CCTA, CT-FFR, calcium) and **general radiology** (Radiology, AJR, RadioGraphics, JACR). Set each to Off, Less, Normal or More; follow words like "TAVR" to get a **Following** chip; choose which organ-system chips show. Under **Papers** and **Most important**, area chips narrow the list to one area. **ACR & societies** carries ACR, SNMMI and RSNA press releases (through Medical Xpress, whose feed terms allow this), SCCT's own news feed, and industry stories that mention a radiology society.
 - **Tune** has four parts (Reading, Interests, Rules, Updates):
   - **Your reading:** what you read and opened over 7 or 30 days, by kind, outlet and organ system, plus what's in your feed right now. It's counted only on your phone.
   - **Feed rules:** how many turns each kind gets in Everything, the per-outlet daily limit, newest-first or ranked paper order (freshness × evidence, study size, labeled conclusion and your organ systems), muted words and outlets, and Explore's trend thresholds. Changes apply on your phone right away.
@@ -102,6 +102,12 @@ cd docs && python -m http.server    # open http://localhost:8000
 - **Updates** install exact package versions checked against their published hashes (`requirements.txt`, generated from `requirements.in` with `pip-compile --generate-hashes`), and use GitHub's own actions pinned to exact commits. Dependabot proposes updates monthly as pull requests; the Tests workflow checks each one before you merge it.
 - **Secrets:** only `NCBI_API_KEY` and `NCBI_EMAIL`, given to the PubMed jobs alone and sent in request bodies, never in web addresses. The news job, which reads the most outside data, gets no secrets. Nothing secret is stored in the app.
 - **Your GitHub account is the key to all of it.** Turn on two-factor authentication (github.com → Settings → Password and authentication) if it isn't already.
+
+### Terms of use
+
+- **PubMed / NCBI:** requests stay within NCBI's rate limits (3 a second, 10 with an API key), carry the tool name and your `NCBI_EMAIL`, and the larger jobs run in NCBI's off-peak hours. The app credits MEDLINE/PubMed and links NCBI's disclaimer and copyright notice. NLM doesn't hold copyright in abstracts; publishers or authors may. Readout shows them for personal, non-commercial reading with credit and a PubMed link.
+- **News:** only outlets whose feeds may be shown on a website, each credited and linked. No Google News feeds (personal use only). ScienceDaily and Medical Xpress items are shown exactly as their feeds supply them, as their terms require.
+- **GitHub:** the jobs build what this repository's site publishes, which is what Actions is for; the site is personal and non-commercial and far under Pages' limits.
 
 ### Limits worth knowing
 

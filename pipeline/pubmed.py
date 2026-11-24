@@ -25,8 +25,10 @@ def fmt(d: date) -> str:
 class PubMed:
     def __init__(self, http: Http):
         self.http = http
-        self.base = {"db": "pubmed", "tool": "readout",
-                     "email": os.environ.get("NCBI_EMAIL", "readout@example.com")}
+        self.base = {"db": "pubmed", "tool": "readout"}
+        email = os.environ.get("NCBI_EMAIL", "").strip()
+        if email:                       # NCBI wants a real address to reach you; send none rather than a made-up one
+            self.base["email"] = email
         key = os.environ.get("NCBI_API_KEY", "").strip()
         if key:
             self.base["api_key"] = key

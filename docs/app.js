@@ -448,7 +448,7 @@ function filtered(f = {}, report = null) {
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
   const only = kind === "all" ? null : kind;
   const tops = T.topCard && system === "all" && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
-  if (kind !== "all") return tops.concat(news.filter((i) => i.kind === kind));
+  if (kind !== "all") return tops.concat(news.filter((i) => i.kind === kind || (i.also || []).includes(kind)));
   // Everything: take turns by weight, each stream newest first (or ranked, for papers), so the
   // newest papers sit at the top even though news arrives hours sooner than PubMed records
   const perSource = new Map();
@@ -992,13 +992,15 @@ function openInfo() {
     el("h3", {}, "News in the feed"),
     el("p", {}, "The feed mixes papers with four kinds of news: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science for everyone (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Smithsonian, Live Science, NASA…) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons, Inverse, Den of Geek…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
-    el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI and SCCT news arrive as “ACR & societies”."),
+    el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Most important"),
     el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),
     el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub."),
     el("h3", {}, "Sources"),
-    el("p", {}, "PubMed (NLM), NIH iCite, ClinicalTrials.gov. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
+    el("p", {}, "Papers from MEDLINE®/PubMed®, a database of the U.S. National Library of Medicine. NLM does not endorse Readout. ",
+      el("a", { href: "https://www.ncbi.nlm.nih.gov/home/about/policies/", target: "_blank", rel: "noopener" }, "NCBI disclaimer and copyright notice"),
+      ". Citation data from NIH iCite; trials from ClinicalTrials.gov. News is each outlet’s own headline and summary, credited and linked; ScienceDaily and Medical Xpress items appear exactly as their feeds supply them. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
 }
 
 // ── explore ────────────────────────────────────────────────────────────────

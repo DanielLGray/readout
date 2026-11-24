@@ -117,8 +117,10 @@ def link_sites(src: dict) -> set:
            {site_of(d) for d in src.get("link_domains", [])}
 
 
-def parse_feed(text: str, source: str, now: datetime) -> list[dict]:
-    """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}]."""
+def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False) -> list[dict]:
+    """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}].
+    verbatim: the outlet's terms say not to edit headlines, text or links (ScienceDaily, Medical
+    Xpress), so the summary isn't shortened and the link keeps every parameter."""
     check_xml(text)
     head = text.lstrip()[:600]
     if "<urlset" in head:
@@ -126,15 +128,16 @@ def parse_feed(text: str, source: str, now: datetime) -> list[dict]:
     d = feedparser.parse(text)
     out = []
     for e in d.entries:
-        title = clean_text(e.get("title", ""))[:300]
-        link = clean_link(e.get("link", "") or "")
+        title = clean_text(e.get("title", ""))
+        title = title if verbatim else title[:300]
+        link = (e.get("link", "") or "").strip() if verbatim else clean_link(e.get("link", "") or "")
         if not title or not link:
             continue
         t = e.get("published_parsed") or e.get("updated_parsed")
         when = datetime(*t[:6], tzinfo=timezone.utc) if t else now
         summary = e.get("summary", "") or (e.get("content") or [{}])[0].get("value", "")
         item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
-                "date": _utc(min(when, now)), "summary": teaser(summary)}
+                "date": _utc(min(when, now)), "summary": clean_text(summary) if verbatim else teaser(summary)}
         audio = _audio(e)                          # podcast episode: playable in the app
         if audio:
             item["audio"] = audio

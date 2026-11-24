@@ -49,6 +49,7 @@ def env(tmp_path, monkeypatch):
             {"name": "SciWire", "kind": "science", "max_per_day": 1, "home": "https://example-sci.test", "urls": ["https://sci.test/feed"]},
         ],
         "categories": {"policy": {"label": "Policy", "words": ["CMS", "Medicare", "fee schedule"]}},
+        "society_mentions": r"\bCMS\b",
     })
     pages = {"https://wire.test/feed": (FIX / "news_rss.xml").read_text(),
              "https://biz.test/atom": (FIX / "news_atom.xml").read_text(),
@@ -63,6 +64,8 @@ def test_build_news(env):
     out = build_news.run(env, NOW)
     by = {s["name"]: s for s in out["sources"]}
     assert by["Wire"]["ok"] and by["Wire"]["url"] == "https://wire.test/feed"     # fell back to 2nd address
+    tagged = [i for i in out["items"] if i.get("also")]
+    assert tagged and all(i["also"] == ["societies"] and "CMS" in i["title"] + i.get("summary", "") for i in tagged)
     assert not by["Dead"]["ok"]
     sci = [i for i in out["items"] if i["kind"] == "science"]
     assert len(sci) == 2 and all(not i["categories"] for i in sci)   # 1 per day cap; 2 different days
@@ -255,3 +258,29 @@ def test_hacked_feed_cannot_add_links_or_entity_tricks():
     http2 = Http(transport=lambda m, u, p: (200, bomb), sleep=lambda s: None, retries=1)
     got2, st2 = build_news.fetch_source(http2, {"name": "O", "home": "https://outlet.test", "urls": ["https://outlet.test/rss"]}, NOW)
     assert got2 == [] and "entities" in st2["tried"][0]
+
+
+def test_no_google_news_and_verbatim_outlets():
+    from pipeline import news
+    from pipeline.common import load_yaml
+    cfg = load_yaml("news.yaml")
+    urls = [u for s in cfg["sources"] for u in s.get("urls", [])]
+    assert not any("news.google.com" in u for u in urls), "Google News terms allow personal use only"
+    assert not any(s.get("google_news") for s in cfg["sources"])
+    assert {s["name"] for s in cfg["sources"] if s.get("verbatim")} >= {"ScienceDaily", "ACR (via Medical Xpress)"}
+    long = "A" + " word" * 120 + "."
+    feed = f"""<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>
+      <item><title>Headline kept as is</title><link>https://www.sciencedaily.com/releases/x.htm?utm_source=feed</link>
+        <description>{long}</description><pubDate>Sun, 22 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>"""
+    v = news.parse_feed(feed, "ScienceDaily", NOW, verbatim=True)[0]
+    assert v["summary"] == long and v["link"].endswith("?utm_source=feed")
+    t = news.parse_feed(feed, "Other", NOW)[0]
+    assert len(t["summary"]) <= 221 and "utm_source" not in t["link"]
+
+
+def test_pubmed_contact_email(monkeypatch):
+    from pipeline.pubmed import PubMed
+    monkeypatch.delenv("NCBI_EMAIL", raising=False)
+    assert "email" not in PubMed(None).base                       # no made-up address
+    monkeypatch.setenv("NCBI_EMAIL", "doc@example.org")
+    assert PubMed(None).base["email"] == "doc@example.org"

@@ -36,7 +36,7 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
     for url in src.get("urls", []):
         try:
             text = http.request("GET", url, {}, expect_json=False)
-            items = news.parse_feed(text, src["name"], now)
+            items = news.parse_feed(text, src["name"], now, verbatim=bool(src.get("verbatim")))
         except (HttpError, Exception) as exc:      # bad address, block, or unreadable feed: try the next
             status["tried"].append(f"{url} → {type(exc).__name__}: {str(exc)[:80]}")
             continue
@@ -65,7 +65,7 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
                     del i["audio"]
             safe.append(i)
         items = safe
-        for i in items:                            # same site, fetched over https: link over https too
+        for i in ([] if src.get("verbatim") else items):    # same site, fetched over https: link over https too
             u = urlparse(i["link"])
             if url.startswith("https:") and u.scheme == "http" and (u.hostname or "").removeprefix("www.") == host:
                 i["link"] = "https:" + i["link"][5:]
@@ -145,7 +145,12 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         return not (skip and skip.search(it["link"] + " " + it["title"])) and \
             not (need and not need.search(it["title"] + " " + it.get("summary", "")))
     items = {k: v for k, v in items.items() if allowed(v)}
+    mentions = re.compile(cfg["society_mentions"]) if cfg.get("society_mentions") else None
     for it in items.values():                  # every run, so word-list changes reach stored stories too
+        it.pop("also", None)
+        if mentions and it.get("kind", "industry") in ("industry", "health") and \
+                mentions.search(it["title"] + " " + it.get("summary", "")):
+            it["also"] = ["societies"]         # an industry story about ACR, SNMMI, RSNA…: under societies too
         if it.get("summary"):                  # and summary clean-up changes (already a teaser: just tidy it)
             it["summary"] = news.clean_text(it["summary"])
         it["categories"] = news.categorize(it, compiled) if it.get("kind", "industry") == "industry" else []
