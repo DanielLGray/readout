@@ -1000,7 +1000,7 @@ function openInfo() {
     el("h3", {}, "Sources"),
     el("p", {}, "Papers from MEDLINE®/PubMed®, a database of the U.S. National Library of Medicine. NLM does not endorse Readout. ",
       el("a", { href: "https://www.ncbi.nlm.nih.gov/home/about/policies/", target: "_blank", rel: "noopener" }, "NCBI disclaimer and copyright notice"),
-      ". Citation data from NIH iCite; trials from ClinicalTrials.gov. News is each outlet’s own headline and summary, credited and linked; ScienceDaily and Medical Xpress items appear exactly as their feeds supply them. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
+      ". Citation data from NIH iCite; trials from ClinicalTrials.gov. News is each outlet’s own headline and summary, credited and linked; outlets whose terms ask for it (ScienceDaily, Medical Xpress, Phys.org, The New York Times) appear exactly as their feeds supply them. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
 }
 
 // ── explore ────────────────────────────────────────────────────────────────

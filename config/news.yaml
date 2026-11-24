@@ -91,6 +91,7 @@ sources:
   # credit stays and headlines and links are left as they are (verbatim). Shared stories go to the
   # society feeds below, which come later and win.
   - name: Medical Xpress Radiology
+    group: sciencex              # Medical Xpress and Phys.org are one publisher (Science X)
     verbatim: true
     max_per_day: 4
     home: https://medicalxpress.com
@@ -176,6 +177,17 @@ sources:
     home: https://kffhealthnews.org
     urls:
       - https://kffhealthnews.org/feed/
+
+  # The Times allows its feeds on a personal, non-commercial site with credit; Readout shows them
+  # exactly as supplied. Many articles need a Times subscription to read in full.
+  - name: New York Times Health
+    kind: health
+    group: nyt
+    verbatim: true
+    max_per_day: 3
+    home: https://www.nytimes.com
+    urls:
+      - https://rss.nytimes.com/services/xml/rss/nyt/Health.xml
 
   - name: NPR Health
     kind: health
@@ -267,6 +279,32 @@ sources:
     home: https://www.npr.org/podcasts/510351/short-wave
     urls:
       - https://feeds.npr.org/510351/podcast.xml
+
+  - name: New York Times Science
+    kind: science
+    group: nyt
+    verbatim: true
+    max_per_day: 3
+    home: https://www.nytimes.com
+    urls:
+      - https://rss.nytimes.com/services/xml/rss/nyt/Science.xml
+
+  # Phys.org allows its feeds on other sites, personal or commercial, if its credit stays and the
+  # text and links are unchanged. Its science topic feeds, not the all-news feed, which also
+  # carries economics and social science.
+  - name: Phys.org
+    kind: science
+    group: sciencex
+    verbatim: true
+    merge: true
+    max_per_day: 4
+    home: https://phys.org
+    urls:
+      - https://phys.org/rss-feed/space-news/
+      - https://phys.org/rss-feed/physics-news/
+      - https://phys.org/rss-feed/earth-news/
+      - https://phys.org/rss-feed/biology-news/
+      - https://phys.org/rss-feed/chemistry-news/
 
   - name: NPR Science
     kind: science
