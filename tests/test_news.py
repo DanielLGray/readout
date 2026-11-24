@@ -185,6 +185,11 @@ def test_skip_rule_clears_stored_stories(env, monkeypatch):
     monkeypatch.setattr(build_news, "load_yaml", lambda name: dict(base, sources=srcs))
     out2 = build_news.run(env, NOW)
     assert not any(i["source"] == "Wire" for i in out2["items"])
+    # an outlet taken off the list takes its stored stories with it
+    assert any(i["source"] == "Biz" for i in out2["items"])
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: dict(base, sources=[s for s in srcs if s["name"] != "Biz"]))
+    out3 = build_news.run(env, NOW)
+    assert not any(i["source"] == "Biz" for i in out3["items"])
 
 
 def test_top_stories_do_not_chain_unrelated_headlines():

@@ -139,7 +139,9 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
              for src in cfg.get("sources", [])}
     sites = {src["name"]: news.link_sites(src) for src in cfg.get("sources", [])}
     def allowed(it):
-        if it["source"] in sites and news.site_of(it["link"]) not in sites[it["source"]]:
+        if it["source"] not in sites:
+            return False                       # outlet taken off the list: its stories go with it
+        if news.site_of(it["link"]) not in sites[it["source"]]:
             return False                       # stored before the outlet's links were checked
         skip, need = rules.get(it["source"], (None, None))
         return not (skip and skip.search(it["link"] + " " + it["title"])) and \

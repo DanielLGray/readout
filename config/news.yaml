@@ -133,6 +133,7 @@ sources:
     max_per_day: 3
     home: https://scct.org
     stale_days: 120
+    merge: true                  # "Society updates" plus the general news feed
     urls:
       - https://scct.org/news/news_rss.asp?cat=11632
       - https://scct.org/news/news_rss.asp
