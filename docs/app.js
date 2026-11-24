@@ -94,7 +94,7 @@ const TUNE_DEFAULTS = {
   order: "newest",      // papers: "newest" or "ranked"
   rank: { fresh: 7, evidence: 1, size: 0.5, concl: 0.5, systems: 1 },   // half-life in days; weights
   fav: [],              // your organ systems (a ranking boost)
-  hidePending: false,   // hide papers whose abstract isn't in PubMed yet
+  hidePending: true,    // hide papers whose abstract isn't in PubMed yet (the conclusion is the card)
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
@@ -120,7 +120,7 @@ function loadTune() {
     cap: Math.max(0, Math.round(num(t.cap, TUNE_DEFAULTS.cap))),
     topCard: typeof t.topCard === "boolean" ? t.topCard : TUNE_DEFAULTS.topCard,
     order: t.order === "ranked" ? "ranked" : "newest",
-    fav: strs(t.fav), hidePending: t.hidePending === true,
+    fav: strs(t.fav), hidePending: typeof t.hidePending === "boolean" ? t.hidePending : TUNE_DEFAULTS.hidePending,
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
@@ -245,9 +245,11 @@ function areaList() {
 }
 const areaShort = (a) => (S.feed?.areas?.[a] || AREA_DEFAULTS[a] || {}).short || a;
 const areasOf = (p) => (p.areas && p.areas.length ? p.areas : ["body"]);     // cards from before areas existed
+// the area chip only applies on Papers and Most important
+const areaPick = () => (["papers", "important"].includes(S.kind) && S.area && S.area !== "all" ? S.area : null);
 // the area a paper counts under: the one you weight most (and, with an area chip, that one)
-function homeArea(p) {
-  const on = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!S.area || S.area === "all" || S.area === a));
+function homeArea(p, only = null) {
+  const on = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!only || only === a));
   return on.sort((x, y) => (T.areas[y] ?? 2) - (T.areas[x] ?? 2))[0] || null;
 }
 function followRe() {
@@ -279,13 +281,13 @@ function importantList(system = "all", strong = false, mute = null) {
   const per = w.research ? { body: w } : w;
   const ids = [];
   for (const [a, lists] of Object.entries(per)) {
-    if ((T.areas[a] ?? 2) <= 0 || (S.area && S.area !== "all" && S.area !== a)) continue;
+    if ((T.areas[a] ?? 2) <= 0 || (areaPick() && areaPick() !== a)) continue;
     ids.push(...(lists.research || []), ...(T.impReviews ? lists.other || [] : []));
   }
   let list = [...new Set(ids)].map((p) => I.papers?.[p]).filter(Boolean).map((p) => ({ ...p, type: "paper" }));
   const best = (p) => {                 // its percentile in the best of your areas
     const pc = p.impact?.pcts || {};
-    const mine = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!S.area || S.area === "all" || S.area === a));
+    const mine = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!areaPick() || areaPick() === a));
     return Math.max(...mine.map((a) => pc[a] ?? p.impact?.pct ?? 0), 0);
   };
   const key = (p) => (win === "6m" ? p.impact?.score || 0 : best(p));
@@ -293,7 +295,8 @@ function importantList(system = "all", strong = false, mute = null) {
   list.forEach((p) => {                 // show the percentile and area that earned its place
     if (!p.impact) return;
     const pc = p.impact.pcts || {};
-    const area = Object.keys(pc).filter((a) => (T.areas[a] ?? 2) > 0).sort((x, y) => pc[y] - pc[x])[0];
+    const area = areaPick() && pc[areaPick()] != null ? areaPick()
+      : Object.keys(pc).filter((a) => (T.areas[a] ?? 2) > 0).sort((x, y) => pc[y] - pc[x])[0];
     if (area) p.impact = { ...p.impact, pct: pc[area], area };
   });
   if (system !== "all") list = list.filter((i) => (i.systems || []).includes(system));
@@ -410,11 +413,12 @@ function filtered(f = {}, report = null) {
   if (system !== "all") papers = papers.filter((i) => (i.systems || []).includes(system));
   if (strong) papers = papers.filter((i) => (i.design?.strength || 0) >= 3);
   if (topic) papers = papers.filter((i) => (i.topics || []).includes(topic));
-  papers = papers.filter((i) => homeArea(i) || (drop("areaOff"), false));
+  const onlyArea = kind === "papers" ? areaPick() : null;
+  papers = papers.filter((i) => homeArea(i, onlyArea) || (!onlyArea && drop("areaOff"), false));
   if (T.order === "ranked") papers = rankPapers(papers);
   // take turns between areas by the weights you set (Tune → Interests)
   const byArea = {};
-  for (const p of papers) (byArea[homeArea(p)] = byArea[homeArea(p)] || []).push(p);
+  for (const p of papers) { const a = homeArea(p, onlyArea); (byArea[a] = byArea[a] || []).push(p); }
   papers = Object.keys(byArea).length > 1 ? interleave(byArea, T.areas) : papers;
   if (topic || strong || kind === "papers") return papers;
   // news
@@ -461,6 +465,9 @@ function currentKey() {
 // keepKey: the card you were reading; the rebuilt feed opens there if it's still in the list
 function refreshFeed(keepKey) {
   S.feedDirty = false;
+  if ((S.kind === "following" && !followRe()) || (S.kind !== "all" && S.kind !== "papers" && S.kind !== "important"
+      && S.kind !== "following" && S.news && !newsKinds()[S.kind])) S.kind = "all";
+  if (S.area && S.area !== "all" && (T.areas[S.area] ?? 2) <= 0) S.area = "all";
   renderChips();
   const view = $("#view-feed");
   view.replaceChildren();
@@ -877,6 +884,7 @@ async function openAbstract(it) {
       ? secs.map((s) => el("section", { class: "abs-sec" + (s.cat === "CONCLUSIONS" ? " key" : "") },
         s.label ? el("h3", {}, s.label) : null, el("p", {}, s.text)))
       : el("p", { class: "sample" }, missing ? "Couldn’t load the abstract (you may be offline). Open it on PubMed instead."
+        : it.abs ? "This abstract is no longer stored in Readout (the paper has left the feed). Open it on PubMed."
         : "PubMed has no abstract for this paper. Open it on PubMed or the journal’s site to read it."),
     el("div", { class: "link-row" }, links, actionsEl(it, false).children[1]));
 }

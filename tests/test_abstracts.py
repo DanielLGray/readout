@@ -286,3 +286,22 @@ def test_titles_tidied_and_translations_unbracketed():
     assert title_fields({"title": "[ 18 F]AlF-NOTA-FAPI-04 PET/CT."})["title"] == "[18F]AlF-NOTA-FAPI-04 PET/CT."
     assert title_fields({"title": "177 Lu-PSMA in glioma : a pilot study."})["title"] == "177Lu-PSMA in glioma: a pilot study."
     assert title_fields({"title": "Outcomes in 18 F patients."})["title"] == "Outcomes in 18 F patients."
+
+
+def test_replies_and_commentaries_are_notices():
+    from pipeline.abstracts import is_notice
+    for t in ["Reply to the Letter to the Editor [123I]Ioflupane Findings", 'Reply to "BI-RADS v2025: Explicit Axillary Staging".',
+              "Response to Clarification of FAPI PET Response Classification", "Invited Commentary: Beyond Dose"]:
+        assert is_notice({"title": t, "pub_types": []}), t
+    assert not is_notice({"title": "Response assessment with PSMA PET after 177Lu-PSMA therapy", "pub_types": []})
+
+
+def test_cardiac_ct_rule_skips_spect_and_pet_ct():
+    from pipeline.abstracts import area_require, passes
+    rule = area_require(load_yaml("feeds.yaml")["areas"])["cardiac"]
+    rec = lambda t: {"title": t, "sections": []}
+    assert passes(rec("Coronary CT angiography before TAVR"), rule) and passes(rec("CCTA-derived plaque burden"), rule)
+    assert passes(rec("Photon-counting detector imaging of stents"), rule)
+    assert not passes(rec("Myocardial perfusion SPECT/CT after His bundle pacing"), rule)
+    assert not passes(rec("Single-photon emission computed tomography in cardiac sarcoidosis"), rule)
+    assert not passes(rec("Rubidium PET/CT myocardial blood flow"), rule)

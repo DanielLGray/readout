@@ -35,6 +35,8 @@ areas:
     short: Cardiac CT
     keep_days: 120
     about: TAVR planning CT, coronary CT angiography, CT-FFR, calcium scoring and vascular CT.
+    # must mention CT itself: "computed tomography" also matches SPECT and PET, and "CT" PET/CT
+    require: '(?<!PET/)(?<!PET-)(?<!SPECT/)(?<!SPECT-)\bCT\b(?!/)|\bCTA\b|CCTA|CT-?FFR|FFR-?CT|[Cc]omputed [Tt]omograph(?:y|ic) [Aa]ngiograph|(?:[Cc]ardiac|[Cc]oronary|[Cc]ardiovascular) [Cc]omputed [Tt]omograph|[Cc]alcium scor|Agatston|[Pp]hoton-counting'
   general:
     label: General radiology
     short: General
@@ -143,8 +145,9 @@ imaging_title: >-
   "Diagnostic Imaging"[majr] OR "Radiopharmaceuticals"[majr] OR "Radiology"[majr]
 
 ct_terms: >-
-  CT[tiab] OR "computed tomography"[tiab] OR CCTA[tiab] OR "CT angiography"[tiab] OR "CT angiographic"[tiab] OR
-  tomographic[tiab] OR "CT-FFR"[tiab] OR FFRCT[tiab] OR "calcium score"[tiab] OR "calcium scoring"[tiab]
+  CT[tiab] OR CCTA[tiab] OR CTA[tiab] OR "CT angiography"[tiab] OR "CT angiographic"[tiab] OR "CT-FFR"[tiab] OR
+  FFRCT[tiab] OR "calcium score"[tiab] OR "calcium scoring"[tiab] OR "computed tomography angiography"[tiab] OR
+  "cardiac computed tomography"[tiab] OR "coronary computed tomography"[tiab] OR "photon-counting"[tiab]
 
 tavr_terms: >-
   TAVR[tiab] OR TAVI[tiab] OR "transcatheter aortic"[tiab] OR "aortic stenosis"[tiab] OR "aortic annulus"[tiab] OR

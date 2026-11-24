@@ -595,7 +595,10 @@ function newsJob() {
 function importantJob() {
   const I = S.important;
   const st = I?.stats || {}, set = I?.settings || {};
-  const sizes = (w) => `${I?.windows?.[w]?.research?.length ?? 0}`;
+  const sizes = (w) => {                // per area since areas came in; one list before
+    const v = I?.windows?.[w] || {};
+    return String(v.research ? v.research.length : new Set(Object.values(v).flatMap((x) => x.research || [])).size);
+  };
   return el("section", { class: "sect job" }, el("h2", {}, JOBS.important.title), el("p", { class: "sub" }, JOBS.important.sub),
     jobStatus("important", I?.generated),
     !I ? el("p", { class: "nothing" }, "Not built yet.") : [
@@ -605,7 +608,7 @@ function importantJob() {
         el("dt", {}, "Reviews and guidelines"), el("dd", {}, (st.other || 0).toLocaleString()),
         el("dt", {}, "Left out (case reports, editorials…)"), el("dd", {}, (st.skipped || 0).toLocaleString()),
         el("dt", {}, "Cited at least once"), el("dd", {}, `${Math.round(100 * (st.with_citations || 0) / Math.max(1, st.kept || 1))}%`),
-        el("dt", {}, "Lists: new, 1 year, 3 years"), el("dd", {}, `${sizes("6m")}, ${sizes("1y")}, ${sizes("3y")}`)),
+        el("dt", {}, "Papers in New, 1 year, 3 years"), el("dd", {}, `${sizes("6m")}, ${sizes("1y")}, ${sizes("3y")}`)),
       (st.journals || []).length ? [el("div", { class: "ctl-label" }, "Journals by citation record"),
         el("p", { class: "fine", style: "margin-top:2px" }, "Average percentile of their papers that are 1 to 3 years old; new papers borrow it."),
         el("dl", { class: "facts small" }, st.journals.slice(0, 10).map(([j, p, n]) => [el("dt", {}, j), el("dd", {}, `${Math.round(p)} · ${n.toLocaleString()} papers`)]))] : null,

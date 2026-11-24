@@ -9,7 +9,9 @@ from datetime import date, timedelta
 from typing import Optional
 
 from . import abstract_store
-from .abstracts import compile_systems, is_notice, refresh, to_card
+from .abstracts import area_require, compile_systems, is_notice, passes, refresh, to_card
+
+NO_ABSTRACT_DAYS = 21      # PubMed adds late abstracts within days; after three weeks none is coming
 from .common import DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import MAX_IDS, PubMed
@@ -43,6 +45,10 @@ def run(http: Optional[Http] = None) -> dict:
     areas_cfg = cfg.get("areas") or {}
     area_of = {s["id"]: s.get("area", "body") for s in cfg["streams"]}
     have = {s for it in items.values() for s in it.get("streams", [])}
+    rules = area_require(areas_cfg)
+    def areas_for(card: dict) -> list:
+        return sorted(a for a in {area_of.get(s, "body") for s in card.get("streams", [])}
+                      if a not in rules or passes(card, rules[a]))
     recheck, first = int(settings.get("recheck_days", 10)), int(settings.get("first_run_days", 45))
 
     # 1 — which PMIDs belong to which stream (a stream new to the feed looks further back)
@@ -87,7 +93,10 @@ def run(http: Optional[Http] = None) -> dict:
         prev = items.get(pmid, {})
         card = to_card(rec, compiled)
         card["streams"] = sorted(found.get(pmid, set()) | set(prev.get("streams", [])))
-        card["areas"] = sorted({area_of.get(s, "body") for s in card["streams"]})
+        card["areas"] = areas_for(card)
+        if not card["areas"]:                         # e.g. a SPECT paper that only reached the cardiac CT search
+            items.pop(pmid, None)
+            continue
         card["topics"] = sorted(topic_hits.get(pmid, set()) | set(prev.get("topics", [])))
         card["seen"] = prev.get("seen") or t.isoformat()
         if not prev:
@@ -99,14 +108,16 @@ def run(http: Optional[Http] = None) -> dict:
     for pmid, it in items.items():
         if pmid not in fetched:
             refresh(it, compiled)
-            it["areas"] = sorted({area_of.get(s, "body") for s in it.get("streams", [])})
+            it["areas"] = areas_for(it)
 
     # 5 — prune and sort
     keep_days = int(settings.get("keep_days", 180))
     keep_for = lambda it: max([int((areas_cfg.get(a) or {}).get("keep_days", keep_days)) for a in it.get("areas", [])]
                               or [keep_days])
     kept = [it for it in items.values()
-            if _age_days(it.get("added") or it.get("seen"), t) <= keep_for(it) and not is_notice(it)]
+            if _age_days(it.get("added") or it.get("seen"), t) <= keep_for(it) and not is_notice(it) and it.get("areas")
+            and not ((it.get("conclusion") or {}).get("kind") == "none"
+                     and _age_days(it.get("added") or it.get("seen"), t) > NO_ABSTRACT_DAYS)]
     kept.sort(key=lambda it: (it.get("added") or "", it.get("seen") or "", int(it["pmid"])), reverse=True)
     kept = kept[: int(settings.get("max_items", 2500))]
     abstract_store.save(DATA / "abstracts", "f", abstract_store.split_out(kept, "f"))

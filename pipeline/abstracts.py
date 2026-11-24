@@ -239,11 +239,29 @@ _NOTICE = re.compile(r"(^\s*(erratum|corrigendum|correction|retraction|retracted
                      r"[:\-–]\s*(erratum|corrigendum|correction|retraction|expression of concern)\.?\s*$)", re.I)
 
 
+# replies in a letters exchange and invited commentaries, often typed as ordinary articles
+_REPLY = re.compile(r"^\s*(?:reply|in reply|authors?['’]? reply|invited commentary|commentary on)\b"
+                    r"|^\s*response to\s*[\"“‘']"           # Response to "Title of the letter"
+                    r"|^\s*response to (?:the )?(?:letter|comments?|clarification|correspondence|criticism|query|concerns?)\b"
+                    r"|\breply to (?:the )?(?:letter|comment)", re.I)
+
+
 def is_notice(rec: dict) -> bool:
-    """Erratum, correction and retraction notices: not papers to read."""
+    """Erratum, correction and retraction notices, replies and invited commentaries: not papers to read."""
     pts = set(rec.get("pub_types", []))
+    title = rec.get("title", "")
     return bool(pts & {"Published Erratum", "Retraction of Publication", "Retraction Notice", "Expression of Concern"}) \
-        or bool(_NOTICE.search(rec.get("title", "")))
+        or bool(_NOTICE.search(title)) or bool(_REPLY.search(title))
+
+
+def area_require(areas_cfg: dict) -> dict:
+    """{area: compiled pattern} for areas whose papers must mention something (cardiac CT: CT)."""
+    return {a: re.compile(v["require"]) for a, v in (areas_cfg or {}).items() if v.get("require")}
+
+
+def passes(rec: dict, pattern) -> bool:
+    text = " ".join([rec.get("title", "")] + [s.get("text", "") for s in rec.get("sections", [])])
+    return bool(pattern.search(text))
 
 
 # ── sample size ─────────────────────────────────────────────────────────────

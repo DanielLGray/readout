@@ -21,7 +21,7 @@ from datetime import date, timedelta
 from typing import Optional
 
 from . import abstract_store, icite
-from .abstracts import compile_systems, is_guideline, is_notice, to_card
+from .abstracts import area_require, compile_systems, is_guideline, is_notice, passes, to_card
 from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import PubMed
@@ -109,8 +109,9 @@ def pick(rows: dict[str, dict], t: date, s: dict, areas: list[str]) -> dict:
                 pool = [r for r in pool if months(r["date"], t) >= s["min_age_months"]]
                 key = lambda r, a=a: (-proven(r, a, t), -r["cites"], r["pmid"])
             pool.sort(key=key)
-            out[w][a] = {"research": [r["pmid"] for r in pool if r["kind"] == "research"][:s["per_window"][w]],
-                         "other": [r["pmid"] for r in pool if r["kind"] == "other"][:s["other_per_window"]]}
+            room = 1.5 if a in s.get("_checked_areas", ()) else 1     # some will fail the area's rule
+            out[w][a] = {"research": [r["pmid"] for r in pool if r["kind"] == "research"][:int(s["per_window"][w] * room)],
+                         "other": [r["pmid"] for r in pool if r["kind"] == "other"][:int(s["other_per_window"] * room)]}
     return out
 
 
@@ -172,6 +173,8 @@ def run(http: Optional[Http] = None) -> dict:
                       "areas": sorted(areas_of.get(pmid) or {"body"}),
                       "cites": m.get("cites", 0), "cpy": m.get("cpy", 0), "rcr": m.get("rcr"), "clin": m.get("clin", 0)}
     jtable = score(rows, t, s)
+    rules = area_require(cfg.get("areas"))
+    s["_checked_areas"] = set(rules)
     windows = pick(rows, t, s, areas)
 
     chosen = list(dict.fromkeys(p for w in windows.values() for per in w.values() for lst in per.values() for p in lst))
@@ -179,15 +182,19 @@ def run(http: Optional[Http] = None) -> dict:
     papers = {}
     for rec in pm.fetch(chosen):
         card = to_card(rec, compiled)
-        if is_notice(card) or rec["pmid"] not in rows:
+        if is_notice(card) or rec["pmid"] not in rows or (card.get("conclusion") or {}).get("kind") == "none":
             continue
         r = rows[rec["pmid"]]
-        card["areas"] = r["areas"]
+        card["areas"] = [a for a in r["areas"] if a not in rules or passes(rec, rules[a])]
+        if not card["areas"]:
+            continue
         card["impact"] = {"pct": r["pct"], "pcts": r["pcts"], "jpct": r["jpct"], "cites": r["cites"], "cpy": r["cpy"], "rcr": r["rcr"],
                           "clin": r["clin"], "age": round(months(r["date"], t), 1), "q": quarter(r["date"]),
                           "kind": r["kind"], "score": r["score"]}
         papers[rec["pmid"]] = card
-    windows = {w: {a: {k: [p for p in lst if p in papers] for k, lst in per.items()} for a, per in v.items()}
+    cap = {"research": lambda w: s["per_window"][w], "other": lambda w: s["other_per_window"]}
+    windows = {w: {a: {k: [p for p in lst if p in papers and a in papers[p]["areas"]][:cap[k](w)] for k, lst in per.items()}
+                   for a, per in v.items()}
                for w, v in windows.items()}
     abstract_store.save(DATA / "abstracts", "i", abstract_store.split_out(list(papers.values()), "i"))
 

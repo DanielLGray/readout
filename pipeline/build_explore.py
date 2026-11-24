@@ -18,7 +18,7 @@ import statistics
 from datetime import date, timedelta
 from typing import Optional
 
-from . import ctgov, icite, terms
+from . import abstract_store, ctgov, icite, terms
 from .abstracts import compile_systems, is_guideline, is_notice, to_card
 from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
@@ -221,6 +221,10 @@ def run(http: Optional[Http] = None) -> dict:
     old = read_json(DATA / "explore.json", {}) or {}
     old_topics = {tp["id"]: tp for tp in old.get("topics", [])}
     old_papers = old.get("papers", {})
+    stored = abstract_store.load(DATA / "abstracts", "e")
+    for p, c in old_papers.items():                 # last week's papers, kept for stale topics
+        if not c.get("sections") and p in stored:
+            c["sections"] = stored[p]
     papers: dict[str, dict] = {}
 
     log("Explore: baseline")
@@ -271,6 +275,7 @@ def run(http: Optional[Http] = None) -> dict:
                          topics=len(tcfg["topics"])),
         "query_notes": {term[:160]: notes for term, notes in pm.warnings.items()},
     }
+    abstract_store.save(DATA / "abstracts", "e", abstract_store.split_out(list(papers.values()), "e"))
     write_json(DATA / "explore.json", out)
     for term, notes in pm.warnings.items():
         log(f"  PubMed note for «{term[:80]}…»: {'; '.join(notes)}")

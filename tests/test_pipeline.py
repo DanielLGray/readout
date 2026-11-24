@@ -64,7 +64,9 @@ def test_explore(env):
     assert topics["psma_pet"]["windows"]["5"]["top"], "top papers present"
     top = out["papers"][topics["psma_pet"]["windows"]["5"]["top"][0]]
     assert top["conclusion"]["text"] and top["metrics"]["cites"] > 0
-    assert top["sections"], "full abstract kept so the app's Abstract button works"
+    import json as _json                       # the full abstract sits beside explore.json for the Abstract button
+    bucket = _json.loads((build_explore.DATA / "abstracts" / f"e{int(top['pmid']) % 50:02d}.json").read_text())
+    assert top["abs"] == "e" and bucket[top["pmid"]]
     for t in out["topics"]:
         for w in t["windows"].values():
             assert all(p in out["papers"] for p in w["top"] + w["guidelines"])
