@@ -217,3 +217,59 @@ topics:
     name: Contrast safety (CA-AKI, gadolinium)
     system: tech_ai
     query: '"gadolinium retention"[tiab] OR "gadolinium deposition"[tiab] OR "contrast-associated acute kidney"[tiab] OR "contrast-induced nephropathy"[tiab] OR "contrast-induced acute kidney"[tiab] OR "post-contrast acute kidney"[tiab] OR "nephrogenic systemic fibrosis"[tiab]'
+
+  # ── cardiac & vascular CT ───────────────────────────────────────────────
+  - id: tavr_ct
+    name: TAVR planning CT
+    system: cardiac
+    query: '("transcatheter aortic valve"[tiab] OR TAVR[tiab] OR TAVI[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR "CT angiography"[tiab])'
+    trials: TAVR CT
+
+  - id: ccta
+    name: Coronary CT angiography & CAD-RADS
+    system: cardiac
+    query: '"coronary CT angiography"[tiab] OR "coronary computed tomography angiography"[tiab] OR CCTA[tiab] OR "CAD-RADS"[tiab]'
+    trials: coronary CT angiography
+
+  - id: ct_ffr_plaque
+    name: CT-FFR & plaque analysis
+    system: cardiac
+    query: '("CT-FFR"[tiab] OR FFRCT[tiab] OR "CT-derived fractional flow reserve"[tiab] OR "plaque analysis"[tiab] OR "pericoronary adipose"[tiab] OR "high-risk plaque"[tiab]) AND (CT[tiab] OR "computed tomography"[tiab])'
+
+  - id: cac
+    name: Coronary artery calcium
+    system: cardiac
+    query: '"coronary artery calcium"[tiab] OR "calcium score"[tiab] OR "calcium scoring"[tiab] OR Agatston[tiab]'
+
+  # ── nuclear medicine beyond the body ────────────────────────────────────
+  - id: amyloid_tau_pet
+    name: Amyloid & tau PET
+    system: neuro
+    query: '(amyloid[tiab] OR tau[tiab]) AND (PET[tiab] OR "positron emission"[tiab])'
+
+  - id: mpi
+    name: Myocardial perfusion PET & SPECT
+    system: cardiac
+    query: '"myocardial perfusion"[tiab] AND (PET[tiab] OR SPECT[tiab] OR "positron emission"[tiab] OR flurpiridaz[tiab])'
+
+  - id: radioiodine
+    name: Radioiodine & thyroid
+    system: thyroid
+    query: '(radioiodine[tiab] OR "radioactive iodine"[tiab] OR "I-131"[tiab] OR "131I"[tiab]) AND thyroid*[tiab]'
+
+  # ── general radiology ───────────────────────────────────────────────────
+  - id: lung_screening
+    name: Lung cancer screening
+    system: chest
+    query: '"lung cancer screening"[tiab] OR "Lung-RADS"[tiab] OR ("low-dose CT"[tiab] AND lung[tiab])'
+    trials: lung cancer screening CT
+
+  - id: incidental_findings
+    name: Incidental findings
+    system: practice
+    query: '("incidental finding"[tiab] OR "incidental findings"[tiab] OR incidentaloma*[tiab]) AND (CT[tiab] OR MRI[tiab] OR imaging[tiab])'
+
+  - id: radiology_workforce
+    name: Workforce & burnout
+    system: practice
+    query: 'radiolog*[tiab] AND (burnout[tiab] OR workforce[tiab] OR workload[tiab] OR staffing[tiab])'

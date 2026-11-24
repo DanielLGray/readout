@@ -213,3 +213,16 @@ def test_only_web_links_reach_the_app():
     links = sorted(i["link"] for i in got)
     assert links == ["https://site.test/ep", "https://site.test/news/relative-story"]
     assert not any(i.get("audio") for i in got)
+
+
+def test_google_news_titles_credit_the_publisher():
+    feed = """<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>
+      <item><title>ACR outlines 2027 fee schedule impact - Radiology Business</title><link>https://news.google.com/rss/articles/abc</link>
+        <description>&lt;a href="x"&gt;ACR outlines 2027 fee schedule impact&lt;/a&gt;&amp;nbsp;&lt;font&gt;Radiology Business&lt;/font&gt;</description>
+        <pubDate>Sun, 22 Nov 2026 10:00:00 GMT</pubDate></item>
+    </channel></rss>"""
+    http = Http(transport=lambda m, u, p: (200, feed), sleep=lambda s: None, retries=1)
+    got, _ = build_news.fetch_source(http, {"name": "ACR", "kind": "societies", "google_news": True,
+                                            "urls": ["https://news.google.com/rss/search?q=x"]}, NOW)
+    assert got[0]["title"] == "ACR outlines 2027 fee schedule impact"
+    assert got[0]["summary"] == "Reported by Radiology Business"

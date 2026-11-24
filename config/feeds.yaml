@@ -6,23 +6,48 @@
 #   • add/remove journals in `journals`
 #   • widen/narrow the body-imaging filter in `body_filter`
 #   • add whole new streams at the bottom
-# Placeholders {journals}, {nm_journals}, {general_journals}, {body_filter},
-# {imaging_terms} and {exclude} are filled in from the blocks below.
+# A placeholder like {journals} or {body_filter} is filled in with the block of
+# that name below; any block can be used this way.
 # Query syntax help: https://pubmed.ncbi.nlm.nih.gov/help/
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
-  first_run_days: 45        # how far back the very first run looks
+  first_run_days: 45        # how far back a stream's very first run looks
   recheck_days: 30          # later runs re-check this many days (abstracts often arrive weeks late)
-  keep_days: 180            # cards older than this drop out of the feed
-  max_items: 900            # hard cap on cards kept in the feed
+  keep_days: 180            # default for areas that don't set their own
+  max_items: 2500           # hard cap on cards kept in the feed
+
+# Interest areas. Every stream below belongs to one. In the app (Tune → Interests) you turn
+# areas on or off and choose how much of the feed each gets. keep_days: how long its papers stay.
+areas:
+  nm:
+    label: Nuclear medicine
+    short: NM
+    keep_days: 60
+    about: Every original paper in the nuclear medicine journals — oncology, theranostics, cardiac, neuro, thyroid.
+  body:
+    label: Body imaging
+    short: Body
+    keep_days: 180
+    about: Abdomen and pelvis in radiology and nuclear medicine journals, plus imaging papers in high-impact clinical journals.
+  cardiac:
+    label: Cardiac & vascular CT
+    short: Cardiac CT
+    keep_days: 120
+    about: TAVR planning CT, coronary CT angiography, CT-FFR, calcium scoring and vascular CT.
+  general:
+    label: General radiology
+    short: General
+    keep_days: 45
+    about: Radiology, AJR, RadioGraphics and JACR — every subspecialty, plus practice, quality and policy.
 
 # "Most important" in the app: every paper from the streams below over the last few years,
-# ranked by citations against papers published in the same quarter (NIH iCite). Built weekly.
+# ranked by citations against papers in the same area published the same quarter (NIH iCite).
+# Built weekly; each area gets its own lists.
 important:
   years: 3                 # how far back to look
-  per_window: {6m: 60, 1y: 80, 3y: 120}   # original research papers kept per list
-  other_per_window: 20     # reviews, meta-analyses and guidelines kept per list (shown if you turn them on)
+  per_window: {6m: 30, 1y: 40, 3y: 60}   # original research papers kept per list, per area
+  other_per_window: 10     # reviews, meta-analyses and guidelines per list and area (shown if you turn them on)
   min_age_months: 4        # the 1- and 3-year lists skip papers younger than this (too new to judge)
 
 # Radiology journals that carry most body-imaging research and education.
@@ -41,12 +66,36 @@ journals:
   - '"Radiol Artif Intell"[ta]'
   - '"J Am Coll Radiol"[ta]'
 
-# Nuclear medicine journals (filtered to body/oncologic content below).
+# Nuclear medicine journals.
 nm_journals:
   - '"J Nucl Med"[ta]'
   - '"Eur J Nucl Med Mol Imaging"[ta]'
   - '"Clin Nucl Med"[ta]'
   - '"Semin Nucl Med"[ta]'
+  - '"J Nucl Cardiol"[ta]'
+  - '"EJNMMI Res"[ta]'
+  - '"Ann Nucl Med"[ta]'
+
+# The core general radiology journals (every subspecialty).
+general_radiology_journals:
+  - '"Radiology"[ta]'
+  - '"AJR Am J Roentgenol"[ta]'
+  - '"Radiographics"[ta]'
+  - '"J Am Coll Radiol"[ta]'
+
+# Cardiovascular imaging journals (CT papers are pulled from these).
+cardiac_journals:
+  - '"J Cardiovasc Comput Tomogr"[ta]'
+  - '"JACC Cardiovasc Imaging"[ta]'
+  - '"Radiol Cardiothorac Imaging"[ta]'
+  - '"Circ Cardiovasc Imaging"[ta]'
+  - '"Eur Heart J Cardiovasc Imaging"[ta]'
+
+# Interventional cardiology journals (TAVR planning-CT papers are pulled from these).
+interventional_journals:
+  - '"JACC Cardiovasc Interv"[ta]'
+  - '"EuroIntervention"[ta]'
+  - '"Catheter Cardiovasc Interv"[ta]'
 
 # High-impact clinical journals — only imaging papers are pulled from these.
 general_journals:
@@ -93,22 +142,62 @@ imaging_title: >-
   theranostic*[ti] OR radioligand*[ti] OR radionuclide*[ti] OR lutetium[ti] OR DOTATATE[ti] OR
   "Diagnostic Imaging"[majr] OR "Radiopharmaceuticals"[majr] OR "Radiology"[majr]
 
+ct_terms: >-
+  CT[tiab] OR "computed tomography"[tiab] OR CCTA[tiab] OR "CT angiography"[tiab] OR "CT angiographic"[tiab] OR
+  tomographic[tiab] OR "CT-FFR"[tiab] OR FFRCT[tiab] OR "calcium score"[tiab] OR "calcium scoring"[tiab]
+
+tavr_terms: >-
+  TAVR[tiab] OR TAVI[tiab] OR "transcatheter aortic"[tiab] OR "aortic stenosis"[tiab] OR "aortic annulus"[tiab] OR
+  "aortic valve replacement"[tiab] OR "valve-in-valve"[tiab] OR "structural heart"[tiab]
+
+cardiac_terms: >-
+  {tavr_terms} OR coronary[tiab] OR cardiac[tiab] OR myocard*[tiab] OR aorta[tiab] OR aortic[tiab] OR
+  "pulmonary vein*"[tiab] OR "left atrial"[tiab] OR endoleak[tiab]
+
 # Publication types that never make a useful card.
 exclude: >-
   "Published Erratum"[pt] OR Editorial[pt] OR Letter[pt] OR Comment[pt] OR News[pt]
 
 streams:
   - id: body_journals
+    area: body
     name: Body imaging — radiology journals
     query: '({journals}) AND ({body_filter}) NOT ({exclude})'
 
   - id: nm_body
+    area: body
     name: Nuclear medicine — body & oncology
     query: '({nm_journals}) AND ({body_filter}) NOT ({exclude})'
 
   - id: general_imaging
+    area: body
     name: High-impact journals — imaging papers
     query: '({general_journals}) AND ({imaging_title}) AND ({body_filter}) NOT ({exclude})'
+
+  - id: nm_all
+    area: nm
+    name: Nuclear medicine journals — everything
+    query: '({nm_journals}) NOT ({exclude} OR "Case Reports"[pt])'
+
+  - id: cardiac_ct
+    area: cardiac
+    name: Cardiovascular imaging journals — CT
+    query: '({cardiac_journals}) AND ({ct_terms}) NOT ({exclude})'
+
+  - id: cardiac_radiology
+    area: cardiac
+    name: Radiology journals — cardiac and vascular CT
+    query: '({journals}) AND ({cardiac_terms}) AND ({ct_terms}) NOT ({exclude})'
+
+  - id: tavr_ct
+    area: cardiac
+    name: Interventional cardiology journals — TAVR planning CT
+    query: '({interventional_journals}) AND ({tavr_terms}) AND ({ct_terms}) NOT ({exclude})'
+
+  - id: general_radiology
+    area: general
+    name: General radiology journals — everything
+    query: '({general_radiology_journals}) NOT ({exclude} OR "Case Reports"[pt])'
 
 # Organ-system chips in the Feed. Each card gets every system whose words
 # appear in its title or abstract (case-insensitive, word-start match).
@@ -131,6 +220,27 @@ systems:
   onc_nm:
     label: Onc & NM
     words: [PET, PSMA, FAPI, DOTATATE, DOTATOC, theranost, radioligand, PRRT, lutetium, 177Lu, Lu-177, SPECT, scintigra, FDG, radiopharm, RECIST, PERCIST, radionuclide]
+  cardiac:
+    label: Cardiac & vascular
+    words: [heart, cardiac, coronary, myocard, aortic valve, aortic stenosis, TAVR, TAVI, transcatheter, annulus, CCTA, CAD-RADS, calcium scor, Agatston, FFR, aorta, aortic, endoleak, carotid, atrial, ventric]
+  chest:
+    label: Chest
+    words: [lung, pulmonary, thorac, pleura, mediastin, emphysema, interstitial, bronch, Lung-RADS, airway]
+  neuro:
+    label: Neuro
+    words: [brain, cerebr, neuro, stroke, glioma, glioblastoma, dementia, Alzheimer, amyloid, tau, Parkinson, epilep, intracranial, head and neck]
+  msk:
+    label: MSK
+    words: [bone, joint, knee, shoulder, hip, musculoskeletal, cartilage, tendon, fracture, osteo, sarcoma, spine, spinal]
+  breast:
+    label: Breast
+    words: [breast, mammogra, BI-RADS, tomosynthesis]
+  thyroid:
+    label: Thyroid & endocrine
+    words: [thyroid, parathyroid, radioiodine, I-131, 131I, Graves, pheochromocytoma, paraganglioma]
+  practice:
+    label: Practice & policy
+    words: [workforce, burnout, reimbursement, Medicare, appropriateness criteria, quality improvement, health policy, CMS, payment, staffing, residency, teleradiology, peer learning, patient experience]
   tech_ai:
     label: Tech & AI
     words: [deep learning, artificial intelligence, machine learning, radiomic, large language, LLM, ChatGPT, GPT-4, photon-counting, photon counting, dual-energy, dual energy, spectral CT, image reconstruction, neural network, foundation model, convolutional]

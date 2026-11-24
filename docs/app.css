@@ -41,6 +41,7 @@
   --h5: #ffe08a;
   --heat-text: #ffb224;
   --cold-text: #9aa6ae;
+  --k-soc: #7fb3d5;         /* ACR & societies: the one cool colour, so they stand apart from industry news */
   --hot-iron: linear-gradient(90deg, #000 0%, var(--h1) 22%, var(--h2) 42%, var(--h3) 62%, var(--h4) 80%, var(--h5) 100%);
 
   --serif: "Literata", "Iowan Old Style", Georgia, serif;
@@ -67,6 +68,7 @@
     --h5: #f2c230;
     --heat-text: #b54708;
     --cold-text: #4f5d68;
+    --k-soc: #2f6f99;
     color-scheme: light;
   }
 }
@@ -146,10 +148,19 @@ a { color: inherit; }
 .card-meta { display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: var(--muted); }
 .card-journal { color: var(--ink); font-weight: 700; }
 .lang { font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; }
+.lang.follow { border-color: var(--heat-text); color: var(--heat-text); }
+.area { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.area:first-of-type { border-top: 1px solid var(--line); }
+.area-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.area .ctl { margin-top: 8px; }
+.pane-seg { grid-template-columns: repeat(4, 1fr) !important; }
+.pane-seg button { font-size: 13px; }
 .impact { font-size: 13px; color: var(--muted); line-height: 1.35; }
 .impact b { color: var(--heat-text); font-weight: 700; }
 .imp-kind { margin-left: 8px; font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; }
 .imp-detail { margin: 8px 0 0; font-size: 14px; color: var(--muted); max-width: 62ch; }
+.chip-sub { font-size: 13px; padding: 5px 11px; }
+.chip-sub[aria-pressed="true"] { background: var(--raise); color: var(--ink); border-color: var(--ink); }
 .chip-imp[aria-pressed="false"] { border-color: var(--heat-text); color: var(--ink); }
 .card-meta .spacer { flex: 1; }
 .tag-new {
@@ -336,6 +347,7 @@ a { color: inherit; }
 .news-card .kind-label[data-kind="health"]::before { background: var(--h2); }
 .news-card .kind-label[data-kind="science"]::before { background: var(--h4); }
 .news-card .kind-label[data-kind="sff"]::before { background: var(--h5); border-radius: 50%; }
+.news-card .kind-label[data-kind="societies"]::before { background: var(--k-soc); }
 .kind-label .pod { margin-left: 10px; color: var(--ink); font-weight: 700; }
 .player { display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 2px; border-top: 1px solid var(--line); position: relative;
   background: var(--panel); }

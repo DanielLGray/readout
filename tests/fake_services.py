@@ -139,6 +139,10 @@ class FakeWorld:
             raise KeyError(f"fake PubMed does not know this query: {term[:120]}")
         k, v = kind
         if k == "stream":
+            if v == "nm_all":              # every paper in the nuclear medicine journals
+                return [p for p in self.papers.values() if p["journal"] in NM]
+            if v == "general_radiology":
+                return [p for p in self.papers.values() if p["journal"] in ("Radiology", "AJR Am J Roentgenol", "Radiographics")]
             return [p for p in self.papers.values() if p["stream"] == v]
         if k == "topic":
             return [p for p in self.papers.values() if v in p["topics"]]

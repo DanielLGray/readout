@@ -35,6 +35,7 @@ settings:
 # Kinds of news, in the order the app shows them. Every outlet below has one.
 kinds:
   industry: Industry news
+  societies: ACR & societies
   health: Health & medicine
   science: Science
   sff: Sci-fi & fantasy
@@ -67,9 +68,44 @@ sources:
 
   - name: Radiology Business
     home: https://radiologybusiness.com
+    group: innovate
     urls:
       - https://radiologybusiness.com/rss.xml
       - https://radiologybusiness.com/feed
+
+  - name: Cardiovascular Business
+    home: https://cardiovascularbusiness.com
+    group: innovate            # sister site of Radiology Business
+    require: "\\bCT\\b|computed tomography|CCTA|imaging|TAVR|TAVI|transcatheter|structural heart|calcium scor|SCCT|FFR|PET|SPECT|MRI"
+    urls:
+      - https://cardiovascularbusiness.com/rss.xml
+      - https://cardiovascularbusiness.com/feed
+
+  # Societies. ACR, SNMMI and SCCT publish no news feed, so these are Google News searches for
+  # coverage of them; headlines end in " - Publisher", which google_news strips.
+  - name: ACR
+    kind: societies
+    google_news: true
+    max_per_day: 3
+    home: https://www.acr.org/news-and-publications/media-center
+    urls:
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22American+College+of+Radiology%22+OR+%22ACR+appropriateness%22
+
+  - name: SNMMI
+    kind: societies
+    google_news: true
+    max_per_day: 3
+    home: https://snmmi.org
+    urls:
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22SNMMI%22+OR+%22Society+of+Nuclear+Medicine+and+Molecular+Imaging%22
+
+  - name: SCCT
+    kind: societies
+    google_news: true
+    max_per_day: 3
+    home: https://scct.org
+    urls:
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22Society+of+Cardiovascular+Computed+Tomography%22+OR+%22SCCT%22+cardiac
 
   - name: Imaging Technology News
     home: https://www.itnonline.com

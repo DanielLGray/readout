@@ -8,7 +8,7 @@ const REPO = location.hostname.endsWith("github.io")
 const GH = `https://github.com/${REPO}`;
 const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "" };
 
-const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", health: "var(--h2)", science: "var(--h4)", sff: "var(--h5)" };
+const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)", sff: "var(--h5)" };
 const kindColor = (k) => KIND_COLOR[k] || "var(--muted)";
 const kindLabel = (k) => (k === "paper" ? "Papers" : newsKinds()[k] || k);
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
@@ -78,7 +78,7 @@ function setPane(p, anchor) {
 function renderTune(keepScroll) {
   const view = $("#view-tune");
   const top = view.scrollTop;
-  const panes = { reading: readingPane, algorithms: algoPane, pipeline: pipelinePane };
+  const panes = { reading: readingPane, interests: interestsPane, algorithms: algoPane, pipeline: pipelinePane };
   if (!panes[TU.pane]) TU.pane = "reading";
   let body;
   try { body = panes[TU.pane](); } catch (err) {
@@ -90,7 +90,7 @@ function renderTune(keepScroll) {
   }
   view.replaceChildren(el("div", { class: "tune" },
     el("div", { class: "seg pane-seg", role: "tablist", "aria-label": "Tune sections" },
-      [["reading", "Your reading"], ["algorithms", "Feed rules"], ["pipeline", "Updates"]].map(([k, l]) =>
+      [["reading", "Reading"], ["interests", "Interests"], ["algorithms", "Rules"], ["pipeline", "Updates"]].map(([k, l]) =>
         el("button", { role: "tab", "aria-selected": String(TU.pane === k), "aria-pressed": String(TU.pane === k), onclick: () => setPane(k) }, l))),
     body));
   view.scrollTop = keepScroll ? top : 0;
@@ -192,11 +192,79 @@ function feedNowSection() {
     R.off ? `${R.off.toLocaleString()} from kinds you turned off` : null,
     R.muted ? `${R.muted.toLocaleString()} muted` : null,
     R.pending ? `${R.pending.toLocaleString()} papers waiting for an abstract` : null,
+    R.areaOff ? `${R.areaOff.toLocaleString()} papers from areas you turned off` : null,
+    R.dupes ? `${R.dupes.toLocaleString()} repeat headlines` : null,
   ].filter(Boolean);
   return tsec("Your feed right now", `Everything has ${plural(list.length, "card")}, going back ${S.feed?.settings?.keep_days || 180} days for papers.`,
     stack(parts), legend(parts),
     left.length ? el("p", { class: "fine" }, `Left out of Everything: ${left.join("; ")}. Each kind’s chip still shows its full list.`) : null,
     el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => setPane("algorithms") }, "Change the mix")));
+}
+
+// ── interests ──────────────────────────────────────────────────────────────
+const FOLLOW_IDEAS = ["TAVR", "PSMA", "FAPI", "theranostics", "LI-RADS", "CAD-RADS", "photon-counting", "appropriateness criteria", "amyloid", "incidental"];
+function interestsPane() {
+  const feedN = {}, impN = {};
+  (S.feed?.items || []).forEach((p) => areasOf(p).forEach((a) => { feedN[a] = (feedN[a] || 0) + 1; }));
+  Object.values(S.important?.papers || {}).forEach((p) => areasOf(p).forEach((a) => { impN[a] = (impN[a] || 0) + 1; }));
+  const setArea = (a, v) => {
+    const next = { ...T.areas, [a]: Number(v) };
+    if (!areaList().some(([k]) => (next[k] ?? 2) > 0)) { toast("Keep at least one area on"); return; }
+    setTune({ areas: next }); if (S.area === a && !v) S.area = "all"; rerender();
+  };
+  const re = followRe();
+  const count = (term) => {
+    const r = new RegExp(`(?:^|[^\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "iu");
+    return (S.feed?.items || []).filter((p) => r.test(`${p.title} ${p.conclusion?.text || ""}`)).length
+      + (S.news?.items || []).filter((n) => r.test(`${n.title} ${n.summary || ""}`)).length;
+  };
+  const input = el("input", { type: "text", class: "text-in", placeholder: "A word or phrase, like TAVR", "aria-label": "Word to follow",
+    value: TU.followDraft || "", autocapitalize: "off", autocomplete: "off", enterkeyhint: "done" });
+  const add = (w0) => {
+    const w = (w0 ?? input.value).trim();
+    TU.followDraft = "";
+    if (!w || T.follow.some((x) => x.toLowerCase() === w.toLowerCase())) { input.value = ""; return; }
+    setTune({ follow: [...T.follow, w] }); toast(`Following “${w}”`); rerender();
+  };
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
+  input.addEventListener("input", () => { TU.followDraft = input.value; });
+  const systems = S.feed?.systems || {};
+  return [
+    el("p", { class: "lede small" }, "What Readout brings you. Changes here apply on this phone right away."),
+    el("section", { class: "sect", id: "tune-areas" }, el("h2", {}, "Areas"),
+      el("p", { class: "sub" }, "How much of your feed each area gets. Off hides it everywhere: Everything, Papers and Most important."),
+      areaList().map(([a, info]) => el("div", { class: "area" },
+        el("div", { class: "area-head" }, el("b", {}, info.label || a),
+          el("span", { class: "fine", style: "margin:0" }, `${(feedN[a] || 0).toLocaleString()} in the feed · ${(impN[a] || 0).toLocaleString()} most important`)),
+        info.about ? el("p", { class: "fine", style: "margin:2px 0 0" }, info.about) : null,
+        segPick(null, [[0, "Off"], [1, "Less"], [2, "Normal"], [3, "More"]], T.areas[a] ?? 2, (v) => setArea(a, v))))),
+    el("section", { class: "sect", id: "tune-follow" }, el("h2", {}, "Following"),
+      el("p", { class: "sub" }, "Papers and news that mention these get a Following chip of their own and a tag on the card."),
+      el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: () => add() }, "Follow")),
+      T.follow.length ? el("div", { class: "chips wrap" }, T.follow.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Stop following ${w}`,
+        onclick: () => { setTune({ follow: T.follow.filter((x) => x !== w) }); rerender(); } }, `${w} · ${count(w)}  ✕`))) : null,
+      el("div", { class: "ctl-label" }, "Ideas"),
+      el("div", { class: "chips wrap" }, FOLLOW_IDEAS.filter((w) => !T.follow.some((x) => x.toLowerCase() === w.toLowerCase()))
+        .map((w) => el("button", { class: "chip", onclick: () => add(w) }, `+ ${w}`))),
+      re ? el("p", { class: "fine" }, `${plural(followingList(null).length, "item")} match right now.`) : null),
+    el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
+      el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
+      el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
+        onclick: () => { setTune({ hiddenSystems: T.hiddenSystems.includes(k) ? T.hiddenSystems.filter((x) => x !== k) : [...T.hiddenSystems, k] }); rerender(); } }, label)))),
+    el("section", { class: "sect" }, el("h2", {}, "News"),
+      el("p", { class: "sub" }, `${Object.values(newsKinds()).join(", ")}. Turn kinds up, down or off in Rules → Feed mix; mute single outlets in Rules → Mute.`),
+      el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => setPane("algorithms") }, "Open Rules"))),
+    el("section", { class: "sect" }, el("h2", {}, "Change what Readout fetches"),
+      el("p", { class: "sub" }, "The areas’ journals and searches, the news outlets and the Explore topics live in files on GitHub. Edit one there and the next update uses it."),
+      settingsList([
+        ...areaList().map(([a, info]) => `${info.label || a}: ${(info.streams || []).length || "—"} PubMed searches; papers stay ${info.keep_days || 180} days.`),
+        `${(S.news?.sources || []).length} news outlets; ${(S.explore?.topics || []).length} Explore topics.`,
+      ]),
+      el("div", { class: "link-row" },
+        linkBtn(`${GH}/edit/main/config/feeds.yaml`, "Areas and journals"),
+        linkBtn(`${GH}/edit/main/config/news.yaml`, "News outlets"),
+        linkBtn(`${GH}/edit/main/config/topics.yaml`, "Explore topics"))),
+  ];
 }
 
 // ── feed rules ─────────────────────────────────────────────────────────────

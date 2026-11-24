@@ -31,10 +31,22 @@ def test_feed_first_run_then_update(env):
     assert "©" not in it["conclusion"]["text"]
     assert any(i["topics"] for i in items)
     assert any(i["systems"] for i in items)
-    assert set(out["streams"]) == {"body_journals", "nm_body", "general_imaging"}
-    # second run merges, keeps 'seen'
+    from pipeline.common import load_yaml
+    assert set(out["streams"]) == {s["id"] for s in load_yaml("feeds.yaml")["streams"]}
+    # every card names its interest areas; NM-journal body papers are in both
+    assert all(i["areas"] for i in items)
+    assert any({"nm", "body"} <= set(i["areas"]) for i in items) and any(i["areas"] == ["general"] or "general" in i["areas"] for i in items)
+    assert out["areas"]["nm"]["count"] > 0 and out["areas"]["nm"]["label"] == "Nuclear medicine"
+    # abstracts live beside feed.json, not in it
+    assert all("sections" not in i for i in items) and any(i.get("abs") == "f" for i in items)
+    import json as _json
+    some = next(i for i in items if i.get("abs"))
+    bucket = _json.loads((build_feed.DATA / "abstracts" / f"f{int(some['pmid']) % 50:02d}.json").read_text())
+    assert bucket[some["pmid"]][0]["text"]
+    # second run merges, keeps 'seen', and still has every abstract
     out2 = build_feed.run(http)
     assert {i["pmid"] for i in items} <= {i["pmid"] for i in out2["items"]}
+    assert sum(1 for i in out2["items"] if i.get("abs")) == sum(1 for i in items if i.get("abs"))
 
 
 def test_explore(env):
@@ -130,15 +142,18 @@ def test_important_papers(env, monkeypatch):
     st = out["stats"]
     assert st["checked"] > 500 and st["skipped"] > 0 and st["research"] > st["other"] > 0
     for w in ("6m", "1y", "3y"):
-        lst = out["windows"][w]["research"]
-        assert lst and all(p in out["papers"] for p in lst)
-        assert all(out["papers"][p]["impact"]["kind"] == "research" for p in lst)
-    # proven lists: ranked by same-quarter citation percentile, nothing too new to judge
-    pcts = [out["papers"][p]["impact"]["pct"] for p in out["windows"]["3y"]["research"]]
+        for area in ("body", "nm"):
+            lst = out["windows"][w][area]["research"]
+            assert lst and all(p in out["papers"] for p in lst)
+            assert all(out["papers"][p]["impact"]["kind"] == "research" and area in out["papers"][p]["areas"] for p in lst)
+    # proven lists: ranked by citation percentile within the area and quarter, nothing too new to judge
+    pcts = [out["papers"][p]["impact"]["pcts"]["body"] for p in out["windows"]["3y"]["body"]["research"]]
     assert pcts == sorted(pcts, reverse=True) and pcts[0] >= 95
-    assert all(out["papers"][p]["impact"]["age"] >= 4 for p in out["windows"]["1y"]["research"])
-    # cards carry the authors' conclusion like the feed
-    card = out["papers"][out["windows"]["1y"]["research"][0]]
+    assert all(out["papers"][p]["impact"]["age"] >= 4 for p in out["windows"]["1y"]["nm"]["research"])
+    assert st["areas"]["nm"] > 0
+    # cards carry the authors' conclusion like the feed; the abstract sits beside the file
+    card = out["papers"][out["windows"]["1y"]["body"]["research"][0]]
+    assert card["abs"] == "i" and "sections" not in card
     assert card["conclusion"]["text"] and card["impact"]["cites"] >= 0
     assert out["stats"]["journals"] and all(0 <= j[1] <= 100 for j in out["stats"]["journals"])
     # second run reuses the corpus cache
@@ -166,3 +181,14 @@ def test_summaries_date_papers_by_first_appearance():
     pm = PubMed(Http(transport=lambda m, u, p: (200, _json.dumps(body)), sleep=lambda s: None))
     s = pm.summaries(["1"])[0]
     assert s["first"] == "2025-08-14" and s["date"] == "2026-06-01"
+
+
+def test_config_ids_are_unique_and_systems_exist():
+    from collections import Counter
+    from pipeline.common import load_yaml
+    cfg, tcfg = load_yaml("feeds.yaml"), load_yaml("topics.yaml")
+    for name, ids in (("topics", [t["id"] for t in tcfg["topics"]]), ("streams", [s["id"] for s in cfg["streams"]])):
+        dup = [k for k, n in Counter(ids).items() if n > 1]
+        assert not dup, f"duplicate {name}: {dup}"
+    assert all(t["system"] in cfg["systems"] for t in tcfg["topics"])
+    assert all(s.get("area", "body") in cfg["areas"] for s in cfg["streams"])

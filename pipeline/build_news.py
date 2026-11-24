@@ -58,6 +58,13 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
                 i["link"] = "https:" + i["link"][5:]
         if skip:
             items = [i for i in items if not skip.search(i["link"] + " " + i["title"])]
+        if src.get("google_news"):                 # "Headline - Publisher": keep the headline, credit the publisher
+            for i in items:
+                m = re.match(r"^(.*\S)\s+[-–]\s+([^-–]{2,60})$", i["title"])
+                if m:
+                    i["title"], i["summary"] = m.group(1), f"Reported by {m.group(2).strip()}"
+                elif i.get("summary", "").lower().startswith(i["title"].lower()[:40]):
+                    i["summary"] = ""
         if need:
             items = [i for i in items if need.search(i["title"] + " " + i.get("summary", ""))]
         if not items:

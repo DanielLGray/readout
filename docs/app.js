@@ -85,7 +85,10 @@ const S = {
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
-  mix: { paper: 2, industry: 1, science: 1, health: 1, sff: 1 },   // turns per round in Everything
+  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, sff: 1 },   // turns per round in Everything
+  areas: { body: 3, nm: 2, cardiac: 2, general: 1 },   // interest areas: 0 off, 1 less, 2 normal, 3 more
+  follow: [],           // words and phrases you follow (the Following chip)
+  hiddenSystems: [],    // organ-system chips you don't want in the chip row
   cap: 2,               // most stories per outlet per day in Everything (industry news exempt); 0 = no limit
   topCard: true,        // open the feed with stories several outlets covered
   order: "newest",      // papers: "newest" or "ranked"
@@ -105,13 +108,15 @@ function loadTune() {
   const t = obj(store.get("tune", {}));
   const mix = {};
   for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.mix, ...obj(t.mix) })) mix[k] = Math.max(0, Math.min(4, Math.round(num(v, 1))));
+  const areas = {};
+  for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.areas, ...obj(t.areas) })) areas[k] = Math.max(0, Math.min(3, Math.round(num(v, 2))));
   const rank = {};
   for (const [k, v] of Object.entries(TUNE_DEFAULTS.rank)) rank[k] = Math.max(0, num(obj(t.rank)[k], v));
   if (!rank.fresh) rank.fresh = TUNE_DEFAULTS.rank.fresh;      // a half-life must be > 0
   const trend = Object.fromEntries(Object.entries(obj(t.trend))
     .filter(([k, v]) => ["breakout", "rising", "cooling", "minScale"].includes(k) && typeof v === "number" && isFinite(v)));
   return {
-    mix, rank,
+    mix, rank, areas, follow: strs(t.follow), hiddenSystems: strs(t.hiddenSystems),
     cap: Math.max(0, Math.round(num(t.cap, TUNE_DEFAULTS.cap))),
     topCard: typeof t.topCard === "boolean" ? t.topCard : TUNE_DEFAULTS.topCard,
     order: t.order === "ranked" ? "ranked" : "newest",
@@ -214,7 +219,7 @@ function topicName(id) {
   return S.feed?.topics?.[id]?.name || S.explore?.topics?.find((t) => t.id === id)?.name || id;
 }
 
-const MIX_ORDER = ["paper", "industry", "science", "health", "sff"];   // ties go in this order
+const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "sff"];   // ties go in this order
 
 // Everything takes turns: a kind with weight w gets w turns per round, spread evenly.
 // Card j of a kind sits at (j + phase) / w; staggered phases keep kinds from bunching up,
@@ -231,6 +236,38 @@ function interleave(queues, weights) {
   return slots.map((x) => x[2]);
 }
 
+// ── interest areas (Tune → Interests) ──────────────────────────────────────
+const AREA_DEFAULTS = { body: { label: "Body imaging", short: "Body" }, nm: { label: "Nuclear medicine", short: "NM" },
+  cardiac: { label: "Cardiac & vascular CT", short: "Cardiac CT" }, general: { label: "General radiology", short: "General" } };
+function areaList() {
+  const a = S.feed?.areas && Object.keys(S.feed.areas).length ? S.feed.areas : AREA_DEFAULTS;
+  return Object.entries(a);
+}
+const areaShort = (a) => (S.feed?.areas?.[a] || AREA_DEFAULTS[a] || {}).short || a;
+const areasOf = (p) => (p.areas && p.areas.length ? p.areas : ["body"]);     // cards from before areas existed
+// the area a paper counts under: the one you weight most (and, with an area chip, that one)
+function homeArea(p) {
+  const on = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!S.area || S.area === "all" || S.area === a));
+  return on.sort((x, y) => (T.areas[y] ?? 2) - (T.areas[x] ?? 2))[0] || null;
+}
+function followRe() {
+  const w = (T.follow || []).map((x) => x.trim()).filter(Boolean);
+  if (!w.length) return null;
+  return new RegExp(`(?:^|[^\\p{L}\\p{N}])(?:${w.map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "iu");
+}
+const followHit = (it, re = followRe()) => !!re && re.test(`${it.title} ${it.conclusion?.text || it.summary || ""}`);
+function followingList(mute) {
+  const re = followRe();
+  if (!re) return [];
+  const seen = new Set();
+  const papers = (S.feed?.items || []).concat(Object.values(S.important?.papers || {}))
+    .filter((p) => !seen.has(p.pmid) && seen.add(p.pmid) && followHit(p, re) && homeArea(p))
+    .map((p) => ({ ...p, type: "paper", _when: (p.epub || p.added || "") }));
+  const news = (S.news?.items || []).filter((n) => followHit(n, re) && !(T.mutedSources || []).includes(n.source))
+    .map((n) => ({ ...n, type: "news", kind: kindOf(n), _when: (n.date || "").slice(0, 10) }));
+  return papers.concat(news).filter((i) => !(mute && mute.test(i.title))).sort((a, b) => (a._when < b._when ? 1 : -1));
+}
+
 // ── most important papers: ranked weekly by citations against same-quarter papers ──
 const IMP_WINDOWS = [["6m", "New"], ["1y", "1 year"], ["3y", "3 years"]];
 function importantList(system = "all", strong = false, mute = null) {
@@ -238,12 +275,27 @@ function importantList(system = "all", strong = false, mute = null) {
   if (!I) return [];
   const win = I.windows?.[S.impWin] ? S.impWin : "1y";
   const w = I.windows?.[win] || {};
-  const rank = new Map((w.research || []).concat(T.impReviews ? w.other || [] : []).map((p, i) => [p, i]));
-  let list = [...rank.keys()].map((p) => I.papers?.[p]).filter(Boolean).map((p) => ({ ...p, type: "paper" }));
-  if (T.impReviews) {                // one list: new by blended score, proven by citation percentile
-    const key = (p) => (win === "6m" ? p.impact?.score : p.impact?.pct) || 0;
-    list.sort((a, b) => key(b) - key(a) || (b.impact?.cites || 0) - (a.impact?.cites || 0));
+  // per area since areas came in ({area: {research, other}}); one list before that
+  const per = w.research ? { body: w } : w;
+  const ids = [];
+  for (const [a, lists] of Object.entries(per)) {
+    if ((T.areas[a] ?? 2) <= 0 || (S.area && S.area !== "all" && S.area !== a)) continue;
+    ids.push(...(lists.research || []), ...(T.impReviews ? lists.other || [] : []));
   }
+  let list = [...new Set(ids)].map((p) => I.papers?.[p]).filter(Boolean).map((p) => ({ ...p, type: "paper" }));
+  const best = (p) => {                 // its percentile in the best of your areas
+    const pc = p.impact?.pcts || {};
+    const mine = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!S.area || S.area === "all" || S.area === a));
+    return Math.max(...mine.map((a) => pc[a] ?? p.impact?.pct ?? 0), 0);
+  };
+  const key = (p) => (win === "6m" ? p.impact?.score || 0 : best(p));
+  list.sort((a, b) => key(b) - key(a) || (b.impact?.cites || 0) - (a.impact?.cites || 0));
+  list.forEach((p) => {                 // show the percentile and area that earned its place
+    if (!p.impact) return;
+    const pc = p.impact.pcts || {};
+    const area = Object.keys(pc).filter((a) => (T.areas[a] ?? 2) > 0).sort((x, y) => pc[y] - pc[x])[0];
+    if (area) p.impact = { ...p.impact, pct: pc[area], area };
+  });
   if (system !== "all") list = list.filter((i) => (i.systems || []).includes(system));
   if (strong) list = list.filter((i) => (i.design?.strength || 0) >= 3);
   if (mute) list = list.filter((i) => !mute.test(i.title));
@@ -254,7 +306,7 @@ function impactEl(it) {
   const m = it.impact;
   if (!m) return null;
   const lead = m.age >= 4
-    ? el("b", {}, `${topPct(m.pct)[0].toUpperCase()}${topPct(m.pct).slice(1)} for citations`)
+    ? el("b", {}, `${topPct(m.pct)[0].toUpperCase()}${topPct(m.pct).slice(1)} for citations${m.area ? ` (${areaShort(m.area)})` : ""}`)
     : [el("b", {}, "New"), ` · ${it.journal} papers usually rank in the ${topPct(m.jpct)}`];
   return el("div", { class: "impact" }, lead,
     m.age >= 4 ? ` · ${plural(m.cites, "citation")}` : null,
@@ -306,24 +358,35 @@ function renderChips() {
     box.append(el("button", { class: "chip chip-topic", "aria-pressed": "true", onclick: () => { S.topic = null; refreshFeed(); } },
       `${topicName(S.topic)}  ✕`));
   }
-  const kinds = [["all", "Everything"], ["papers", "Papers"], ...(S.important ? [["important", "Most important"]] : []), ...Object.entries(newsKinds())];
-  for (const [k, label] of kinds) {
-    box.append(el("button", { class: "chip" + (k === "important" ? " chip-imp" : ""), "aria-pressed": String(S.kind === k && !S.topic),
-      onclick: () => { S.kind = k; S.topic = null; if (!["papers", "all", "important"].includes(k)) S.strong = false; refreshFeed(); } }, label));
+  const kindChip = ([k, label]) => el("button", { class: "chip" + (k === "important" ? " chip-imp" : ""), "aria-pressed": String(S.kind === k && !S.topic),
+    onclick: () => { S.kind = k; S.topic = null; if (!["papers", "all", "important"].includes(k)) S.strong = false; refreshFeed(); } }, label);
+  const sep = () => el("span", { class: "chip-sep", "aria-hidden": "true" });
+  // papers first, with their sub-filters right beside them; then news
+  box.append(...[["all", "Everything"], ["papers", "Papers"], ...(S.important ? [["important", "Most important"]] : []),
+    ...(followRe() ? [["following", "Following"]] : [])].map(kindChip));
+  const onAreas = areaList().filter(([a]) => (T.areas[a] ?? 2) > 0);
+  if ((S.kind === "papers" || S.kind === "important") && !S.topic && onAreas.length > 1) {   // one area at a time
+    box.append(sep());
+    for (const [a, info] of [["all", { short: "All areas" }], ...onAreas]) {
+      box.append(el("button", { class: "chip chip-sub", "aria-pressed": String((S.area || "all") === a),
+        onclick: () => { S.area = a; refreshFeed(); } }, info.short || info.label || a));
+    }
   }
   if (S.kind === "important" && !S.topic) {          // which list: new, or proven over 1 or 3 years
-    box.append(el("span", { class: "chip-sep", "aria-hidden": "true" }));
+    box.append(sep());
     for (const [w, label] of IMP_WINDOWS) {
-      box.append(el("button", { class: "chip", "aria-pressed": String(S.impWin === w),
+      box.append(el("button", { class: "chip chip-sub", "aria-pressed": String(S.impWin === w),
         onclick: () => { S.impWin = w; store.set("impWin", w); refreshFeed(); } }, label));
     }
   }
+  box.append(sep(), ...Object.entries(newsKinds()).map(kindChip));
   box.append(el("span", { class: "chip-sep", "aria-hidden": "true" }));
   box.append(el("button", { class: "chip", "aria-pressed": String(S.strong),
     onclick: () => { S.strong = !S.strong; if (S.strong && !["papers", "important"].includes(S.kind)) S.kind = "papers"; refreshFeed(); } }, "Strong evidence"));
   box.append(el("span", { class: "chip-sep", "aria-hidden": "true" }));
   const systems = S.feed?.systems || {};
   for (const [k, label] of Object.entries(systems)) {
+    if (T.hiddenSystems.includes(k) && S.system !== k) continue;
     box.append(el("button", { class: "chip", "aria-pressed": String(S.system === k),
       onclick: () => { S.system = S.system === k ? "all" : k; refreshFeed(); } }, label));
   }
@@ -339,6 +402,7 @@ function filtered(f = {}, report = null) {
   const mute = mutedRe();
   const mutedSrc = new Set(T.mutedSources || []);
   if (kind === "important") return importantList(system, strong, mute);
+  if (kind === "following") return followingList(mute);
   // papers
   let papers = (S.feed?.items || []).map((i) => ({ ...i, type: "paper" }));
   if (T.hidePending) papers = papers.filter((i) => (i.conclusion?.kind || "none") !== "none" || (drop("pending"), false));
@@ -346,7 +410,12 @@ function filtered(f = {}, report = null) {
   if (system !== "all") papers = papers.filter((i) => (i.systems || []).includes(system));
   if (strong) papers = papers.filter((i) => (i.design?.strength || 0) >= 3);
   if (topic) papers = papers.filter((i) => (i.topics || []).includes(topic));
+  papers = papers.filter((i) => homeArea(i) || (drop("areaOff"), false));
   if (T.order === "ranked") papers = rankPapers(papers);
+  // take turns between areas by the weights you set (Tune → Interests)
+  const byArea = {};
+  for (const p of papers) (byArea[homeArea(p)] = byArea[homeArea(p)] || []).push(p);
+  papers = Object.keys(byArea).length > 1 ? interleave(byArea, T.areas) : papers;
   if (topic || strong || kind === "papers") return papers;
   // news
   let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
@@ -370,7 +439,15 @@ function filtered(f = {}, report = null) {
     (queues[n.kind] = queues[n.kind] || []).push(n);
   }
   for (const [k, q] of Object.entries(queues)) if (q.length && (T.mix[k] ?? 1) <= 0) drop("off", q.length);
-  return tops.concat(interleave(queues, T.mix));
+  // the same headline from two outlets (a society story an industry site also ran): show it once
+  const said = new Set();
+  return tops.concat(interleave(queues, T.mix).filter((i) => {
+    if (i.type !== "news") return true;
+    const key = i.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    if (said.has(key)) { drop("dupes"); return false; }
+    said.add(key);
+    return true;
+  }));
 }
 
 let feedObserver, seenObserver;
@@ -505,6 +582,7 @@ function newsCardEl(it) {
     el("div", { class: "card-meta" },
       el("span", { class: "card-journal" }, it.source),
       el("span", {}, agoShort(it.date)),
+      followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     el("div", { class: "kind-label", "data-kind": it.kind },
@@ -617,6 +695,7 @@ function paperCardEl(it) {
       el("span", { class: "card-journal" }, it.journal),
       el("span", {}, fmtDate(it.epub || it.added)),
       it.translated ? el("span", { class: "lang", title: "PubMed’s English translation of the title" }, it.language ? `In ${it.language}` : "Translated title") : null,
+      followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     impactEl(it),
@@ -700,6 +779,9 @@ function toggleSave(it, btn) {
     toast("Removed from Saved");
   } else {
     S.saved[key] = Object.assign({}, it, { savedAt: Date.now() });
+    if (!it.sections && it.abs) {        // keep the abstract with the saved copy, for when it leaves the feed
+      sectionsOf(it).then((secs) => { if (S.saved[key] && secs.length) { S.saved[key].sections = secs; store.set("saved", S.saved); } }).catch(() => {});
+    }
     bump("save", it);
     toast("Saved");
   }
@@ -758,10 +840,22 @@ function closeSheet() {
   refocus(sheetOpener);
 }
 
-function openAbstract(it) {
+// abstracts sit beside the data files in small buckets (pipeline/abstract_store.py)
+const absCache = new Map();
+async function sectionsOf(it) {
+  if (it.sections) return it.sections;
+  if (!it.abs || !it.pmid) return [];
+  const name = `${it.abs}${String(Number(it.pmid) % 50).padStart(2, "0")}`;
+  if (!absCache.has(name)) absCache.set(name, loadJSON(`data/abstracts/${name}.json`).catch(() => { absCache.delete(name); return null; }));
+  const b = await absCache.get(name);
+  if (b === null) throw new Error("offline");
+  return b?.[it.pmid] || [];
+}
+async function openAbstract(it) {
   if (!it) return;
   bump("open", it);
-  const secs = it.sections || [];
+  let secs = [], missing = false;
+  try { secs = await sectionsOf(it); } catch { missing = true; }
   const links = [
     el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener" }, "PubMed"),
     it.doi ? el("a", { class: "act", href: `https://doi.org/${it.doi}`, target: "_blank", rel: "noopener" }, "Journal") : null,
@@ -776,13 +870,14 @@ function openAbstract(it) {
     evidenceEl(it.design),
     it.sample ? el("p", { class: "sample", style: "margin:6px 0 0;font-size:14px" }, `Sample: ${it.sample} (read from the abstract)`) : null,
     it.impact ? el("p", { class: "imp-detail" }, it.impact.age >= 4
-      ? `${plural(it.impact.cites, "citation")}${it.impact.age >= 12 ? ` (${it.impact.cpy} a year)` : ""}${it.impact.rcr != null ? `, Relative Citation Ratio ${it.impact.rcr}` : ""}. Cited more than ${Math.floor(it.impact.pct)}% of body-imaging papers published in ${it.impact.q}.${it.impact.clin ? ` Cited in ${plural(it.impact.clin, "clinical paper")} (trials, guidelines).` : ""} Source: NIH iCite.`
+      ? `${plural(it.impact.cites, "citation")}${it.impact.age >= 12 ? ` (${it.impact.cpy} a year)` : ""}${it.impact.rcr != null ? `, Relative Citation Ratio ${it.impact.rcr}` : ""}. Cited more than ${Math.floor(it.impact.pct)}% of ${it.impact.area ? (S.feed?.areas?.[it.impact.area]?.label || areaShort(it.impact.area)).toLowerCase().replace(/\bct\b/g, "CT") : "radiology"} papers that came out in ${it.impact.q}.${it.impact.clin ? ` Cited in ${plural(it.impact.clin, "clinical paper")} (trials, guidelines).` : ""} Source: NIH iCite.`
       : `Too new to judge by citations (${Math.round(it.impact.age)} months old). Papers in ${it.journal} from the last few years average the ${Math.round(it.impact.jpct)}th percentile for citations.`) : null,
     el("div", { style: "height:16px" }),
     secs.length
       ? secs.map((s) => el("section", { class: "abs-sec" + (s.cat === "CONCLUSIONS" ? " key" : "") },
         s.label ? el("h3", {}, s.label) : null, el("p", {}, s.text)))
-      : el("p", { class: "sample" }, "PubMed has no abstract for this paper. Open it on PubMed or the journal’s site to read it."),
+      : el("p", { class: "sample" }, missing ? "Couldn’t load the abstract (you may be offline). Open it on PubMed instead."
+        : "PubMed has no abstract for this paper. Open it on PubMed or the journal’s site to read it."),
     el("div", { class: "link-row" }, links, actionsEl(it, false).children[1]));
 }
 
@@ -805,6 +900,8 @@ function openInfo() {
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
     el("p", {}, "The feed mixes papers with four kinds of news: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science for everyone (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Smithsonian, Live Science, NASA…) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons, Inverse, Den of Geek…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
+    el("h3", {}, "Your interests"),
+    el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI and SCCT news arrive as “ACR & societies”."),
     el("h3", {}, "Most important"),
     el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),

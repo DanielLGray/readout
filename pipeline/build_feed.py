@@ -8,6 +8,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Optional
 
+from . import abstract_store
 from .abstracts import compile_systems, is_notice, refresh, to_card
 from .common import DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
@@ -35,15 +36,24 @@ def run(http: Optional[Http] = None) -> dict:
 
     old = read_json(path, {}) or {}
     items: dict[str, dict] = {it["pmid"]: it for it in old.get("items", [])}
-    days = int(settings.get("recheck_days", 10) if items else settings.get("first_run_days", 45))
-    log(f"Feed: looking back {days} days ({'update' if items else 'first run'})")
+    stored = abstract_store.load(DATA / "abstracts", "f")
+    for pmid, it in items.items():                   # abstracts live beside feed.json
+        if not it.get("sections") and pmid in stored:
+            it["sections"] = stored[pmid]
+    areas_cfg = cfg.get("areas") or {}
+    area_of = {s["id"]: s.get("area", "body") for s in cfg["streams"]}
+    have = {s for it in items.values() for s in it.get("streams", [])}
+    recheck, first = int(settings.get("recheck_days", 10)), int(settings.get("first_run_days", 45))
 
-    # 1 — which PMIDs belong to which stream
+    # 1 — which PMIDs belong to which stream (a stream new to the feed looks further back)
     found: dict[str, set] = {}
+    days = recheck
     for s in cfg["streams"]:
         q = fill(s["query"], cfg)
-        n, ids = pm.esearch(q, datetype="edat", reldate=days, retmax=MAX_IDS)
-        log(f"  {s['id']}: {n} records")
+        sd = recheck if s["id"] in have else first
+        days = max(days, sd)
+        n, ids = pm.esearch(q, datetype="edat", reldate=sd, retmax=MAX_IDS)
+        log(f"  {s['id']}: {n} records in {sd} days")
         for pmid in ids:
             found.setdefault(pmid, set()).add(s["id"])
 
@@ -77,6 +87,7 @@ def run(http: Optional[Http] = None) -> dict:
         prev = items.get(pmid, {})
         card = to_card(rec, compiled)
         card["streams"] = sorted(found.get(pmid, set()) | set(prev.get("streams", [])))
+        card["areas"] = sorted({area_of.get(s, "body") for s in card["streams"]})
         card["topics"] = sorted(topic_hits.get(pmid, set()) | set(prev.get("topics", [])))
         card["seen"] = prev.get("seen") or t.isoformat()
         if not prev:
@@ -88,19 +99,28 @@ def run(http: Optional[Http] = None) -> dict:
     for pmid, it in items.items():
         if pmid not in fetched:
             refresh(it, compiled)
+            it["areas"] = sorted({area_of.get(s, "body") for s in it.get("streams", [])})
 
     # 5 — prune and sort
     keep_days = int(settings.get("keep_days", 180))
+    keep_for = lambda it: max([int((areas_cfg.get(a) or {}).get("keep_days", keep_days)) for a in it.get("areas", [])]
+                              or [keep_days])
     kept = [it for it in items.values()
-            if _age_days(it.get("added") or it.get("seen"), t) <= keep_days and not is_notice(it)]
+            if _age_days(it.get("added") or it.get("seen"), t) <= keep_for(it) and not is_notice(it)]
     kept.sort(key=lambda it: (it.get("added") or "", it.get("seen") or "", int(it["pmid"])), reverse=True)
-    kept = kept[: int(settings.get("max_items", 900))]
+    kept = kept[: int(settings.get("max_items", 2500))]
+    abstract_store.save(DATA / "abstracts", "f", abstract_store.split_out(kept, "f"))
 
     out = {
         "generated": now_iso(),
         "systems": {k: v["label"] for k, v in cfg["systems"].items()},
         "topics": {tp["id"]: {"name": tp["name"], "system": tp["system"]} for tp in tcfg.get("topics", [])},
         "streams": {s["id"]: s["name"] for s in cfg["streams"]},
+        "areas": {a: {"label": v.get("label", a), "short": v.get("short", v.get("label", a)), "about": v.get("about", ""),
+                      "keep_days": int(v.get("keep_days", keep_days)),
+                      "streams": [s["id"] for s in cfg["streams"] if s.get("area", "body") == a],
+                      "count": sum(1 for it in kept if a in it.get("areas", []))}
+                  for a, v in areas_cfg.items()},
         "settings": {
             "first_run_days": int(settings.get("first_run_days", 45)),
             "recheck_days": int(settings.get("recheck_days", 10)),
@@ -109,6 +129,8 @@ def run(http: Optional[Http] = None) -> dict:
             "journals": len(cfg.get("journals", [])),
             "nm_journals": len(cfg.get("nm_journals", [])),
             "general_journals": len(cfg.get("general_journals", [])),
+            "general_radiology_journals": len(cfg.get("general_radiology_journals", [])),
+            "cardiac_journals": len(cfg.get("cardiac_journals", [])) + len(cfg.get("interventional_journals", [])),
             "topics": len(tcfg.get("topics", [])),
         },
         "items": kept,

@@ -34,7 +34,13 @@ def fill(query: str, cfg: dict) -> str:
             raise KeyError(f"query uses {{{name}}} but config has no block called {name!r}")
         v = cfg[name]
         return _or(v) if isinstance(v, list) else " ".join(str(v).split())
-    return " ".join(re.sub(r"\{([a-z_]+)\}", block, query).split())
+    out = query
+    for _ in range(4):                      # blocks may use other blocks: {cardiac_terms} uses {tavr_terms}
+        nxt = re.sub(r"\{([a-z_]+)\}", block, out)
+        if nxt == out:
+            break
+        out = nxt
+    return " ".join(out.split())
 
 
 def now_iso() -> str:

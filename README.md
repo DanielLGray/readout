@@ -39,7 +39,8 @@ From then on, the feed updates every morning and the trends every Monday, with n
 - Tap a **topic tag** on a card to see only that topic. In **Explore**, tap a topic for its trend page, then **…cards in your feed** to jump back.
 - The **ⓘ** button explains how cards are built.
 - **Most important** (a chip in the feed) lists the papers cited far more than others of the same age. It draws on every paper from your journals over the last three years, ranked by citations against body-imaging papers from the same quarter (NIH iCite). **1 year** and **3 years** show proven original research; **New** covers the last six months, where a paper's journal record stands in until citations arrive. You can include reviews and guidelines, or open the app on this view, in Tune. It's rebuilt every Tuesday.
-- **Tune** has three parts:
+- **Interests** (Tune → Interests): papers come from four areas: **nuclear medicine** (every paper in the NM journals), **body imaging**, **cardiac & vascular CT** (TAVR planning, CCTA, CT-FFR, calcium) and **general radiology** (Radiology, AJR, RadioGraphics, JACR). Set each to Off, Less, Normal or More; follow words like "TAVR" to get a **Following** chip; choose which organ-system chips show. Under **Papers** and **Most important**, area chips narrow the list to one area. ACR, SNMMI and SCCT news arrive as **ACR & societies**.
+- **Tune** has four parts (Reading, Interests, Rules, Updates):
   - **Your reading:** what you read and opened over 7 or 30 days, by kind, outlet and organ system, plus what's in your feed right now. It's counted only on your phone.
   - **Feed rules:** how many turns each kind gets in Everything, the per-outlet daily limit, newest-first or ranked paper order (freshness × evidence, study size, labeled conclusion and your organ systems), muted words and outlets, and Explore's trend thresholds. Changes apply on your phone right away.
   - **Updates:** how each update job is doing, data-quality figures, the job's current settings, and buttons to edit its config file or run it on GitHub.
@@ -61,7 +62,7 @@ From then on, the feed updates every morning and the trends every Monday, with n
 
 Everything you'd want to change lives in three text files in `config/`. You can edit them on github.com (tap the file, then the pencil), or jump there from **Tune → Updates**. Feed order, mutes and trend thresholds for your own phone are set in **Tune → Feed rules** instead and need no editing.
 
-- **`config/feeds.yaml`** sets the journals, the abdomen/pelvis word filter, the organ-system chips, and how long cards stay (180 days by default).
+- **`config/feeds.yaml`** sets the interest areas (and how long each keeps papers), their journals and PubMed searches ("streams"), the abdomen/pelvis word filter and the organ-system chips. Any block can be used in a search as `{name}`.
 - **`config/news.yaml`** lists the news outlets (each with backup feed addresses) and the words behind each business category. Its `settings:` also set how long stories stay, what counts as a top story and the trending windows. The **Update news** run's summary shows which address each outlet is using.
 - **`config/topics.yaml`** holds the Explore topics and, under `settings:`, the trend rules (what counts as a breakout, rising or cooling topic). It also controls how many papers a topic needs before it can trend. Each topic is a PubMed query, so you can copy a block, give it a new `id` and `name`, and write the query the way you would in PubMed. Add a `trials:` line to also count new ClinicalTrials.gov registrations.
 
