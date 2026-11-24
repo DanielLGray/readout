@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import re
 import os
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -25,19 +26,15 @@ def _or(items: list[str]) -> str:
 
 
 def fill(query: str, cfg: dict) -> str:
-    """Replace {journals}, {body_filter}, … placeholders with config blocks."""
-    repl = {
-        "journals": _or(cfg.get("journals", [])),
-        "nm_journals": _or(cfg.get("nm_journals", [])),
-        "general_journals": _or(cfg.get("general_journals", [])),
-        "body_filter": " ".join(cfg.get("body_filter", "").split()),
-        "imaging_terms": " ".join(cfg.get("imaging_terms", "").split()),
-        "exclude": " ".join(cfg.get("exclude", "").split()),
-    }
-    out = query
-    for k, v in repl.items():
-        out = out.replace("{" + k + "}", v)
-    return " ".join(out.split())
+    """Replace {name} placeholders with the config block of that name: a list of journals is
+    OR-ed together, text is used as is. An unknown placeholder is an error, never sent to PubMed."""
+    def block(m: "re.Match") -> str:
+        name = m.group(1)
+        if name not in cfg:
+            raise KeyError(f"query uses {{{name}}} but config has no block called {name!r}")
+        v = cfg[name]
+        return _or(v) if isinstance(v, list) else " ".join(str(v).split())
+    return " ".join(re.sub(r"\{([a-z_]+)\}", block, query).split())
 
 
 def now_iso() -> str:

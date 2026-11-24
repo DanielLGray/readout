@@ -144,3 +144,15 @@ def test_important_papers(env, monkeypatch):
     # second run reuses the corpus cache
     out2 = build_important.run(http)
     assert out2["stats"]["checked"] == st["checked"]
+
+
+def test_every_query_placeholder_is_filled():
+    import pytest as _pt
+    from pipeline.common import fill, load_yaml
+    cfg = load_yaml("feeds.yaml")
+    for s in cfg["streams"]:
+        q = fill(s["query"], cfg)
+        assert "{" not in q and "}" not in q, s["id"]
+    assert "[majr]" in fill(next(s["query"] for s in cfg["streams"] if s["id"] == "general_imaging"), cfg)
+    with _pt.raises(KeyError):
+        fill("({no_such_block})", cfg)
