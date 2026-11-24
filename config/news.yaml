@@ -171,6 +171,7 @@ sources:
     kind: health
     max_per_day: 6
     home: https://www.bbc.com/news/health
+    link_domains: [bbc.co.uk]            # BBC stories link to bbc.co.uk addresses
     urls:
       - https://feeds.bbci.co.uk/news/health/rss.xml
 
@@ -253,6 +254,7 @@ sources:
     kind: science
     max_per_day: 3
     home: https://www.sciencefriday.com
+    link_domains: [wnycstudios.org]      # episode pages live on WNYC Studios
     merge: true
     urls:
       - https://feeds.simplecast.com/h18ZIZD_          # the podcast (the old WordPress podcast feed stopped in 2023)

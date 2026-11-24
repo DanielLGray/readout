@@ -477,7 +477,7 @@ function jobStatus(key, generated) {
     const when = ago(run.updated_at || run.created_at);
     if (run.status !== "completed") bits.push(el("span", {}, `Running now (started ${ago(run.created_at)})`));
     else if (run.conclusion === "success") bits.push(el("span", {}, `Last run worked, ${when}`));
-    else bits.push(el("a", { class: "warn-text", href: run.html_url, target: "_blank", rel: "noopener" }, `Last run ${run.conclusion === "cancelled" ? "was cancelled" : "failed"}, ${when}. See the log`));
+    else bits.push(el("a", { class: "warn-text", href: /^https:\/\/github\.com\//.test(run.html_url || "") ? run.html_url : GH, target: "_blank", rel: "noopener" }, `Last run ${run.conclusion === "cancelled" ? "was cancelled" : "failed"}, ${when}. See the log`));
   }
   return el("p", { class: "status" }, bits);
 }
@@ -579,6 +579,9 @@ function newsJob() {
         el("ul", { class: "settings-list" }, failing.map((x) => el("li", {}, el("b", {}, x.name), ": ", (x.tried || [])[0] || "no feed answered")))) : null,
       stale.length ? el("div", {}, el("div", { class: "ctl-label warn-text" }, "Not updating"),
         el("ul", { class: "settings-list" }, stale.map((x) => el("li", {}, el("b", {}, x.name), `: newest story is from ${fmtDate(x.newest.slice(0, 10))}. The outlet may have moved its feed.`)))) : null,
+      sources.some((x) => x.offsite) ? el("div", {}, el("div", { class: "ctl-label warn-text" }, "Links to other sites dropped"),
+        el("p", { class: "fine" }, "Stories that pointed away from the outlet’s own site, which can mean a hacked feed. If one keeps showing up for an outlet you trust, add the site to its link_domains in config/news.yaml."),
+        el("ul", { class: "settings-list" }, sources.filter((x) => x.offsite).map((x) => el("li", {}, el("b", {}, x.name), `: ${plural(x.offsite, "link")} in the last update`)))) : null,
       el("details", { class: "outlets" }, el("summary", {}, el("span", {}, "Every outlet"), el("span", { class: "fine", style: "margin:0" }, "stories now, newest")),
         el("dl", { class: "facts small" }, sources.slice().sort((a, b) => (counts[b.name] || 0) - (counts[a.name] || 0)).map((x) => [
           el("dt", {}, swatch(x.kind || "industry"), x.name),

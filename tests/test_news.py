@@ -42,11 +42,11 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(build_news, "load_yaml", lambda name: {
         "settings": {"keep_days": 120},
         "sources": [
-            {"name": "Wire", "urls": ["https://wire.test/broken", "https://wire.test/feed"]},
-            {"name": "Biz", "urls": ["https://biz.test/atom"]},
-            {"name": "Minnie", "urls": ["https://minnie.test/sitemap-google-news.xml"]},
+            {"name": "Wire", "home": "https://example-wire.test", "urls": ["https://wire.test/broken", "https://wire.test/feed"]},
+            {"name": "Biz", "home": "https://example-business.test", "urls": ["https://biz.test/atom"]},
+            {"name": "Minnie", "home": "https://example-minnie.test", "urls": ["https://minnie.test/sitemap-google-news.xml"]},
             {"name": "Dead", "urls": ["https://dead.test/rss"]},
-            {"name": "SciWire", "kind": "science", "max_per_day": 1, "urls": ["https://sci.test/feed"]},
+            {"name": "SciWire", "kind": "science", "max_per_day": 1, "home": "https://example-sci.test", "urls": ["https://sci.test/feed"]},
         ],
         "categories": {"policy": {"label": "Policy", "words": ["CMS", "Medicare", "fee schedule"]}},
     })
@@ -148,9 +148,9 @@ def test_skip_https_upgrade_and_stale_outlets():
     http = Http(transport=lambda m, u, p: (200, pages[u]) if u in pages else (404, ""), sleep=lambda s: None, retries=1)
     got, st = build_news.fetch_source(http, {"name": "Mag", "urls": ["https://www.mag.test/feed"], "skip": "/poetry/"}, NOW)
     links = sorted(i["link"] for i in got)
-    assert links == ["http://other.test/x", "https://mag.test/non-fiction/review/"]     # poem skipped; same-site link upgraded
-    assert st["ok"] and not st["stale"]
-    _, st2 = build_news.fetch_source(http, {"name": "Old", "urls": ["https://old.test/feed"]}, NOW)
+    assert links == ["https://mag.test/non-fiction/review/"]     # poem skipped; same-site link upgraded; other site dropped
+    assert st["ok"] and not st["stale"] and st["offsite"] == 1
+    _, st2 = build_news.fetch_source(http, {"name": "Old", "home": "https://mag.test", "urls": ["https://old.test/feed"]}, NOW)
     assert st2["ok"] and st2["stale"]
 
 
@@ -236,3 +236,22 @@ def test_summary_boilerplate():
     assert teaser("Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. In this episode we explore caves.") == \
         "In this episode we explore caves."
     assert teaser("Readers who listen to experts do better.") == "Readers who listen to experts do better."
+
+
+def test_hacked_feed_cannot_add_links_or_entity_tricks():
+    from pipeline import news
+    feed = """<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>
+      <item><title>Real story</title><link>https://www.outlet.test/a</link><pubDate>Sun, 22 Nov 2026 10:00:00 GMT</pubDate></item>
+      <item><title>Phishing</title><link>https://outlet-login.test/verify</link><pubDate>Sun, 22 Nov 2026 11:00:00 GMT</pubDate></item>
+      <item><title>Partner page</title><link>https://partner.test/ep</link><pubDate>Sun, 22 Nov 2026 12:00:00 GMT</pubDate></item>
+    </channel></rss>"""
+    http = Http(transport=lambda m, u, p: (200, feed), sleep=lambda s: None, retries=1)
+    got, st = build_news.fetch_source(http, {"name": "O", "home": "https://outlet.test", "link_domains": ["partner.test"],
+                                             "urls": ["https://feeds.outlet.test/rss"]}, NOW)
+    assert sorted(i["title"] for i in got) == ["Partner page", "Real story"] and st["offsite"] == 1
+    assert news.site_of("https://news.bbc.co.uk/x") == "bbc.co.uk" and news.site_of("https://www.nature.com/a") == "nature.com"
+    bomb = """<?xml version="1.0"?><!DOCTYPE lolz [<!ENTITY lol "lol"><!ENTITY lol2 "&lol;&lol;&lol;">]>
+      <rss version="2.0"><channel><item><title>&lol2;</title><link>https://outlet.test/b</link></item></channel></rss>"""
+    http2 = Http(transport=lambda m, u, p: (200, bomb), sleep=lambda s: None, retries=1)
+    got2, st2 = build_news.fetch_source(http2, {"name": "O", "home": "https://outlet.test", "urls": ["https://outlet.test/rss"]}, NOW)
+    assert got2 == [] and "entities" in st2["tried"][0]

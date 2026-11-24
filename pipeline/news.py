@@ -88,15 +88,45 @@ def item_id(link: str, title: str, source: str) -> str:
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
 
 
+# a feed never needs its own entity definitions; they're how "billion laughs" and external-entity
+# attacks work, so a document that declares any is refused before a parser sees it
+_ENTITY_TRICK = re.compile(r"<!ENTITY|<!DOCTYPE[^>\[]*\[", re.I)
+
+
+def check_xml(text: str) -> str:
+    if _ENTITY_TRICK.search(text[:200_000]):
+        raise ValueError("document declares XML entities; refused")
+    return text
+
+
+# sites whose name has two parts after the dot (bbc.co.uk)
+_TWO_PART = {"co.uk", "org.uk", "ac.uk", "gov.uk", "com.au", "org.au", "net.au", "co.nz", "co.jp", "com.br", "co.in", "co.za"}
+
+
+def site_of(url_or_host: str) -> str:
+    """The registrable site of a link: news.bbc.co.uk → bbc.co.uk, www.nature.com → nature.com."""
+    host = (urlparse(url_or_host).hostname if "//" in url_or_host else url_or_host or "").lower().rstrip(".")
+    parts = host.split(".")
+    n = 3 if len(parts) > 2 and ".".join(parts[-2:]) in _TWO_PART else 2
+    return ".".join(parts[-n:])
+
+
+def link_sites(src: dict) -> set:
+    """Where an outlet's stories may link: its own site, its feed's site, and any partner sites it names."""
+    return {site_of(u) for u in [src.get("home", "")] + list(src.get("urls", [])) if u} | \
+           {site_of(d) for d in src.get("link_domains", [])}
+
+
 def parse_feed(text: str, source: str, now: datetime) -> list[dict]:
     """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}]."""
+    check_xml(text)
     head = text.lstrip()[:600]
     if "<urlset" in head:
         return _parse_sitemap(text, source, now)
     d = feedparser.parse(text)
     out = []
     for e in d.entries:
-        title = clean_text(e.get("title", ""))
+        title = clean_text(e.get("title", ""))[:300]
         link = clean_link(e.get("link", "") or "")
         if not title or not link:
             continue

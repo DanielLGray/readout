@@ -2,13 +2,15 @@
 so the whole pipeline can be tested offline."""
 from __future__ import annotations
 
+import ipaddress
 import json
 import os
 import random
+import socket
 import sys
 import time
 from typing import Callable, Optional
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import requests
 
@@ -24,13 +26,50 @@ class HttpError(RuntimeError):
 Transport = Callable[[str, str, dict], "tuple[int, str]"]
 
 
+MAX_BYTES = 30 * 1024 * 1024        # no feed or API answer is anywhere near this; a bigger one is refused
+MAX_REDIRECTS = 5
+
+
+def public_host(host: str) -> bool:
+    """True when every address the name resolves to is on the public internet, so a redirect can't
+    point the job at the runner itself or its cloud's internal services (169.254.169.254 and the like)."""
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except OSError:
+        return False
+    for info in infos:
+        ip = ipaddress.ip_address(str(info[4][0]).split("%")[0])
+        if not ip.is_global or ip.is_multicast:
+            return False
+    return bool(infos)
+
+
 def _requests_transport(method: str, url: str, params: dict) -> "tuple[int, str]":
     headers = {"User-Agent": USER_AGENT, "Accept": ACCEPT}
-    if method == "POST":
-        r = requests.post(url, data=params, headers=headers, timeout=60)
-    else:
-        r = requests.get(url, params=params, headers=headers, timeout=60)
-    return r.status_code, r.text
+    with requests.Session() as s:
+        for _ in range(MAX_REDIRECTS + 1):
+            r = s.request(method, url, headers=headers, timeout=60, allow_redirects=False, stream=True,
+                          data=params if method == "POST" else None, params=params if method == "GET" else None)
+            if r.is_redirect:
+                nxt = urljoin(url, r.headers.get("location", ""))
+                r.close()
+                u = urlparse(nxt)
+                if u.scheme not in ("http", "https") or not u.hostname or not public_host(u.hostname):
+                    return 400, f"refused a redirect to {u.scheme}://{u.hostname or ''}"
+                if r.status_code in (301, 302, 303):
+                    method = "GET"
+                url, params = nxt, {}
+                continue
+            body = bytearray()
+            for chunk in r.iter_content(64 * 1024):
+                body += chunk
+                if len(body) > MAX_BYTES:
+                    r.close()
+                    return 400, f"response over {MAX_BYTES // 2**20} MB refused"
+            r._content = bytes(body)          # let requests decode it as usual
+            r._content_consumed = True
+            return r.status_code, r.text
+    return 400, "too many redirects"
 
 
 class Http:

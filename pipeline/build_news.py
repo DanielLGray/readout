@@ -44,12 +44,25 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
             status["ok"] = True                    # the feed works, even if nothing passes the filter today
         host = (urlparse(url).hostname or "").removeprefix("www.")
         safe = []
+        sites = news.link_sites(src)
         for i in items:                            # web links only ("javascript:" never reaches the app)
             i["link"] = urljoin(url, i["link"])
             if urlparse(i["link"]).scheme not in ("http", "https"):
                 continue
-            if i.get("audio") and urlparse(urljoin(url, i["audio"])).scheme not in ("http", "https"):
-                del i["audio"]
+            # and only to the outlet's own site (or partners it names): a hacked feed can't
+            # slip in a link to somewhere else
+            if news.site_of(i["link"]) not in sites:
+                status["offsite"] = status.get("offsite", 0) + 1
+                continue
+            if i.get("audio"):                     # episodes play over https only, so they can't be altered on the way
+                a = urljoin(url, i["audio"])
+                scheme = urlparse(a).scheme
+                if scheme == "http":
+                    a = "https:" + a[5:]
+                if scheme in ("http", "https"):
+                    i["audio"] = a
+                else:
+                    del i["audio"]
             safe.append(i)
         items = safe
         for i in items:                            # same site, fetched over https: link over https too
@@ -124,7 +137,10 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     rules = {src["name"]: (re.compile(src["skip"], re.I) if src.get("skip") else None,
                            re.compile(src["require"], re.I) if src.get("require") else None)
              for src in cfg.get("sources", [])}
+    sites = {src["name"]: news.link_sites(src) for src in cfg.get("sources", [])}
     def allowed(it):
+        if it["source"] in sites and news.site_of(it["link"]) not in sites[it["source"]]:
+            return False                       # stored before the outlet's links were checked
         skip, need = rules.get(it["source"], (None, None))
         return not (skip and skip.search(it["link"] + " " + it["title"])) and \
             not (need and not need.search(it["title"] + " " + it.get("summary", "")))

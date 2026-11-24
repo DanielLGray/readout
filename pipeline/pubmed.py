@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import date, timedelta
 from typing import Iterable, Optional
 from xml.etree import ElementTree as ET
@@ -153,6 +154,8 @@ def _date_from(el: Optional[ET.Element]) -> Optional[str]:
 
 
 def parse_articles(xml: str) -> list[dict]:
+    if re.search(r"<!ENTITY|<!DOCTYPE[^>\[]*\[", xml[:200_000], re.I):    # entity tricks: never in PubMed's XML
+        raise ET.ParseError("document declares XML entities; refused")
     root = ET.fromstring(xml)
     return [a for a in (parse_article(el) for el in root.iter("PubmedArticle")) if a]
 

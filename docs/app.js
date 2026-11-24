@@ -57,7 +57,10 @@ function pct(g) {
   const v = Math.round(g * 100);
   return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) + "%";
 }
-const pubmedUrl = (pmid) => `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
+const pubmedUrl = (pmid) => `https://pubmed.ncbi.nlm.nih.gov/${/^\d{1,9}$/.test(String(pmid)) ? pmid : ""}`;
+// links built from paper data: only well-formed identifiers make a link
+const doiUrl = (doi) => (/^10\.\d{4,9}\/[^\s"<>]+$/.test(String(doi || "")) ? `https://doi.org/${encodeURI(doi)}` : null);
+const pmcUrl = (id) => (/^PMC\d{1,9}$/.test(String(id || "")) ? `https://pmc.ncbi.nlm.nih.gov/articles/${id}/` : null);
 // links from outlets' feeds: web addresses only
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || "")) ? u : "#");
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : (many || one + "s")}`;
@@ -655,7 +658,7 @@ function showProgress() {
 }
 function play(it) {
   const a = $("#pl-audio");
-  if (safeUrl(it.audio) === "#") return;
+  if (!/^https:\/\//i.test(String(it.audio || ""))) return;
   if (a.dataset.id !== it.id) {
     savePos();                       // the episode you're leaving
     a.src = it.audio;
@@ -945,8 +948,8 @@ async function openAbstract(it) {
   try { secs = await sectionsOf(it); } catch { missing = true; }
   const links = [
     el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener" }, "PubMed"),
-    it.doi ? el("a", { class: "act", href: `https://doi.org/${it.doi}`, target: "_blank", rel: "noopener" }, "Journal") : null,
-    it.pmcid ? el("a", { class: "act", href: `https://pmc.ncbi.nlm.nih.gov/articles/${it.pmcid}/`, target: "_blank", rel: "noopener" }, "Free full text") : null,
+    doiUrl(it.doi) ? el("a", { class: "act", href: doiUrl(it.doi), target: "_blank", rel: "noopener" }, "Journal") : null,
+    pmcUrl(it.pmcid) ? el("a", { class: "act", href: pmcUrl(it.pmcid), target: "_blank", rel: "noopener" }, "Free full text") : null,
   ];
   openSheet(
     el("h2", { id: "sheet-title" }, it.title),
