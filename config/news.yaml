@@ -295,6 +295,7 @@ sources:
     urls:
       - https://www.livescience.com/feeds.xml
       - https://www.livescience.com/feeds/all
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=site:livescience.com+when:7d       # if the site turns readers away
 
   - name: Space.com
     kind: science
@@ -303,6 +304,7 @@ sources:
     urls:
       - https://www.space.com/feeds.xml
       - https://www.space.com/feeds/all
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=site:space.com+when:7d
 
   - name: NASA
     kind: science

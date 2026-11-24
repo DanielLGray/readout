@@ -58,7 +58,7 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
                 i["link"] = "https:" + i["link"][5:]
         if skip:
             items = [i for i in items if not skip.search(i["link"] + " " + i["title"])]
-        if src.get("google_news"):                 # "Headline - Publisher": keep the headline, credit the publisher
+        if src.get("google_news") or "news.google.com" in url:   # "Headline - Publisher": keep the headline, credit the publisher
             for i in items:
                 m = re.match(r"^(.*\S)\s+[-–]\s+([^-–]{2,60})$", i["title"])
                 if m:
