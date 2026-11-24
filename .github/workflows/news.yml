@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: readout-data
+  group: readout-news      # one run of this job at a time; other jobs write other files
   cancel-in-progress: false
 
 jobs:
@@ -32,5 +32,9 @@ jobs:
           git add docs/data cache
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git commit -m "News update $(date -u +%F\ %H:%M)"
-          git pull --rebase --autostash
-          git push
+          for i in 1 2 3 4 5; do              # another job may have pushed meanwhile
+            git pull --rebase --autostash && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          exit 1

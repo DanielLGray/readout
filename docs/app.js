@@ -92,9 +92,28 @@ const TUNE_DEFAULTS = {
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
 };
+// stored settings are checked field by field, so an old or damaged copy can't break the app
 function loadTune() {
-  const t = store.get("tune", {}) || {};
-  return { ...TUNE_DEFAULTS, ...t, mix: { ...TUNE_DEFAULTS.mix, ...(t.mix || {}) }, rank: { ...TUNE_DEFAULTS.rank, ...(t.rank || {}) } };
+  const obj = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+  const strs = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string") : []);
+  const num = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
+  const t = obj(store.get("tune", {}));
+  const mix = {};
+  for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.mix, ...obj(t.mix) })) mix[k] = Math.max(0, Math.min(4, Math.round(num(v, 1))));
+  const rank = {};
+  for (const [k, v] of Object.entries(TUNE_DEFAULTS.rank)) rank[k] = Math.max(0, num(obj(t.rank)[k], v));
+  if (!rank.fresh) rank.fresh = TUNE_DEFAULTS.rank.fresh;      // a half-life must be > 0
+  const trend = Object.fromEntries(Object.entries(obj(t.trend))
+    .filter(([k, v]) => ["breakout", "rising", "cooling", "minScale"].includes(k) && typeof v === "number" && isFinite(v)));
+  return {
+    mix, rank,
+    cap: Math.max(0, Math.round(num(t.cap, TUNE_DEFAULTS.cap))),
+    topCard: typeof t.topCard === "boolean" ? t.topCard : TUNE_DEFAULTS.topCard,
+    order: t.order === "ranked" ? "ranked" : "newest",
+    fav: strs(t.fav), hidePending: t.hidePending === true,
+    mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
+    trend: Object.keys(trend).length ? trend : null,
+  };
 }
 let T = loadTune();
 function setTune(patch) {
@@ -106,8 +125,10 @@ function setTune(patch) {
 
 // ── reading metrics, counted on this phone ─────────────────────────────────
 const STAT_IDX = { seen: 0, open: 1, save: 2, listen: 3 };
-let stats = store.get("stats", { days: {} }) || { days: {} };
-let seenToday = store.get("seenToday", { d: "", ids: [] }) || { d: "", ids: [] };
+let stats = store.get("stats", null);
+if (!stats || typeof stats.days !== "object" || !stats.days || Array.isArray(stats.days)) stats = { days: {} };
+let seenToday = store.get("seenToday", null);
+if (!seenToday || typeof seenToday !== "object") seenToday = { d: "" };      // what was counted today, so nothing counts twice
 const localDay = (t = new Date()) => `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 const daysAgo = (i) => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate() - i); };
 const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
@@ -115,12 +136,11 @@ let statsTimer;
 function bump(type, it) {
   if (!it || it.type === "top") return;
   const d = localDay();
-  if (type === "seen") {
-    if (seenToday.d !== d) seenToday = { d, ids: [] };
-    const key = saveKey(it);
-    if (seenToday.ids.includes(key)) return;
-    seenToday.ids.push(key);
-  }
+  if (seenToday.d !== d || !Array.isArray(seenToday.seen)) seenToday = { d, seen: [], open: [], save: [], listen: [] };
+  const key = saveKey(it);
+  if (seenToday[type].includes(key)) return;
+  if (type !== "seen") bump("seen", it);        // opening, saving or listening means you saw it
+  seenToday[type].push(key);
   const day = stats.days[d] || (stats.days[d] = { k: {}, s: {}, y: {} });
   const i = STAT_IDX[type];
   const inc = (obj, key) => { (obj[key] || (obj[key] = [0, 0, 0, 0]))[i]++; };
@@ -282,7 +302,8 @@ function filtered(f = {}, report = null) {
   let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
   news = news.filter((i) => (!mutedSrc.has(i.source) && !(mute && mute.test(i.title))) || (drop("muted"), false));
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
-  const tops = T.topCard && system === "all" && topStoryLists().length ? [{ type: "top", key: "top" }] : [];
+  const only = kind === "all" ? null : kind;
+  const tops = T.topCard && system === "all" && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
   if (kind !== "all") return tops.concat(news.filter((i) => i.kind === kind));
   // Everything: take turns by weight, each stream newest first (or ranked, for papers), so the
   // newest papers sit at the top even though news arrives hours sooner than PubMed records
@@ -398,7 +419,7 @@ function evidenceEl(design, small, sample) {
 
 function cardEl(it) {
   if (it.type === "news") return newsCardEl(it);
-  if (it.type === "top") return topCardEl();
+  if (it.type === "top") return topCardEl(it.only);
   return paperCardEl(it);
 }
 
@@ -451,24 +472,28 @@ function syncPlayer() {
   $("#pl-toggle").setAttribute("aria-label", a.paused ? "Play" : "Pause");
 }
 
-function topStoryLists() {
+function topStoryLists(only) {
   const t = S.news?.top_stories || {};
   const mute = mutedRe();
   const mutedSrc = new Set(T.mutedSources || []);
   const keep = (l) => l.filter((st) => !(mute && mute.test(st.title)) && st.sources.some((x) => !mutedSrc.has(x)));
   if (Array.isArray(t)) return keep(t).length ? [["Industry news", keep(t)]] : [];
-  return Object.entries(newsKinds()).map(([k, label]) => [label, keep(t[k] || []), k]).filter(([, l]) => l.length);
+  return Object.entries(newsKinds()).filter(([k]) => !only || k === only)
+    .map(([k, label]) => [label, keep(t[k] || []), k]).filter(([, l]) => l.length);
 }
 
-function topCardEl() {
+function topCardEl(only) {
   const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));
+  const lists = topStoryLists(only);
+  const ts = S.news?.settings?.top_stories || {};
+  const span = !ts.days || ts.days === 7 ? "this week" : `in the last ${ts.days} days`;
   return el("article", { class: "card top-card", "data-key": "top" },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Top stories"),
-      el("span", {}, "covered by more than one outlet this week")),
+      el("span", {}, `covered by ${(ts.min_outlets || 2) > 2 ? `${ts.min_outlets} or more outlets` : "more than one outlet"} ${span}`)),
     el("div", { class: "top-lists" },
-      topStoryLists().map(([label, list]) => el("section", {},
+      lists.map(([label, list]) => el("section", {},
         el("h3", { class: "top-h" }, label),
-        el("ol", { class: "top-list" }, list.slice(0, topStoryLists().length > 2 ? 2 : 3).map((st) =>
+        el("ol", { class: "top-list" }, list.slice(0, lists.length > 2 ? 2 : 3).map((st) =>
           el("li", {}, el("button", { onclick: () => openStory(st, byId) },
             el("span", { class: "top-title" }, st.title),
             el("span", { class: "top-meta" }, `${st.sources.length} outlets: ${st.sources.join(", ")}`)))))))),
@@ -1032,14 +1057,15 @@ function switchTab(tab) {
   $("#view-feed").hidden = tab !== "feed";
   $("#view-explore").hidden = tab !== "explore";
   $("#view-saved").hidden = tab !== "saved";
-  $("#view-tune").hidden = tab !== "tune";
+  const tv = $("#view-tune");
+  if (tv) tv.hidden = tab !== "tune";
   $("#chips").hidden = tab !== "feed";
   $("#title").textContent = { feed: "Readout", explore: "Explore", saved: "Saved", tune: "Tune" }[tab];
   updateHeadNote();
   if (tab === "feed" && S.feedDirty) refreshFeed();
   if (tab === "explore") renderExplore();
   if (tab === "saved") renderSaved();
-  if (tab === "tune") renderTune();
+  if (tab === "tune" && typeof renderTune === "function") renderTune();
 }
 
 async function reload(announce) {
@@ -1064,7 +1090,7 @@ async function reload(announce) {
   else updateHeadNote();
   if (exploreChanged || newsChanged) S.exploreKey = null;
   if (S.tab === "explore" && (announce || exploreChanged)) renderExplore();
-  if (S.tab === "tune" && (announce || feedChanged || newsChanged || exploreChanged)) renderTune();
+  if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged || exploreChanged)) renderTune();
   if (announce) {
     if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");
     else {

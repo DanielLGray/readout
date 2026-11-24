@@ -79,11 +79,20 @@ function renderTune(keepScroll) {
   const view = $("#view-tune");
   const top = view.scrollTop;
   const panes = { reading: readingPane, algorithms: algoPane, pipeline: pipelinePane };
+  if (!panes[TU.pane]) TU.pane = "reading";
+  let body;
+  try { body = panes[TU.pane](); } catch (err) {
+    body = el("section", { class: "sect" }, el("h2", {}, "This page didn’t draw"),
+      el("p", { class: "sub" }, `${err?.message || err}. Resetting the feed rules usually fixes it; your saved items stay.`),
+      el("div", { class: "link-row" }, el("button", { class: "act wide", onclick: () => {
+        store.set("tune", {}); T = loadTune(); S.feedDirty = true; S.exploreKey = null; renderTune();
+      } }, "Reset feed rules")));
+  }
   view.replaceChildren(el("div", { class: "tune" },
     el("div", { class: "seg pane-seg", role: "tablist", "aria-label": "Tune sections" },
       [["reading", "Your reading"], ["algorithms", "Feed rules"], ["pipeline", "Updates"]].map(([k, l]) =>
         el("button", { role: "tab", "aria-selected": String(TU.pane === k), "aria-pressed": String(TU.pane === k), onclick: () => setPane(k) }, l))),
-    (panes[TU.pane] || readingPane)()));
+    body));
   view.scrollTop = keepScroll ? top : 0;
 }
 const rerender = () => renderTune(true);
@@ -146,7 +155,7 @@ function readingPane() {
   out.push(feedNowSection());
   out.push(el("p", { class: "fine" }, "Counted on this phone only, never sent anywhere. History older than 120 days is dropped."),
     el("div", { class: "link-row" }, twoTap("clear", "Clear reading history", "Tap again to clear", () => {
-      stats = { days: {} }; seenToday = { d: "", ids: [] }; saveStats(); toast("Reading history cleared"); rerender();
+      stats = { days: {} }; seenToday = { d: "" }; saveStats(); toast("Reading history cleared"); rerender();
     })));
   return out;
 }
@@ -276,7 +285,7 @@ function orderSection() {
 }
 function rankPreview() {
   const now = Date.now();
-  const top = rankPapers((S.feed?.items || []).filter((p) => !T.hidePending || (p.conclusion?.kind || "none") !== "none")).slice(0, 5);
+  const top = filtered({ kind: "papers", system: "all", strong: false, topic: null }).slice(0, 5);
   const names = { evidence: "evidence", size: "size", concl: "conclusion", systems: "your systems" };
   return el("div", { class: "preview" },
     el("div", { class: "ctl-label" }, "Top of your feed with these settings"),
