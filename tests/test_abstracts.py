@@ -276,3 +276,13 @@ def test_system_words_skip_listed_endings():
     assert tag("Adrenaline and the science of thrill") == [] and tag("A colony on Mars") == []
     assert tag("Bacterial colonization of central lines") == []
     assert tag("Adrenal incidentaloma") == ["gu"] and tag("Colonoscopy after colon cancer") == ["gi"]
+
+
+def test_titles_tidied_and_translations_unbracketed():
+    from pipeline.abstracts import title_fields
+    f = title_fields({"title": "[Expert consensus on gadoxetate disodium-enhanced MRI].", "language": "chi"})
+    assert f == {"title": "Expert consensus on gadoxetate disodium-enhanced MRI.", "translated": True, "language": "Chinese"}
+    assert title_fields({"title": "[177Lu]Lu-PSMA radioligand therapy."}) == {"title": "[177Lu]Lu-PSMA radioligand therapy."}
+    assert title_fields({"title": "[ 18 F]AlF-NOTA-FAPI-04 PET/CT."})["title"] == "[18F]AlF-NOTA-FAPI-04 PET/CT."
+    assert title_fields({"title": "177 Lu-PSMA in glioma : a pilot study."})["title"] == "177Lu-PSMA in glioma: a pilot study."
+    assert title_fields({"title": "Outcomes in 18 F patients."})["title"] == "Outcomes in 18 F patients."

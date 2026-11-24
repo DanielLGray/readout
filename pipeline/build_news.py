@@ -8,7 +8,7 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from . import news
 from .abstracts import compile_systems, tag_systems
@@ -43,6 +43,15 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
         if items:
             status["ok"] = True                    # the feed works, even if nothing passes the filter today
         host = (urlparse(url).hostname or "").removeprefix("www.")
+        safe = []
+        for i in items:                            # web links only ("javascript:" never reaches the app)
+            i["link"] = urljoin(url, i["link"])
+            if urlparse(i["link"]).scheme not in ("http", "https"):
+                continue
+            if i.get("audio") and urlparse(urljoin(url, i["audio"])).scheme not in ("http", "https"):
+                del i["audio"]
+            safe.append(i)
+        items = safe
         for i in items:                            # same site, fetched over https: link over https too
             u = urlparse(i["link"])
             if url.startswith("https:") and u.scheme == "http" and (u.hostname or "").removeprefix("www.") == host:

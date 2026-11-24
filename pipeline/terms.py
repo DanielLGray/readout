@@ -179,10 +179,11 @@ def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15)
         def ratio(c):
             return ((rc[c] + 1) / R) / ((pc[c] + 1) / P)
 
+        # ties: longer phrase first, then alphabetical, so every run gives the same list
         emerging = sorted((c for c in rc if rc[c] >= min_r and ratio(c) >= 1.8),
-                          key=lambda c: (ratio(c), rc[c]), reverse=True)
+                          key=lambda c: (-ratio(c), -rc[c], -len(c.split()), c))
         fading = sorted((c for c in pc if pc[c] >= min_r and ratio(c) <= 0.55),
-                        key=lambda c: (ratio(c), -pc[c]))
+                        key=lambda c: (ratio(c), -pc[c], -len(c.split()), c))
 
         def pick(cands, n, counts, pool):
             """-> [(canonical, display override or None)]"""

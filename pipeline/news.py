@@ -174,15 +174,38 @@ def categorize(item: dict, compiled: dict) -> list[str]:
 
 
 # ── the same story across outlets ────────────────────────────────────────────
+# words that tie unrelated stories together: dates, and topics every outlet of a kind covers daily
+_CALENDAR = set("""january february march april may june july august september october november december jan feb
+mar apr jun jul aug sep sept oct nov dec monday tuesday wednesday thursday friday saturday sunday weekly daily
+monthly""".split())
+STORY_GENERIC = set("""
+cancer cancers disease diseases care drug drugs treatment treatments therapy therapies trial trials research
+researchers scientists science scientist doctors doctor people women men children kids adults million billion
+percent risk risks linked link links data experts expert world global national state states federal government
+public life time times day days month months award awards winner winners nominee nominees list lists book books
+review reviews fiction story stories series season episode trailer movie film game games
+""".split())
+
+
 def _words(title: str) -> set:
-    toks = re.findall(r"[A-Za-z0-9][A-Za-z0-9\-]+", title)
+    """Distinctive words of a headline, for telling whether two outlets cover the same story."""
+    toks = [part for tok in re.findall(r"[A-Za-z0-9][A-Za-z0-9\-]+", title) for part in tok.split("-")]
     out = set()
     for t in toks:
         lw = t.lower()
-        if lw in STOP or lw in NEWS_GENERIC or len(lw) < 3:
+        if lw in STOP or lw in NEWS_GENERIC or len(lw) < 3 or lw in _CALENDAR or re.fullmatch(r"\d+(?:s|st|nd|rd|th)?", lw):
             continue
-        out.add(lw[:-1] if lw.endswith("s") and len(lw) >= 4 and not lw.endswith(("ss", "us", "is")) else lw)
+        w = lw[:-1] if lw.endswith("s") and len(lw) >= 4 and not lw.endswith(("ss", "us", "is")) else lw
+        if w not in STORY_GENERIC and lw not in STORY_GENERIC:
+            out.add(w)
     return out
+
+
+def _core(cluster: dict) -> set:
+    """Words that most of a story's headlines share (all words, for a single headline)."""
+    n = len(cluster["words"])
+    seen = Counter(x for ws in cluster["words"] for x in ws)
+    return {x for x, k in seen.items() if k >= (1 if n == 1 else max(2, math.ceil(n / 2)))}
 
 
 def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
@@ -199,16 +222,34 @@ def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
             continue
         best, best_sim = None, 0.0
         for c in clusters:
-            for other in c["words"]:            # compare with each headline already in the story
-                inter = len(w & other)
-                sim = inter / max(1, min(len(w), len(other)))
-                if inter >= 2 and sim > best_sim:
-                    best, best_sim = c, sim
-        if best is not None and best_sim >= match:
+            # compare with the story's core (words most of its headlines share), not any one headline:
+            # one loose match can't chain unrelated stories together
+            core = _core(c)
+            inter = len(w & core)
+            sim = inter / max(1, min(len(w), len(core)))
+            if inter >= 2 and sim >= match and sim > best_sim:
+                best, best_sim = c, sim
+        if best is not None:
             best["items"].append(it)
             best["words"].append(w)
         else:
             clusters.append({"items": [it], "words": [w]})
+    # second pass: headlines arrive in any order, so join stories whose cores match
+    joined = True
+    while joined:
+        joined = False
+        for a in range(len(clusters)):
+            for b in range(a + 1, len(clusters)):
+                ca, cb = _core(clusters[a]), _core(clusters[b])
+                inter = len(ca & cb)
+                if inter >= 2 and inter / max(1, min(len(ca), len(cb))) >= match:
+                    clusters[a]["items"] += clusters[b]["items"]
+                    clusters[a]["words"] += clusters[b]["words"]
+                    del clusters[b]
+                    joined = True
+                    break
+            if joined:
+                break
     out = []
     for c in clusters:
         sources = sorted({i["source"] for i in c["items"]})
@@ -257,7 +298,7 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
     if P >= 40:
         ratio = lambda k: ((rc[k] + 1) / max(R, 1)) / ((pc[k] + 1) / P)
         growth = sorted((k for k in rc if rc[k] >= 3 and len(srcs[k]) >= 2 and ratio(k) >= 1.5),
-                        key=lambda k: ratio(k) * math.log(rc[k] + 1), reverse=True)
+                        key=lambda k: (-ratio(k) * math.log(rc[k] + 1), k))
     if len(growth) >= 4:
         basis, cands = "growth", growth
     else:                                      # not enough history yet: what most outlets are covering
@@ -265,7 +306,7 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
         # ties go to the phrase nearer the start of headlines (the subject comes first)
         lead = lambda k: sum(where[k]) / len(where[k]) if where[k] else 1
         cands = sorted((k for k in rc if rc[k] >= 2 and len(srcs[k]) >= 2),
-                       key=lambda k: (-len(srcs[k]), -rc[k], lead(k)))
+                       key=lambda k: (-len(srcs[k]), -rc[k], lead(k), k))
     chosen: list[str] = []
     docs = {k: {i for _, i in ids[k]} for k in cands[:200]}
     for k in cands:

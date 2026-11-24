@@ -58,6 +58,8 @@ function pct(g) {
   return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) + "%";
 }
 const pubmedUrl = (pmid) => `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
+// links from outlets' feeds: web addresses only
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u || "")) ? u : "#");
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : (many || one + "s")}`;
 
 let toastTimer;
@@ -460,7 +462,7 @@ function newsCardEl(it) {
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
     el("div", { class: "actions", style: `grid-template-columns:repeat(${it.audio ? 4 : 3},1fr)` },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
-      el("a", { class: "act", href: it.link, target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
+      el("a", { class: "act", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
       saveBtn,
       el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share")));
 }
@@ -485,6 +487,7 @@ function showProgress() {
 }
 function play(it) {
   const a = $("#pl-audio");
+  if (safeUrl(it.audio) === "#") return;
   if (a.dataset.id !== it.id) {
     savePos();                       // the episode you're leaving
     a.src = it.audio;
@@ -546,7 +549,7 @@ function openStory(st, byId) {
     el("h2", { id: "sheet-title" }, st.title),
     el("p", { class: "sheet-meta" }, el("span", {}, `${st.sources.length} outlets`), el("span", {}, agoShort(st.date))),
     el("ul", { class: "rows" }, st.items.map((id) => byId[id]).filter(Boolean).map((it) =>
-      el("li", { class: "news-item" }, el("a", { href: it.link, target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
+      el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
         el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date))),
         el("span", { class: "news-title" }, it.title),
         it.summary ? el("span", { class: "news-teaser" }, it.summary) : null)))));
@@ -560,6 +563,7 @@ function paperCardEl(it) {
     el("div", { class: "card-meta" },
       el("span", { class: "card-journal" }, it.journal),
       el("span", {}, fmtDate(it.epub || it.added)),
+      it.translated ? el("span", { class: "lang", title: "PubMed’s English translation of the title" }, it.language ? `In ${it.language}` : "Translated title") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     it.retracted ? el("div", { class: "warn" }, "Retracted. See the notice on PubMed before using this.") : null,
@@ -712,7 +716,8 @@ function openAbstract(it) {
   openSheet(
     el("h2", { id: "sheet-title" }, it.title),
     el("p", { class: "sheet-meta" },
-      [it.authors, it.journal, fmtDate(it.epub || it.added || it.ppub), `PMID ${it.pmid}`].filter(Boolean).map((t) => el("span", {}, t))),
+      [it.authors, it.journal, fmtDate(it.epub || it.added || it.ppub), `PMID ${it.pmid}`,
+        it.translated ? `${it.language ? `Article in ${it.language}; ` : ""}title translated by PubMed` : null].filter(Boolean).map((t) => el("span", {}, t))),
     it.retracted ? el("div", { class: "warn", style: "margin-bottom:14px" }, "Retracted. Check the retraction notice on PubMed.") : null,
     evidenceEl(it.design),
     it.sample ? el("p", { class: "sample", style: "margin:6px 0 0;font-size:14px" }, `Sample: ${it.sample} (read from the abstract)`) : null,
@@ -948,7 +953,7 @@ function newsTrendsEl() {
                 el("h2", { id: "sheet-title" }, `“${t.term}” in the news`),
                 el("p", { class: "sheet-meta" }, el("span", {}, plural(t.count, "headline")), el("span", {}, t.sources.join(", "))),
                 el("ul", { class: "rows" }, t.ids.map((id) => byId[id]).filter(Boolean).map((it) =>
-                  el("li", { class: "news-item" }, el("a", { href: it.link, target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
+                  el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
                     el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date))),
                     el("span", { class: "news-title" }, it.title)))))) },
               t.term, el("b", {}, String(t.count)))))
@@ -1074,7 +1079,7 @@ function savedNewsEl(it) {
     it.summary ? el("p", { class: "news-teaser", style: "margin:0" }, it.summary) : null,
     el("div", { class: "actions", style: `grid-template-columns:repeat(${it.audio ? 4 : 3},1fr)` },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
-      el("a", { class: "act", href: it.link, target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
+      el("a", { class: "act", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
       actionsEl(it, false).children[1],
       el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share")));
 }

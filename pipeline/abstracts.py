@@ -338,11 +338,59 @@ def short_authors(authors: list[str]) -> str:
     return ", ".join(authors[:3]) + ", et al."
 
 
+# ── titles ──────────────────────────────────────────────────────────────────
+LANGUAGES = {"chi": "Chinese", "ger": "German", "fre": "French", "spa": "Spanish", "jpn": "Japanese", "kor": "Korean",
+             "ita": "Italian", "por": "Portuguese", "rus": "Russian", "dut": "Dutch", "pol": "Polish", "tur": "Turkish",
+             "cze": "Czech", "hun": "Hungarian", "swe": "Swedish", "dan": "Danish", "nor": "Norwegian", "fin": "Finnish",
+             "gre": "Greek", "heb": "Hebrew", "per": "Persian", "ara": "Arabic", "ukr": "Ukrainian", "rum": "Romanian",
+             "srp": "Serbian", "hrv": "Croatian", "slv": "Slovenian", "slo": "Slovak", "bul": "Bulgarian", "lit": "Lithuanian"}
+# PubMed sometimes loses the superscript and leaves "[ 18 F]" or "177 Lu-PSMA"
+_ISOTOPES = ("177 Lu|68 Ga|67 Ga|18 F|99m Tc|64 Cu|61 Cu|67 Cu|89 Zr|225 Ac|90 Y|86 Y|111 In|131 I|123 I|124 I|125 I|"
+             "223 Ra|212 Pb|203 Pb|161 Tb|149 Tb|152 Tb|155 Tb|44 Sc|43 Sc|47 Sc|153 Sm|186 Re|188 Re|166 Ho|213 Bi|"
+             "211 At|227 Th|11 C|13 N|15 O|82 Rb|201 Tl|133 Xe|89 Sr|52 Mn")
+_ISO_SPACED = re.compile(r"\[\s*(\d{1,3}m?)\s+([A-Z][a-z]?)\s*\]")
+
+
+def tidy_title(title: str) -> str:
+    t = _ISO_SPACED.sub(lambda m: f"[{m.group(1)}{m.group(2)}]", title or "")
+    t = re.sub(r"(?<![\d.])(\d{1,3}m?)\s+([A-Z][a-z]?)(?=[-\]/])",
+               lambda m: m.group(1) + m.group(2) if f"{m.group(1)} {m.group(2)}" in _ISOTOPES.split("|") else m.group(0), t)
+    t = re.sub(r"\s+([:;])(?=\s)", r"\1", t)          # "Glioma : A pilot study" (French spacing)
+    return re.sub(r"\s{2,}", " ", t).strip()
+
+
+def translated_title(title: str) -> Optional[str]:
+    """PubMed puts the English translation of a non-English title in brackets:
+    "[Expert consensus on …]." -> "Expert consensus on …". "[18F]FDG PET …" is not one."""
+    s = (title or "").strip()
+    body = s[:-1].rstrip() if s.endswith(".") else s
+    if not (body.startswith("[") and body.endswith("]")):
+        return None
+    depth = 0
+    for i, ch in enumerate(body):
+        depth += (ch == "[") - (ch == "]")
+        if depth == 0 and i < len(body) - 1:
+            return None                                 # the first bracket closes early
+    return body[1:-1].strip() + ("." if s.endswith(".") else "")
+
+
+def title_fields(rec_or_card: dict) -> dict:
+    t = tidy_title(rec_or_card.get("title", ""))
+    out = {"title": t}
+    tr = translated_title(t)
+    lang = LANGUAGES.get((rec_or_card.get("language") or "").lower())
+    if tr:
+        out.update(title=tr, translated=True)
+    if lang:
+        out["language"] = lang
+    return out
+
+
 def to_card(rec: dict, systems_compiled: dict) -> dict:
     primary, extras = conclusion(rec)
     return {
         "pmid": rec["pmid"],
-        "title": rec["title"],
+        **title_fields(rec),
         "journal": rec["journal"] or rec["journal_full"],
         "journal_full": rec["journal_full"],
         "authors": short_authors(rec["authors"]),
@@ -375,5 +423,5 @@ def refresh(card: dict, systems_compiled: dict) -> dict:
         return card
     primary, extras = conclusion(rec)
     card.update(conclusion=primary, extras=extras, design=design(rec), sample=sample_size(rec),
-                systems=tag_systems(rec, systems_compiled))
+                systems=tag_systems(rec, systems_compiled), **title_fields(card))
     return card

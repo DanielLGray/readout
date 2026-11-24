@@ -182,3 +182,34 @@ def test_skip_rule_clears_stored_stories(env, monkeypatch):
     monkeypatch.setattr(build_news, "load_yaml", lambda name: dict(base, sources=srcs))
     out2 = build_news.run(env, NOW)
     assert not any(i["source"] == "Wire" for i in out2["items"])
+
+
+def test_top_stories_do_not_chain_unrelated_headlines():
+    def it(i, src, title):
+        return {"id": f"x{i}", "source": src, "title": title, "date": f"2026-11-2{i % 3}T10:00:00Z", "summary": ""}
+    items = [it(1, "A", "First hormone therapy approved for early breast cancer in over 20 years"),
+             it(2, "B", "FDA approves first hormone therapy for early breast cancer"),
+             it(3, "C", "Can AI improve breast cancer diagnosis?"),
+             it(4, "D", "HPV viral load may improve risk assessment for cervical cancer"),
+             it(5, "E", "Game Awards 2026 nominees"), it(6, "F", "Xingyun Awards 2026 winners"),
+             it(7, "G", "Voyager 1 reaches a historic milestone: one light-day from Earth"),
+             it(8, "H", "Voyager 1 is now one 'light day' from Earth"),
+             it(9, "I", "Voyager 1 is a full light-day away, and still going")]
+    got = {st["title"][:20]: st["sources"] for st in news.top_stories(items, NOW)}
+    assert len(got) == 2
+    assert sorted(next(v for k, v in got.items() if "Voyager" in k)) == ["G", "H", "I"]
+    assert sorted(next(v for k, v in got.items() if "hormone" in k.lower() or "FDA" in k)) == ["A", "B"]
+
+
+def test_only_web_links_reach_the_app():
+    feed = """<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>
+      <item><title>Hostile</title><link>javascript:alert(1)</link><pubDate>Sun, 22 Nov 2026 10:00:00 GMT</pubDate></item>
+      <item><title>Relative</title><link>/news/relative-story</link><pubDate>Sun, 22 Nov 2026 11:00:00 GMT</pubDate></item>
+      <item><title>Odd audio</title><link>https://site.test/ep</link><pubDate>Sun, 22 Nov 2026 12:00:00 GMT</pubDate>
+        <enclosure url="data:audio/mpeg;base64,AAAA" type="audio/mpeg"/></item>
+    </channel></rss>"""
+    http = Http(transport=lambda m, u, p: (200, feed), sleep=lambda s: None, retries=1)
+    got, _ = build_news.fetch_source(http, {"name": "S", "urls": ["https://site.test/feed"]}, NOW)
+    links = sorted(i["link"] for i in got)
+    assert links == ["https://site.test/ep", "https://site.test/news/relative-story"]
+    assert not any(i.get("audio") for i in got)

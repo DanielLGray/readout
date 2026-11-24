@@ -72,8 +72,8 @@ def _adj_growth(r: int, p: int, R: int, P: int) -> Optional[float]:
 
 def _paper(card: dict, m: Optional[dict] = None) -> dict:
     keep = ("pmid", "title", "journal", "authors", "added", "epub", "ppub", "doi", "pmcid", "pub_types", "design",
-            "sample", "conclusion", "extras", "sections", "retracted", "concern")
-    out = {k: card.get(k) for k in keep}
+            "sample", "conclusion", "extras", "sections", "retracted", "concern", "translated", "language")
+    out = {k: card.get(k) for k in keep if k not in ("translated", "language") or card.get(k)}
     if m:
         out["metrics"] = m
     return out
