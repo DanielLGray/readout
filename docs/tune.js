@@ -214,7 +214,8 @@ function interestsPane() {
   };
   const re = followRe();
   const count = (term) => {
-    const r = new RegExp(`(?:^|[^\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "iu");
+    const r = wordRe([term]);
+    if (!r) return 0;
     return (S.feed?.items || []).filter((p) => r.test(`${p.title} ${p.conclusion?.text || ""}`)).length
       + (S.news?.items || []).filter((n) => r.test(`${n.title} ${n.summary || ""}`)).length;
   };
@@ -239,7 +240,7 @@ function interestsPane() {
         info.about ? el("p", { class: "fine", style: "margin:2px 0 0" }, info.about) : null,
         segPick(null, [[0, "Off"], [1, "Less"], [2, "Normal"], [3, "More"]], T.areas[a] ?? 2, (v) => setArea(a, v))))),
     el("section", { class: "sect", id: "tune-follow" }, el("h2", {}, "Following"),
-      el("p", { class: "sub" }, "Papers and news that mention these get a Following chip of their own and a tag on the card."),
+      el("p", { class: "sub" }, "Papers and news that mention these get a Following chip of their own and a tag on the card. Whole words; end one with * for any ending, like radiolog*."),
       el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: () => add() }, "Follow")),
       T.follow.length ? el("div", { class: "chips wrap" }, T.follow.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Stop following ${w}`,
         onclick: () => { setTune({ follow: T.follow.filter((x) => x !== w) }); rerender(); } }, `${w} · ${count(w)}  ✕`))) : null,
@@ -398,7 +399,7 @@ function muteSection() {
   (S.news?.items || []).forEach((i) => { counts[i.source] = (counts[i.source] || 0) + 1; });
   const sources = S.news?.sources || [];
   return el("section", { class: "sect", id: "tune-mute" }, el("h2", {}, "Mute"),
-    el("p", { class: "sub" }, "Hide words or whole outlets everywhere in the feed."),
+    el("p", { class: "sub" }, "Hide words or whole outlets everywhere in the feed. Whole words, so AI doesn’t hide “air”; end one with * for any ending."),
     el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: add }, "Mute")),
     words.length ? el("div", { class: "chips wrap" }, words.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Unmute ${w}`,
       onclick: () => { setTune({ mutedWords: words.filter((x) => x !== w) }); rerender(); } }, `${w}  ✕`))) : null,
@@ -526,6 +527,8 @@ function papersJob() {
       el("dl", { class: "facts" },
         el("dt", {}, "Cards in the feed"), el("dd", {}, items.length.toLocaleString()),
         el("dt", {}, "Added in the last 7 days"), el("dd", {}, week.toLocaleString())),
+      f?.failed_streams?.length ? el("p", { class: "fine warn-text" },
+        `Last run couldn’t search ${f.failed_streams.map((s) => f.streams?.[s] || s).join(", ")}; those papers will catch up on the next run. If this repeats, the search wording in config/feeds.yaml needs a look.`) : null,
       dayBars(perDay, [fmtDate(new Date(Date.now() - (daysBack - 1) * 864e5).toISOString().slice(0, 10)), "today"], { h: 48 }),
       el("div", { class: "ctl-label" }, "What the big text on each card is"),
       stack(concl), legend(concl),

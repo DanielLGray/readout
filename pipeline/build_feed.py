@@ -54,14 +54,23 @@ def run(http: Optional[Http] = None) -> dict:
     # 1 — which PMIDs belong to which stream (a stream new to the feed looks further back)
     found: dict[str, set] = {}
     days = recheck
+    failed = []
     for s in cfg["streams"]:
         q = fill(s["query"], cfg)
         sd = recheck if s["id"] in have else first
         days = max(days, sd)
-        n, ids = pm.esearch(q, datetype="edat", reldate=sd, retmax=MAX_IDS)
+        try:
+            n, ids = pm.esearch(q, datetype="edat", reldate=sd, retmax=MAX_IDS)
+        except Exception as exc:     # one rejected search shouldn't hold back the others; its cards stay
+            log(f"  {s['id']} skipped: {exc}")
+            failed.append(s["id"])
+            continue
         log(f"  {s['id']}: {n} records in {sd} days")
         for pmid in ids:
             found.setdefault(pmid, set()).add(s["id"])
+
+    if failed and len(failed) == len(cfg["streams"]):
+        raise RuntimeError("every PubMed search failed; keeping yesterday's feed")
 
     # 2 — re-check recent cards whose abstract wasn't in PubMed yet
     for pmid, it in items.items():
@@ -136,7 +145,7 @@ def run(http: Optional[Http] = None) -> dict:
             "first_run_days": int(settings.get("first_run_days", 45)),
             "recheck_days": int(settings.get("recheck_days", 10)),
             "keep_days": keep_days,
-            "max_items": int(settings.get("max_items", 900)),
+            "max_items": int(settings.get("max_items", 2500)),
             "journals": len(cfg.get("journals", [])),
             "nm_journals": len(cfg.get("nm_journals", [])),
             "general_journals": len(cfg.get("general_journals", [])),
@@ -146,6 +155,8 @@ def run(http: Optional[Http] = None) -> dict:
         },
         "items": kept,
     }
+    if failed:
+        out["failed_streams"] = failed
     write_json(path, out)
     for term, notes in pm.warnings.items():
         log(f"  PubMed note for query «{term[:80]}…»: {'; '.join(notes)}")

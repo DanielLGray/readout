@@ -266,11 +266,18 @@ function homeArea(p, only = null) {
   const on = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!only || only === a));
   return on.sort((x, y) => (T.areas[y] ?? 2) - (T.areas[x] ?? 2))[0] || null;
 }
-function followRe() {
-  const w = (T.follow || []).map((x) => x.trim()).filter(Boolean);
-  if (!w.length) return null;
-  return new RegExp(`(?:^|[^\\p{L}\\p{N}])(?:${w.map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "iu");
+// whole words or phrases, plurals included (AI doesn't catch "air"; nodule catches "nodules");
+// end one with * for any ending (radiolog* catches radiology and radiologist)
+function wordRe(words) {
+  const one = (x) => {
+    const star = x.endsWith("*");
+    const core = (star ? x.slice(0, -1) : x).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return !core ? null : star ? core : `${core}(?:e?s)?(?![\\p{L}\\p{N}])`;
+  };
+  const w = (words || []).map((x) => one(String(x).trim())).filter(Boolean);
+  return w.length ? new RegExp(`(?:^|[^\\p{L}\\p{N}])(?:${w.join("|")})`, "iu") : null;
 }
+function followRe() { return wordRe(T.follow); }
 const followHit = (it, re = followRe()) => !!re && re.test(`${it.title} ${it.conclusion?.text || it.summary || ""}`);
 function followingList(mute) {
   const re = followRe();
@@ -332,11 +339,7 @@ function impactEl(it) {
     m.kind === "other" ? el("span", { class: "imp-kind" }, "Review or guideline") : null);
 }
 
-function mutedRe() {
-  const w = (T.mutedWords || []).map((x) => x.trim()).filter(Boolean);
-  if (!w.length) return null;
-  return new RegExp(`\\b(?:${w.map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i");
-}
+function mutedRe() { return wordRe(T.mutedWords); }
 
 const sampleN = (s) => { const m = String(s || "").replace(/(\d),(?=\d{3})/g, "$1").match(/\d+/); return m ? +m[0] : 0; };
 // score = freshness × (1 + evidence + size + conclusion + your systems); each factor 0–1 times its weight
@@ -672,7 +675,11 @@ function play(it) {
   $("#player").hidden = false;
   document.body.classList.add("playing");
   bump("listen", it);
-  a.play().catch(() => toast("Couldn’t start the audio. Try Read to open the episode page."));
+  a.play().catch((err) => {
+    // a pause or close before it started isn't a failure
+    if (err?.name === "AbortError" || $("#player").hidden || a.dataset.id !== it.id) return;
+    toast("Couldn’t start the audio. Try Read to open the episode page.");
+  });
 }
 function syncPlayer() {
   const a = $("#pl-audio");
@@ -761,7 +768,22 @@ function actionsEl(it, withShare) {
     withShare ? el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share") : null);
 }
 
+// top stories: drop whole stories that don't fit (extra ones per kind first), never half a line
+function fitTop(card) {
+  const box = card.querySelector(".top-lists");
+  if (!box || !box.clientHeight) return;
+  box.querySelectorAll("section, li").forEach((n) => { n.hidden = false; });
+  const over = () => box.scrollHeight > box.clientHeight + 1;
+  const secs = [...box.children].reverse();
+  for (const sec of secs) {
+    const lis = [...sec.querySelectorAll("li")];
+    for (let i = lis.length - 1; i > 0 && over(); i--) lis[i].hidden = true;
+  }
+  for (const sec of secs.slice(0, -1)) { if (!over()) break; sec.hidden = true; }
+}
 function fitCard(card) {
+  if (card.classList.contains("top-card")) return fitTop(card);
+  card.querySelector(".card-title")?.classList.add("clamp");
   const box = card.querySelector(".concl");
   const inner = box?.querySelector(".concl-inner");
   const p = box?.querySelector(".concl-text:not(.none)");
@@ -780,11 +802,20 @@ function fitCard(card) {
   const over = () => inner.scrollHeight > box.clientHeight + 1;
   if (over() && extra) extra.hidden = true;
   // smaller type before cutting text: the conclusion is the point of the card
+  let shrank = false;
   for (let i = sizes.indexOf(base) + 1; over() && i < sizes.length; i++) {
     sizes.forEach((c) => c && p.classList.remove(c));
     p.classList.add(sizes[i]);
+    shrank = true;
   }
-  if (!over()) return;
+  if (!over()) {                     // room to spare: let a long title show in full, if the conclusion still fits
+    const t = card.querySelector(".card-title.clamp");
+    if (t && !shrank && !(extra && extra.hidden) && t.scrollHeight > t.clientHeight + 1) {
+      t.classList.remove("clamp");
+      if (over()) t.classList.add("clamp");
+    }
+    return;
+  }
   if (card.classList.contains("news-card")) {      // a teaser: clamp it, the article is one tap away
     const lh = parseFloat(getComputedStyle(p).lineHeight) || 24;
     const head = box.querySelector(".news-headline");
@@ -1429,7 +1460,13 @@ function boot() {
   $("#topic-back").addEventListener("click", closeTopic);
   const pa = $("#pl-audio");
   $("#pl-toggle").addEventListener("click", () => (pa.paused ? pa.play().catch(() => {}) : pa.pause()));
-  $("#pl-close").addEventListener("click", () => { pa.pause(); $("#player").hidden = true; document.body.classList.remove("playing"); });
+  $("#pl-close").addEventListener("click", () => {
+    savePos();
+    pa.pause();
+    pa.removeAttribute("src"); pa.load(); delete pa.dataset.id;     // stop downloading the episode
+    if ("mediaSession" in navigator) navigator.mediaSession.metadata = null;
+    $("#player").hidden = true; document.body.classList.remove("playing");
+  });
   ["play", "pause", "ended"].forEach((ev) => pa.addEventListener(ev, syncPlayer));
   ["pause", "ended"].forEach((ev) => pa.addEventListener(ev, savePos));
   let lastSave = 0;

@@ -198,3 +198,19 @@ def test_config_ids_are_unique_and_systems_exist():
         assert not dup, f"duplicate {name}: {dup}"
     assert all(t["system"] in cfg["systems"] for t in tcfg["topics"])
     assert all(s.get("area", "body") in cfg["areas"] for s in cfg["streams"])
+
+
+def test_feed_survives_one_rejected_search(env, monkeypatch):
+    world, http = env
+    from pipeline import pubmed
+    real = pubmed.PubMed.esearch
+    def picky(self, term, **kw):
+        if "Nucl Med" in term and "Clin Nucl Med" in term:      # the NM journals stream
+            raise RuntimeError("PubMed rejected query: test")
+        return real(self, term, **kw)
+    monkeypatch.setattr(pubmed.PubMed, "esearch", picky)
+    out = build_feed.run(http)
+    assert "nm_all" in out["failed_streams"] and len(out["items"]) > 30
+    monkeypatch.setattr(pubmed.PubMed, "esearch", lambda self, term, **kw: (_ for _ in ()).throw(RuntimeError("down")))
+    with pytest.raises(RuntimeError, match="every PubMed search failed"):
+        build_feed.run(http)
