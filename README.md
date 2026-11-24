@@ -77,7 +77,7 @@ GitHub Actions (daily / weekly)
   pipeline/build_feed.py      PubMed E-utilities → parse abstracts → docs/data/feed.json
   pipeline/build_explore.py   PubMed counts + NIH iCite + ClinicalTrials.gov → docs/data/explore.json
 GitHub Pages
-  docs/                       the app (HTML/CSS/JS, works offline once loaded)
+  docs/                       the app (HTML/CSS/JS; opens from the copy on the phone, then updates; works offline)
 ```
 
 - **Trend math:** for each window it compares `papers on topic ÷ all imaging papers` now vs. the period before. So "+40%" means the topic grew 40% faster than imaging research overall, not just that more papers exist.

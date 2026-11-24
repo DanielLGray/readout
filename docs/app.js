@@ -33,7 +33,7 @@ const ICONS = {
 };
 const store = {
   get(k, d) { try { const v = localStorage.getItem("readout." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem("readout." + k, JSON.stringify(v)); } catch { /* private mode */ } },
+  set(k, v) { try { localStorage.setItem("readout." + k, JSON.stringify(v)); return true; } catch { return false; } },   // full, or private mode
 };
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function fmtDate(s) {
@@ -188,10 +188,24 @@ function statsFor(days) {
   return out;
 }
 
+// the last copy of each data file stays on the phone (same cache as the service worker's), so the
+// app opens at once from it and updates when the network answers
+const DATA_CACHE = "readout-data";
+async function keptJSON(path) {
+  try {
+    if (!("caches" in window)) return null;
+    const r = await (await caches.open(DATA_CACHE)).match(path, { ignoreSearch: true });
+    return r ? await r.json() : null;
+  } catch { return null; }
+}
 async function loadJSON(path) {
   const r = await fetch(path, { cache: "no-cache" });
   if (!r.ok) throw new Error(`${path}: ${r.status}`);
   if (r.headers.get("x-readout-offline")) S.offline = true;      // the service worker's saved copy
+  else if (!navigator.serviceWorker?.controller && "caches" in window) {   // no service worker yet: keep it ourselves
+    const copy = r.clone();
+    caches.open(DATA_CACHE).then((c) => c.put(path, copy)).catch(() => {});
+  }
   return r.json();
 }
 
@@ -290,8 +304,8 @@ function importantList(system = "all", strong = false, mute = null) {
     const mine = areasOf(p).filter((a) => (T.areas[a] ?? 2) > 0 && (!areaPick() || areaPick() === a));
     return Math.max(...mine.map((a) => pc[a] ?? p.impact?.pct ?? 0), 0);
   };
-  const key = (p) => (win === "6m" ? p.impact?.score || 0 : best(p));
-  list.sort((a, b) => key(b) - key(a) || (b.impact?.cites || 0) - (a.impact?.cites || 0));
+  const rank = new Map(list.map((p) => [p, win === "6m" ? p.impact?.score || 0 : best(p)]));
+  list.sort((a, b) => rank.get(b) - rank.get(a) || (b.impact?.cites || 0) - (a.impact?.cites || 0));
   list.forEach((p) => {                 // show the percentile and area that earned its place
     if (!p.impact) return;
     const pc = p.impact.pcts || {};
@@ -456,11 +470,22 @@ function filtered(f = {}, report = null) {
 
 let feedObserver, seenObserver;
 const listKey = (it) => (it.type === "top" ? `top:${it.only || ""}` : saveKey(it));
-function currentKey() {
+function currentKey(evenAtTop = false) {
   const v = $("#view-feed");
   if (!v.clientHeight) return null;
   const it = S.list[Math.round(v.scrollTop / v.clientHeight)];
-  return it && v.scrollTop > 0 ? listKey(it) : null;
+  return it && (v.scrollTop > 0 || evenAtTop) ? listKey(it) : null;
+}
+// what a rendered card shows: the top-stories card changes with its stories
+const shownSig = (it) => (it.type === "top" ? `top:${JSON.stringify(topStoryLists(it.only).map(([, l]) => l.map((s) => s.title)))}` : listKey(it));
+// after a background update: leave the screen alone when the cards already drawn are unchanged
+function updateFeedQuietly(sinceShown) {
+  const next = filtered();
+  const n = S.rendered;
+  const same = n > 0 && next.length >= n && next.slice(0, n).every((it, i) => shownSig(it) === shownSig(S.list[i]));
+  if (same) { S.list = next; updateHeadNote(); return; }
+  // an update in the first moments replaces the old copy; later, keep the card you're reading
+  refreshFeed(sinceShown < 4000 && !$("#view-feed").scrollTop ? null : currentKey(true));
 }
 // keepKey: the card you were reading; the rebuilt feed opens there if it's still in the list
 function refreshFeed(keepKey) {
@@ -481,6 +506,7 @@ function refreshFeed(keepKey) {
   }
   S.list = filtered();
   S.rendered = 0;
+  if (!S.shownAt) S.shownAt = Date.now();
   updateHeadNote();
   if (!S.list.length && S.kind === "important" && !S.important) {
     view.append(el("section", { class: "empty" },
@@ -787,12 +813,25 @@ function toggleSave(it, btn) {
   } else {
     S.saved[key] = Object.assign({}, it, { savedAt: Date.now() });
     if (!it.sections && it.abs) {        // keep the abstract with the saved copy, for when it leaves the feed
-      sectionsOf(it).then((secs) => { if (S.saved[key] && secs.length) { S.saved[key].sections = secs; store.set("saved", S.saved); } }).catch(() => {});
+      sectionsOf(it).then((secs) => {
+        if (!S.saved[key] || !secs.length) return;
+        S.saved[key].sections = secs;
+        if (!store.set("saved", S.saved)) delete S.saved[key].sections;   // no room for the abstract: keep the card
+      }).catch(() => {});
     }
     bump("save", it);
     toast("Saved");
   }
-  store.set("saved", S.saved);
+  if (!store.set("saved", S.saved)) {
+    if (S.saved[key] && S.saved[key].savedAt) {      // didn't fit: undo, and say so rather than lose it later
+      const copy = S.saved[key];
+      delete copy.sections; delete copy.extras; delete copy.streams;
+      if (!store.set("saved", S.saved)) {
+        delete S.saved[key];
+        toast("Couldn’t save: Readout’s storage on this phone is full. Remove some saved items first.");
+      }
+    } else toast("Couldn’t update Saved: this phone’s storage is full.");
+  }
   const on = !!S.saved[key];
   document.querySelectorAll(`[data-key="${CSS.escape(key)}"] .act[aria-pressed]`).forEach((b) => setSaveBtn(b, on));
   if (btn) setSaveBtn(btn, on);
@@ -853,8 +892,17 @@ async function sectionsOf(it) {
   if (it.sections) return it.sections;
   if (!it.abs || !it.pmid) return [];
   const name = `${it.abs}${String(Number(it.pmid) % 50).padStart(2, "0")}`;
-  if (!absCache.has(name)) absCache.set(name, loadJSON(`data/abstracts/${name}.json`).catch(() => { absCache.delete(name); return null; }));
-  const b = await absCache.get(name);
+  const path = `data/abstracts/${name}.json`;
+  if (!absCache.has(name)) {
+    // abstracts don't change: a kept copy that has this paper answers at once, even on a weak signal
+    absCache.set(name, keptJSON(path).then((k) => (k?.[it.pmid] ? k : loadJSON(path)))
+      .catch(() => { absCache.delete(name); return null; }));
+  }
+  let b = await absCache.get(name);
+  if (b && !b[it.pmid]) {             // kept copy from before this paper joined: ask the network
+    absCache.delete(name);
+    b = await loadJSON(path).then((x) => { absCache.set(name, Promise.resolve(x)); return x; }).catch(() => null);
+  }
   if (b === null) throw new Error("offline");
   return b?.[it.pmid] || [];
 }
@@ -1045,6 +1093,11 @@ function renderExplore(force) {
   const keep = S.exploreKey && S.exploreKey.split("|")[0] === String(x?.generated) ? view.scrollTop : 0;
   S.exploreKey = key;
   view.replaceChildren();
+  if (!x && S.exploreLoading) {
+    S.exploreKey = null;                     // draw again when it arrives
+    view.append(el("section", { class: "empty", style: "height:100%" }, el("h2", { text: "Loading trends…" })));
+    return;
+  }
   if (!x) {
     view.append(el("section", { class: "empty", style: "height:100%" },
       el("h2", { text: "Trends aren’t built yet" }),
@@ -1310,33 +1363,37 @@ async function reload(announce) {
   const was = { feed: S.feed?.generated, explore: S.explore?.generated, news: S.news?.generated };
   S.offline = false;
   const wasImp = S.important?.generated;
-  const [feed, explore, newsData, important] = await Promise.all([
+  const [feed, newsData, important] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
-    loadJSON("data/explore.json").catch(() => null),
     loadJSON("data/news.json").catch(() => null),
     loadJSON("data/important.json").catch(() => null),
   ]);
+  // Explore isn't needed for the feed: fetch it after, so the feed gets the bandwidth
+  const exploreDone = loadJSON("data/explore.json").catch(() => null).then((explore) => {
+    S.exploreLoading = false;
+    if (explore) S.explore = explore;
+    const changed = !S.explore || S.explore.generated !== was.explore;
+    if (changed) S.exploreKey = null;
+    if (S.tab === "explore" && (announce || changed)) renderExplore();
+    if (S.tab === "tune" && typeof renderTune === "function" && changed) renderTune(true);
+  });
   if (important) S.important = important;
   const impChanged = !!S.important && S.important.generated !== wasImp;
   if (newsData) S.news = newsData;
   const newsChanged = !!S.news && S.news.generated !== was.news;
   markNewsNew();
   if (feed) S.feed = feed;
-  if (explore) S.explore = explore;
-  if (feed || explore || newsData) S.loadedAt = Date.now();
+  if (feed || newsData) S.loadedAt = Date.now();
   const feedChanged = !S.feed || S.feed.generated !== was.feed;
-  const exploreChanged = !S.explore || S.explore.generated !== was.explore;
   markNew();
-  // rebuilding resets scroll position, so only do it when something changed (or the user asked)
   // rebuilding resets the feed; when it's on screen keep your place (unless you tapped refresh),
   // when it isn't, rebuild on the way back
   if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp))) {
-    if (S.tab === "feed") refreshFeed(announce ? null : currentKey());
+    if (S.tab === "feed") { if (announce) refreshFeed(null); else updateFeedQuietly(Date.now() - (S.shownAt || 0)); }
     else { S.feedDirty = true; if (announce) S.lastKey = null; }
   } else updateHeadNote();
-  if (exploreChanged || newsChanged) S.exploreKey = null;
-  if (S.tab === "explore" && (announce || exploreChanged)) renderExplore();
-  if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged || exploreChanged)) renderTune(true);
+  if (newsChanged) S.exploreKey = null;
+  if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged)) renderTune(true);
   if (!feed && !newsData && navigator.onLine === false) S.offline = true;
   updateHeadNote();
   if (announce) {
@@ -1349,6 +1406,20 @@ async function reload(announce) {
         : `Up to date. Papers updated ${ago(feed?.generated)}${S.news ? `, news ${ago(S.news.generated)}` : ""}.`);
     }
   }
+  return exploreDone;
+}
+
+// open at once from what's on the phone; reload() then brings it up to date
+async function showKept() {
+  const [feed, newsData, important] = await Promise.all(["feed", "news", "important"].map((f) => keptJSON(`data/${f}.json`)));
+  if (!feed && !newsData) return;
+  if (S.feed || S.news) return;             // the network won the race
+  S.feed = feed; S.news = newsData; S.important = important;
+  S.loadedAt = Date.now();
+  markNewsNew(); markNew();
+  if (S.tab === "feed") refreshFeed(); else S.feedDirty = true;
+  S.shownAt = Date.now();
+  keptJSON("data/explore.json").then((x) => { if (x && !S.explore) { S.explore = x; S.exploreKey = null; if (S.tab === "explore") renderExplore(); } });
 }
 
 function boot() {
@@ -1395,6 +1466,7 @@ function boot() {
   document.fonts?.addEventListener?.("loadingdone", fitAll);
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
   S.kind = T.startOn;
-  reload(false);
+  S.exploreLoading = true;
+  showKept().finally(() => reload(false));
 }
 boot();
