@@ -87,7 +87,7 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
         got = list(found.values())
         status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
         # answers, but nothing new in a month: the outlet probably moved its feed
-        status["stale"] = status["newest"] < news._utc(now - timedelta(days=STALE_DAYS))
+        status["stale"] = status["newest"] < news._utc(now - timedelta(days=int(src.get("stale_days", STALE_DAYS))))
     elif status["ok"]:
         status["url"] = "works; no matching stories right now"
     return list(found.values()), status
@@ -146,8 +146,10 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     other_days = int(settings.get("other_keep_days", settings.get("science_keep_days", 30)))
     cut_industry = news._utc(now - timedelta(days=int(settings.get("keep_days", 120))))
     cut_other = news._utc(now - timedelta(days=other_days))
+    cut_kind = {k: news._utc(now - timedelta(days=int(d))) for k, d in (settings.get("kind_keep_days") or {}).items()}
+    cut_for = lambda k: cut_kind.get(k) or (cut_industry if k == "industry" else cut_other)
     kept = [i for i in unique
-            if i["date"] >= (cut_industry if i.get("kind", "industry") == "industry" else cut_other)
+            if i["date"] >= cut_for(i.get("kind", "industry"))
             and not (junk and i.get("kind", "industry") != "industry" and junk.search(i["title"]))]
     kept = kept[: int(settings.get("max_items", 4000))]
 

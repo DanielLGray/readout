@@ -147,8 +147,12 @@ def test_important_papers(env, monkeypatch):
             assert lst and all(p in out["papers"] for p in lst)
             assert all(out["papers"][p]["impact"]["kind"] == "research" and area in out["papers"][p]["areas"] for p in lst)
     # proven lists: ranked by citation percentile within the area and quarter, nothing too new to judge
-    pcts = [out["papers"][p]["impact"]["pcts"]["body"] for p in out["windows"]["3y"]["body"]["research"]]
-    assert pcts == sorted(pcts, reverse=True) and pcts[0] >= 95
+    from pipeline.build_important import proven
+    t = date.fromisoformat(out["today"])
+    keys = [50 + (out["papers"][p]["impact"]["pcts"]["body"] - 50) * min(1, out["papers"][p]["impact"]["age"] / 12)
+            for p in out["windows"]["3y"]["body"]["research"]]
+    assert all(a >= b - 0.6 for a, b in zip(keys, keys[1:])) and keys[0] >= 90       # young papers count for less
+    assert out["papers"][out["windows"]["3y"]["body"]["research"][0]]["impact"]["age"] >= 12
     assert all(out["papers"][p]["impact"]["age"] >= 4 for p in out["windows"]["1y"]["nm"]["research"])
     assert st["areas"]["nm"] > 0
     # cards carry the authors' conclusion like the feed; the abstract sits beside the file

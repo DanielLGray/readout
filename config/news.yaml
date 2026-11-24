@@ -20,6 +20,8 @@
 settings:
   keep_days: 120          # radiology industry stories older than this leave the feed
   other_keep_days: 21     # health, science and sci-fi stories (many more of them) leave sooner
+  kind_keep_days:         # kinds that post rarely keep their stories longer
+    societies: 180
   max_items: 4000
   archive_days: 730       # headlines kept (titles only) for trend analysis
   top_stories:            # the first card in the feed
@@ -88,24 +90,29 @@ sources:
     google_news: true
     max_per_day: 3
     home: https://www.acr.org/news-and-publications/media-center
+    stale_days: 90             # posts a few times a month
+    merge: true
     urls:
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22American+College+of+Radiology%22+OR+%22ACR+appropriateness%22
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22American+College+of+Radiology%22+when:120d
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22ACR+Appropriateness+Criteria%22+when:365d
 
   - name: SNMMI
     kind: societies
     google_news: true
     max_per_day: 3
     home: https://snmmi.org
+    stale_days: 90
     urls:
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22SNMMI%22+OR+%22Society+of+Nuclear+Medicine+and+Molecular+Imaging%22
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=SNMMI+OR+%22Society+of+Nuclear+Medicine+and+Molecular+Imaging%22+when:120d
 
   - name: SCCT
     kind: societies
     google_news: true
     max_per_day: 3
     home: https://scct.org
+    stale_days: 120
     urls:
-      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22Society+of+Cardiovascular+Computed+Tomography%22+OR+%22SCCT%22+cardiac
+      - https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=%22Society+of+Cardiovascular+Computed+Tomography%22+OR+%22SCCT%22+cardiac+when:180d
 
   - name: Imaging Technology News
     home: https://www.itnonline.com
@@ -286,6 +293,7 @@ sources:
     max_per_day: 4
     home: https://www.livescience.com
     urls:
+      - https://www.livescience.com/feeds.xml
       - https://www.livescience.com/feeds/all
 
   - name: Space.com
@@ -293,6 +301,7 @@ sources:
     max_per_day: 3
     home: https://www.space.com
     urls:
+      - https://www.space.com/feeds.xml
       - https://www.space.com/feeds/all
 
   - name: NASA

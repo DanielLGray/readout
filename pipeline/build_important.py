@@ -89,6 +89,12 @@ def score(rows: dict[str, dict], t: date, s: dict) -> dict[str, float]:
     return jtable
 
 
+def proven(r: dict, area: str, t: date) -> float:
+    """The area percentile, pulled toward the middle for papers under a year old: leading a
+    recent quarter with 6 citations is promising, not yet proven."""
+    return 50 + (r["pcts"][area] - 50) * min(1.0, months(r["date"], t) / 12)
+
+
 def pick(rows: dict[str, dict], t: date, s: dict, areas: list[str]) -> dict:
     """{window: {area: {research: [...], other: [...]}}}"""
     out: dict = {}
@@ -101,7 +107,7 @@ def pick(rows: dict[str, dict], t: date, s: dict, areas: list[str]) -> dict:
                 key = lambda r: (-r["score"], -r["cites"], r["pmid"])
             else:                                        # proven: citations only, old enough to judge
                 pool = [r for r in pool if months(r["date"], t) >= s["min_age_months"]]
-                key = lambda r, a=a: (-r["pcts"][a], -r["cites"], r["pmid"])
+                key = lambda r, a=a: (-proven(r, a, t), -r["cites"], r["pmid"])
             pool.sort(key=key)
             out[w][a] = {"research": [r["pmid"] for r in pool if r["kind"] == "research"][:s["per_window"][w]],
                          "other": [r["pmid"] for r in pool if r["kind"] == "other"][:s["other_per_window"]]}
