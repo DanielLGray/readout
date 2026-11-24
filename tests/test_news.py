@@ -164,3 +164,21 @@ def test_trending_ignores_archived_promos(env, monkeypatch, tmp_path):
     out = build_news.run(env, NOW)
     terms = [t["term"].lower() for t in out["trending"]["science"]["week"]["terms"]]
     assert not any("gift" in t for t in terms)
+
+
+def test_episodes_sharing_one_link_stay_separate():
+    feed = """<?xml version="1.0"?><rss version="2.0"><channel><title>Show</title>""" + "".join(
+        f"<item><title>Episode {i}</title><link>https://show.test/</link><pubDate>Sun, {15 + i} Nov 2026 10:00:00 GMT</pubDate>"
+        f"<enclosure url='https://cdn.test/{i}.mp3' type='audio/mpeg'/></item>" for i in range(4)) + "</channel></rss>"
+    got = news.parse_feed(feed, "Show", NOW)
+    assert len({i["id"] for i in got}) == 4
+
+
+def test_skip_rule_clears_stored_stories(env, monkeypatch):
+    out = build_news.run(env, NOW)
+    assert any(i["source"] == "Wire" for i in out["items"])
+    base = build_news.load_yaml("news.yaml")
+    srcs = [dict(s, skip=".") if s["name"] == "Wire" else s for s in base["sources"]]
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: dict(base, sources=srcs))
+    out2 = build_news.run(env, NOW)
+    assert not any(i["source"] == "Wire" for i in out2["items"])

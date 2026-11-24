@@ -107,6 +107,11 @@ def parse_feed(text: str, source: str, now: datetime) -> list[dict]:
             if dur:
                 item["duration"] = dur
         out.append(item)
+    # some podcast feeds point every episode at the show's home page: tell them apart by title
+    shared = Counter(i["link"] for i in out)
+    for i in out:
+        if shared[i["link"]] > 1:
+            i["id"] = item_id(f"{i['link']}#{i['title'].lower()}", i["title"], source)
     return out
 
 

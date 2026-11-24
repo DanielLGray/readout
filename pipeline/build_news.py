@@ -106,6 +106,16 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             it["systems"] = tag_systems({"title": it["title"], "sections": [{"text": it.get("summary", "")}]}, systems)
             items[it["id"]] = it
 
+    # an outlet's skip/require rules also clear out stories stored before the rule existed
+    rules = {src["name"]: (re.compile(src["skip"], re.I) if src.get("skip") else None,
+                           re.compile(src["require"], re.I) if src.get("require") else None)
+             for src in cfg.get("sources", [])}
+    def allowed(it):
+        skip, need = rules.get(it["source"], (None, None))
+        return not (skip and skip.search(it["link"] + " " + it["title"])) and \
+            not (need and not need.search(it["title"] + " " + it.get("summary", "")))
+    items = {k: v for k, v in items.items() if allowed(v)}
+
     # one copy per headline per publisher (sister sites syndicate): keep the one with a summary
     group_of = {src["name"]: src.get("group", src["name"]) for src in cfg.get("sources", [])}
     best: dict[tuple, dict] = {}
