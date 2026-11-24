@@ -5,11 +5,13 @@ from datetime import datetime, timezone
 from pipeline.build_news import fetch_source, news_http
 now = datetime.now(timezone.utc)
 cands = {
-    "Health Imaging": ("https://healthimaging.com", ["https://healthimaging.com/rss.xml", "https://healthimaging.com/feed", "https://healthimaging.com/rss"]),
-    "Diagnostic Imaging": ("https://www.diagnosticimaging.com", ["https://www.diagnosticimaging.com/rss", "https://www.diagnosticimaging.com/rss.xml"]),
-    "Applied Radiology": ("https://appliedradiology.com", ["https://appliedradiology.com/feed", "https://appliedradiology.com/rss"]),
-    "DAIC": ("https://www.dicardiology.com", ["https://www.dicardiology.com/rss.xml", "https://www.dicardiology.com/rss", "https://www.dicardiology.com/feed"]),
-    "Radiology Today": ("https://www.radiologytoday.net", ["https://www.radiologytoday.net/rss.xml", "https://www.radiologytoday.net/feed"]),
+    "MX diagnostic radiology": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/diagnostic-radiology-news/"]),
+    "MX radiology & imaging": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/radiology-imaging-news/", "https://medicalxpress.com/rss-feed/health-news/radiology-imaging/"]),
+    "MX RSNA": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/partners/radiological-society-of-north-america/"]),
+    "MX SNMMI": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/partners/society-of-nuclear-medicine-and-molecular-imaging/", "https://medicalxpress.com/rss-feed/partners/society-of-nuclear-medicine/", "https://medicalxpress.com/rss-feed/partners/snmmi/"]),
+    "MX ACR": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/partners/american-college-of-radiology/"]),
+    "MX ARRS": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/partners/american-roentgen-ray-society/"]),
+    "MX ACC": ("https://medicalxpress.com", ["https://medicalxpress.com/rss-feed/partners/american-college-of-cardiology/"]),
 }
 http = news_http()
 for name, (home, urls) in cands.items():
