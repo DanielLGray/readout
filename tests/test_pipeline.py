@@ -156,3 +156,13 @@ def test_every_query_placeholder_is_filled():
     assert "[majr]" in fill(next(s["query"] for s in cfg["streams"] if s["id"] == "general_imaging"), cfg)
     with _pt.raises(KeyError):
         fill("({no_such_block})", cfg)
+
+
+def test_summaries_date_papers_by_first_appearance():
+    from pipeline.pubmed import PubMed
+    import json as _json
+    body = {"result": {"uids": ["1"], "1": {"title": "t", "source": "J", "sortpubdate": "2026/06/01 00:00",
+            "history": [{"pubstatus": "entrez", "date": "2025/08/14 06:00"}, {"pubstatus": "accepted", "date": "2025/07/01 00:00"}]}}}
+    pm = PubMed(Http(transport=lambda m, u, p: (200, _json.dumps(body)), sleep=lambda s: None))
+    s = pm.summaries(["1"])[0]
+    assert s["first"] == "2025-08-14" and s["date"] == "2026-06-01"

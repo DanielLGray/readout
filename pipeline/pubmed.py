@@ -116,6 +116,10 @@ class PubMed:
                     "title": r.get("title", ""),
                     "journal": r.get("source", ""),
                     "date": (r.get("sortpubdate") or "")[:10].replace("/", "-"),
+                    # when it first appeared (online ahead of print counts): the fair start for citations
+                    "first": min([d for d in [(r.get("sortpubdate") or "")[:10].replace("/", "-")] +
+                                  [(h.get("date") or "")[:10].replace("/", "-") for h in r.get("history", []) or []
+                                   if h.get("pubstatus") in ("entrez", "pubmed")] if len(d) == 10] or [""]),
                     "types": [str(x) for x in r.get("pubtype", []) or []],
                 })
         return out

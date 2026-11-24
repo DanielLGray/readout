@@ -101,7 +101,8 @@ def pick(rows: dict[str, dict], t: date, s: dict) -> dict:
 
 
 def build_corpus(pm: PubMed, cfg: dict, t: date, s: dict) -> dict[str, list]:
-    """{pmid: [date, journal, [types], title]} for every stream paper in the last `years` years, cached."""
+    """{pmid: [first date, journal, [types], title, 2]} for every stream paper in the last `years` years,
+    cached. The date is when it first appeared, online or in print."""
     path = CACHE / "important_corpus.json"
     cache: dict = read_json(path, {}) or {}
     start = t - timedelta(days=round(365.25 * s["years"]) + 31)
@@ -111,11 +112,11 @@ def build_corpus(pm: PubMed, cfg: dict, t: date, s: dict) -> dict[str, list]:
         log(f"Important: {st['id']}: {n} papers since {start}")
         ids.extend(got)
     ids = list(dict.fromkeys(ids))
-    missing = [p for p in ids if len(cache.get(p) or []) < 4]
+    missing = [p for p in ids if len(cache.get(p) or []) < 5]          # 5 fields: the current format
     log(f"Important: {len(ids)} papers, {len(missing)} new to the cache")
     for r in pm.summaries(missing):
-        if r["date"]:
-            cache[r["pmid"]] = [r["date"], r["journal"], r["types"], r["title"]]
+        if r["first"] or r["date"]:
+            cache[r["pmid"]] = [r["first"] or r["date"], r["journal"], r["types"], r["title"], 2]
     keep = set(ids)
     cache = {k: v for k, v in cache.items() if k in keep}
     # one record per line, sorted: weekly changes stay small in git
@@ -139,6 +140,7 @@ def run(http: Optional[Http] = None) -> dict:
     rows: dict[str, dict] = {}
     skipped = 0
     for pmid, (d, journal, types, *rest) in corpus.items():
+        rest = [x for x in rest if isinstance(x, str)]
         m = cites.get(pmid, {})
         kind = kind_of(types, m.get("research") if m else None, rest[0] if rest else "")
         if kind is None:

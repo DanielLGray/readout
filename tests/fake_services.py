@@ -210,6 +210,7 @@ class FakeWorld:
             p = self.papers[i]
             pts = {"guideline": "Practice Guideline", "meta": "Meta-Analysis", "rct": "Randomized Controlled Trial"}
             res[i] = {"title": p["title"], "source": p["journal"], "sortpubdate": p["date"].strftime("%Y/%m/%d 00:00"),
+                      "history": [{"pubstatus": "entrez", "date": min(p["added"], p["date"]).strftime("%Y/%m/%d 00:00")}],
                       "pubtype": ["Journal Article"] + ([pts[p["ev"]]] if p["ev"] in pts else []) +
                                  (["Case Reports"] if int(i) % 23 == 0 else [])}
         return {"result": res}
