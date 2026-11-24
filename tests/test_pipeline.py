@@ -43,6 +43,8 @@ def test_feed_first_run_then_update(env):
     some = next(i for i in items if i.get("abs"))
     bucket = _json.loads((build_feed.DATA / "abstracts" / f"f{int(some['pmid']) % 50:02d}.json").read_text())
     assert bucket[some["pmid"]][0]["text"]
+    # cards carry what an AMA reference needs
+    assert all("cite" in i and i["cite"].get("au") for i in items if i.get("authors"))
     # second run merges, keeps 'seen', and still has every abstract
     out2 = build_feed.run(http)
     assert {i["pmid"] for i in items} <= {i["pmid"] for i in out2["items"]}

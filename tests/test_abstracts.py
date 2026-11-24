@@ -340,3 +340,20 @@ def test_run_on_sections_and_bullets():
     assert review["label"] == "Critical relevance statement" and review["text"] == "This article explores spectral CT in colorectal cancer."
     bullets = _concl("•Dose escalation means over 54 Gy.•MRI-based GTV definition is central.•Delphi achieved consensus.", label="", cat="")
     assert bullets["text"] == "MRI-based GTV definition is central. Delphi achieved consensus."
+
+
+def test_citation_fields_follow_ama_author_rule():
+    from pipeline.abstracts import citation_fields
+    six = [f"Author{i} A" for i in range(6)]
+    assert citation_fields({"authors": six}) == {"au": six}
+    seven = six + ["Author6 A"]
+    assert citation_fields({"authors": seven, "volume": "317", "issue": "2", "pages": "123-30"}) == \
+        {"au": seven[:3], "etal": True, "vol": "317", "iss": "2", "pg": "123-30"}
+
+
+def test_journal_housekeeping_is_not_a_paper():
+    from pipeline.abstracts import is_notice
+    for t in ["2026 Manuscript Reviewers: A Note of Thanks.", "Thank you to our reviewers", "In Memoriam: A. Radiologist", "Editorial Board"]:
+        assert is_notice({"title": t, "pub_types": []}), t
+    for t in ["Updates in cardiovascular CT imaging in 2025: A year in review.", "Reviewers' agreement on LI-RADS categories"]:
+        assert not is_notice({"title": t, "pub_types": []}), t

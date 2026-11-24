@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preload" href="fonts/literata-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="app.css?v=20">
+  <link rel="stylesheet" href="app.css?v=21">
 </head>
 <body>
   <div class="app">
@@ -29,6 +29,9 @@
       <div class="head-row">
         <h1 class="wordmark" id="title">Readout</h1>
         <span class="head-note" id="head-note"></span>
+        <button class="icon-btn" id="btn-search" aria-label="Search papers and news">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        </button>
         <button class="icon-btn" id="btn-refresh" aria-label="Check for new papers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
         </button>
@@ -93,7 +96,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=20"></script>
-  <script src="tune.js?v=20"></script>
+  <script src="app.js?v=21"></script>
+  <script src="tune.js?v=21"></script>
 </body>
 </html>

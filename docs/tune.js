@@ -97,6 +97,83 @@ function renderTune(keepScroll) {
 }
 const rerender = () => renderTune(true);
 
+// ── reading comfort, library access, your data ─────────────────────────────
+function textSizeSection() {
+  return el("section", { class: "sect", id: "tune-text" }, el("h2", {}, "Text size"),
+    el("p", { class: "sub" }, "For conclusions, headlines and abstracts. Long conclusions that no longer fit continue in the abstract."),
+    segPick(null, [[0.9, "Small"], [1, "Default"], [1.12, "Large"], [1.25, "Larger"]], T.textSize, (v) => {
+      setTune({ textSize: Number(v) }); applyTextSize(); requestAnimationFrame(fitAll); rerender();
+    }));
+}
+
+function librarySection() {
+  const input = el("input", { type: "url", class: "text-in wide", placeholder: "https://login.ezproxy.yourlibrary.org/login?url=",
+    "aria-label": "Library link prefix", value: T.library || "", autocapitalize: "off", autocomplete: "off", inputmode: "url", enterkeyhint: "done" });
+  const save = () => {
+    const v = input.value.trim();
+    if (v && !/^https?:\/\/\S{4,300}$/i.test(v)) { toast("That doesn’t look like a web address. It should start with https://"); return; }
+    setTune({ library: v }); toast(v ? "Journal links now go through your library" : "Library link removed"); rerender();
+  };
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); save(); } });
+  const sample = (S.feed?.items || []).find((i) => doiUrl(i.doi));
+  return el("section", { class: "sect", id: "tune-library" }, el("h2", {}, "Library access"),
+    el("p", { class: "sub" }, "Paste the link your hospital or university library gives for reading journals off campus (often called EZproxy or OpenAthens; the library’s website or help desk has it). Journal buttons then open articles through it, with your institution’s subscriptions."),
+    input,
+    el("p", { class: "fine" }, "Examples: https://login.ezproxy.yourlibrary.org/login?url=   or   https://go.openathens.net/redirector/yourhospital.org?url=   Put {url} where the article address goes if your library’s link needs it in the middle."),
+    el("div", { class: "link-row" },
+      el("button", { class: "act", onclick: save }, "Save"),
+      T.library ? el("button", { class: "act", onclick: () => { input.value = ""; save(); } }, "Remove") : null,
+      T.library && sample ? el("a", { class: "act", href: libraryUrl(doiUrl(sample.doi)), target: "_blank", rel: "noopener" }, "Try it") : null));
+}
+
+function backupSection() {
+  const n = Object.keys(S.saved).length;
+  const file = el("input", { type: "file", accept: ".json,application/json", hidden: true,
+    onchange: (e) => { restoreFrom(e.target.files?.[0]); e.target.value = ""; } });
+  return el("section", { class: "sect", id: "tune-backup" }, el("h2", {}, "Back up and restore"),
+    el("p", { class: "sub" }, `Your ${plural(n, "saved item")}, settings, followed words and reading history live only on this phone. Keep a copy in Files or iCloud Drive; restore it after deleting the app or on a new phone.`),
+    el("div", { class: "link-row" },
+      el("button", { class: "act", onclick: backupNow }, "Back up"),
+      el("button", { class: "act", onclick: () => file.click() }, "Restore from a backup"), file),
+    el("p", { class: "fine" }, "Restoring adds the backup’s saved items to what’s here (nothing here is removed) and brings back its settings."));
+}
+
+async function backupNow() {
+  const data = { app: "readout", version: 1, exported: new Date().toISOString(),
+    saved: S.saved, tune: store.get("tune", {}), stats, pos: store.get("pos", {}) };
+  const name = `readout-backup-${localDay()}.json`;
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  try {
+    const f = new File([blob], name, { type: "application/json" });
+    if (navigator.canShare?.({ files: [f] })) { await navigator.share({ files: [f], title: "Readout backup" }); return; }
+  } catch (e) { if (e?.name === "AbortError") return; }     // closed the share sheet
+  const a = el("a", { href: URL.createObjectURL(blob), download: name });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast("Backup saved to Downloads");
+}
+
+async function restoreFrom(file) {
+  if (!file) return;
+  let d = null;
+  try { d = JSON.parse(await file.text()); } catch { /* not JSON */ }
+  if (!d || d.app !== "readout" || !d.saved || typeof d.saved !== "object") { toast("That file isn’t a Readout backup."); return; }
+  // only well-formed items: a paper with a PMID, or a story with a web link
+  const ok = (v) => v && typeof v === "object" && typeof v.title === "string"
+    && ((v.pmid && /^\d{1,9}$/.test(String(v.pmid))) || (typeof v.link === "string" && /^https?:\/\//i.test(v.link)));
+  let added = 0;
+  for (const [k, v] of Object.entries(d.saved)) if (ok(v) && !S.saved[k]) { S.saved[k] = v; added++; }
+  if (d.tune && typeof d.tune === "object") { store.set("tune", d.tune); T = loadTune(); applyTextSize(); }
+  if (d.stats?.days && typeof d.stats.days === "object") {
+    for (const [day, v] of Object.entries(d.stats.days)) if (!stats.days[day] && v && typeof v === "object") stats.days[day] = v;
+    saveStats();
+  }
+  if (d.pos && typeof d.pos === "object") store.set("pos", { ...d.pos, ...(store.get("pos", {}) || {}) });
+  toast(store.set("saved", S.saved) ? `Restored ${plural(added, "saved item")} and your settings`
+    : "Couldn’t restore everything: Readout’s storage on this phone is full.");
+  S.feedDirty = true; S.exploreKey = null; renderTune(true);
+}
+
 // ── your reading ───────────────────────────────────────────────────────────
 function readingPane() {
   const days = Number(TU.span);
@@ -106,6 +183,7 @@ function readingPane() {
   kinds.forEach((k) => (agg.k[k] || [0, 0, 0, 0]).forEach((n, i) => { sum[i] += n; }));
   const [seen, opened, saved, listened] = sum;
   const out = [
+    textSizeSection(),
     segPick(null, [["7", "Last 7 days"], ["30", "Last 30 days"]], TU.span, (v) => { TU.span = v; rerender(); }),
   ];
   if (!seen && !opened) {
@@ -157,6 +235,7 @@ function readingPane() {
     el("div", { class: "link-row" }, twoTap("clear", "Clear reading history", "Tap again to clear", () => {
       stats = { days: {} }; seenToday = { d: "" }; saveStats(); toast("Reading history cleared"); rerender();
     })));
+  out.push(librarySection(), backupSection());
   return out;
 }
 

@@ -200,6 +200,11 @@ def parse_article(el: ET.Element) -> Optional[dict]:
     epub = next((_date_from(d) for d in art.findall("ArticleDate")
                  if d.get("DateType", "Electronic") == "Electronic"), None)
     ppub = _date_from(journal.find("JournalIssue/PubDate")) if journal is not None else None
+    ji = journal.find("JournalIssue") if journal is not None else None
+    pages = _text(art.find("Pagination/MedlinePgn"))
+    if not pages:
+        sp, ep = _text(art.find("Pagination/StartPage")), _text(art.find("Pagination/EndPage"))
+        pages = f"{sp}-{ep}" if sp and ep else sp
     corrections = {c.get("RefType") for c in mc.findall("CommentsCorrectionsList/CommentsCorrections")}
 
     return {
@@ -218,4 +223,7 @@ def parse_article(el: ET.Element) -> Optional[dict]:
         "retracted": "Retracted Publication" in pub_types or "RetractionIn" in corrections,
         "concern": "ExpressionOfConcernIn" in corrections,
         "language": _text(art.find("Language")),
+        "volume": _text(ji.find("Volume")) if ji is not None else "",
+        "issue": _text(ji.find("Issue")) if ji is not None else "",
+        "pages": pages,
     }

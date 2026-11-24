@@ -312,12 +312,19 @@ _REPLY = re.compile(r"^\s*(?:reply|in reply|authors?['’]? reply|invited commen
                     r"|\breply to (?:the )?(?:letter|comment)", re.I)
 
 
+# journal housekeeping: thanks to reviewers, obituaries, editorial-board notices
+_HOUSEKEEPING = re.compile(r"\breviewers?\b[^.]{0,40}\b(?:thanks?|thank you|acknowledg\w*)|\bthanks?(?: you)?\b[^.]{0,30}\breviewers?\b"
+                           r"|\bnote of thanks\b|^\s*in memoriam\b"
+                           r"|^\s*obituary\b|\beditorial board\b|^\s*(?:reviewer|editor) (?:recognition|acknowledg\w*)", re.I)
+
+
 def is_notice(rec: dict) -> bool:
-    """Erratum, correction and retraction notices, replies and invited commentaries: not papers to read."""
+    """Erratum, correction and retraction notices, replies and invited commentaries, and journal
+    housekeeping: not papers to read."""
     pts = set(rec.get("pub_types", []))
     title = rec.get("title", "")
     return bool(pts & {"Published Erratum", "Retraction of Publication", "Retraction Notice", "Expression of Concern"}) \
-        or bool(_NOTICE.search(title)) or bool(_REPLY.search(title))
+        or bool(_NOTICE.search(title)) or bool(_REPLY.search(title)) or bool(_HOUSEKEEPING.search(title))
 
 
 def area_require(areas_cfg: dict) -> dict:
@@ -414,6 +421,19 @@ def tag_systems(rec: dict, compiled: dict) -> list[str]:
     return [k for _, _, k in sorted(hits)]
 
 
+def citation_fields(rec: dict) -> dict:
+    """What an AMA reference needs beyond the card: up to six authors (AMA lists all when there are
+    six or fewer, else the first three and et al), volume, issue and pages. Empty parts left out."""
+    au = rec.get("authors") or []
+    out = {"au": au if len(au) <= 6 else au[:3]}
+    if len(au) > 6:
+        out["etal"] = True
+    for key, field in (("vol", "volume"), ("iss", "issue"), ("pg", "pages")):
+        if rec.get(field):
+            out[key] = rec[field]
+    return out
+
+
 def short_authors(authors: list[str]) -> str:
     if not authors:
         return ""
@@ -478,6 +498,7 @@ def to_card(rec: dict, systems_compiled: dict) -> dict:
         "journal": rec["journal"] or rec["journal_full"],
         "journal_full": rec["journal_full"],
         "authors": short_authors(rec["authors"]),
+        "cite": citation_fields(rec),
         "added": rec.get("added"),
         "epub": rec.get("epub"),
         "ppub": rec.get("ppub"),

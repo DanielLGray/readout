@@ -34,8 +34,10 @@ From then on, the feed updates every night (3:17 AM Eastern, inside NCBI's off-p
 ## Using it
 
 - **Swipe up** for the next paper. The chips at the top filter by organ system. **Strong evidence** keeps only prospective studies, randomized trials, meta-analyses and guidelines.
-- **Abstract** opens the full structured abstract. **PubMed**, **Journal** (DOI) and **Free full text** (when it's in PMC) open in the browser.
-- **Save** keeps a paper on your phone even after it leaves the feed. **Saved → Copy list** copies the citations and links.
+- **Search** (magnifier, top right) finds any paper or story on your phone by words, author or journal: the feed, Most important, Explore, news and Saved. Accents don't matter.
+- **Abstract** opens the full structured abstract. **PubMed**, **Journal** (DOI) and **Free full text** (when it's in PMC) open in the browser; **Copy citation** copies an AMA-style reference. Add your library's off-campus link in **Tune → Reading → Library access** and **Journal** opens articles through your institution's subscriptions.
+- **Save** keeps a paper on your phone even after it leaves the feed. **Saved → Copy list** copies a numbered AMA reference list. **Tune → Reading → Back up** saves your saved items and settings to a file (Files, iCloud Drive) to restore on a new phone.
+- **Text size** (Tune → Reading) makes conclusions, headlines and abstracts larger or smaller.
 - Tap a **topic tag** on a card to see only that topic. In **Explore**, tap a topic for its trend page, then **…cards in your feed** to jump back.
 - The **ⓘ** button explains how cards are built.
 - **Most important** (a chip in the feed) lists the papers cited far more than others of the same age. It draws on every paper from your journals over the last three years, ranked by citations against body-imaging papers from the same quarter (NIH iCite). **1 year** and **3 years** show proven original research; **New** covers the last six months, where a paper's journal record stands in until citations arrive. You can include reviews and guidelines, or open the app on this view, in Tune. It's rebuilt every Tuesday.

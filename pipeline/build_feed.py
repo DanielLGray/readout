@@ -74,9 +74,10 @@ def run(http: Optional[Http] = None) -> dict:
     if failed and len(failed) == len(cfg["streams"]):
         raise RuntimeError("every PubMed search failed; keeping yesterday's feed")
 
-    # 2 — re-check recent cards whose abstract wasn't in PubMed yet
+    # 2 — re-check recent cards whose abstract wasn't in PubMed yet, and fetch once more any card
+    #     stored before cards carried citation details (volume, issue, pages, up to six authors)
     for pmid, it in items.items():
-        if it.get("conclusion", {}).get("kind") == "none" and _age_days(it.get("added"), t) <= 30:
+        if (it.get("conclusion", {}).get("kind") == "none" and _age_days(it.get("added"), t) <= 30) or "cite" not in it:
             found.setdefault(pmid, set()).update(it.get("streams", []))
 
     # 3 — topic tags (same query the Explore tab uses)

@@ -57,6 +57,15 @@ function pct(g) {
   const v = Math.round(g * 100);
   return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) + "%";
 }
+const TEXT_SIZES = [0.9, 1, 1.12, 1.25];
+function applyTextSize() { document.documentElement.style.setProperty("--ts", String(T?.textSize || 1)); }
+// a journal link through your library's proxy, so paywalled articles open with your institution's access
+function libraryUrl(url) {
+  const p = T?.library;
+  if (!p || !url || !/^https?:\/\//i.test(p)) return url;      // only ever a web address
+  if (p.includes("{url}")) return p.replace("{url}", encodeURIComponent(url));
+  return /openathens|redirector|qurl=$/i.test(p) ? p + encodeURIComponent(url) : p + url;    // EZproxy's login?url= takes it as is
+}
 const pubmedUrl = (pmid) => `https://pubmed.ncbi.nlm.nih.gov/${/^\d{1,9}$/.test(String(pmid)) ? pmid : ""}`;
 // links built from paper data: only well-formed identifiers make a link
 const doiUrl = (doi) => (/^10\.\d{4,9}\/[^\s"<>]+$/.test(String(doi || "")) ? `https://doi.org/${encodeURI(doi)}` : null);
@@ -92,6 +101,8 @@ const TUNE_DEFAULTS = {
   areas: { body: 3, nm: 2, cardiac: 2, general: 1 },   // interest areas: 0 off, 1 less, 2 normal, 3 more
   follow: [],           // words and phrases you follow (the Following chip)
   hiddenSystems: [],    // organ-system chips you don't want in the chip row
+  textSize: 1,          // reading text: 0.9 small, 1 default, 1.12 large, 1.25 larger
+  library: "",          // your library's off-campus link prefix (EZproxy, OpenAthens), for Journal links
   cap: 2,               // most stories per outlet per day in Everything (industry news exempt); 0 = no limit
   topCard: true,        // open the feed with stories several outlets covered
   order: "newest",      // papers: "newest" or "ranked"
@@ -127,6 +138,8 @@ function loadTune() {
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
+    textSize: TEXT_SIZES.includes(t.textSize) ? t.textSize : 1,
+    library: typeof t.library === "string" && /^https?:\/\/\S{4,300}$/i.test(t.library.trim()) ? t.library.trim() : "",
     startOn: ["all", "papers", "important"].includes(t.startOn) ? t.startOn : "all",
   };
 }
@@ -887,6 +900,108 @@ async function share(it) {
   } catch { /* cancelled */ }
 }
 
+// ── citations (AMA, as Radiology and AJR use) ──────────────────────────────
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function fmtLong(s) {
+  const [y, m, d] = String(s || "").split("-");
+  return !m ? y || "" : !d ? `${MONTHS[+m - 1]} ${y}` : `${MONTHS[+m - 1]} ${+d}, ${y}`;
+}
+function fullPages(pg) {                 // "1123-30" → "1123-1130"
+  const m = String(pg || "").match(/^(\d+)-(\d+)$/);
+  if (!m || m[2].length >= m[1].length) return pg || "";
+  return `${m[1]}-${m[1].slice(0, m[1].length - m[2].length)}${m[2]}`;
+}
+function amaCitation(it) {
+  if (!it.pmid) {                        // a news story
+    return `${it.title}. ${it.source}. Published ${fmtLong((it.date || "").slice(0, 10))}. ${it.link}`;
+  }
+  const c = it.cite || {};
+  const au = c.au?.length ? c.au.join(", ") + (c.etal ? ", et al" : "")
+    : String(it.authors || "").replace(/,?\s*et al\.?$/, ", et al");
+  const title = String(it.title || "").trim().replace(/\.$/, "");
+  const journal = String(it.journal || "").replace(/\./g, "");
+  const year = (it.ppub || it.epub || it.added || "").slice(0, 4);
+  const where = c.vol
+    ? `${journal}. ${year};${c.vol}${c.iss ? `(${c.iss})` : ""}${c.pg ? `:${fullPages(c.pg)}` : ""}.`
+    : `${journal}. Published online ${fmtLong(it.epub || it.added)}.`;
+  return [au ? `${au}.` : "", `${title}${/[?!]$/.test(title) ? "" : "."}`, where, it.doi ? `doi:${it.doi}` : ""]
+    .filter(Boolean).join(" ");
+}
+async function copyText(text, done) {
+  try { await navigator.clipboard.writeText(text); toast(done); } catch { toast("Couldn’t reach the clipboard"); }
+}
+
+// ── search: every paper and story on this phone ─────────────────────────────
+const fold = (s) => String(s || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+function searchIndex() {
+  const key = [S.feed?.generated, S.important?.generated, S.explore?.generated, S.news?.generated, Object.keys(S.saved).length].join("|");
+  if (S.searchIdx?.key === key) return S.searchIdx;
+  const papers = new Map(), news = new Map();
+  const addP = (p) => { if (p?.pmid && p.title && !papers.has(p.pmid)) papers.set(p.pmid, p); };
+  (S.feed?.items || []).forEach(addP);
+  Object.values(S.important?.papers || {}).forEach(addP);
+  Object.values(S.explore?.papers || {}).forEach(addP);
+  (S.news?.items || []).forEach((n) => news.set(n.id, n));
+  for (const it of Object.values(S.saved)) {
+    if (it.pmid) addP(it); else if (it.id && it.title && !news.has(it.id)) news.set(it.id, it);
+  }
+  const row = (it, ...parts) => ({ it, t: fold(it.title), hay: fold([it.title, ...parts].join(" ")), when: it.epub || it.added || it.date || "" });
+  S.searchIdx = {
+    key,
+    papers: [...papers.values()].map((p) => row(p, p.conclusion?.text, p.authors, (p.cite?.au || []).join(" "), p.journal, p.journal_full, `pmid ${p.pmid}`)),
+    news: [...news.values()].map((n) => row(n, n.summary, n.source)),
+  };
+  return S.searchIdx;
+}
+function searchFind(q) {
+  const words = fold(q).split(/\s+/).filter((w) => w.length > 1 || /\d/.test(w));
+  if (!words.length) return null;
+  const hit = (r) => words.every((w) => r.hay.includes(w));
+  const score = (r) => words.filter((w) => r.t.includes(w)).length;
+  const sort = (a, b) => score(b) - score(a) || (a.when < b.when ? 1 : -1);
+  const idx = searchIndex();
+  return { words, papers: idx.papers.filter(hit).sort(sort), news: idx.news.filter(hit).sort(sort) };
+}
+function marked(text, words) {                 // highlight the words, as text nodes (never HTML)
+  const esc = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).filter(Boolean);
+  if (!esc.length) return [text];
+  return String(text).split(new RegExp(`(${esc.join("|")})`, "ig")).map((part, i) => (i % 2 ? el("mark", {}, part) : part));
+}
+function openSearch() {
+  const input = el("input", { type: "search", class: "text-in search-in", placeholder: "Words, author or journal", "aria-label": "Search",
+    autocapitalize: "off", autocomplete: "off", enterkeyhint: "search", value: S.searchQ || "" });
+  const out = el("div", { class: "search-out", "aria-live": "polite" });
+  const shown = { papers: 25, news: 15 };
+  const draw = () => {
+    S.searchQ = input.value;
+    const r = searchFind(input.value);
+    if (!r) {
+      out.replaceChildren(el("p", { class: "fine" }, "Searches titles, conclusions, authors and journals of every paper here (feed, Most important, Explore, Saved) and every news story."));
+      return;
+    }
+    const group = (label, list, kind, rowEl) => list.length ? el("section", { class: "search-group" },
+      el("h3", { class: "sys-head" }, `${label} · ${list.length.toLocaleString()}`),
+      el("ul", { class: "rows" }, list.slice(0, shown[kind]).map((x) => rowEl(x.it))),
+      list.length > shown[kind] ? el("button", { class: "act wide", onclick: () => { shown[kind] += 50; draw(); } },
+        `Show ${Math.min(50, list.length - shown[kind])} more`) : null) : null;
+    const paperRow = (p) => el("li", { class: "news-item" }, el("button", { class: "search-hit", onclick: () => openAbstract(p) },
+      el("span", { class: "news-src" }, el("b", {}, p.journal || ""), el("span", {}, fmtDate(p.epub || p.added || p.ppub))),
+      el("span", { class: "news-title" }, marked(p.title, r.words)),
+      p.conclusion?.text ? el("span", { class: "news-teaser clamp2" }, marked(p.conclusion.text, r.words)) : null));
+    const newsRow = (n) => el("li", { class: "news-item" }, el("a", { href: safeUrl(n.link), target: "_blank", rel: "noopener", onclick: () => bump("open", n) },
+      el("span", { class: "news-src" }, el("b", {}, n.source || ""), el("span", {}, agoShort(n.date))),
+      el("span", { class: "news-title" }, marked(n.title, r.words))));
+    const groups = [group("Papers", r.papers, "papers", paperRow), group("News", r.news, "news", newsRow)].filter(Boolean);
+    out.replaceChildren(...(groups.length ? groups : [el("p", { class: "fine" }, `Nothing here matches “${input.value.trim()}”. Fewer or shorter words find more.`)]));
+  };
+  let t;
+  input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(draw, 120); });
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); input.blur(); } });
+  openSheet(el("h2", { id: "sheet-title" }, "Search"), input, out);
+  draw();
+  input.focus();
+}
+
 // ── abstract sheet ─────────────────────────────────────────────────────────
 // while a sheet or the topic page is open, what's behind it can't be reached (VoiceOver, keyboard);
 // on close, focus returns to the button that opened it
@@ -948,8 +1063,9 @@ async function openAbstract(it) {
   try { secs = await sectionsOf(it); } catch { missing = true; }
   const links = [
     el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener" }, "PubMed"),
-    doiUrl(it.doi) ? el("a", { class: "act", href: doiUrl(it.doi), target: "_blank", rel: "noopener" }, "Journal") : null,
+    doiUrl(it.doi) ? el("a", { class: "act", href: libraryUrl(doiUrl(it.doi)), target: "_blank", rel: "noopener" }, T.library ? "Journal (library)" : "Journal") : null,
     pmcUrl(it.pmcid) ? el("a", { class: "act", href: pmcUrl(it.pmcid), target: "_blank", rel: "noopener" }, "Free full text") : null,
+    el("button", { class: "act", onclick: () => copyText(amaCitation(it), "Citation copied (AMA style)") }, "Copy citation"),
   ];
   openSheet(
     el("h2", { id: "sheet-title" }, it.title),
@@ -996,7 +1112,9 @@ function openInfo() {
     el("h3", {}, "Most important"),
     el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),
-    el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub."),
+    el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub. Text size, your library’s off-campus link and Back up and restore are under Tune → Reading."),
+    el("h3", {}, "Search and citations"),
+    el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
     el("p", {}, "Papers from MEDLINE®/PubMed®, a database of the U.S. National Library of Medicine. NLM does not endorse Readout. ",
       el("a", { href: "https://www.ncbi.nlm.nih.gov/home/about/policies/", target: "_blank", rel: "noopener" }, "NCBI disclaimer and copyright notice"),
@@ -1355,12 +1473,8 @@ function renderSaved() {
       el("p", { text: "Tap Save on any card to keep it here. Saved papers stay on this phone even after they leave the feed." })));
     return;
   }
-  const copy = async () => {
-    const text = items.map((i) => i.pmid
-      ? `${i.title} ${i.journal}. ${(i.epub || i.added || "").slice(0, 4)}. ${pubmedUrl(i.pmid)}`
-      : `${i.title} (${i.source}, ${(i.date || "").slice(0, 10)}). ${i.link}`).join("\n");
-    try { await navigator.clipboard.writeText(text); toast(`Copied ${plural(items.length, "item")}`); } catch { toast("Couldn’t reach the clipboard"); }
-  };
+  const copy = () => copyText(items.map((i, n) => `${n + 1}. ${amaCitation(i)}`).join("\n"),
+    `Copied ${plural(items.length, "reference")} (AMA style)`);
   view.append(
     el("div", { class: "saved-tools" }, el("button", { class: "act", style: "padding:0 14px", onclick: copy }, "Copy list")),
     el("div", { class: "saved-list" }, items.map((i) => paperEl(i))));
@@ -1466,6 +1580,8 @@ async function showKept() {
 function boot() {
   document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
   $("#btn-refresh").addEventListener("click", () => reload(true));
+  $("#btn-search").addEventListener("click", openSearch);
+  applyTextSize();
   $("#btn-info").addEventListener("click", openInfo);
   $("#topic-back").addEventListener("click", closeTopic);
   const pa = $("#pl-audio");
