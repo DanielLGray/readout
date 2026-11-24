@@ -289,3 +289,17 @@ def test_pubmed_contact_email(monkeypatch):
     assert "email" not in PubMed(None).base                       # no made-up address
     monkeypatch.setenv("NCBI_EMAIL", "doc@example.org")
     assert PubMed(None).base["email"] == "doc@example.org"
+
+
+def test_trending_lists_outlet_names_and_counts_sister_sites_once():
+    arch = [{"id": f"t{i}", "title": t, "source": s, "date": "2026-11-21T10:00:00Z"} for i, (t, s) in enumerate([
+        ("Photon-counting CT reaches routine care", "Radiology Business"),
+        ("Hospitals adopt photon-counting CT", "Cardiovascular Business"),
+        ("Why photon-counting CT matters", "AuntMinnie"),
+        ("Photon-counting CT gains ground", "AuntMinnie Europe")])]
+    groups = {"Radiology Business": "innovate", "Cardiovascular Business": "innovate", "AuntMinnie": "am", "AuntMinnie Europe": "am"}
+    out = news.trending(arch, NOW, 7, 28, group_of=groups)
+    term = next(t for t in out["terms"] if "photon" in t["key"])
+    assert term["sources"] == ["AuntMinnie", "AuntMinnie Europe", "Cardiovascular Business", "Radiology Business"]
+    solo = news.trending(arch[:2], NOW, 7, 28, group_of=groups)       # one publisher's two sites: not a trend
+    assert not any("photon" in t["key"] for t in solo["terms"])

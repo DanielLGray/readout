@@ -324,10 +324,12 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
         (recent if when >= r_cut else prior).append((a, set(ph)))
     R, P = len(recent), len(prior)
     rc, pc, srcs, ids = Counter(), Counter(), defaultdict(set), defaultdict(list)
+    names: dict[str, set] = defaultdict(set)         # outlets as people know them, for the app
     for a, ks in recent:
         for k in ks:
             rc[k] += 1
-            srcs[k].add((group_of or {}).get(a["source"], a["source"]))
+            srcs[k].add((group_of or {}).get(a["source"], a["source"]))     # sister sites count once
+            names[k].add(a["source"])
             ids[k].append((a["date"], a["id"]))
     for _, ks in prior:
         for k in ks:
@@ -359,6 +361,6 @@ def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top
     return {
         "basis": basis, "days": days, "titles_recent": R, "titles_prior": P,
         "terms": [{"term": display(k, surfaces[k]), "key": k, "count": rc[k], "prior": pc[k],
-                   "sources": sorted(srcs[k]), "ids": [i for _, i in sorted(ids[k], reverse=True)][:20]}
+                   "sources": sorted(names[k]), "ids": [i for _, i in sorted(ids[k], reverse=True)][:20]}
                   for k in chosen],
     }

@@ -1202,10 +1202,14 @@ function newsTrendsEl() {
           ? `Used more than in the ${span === "week" ? "4 weeks" : "3 months"} before.`
           : "Most widely covered (trend lines start once a few weeks of headlines build up)."),
         (tr.terms || []).length
-          ? el("div", { class: "term-chips" }, tr.terms.map((t) => el("button", { class: "term-chip",
+          ? el("div", { class: "term-chips" }, tr.terms.filter((t) => t.ids.some((id) => byId[id])).map((t) => el("button", { class: "term-chip",
               onclick: () => openSheet(
                 el("h2", { id: "sheet-title" }, `“${t.term}” in the news`),
-                el("p", { class: "sheet-meta" }, el("span", {}, plural(t.count, "headline")), el("span", {}, t.sources.join(", "))),
+                // the count covers every headline in the window; older ones may have left the feed
+                el("p", { class: "sheet-meta" }, el("span", {}, (() => {
+                  const shown = t.ids.filter((id) => byId[id]).length;
+                  return shown < t.count ? `${plural(t.count, "headline")}, ${shown} still in the feed` : plural(t.count, "headline");
+                })()), el("span", {}, t.sources.join(", "))),
                 el("ul", { class: "rows" }, t.ids.map((id) => byId[id]).filter(Boolean).map((it) =>
                   el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
                     el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date))),

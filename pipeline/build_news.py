@@ -184,7 +184,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     for i in kept:
         archive[i["id"]] = [i["date"], i["title"], i["source"], i.get("kind", "industry")]
     acut = news._utc(now - timedelta(days=int(settings.get("archive_days", 730))))
-    archive = {k: v for k, v in archive.items() if v[0] >= acut}
+    listed = {src["name"] for src in cfg.get("sources", [])}
+    archive = {k: v for k, v in archive.items() if v[0] >= acut and v[2] in listed}   # removed outlets' titles go too
     write_json(apath, archive, compact=False)
     arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
             for k, v in archive.items()]
