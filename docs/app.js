@@ -120,6 +120,7 @@ function setTune(patch) {
   T = { ...T, ...patch };
   store.set("tune", T);
   S.feedDirty = true;
+  S.lastKey = null;          // new rules: start the feed from the top
   S.exploreKey = null;
 }
 
@@ -324,13 +325,20 @@ function filtered(f = {}, report = null) {
 }
 
 let feedObserver, seenObserver;
-function refreshFeed() {
+const listKey = (it) => (it.type === "top" ? `top:${it.only || ""}` : saveKey(it));
+function currentKey() {
+  const v = $("#view-feed");
+  if (!v.clientHeight) return null;
+  const it = S.list[Math.round(v.scrollTop / v.clientHeight)];
+  return it && v.scrollTop > 0 ? listKey(it) : null;
+}
+// keepKey: the card you were reading; the rebuilt feed opens there if it's still in the list
+function refreshFeed(keepKey) {
   S.feedDirty = false;
   renderChips();
   const view = $("#view-feed");
   view.replaceChildren();
   view.scrollTop = 0;
-  updateHeadNote();
   if (!S.feed && !S.news) {
     view.append(el("section", { class: "empty" },
       el("h2", { text: "No papers yet" }),
@@ -340,6 +348,7 @@ function refreshFeed() {
   }
   S.list = filtered();
   S.rendered = 0;
+  updateHeadNote();
   if (!S.list.length) {
     view.append(el("section", { class: "empty" },
       el("h2", { text: "Nothing matches these filters" }),
@@ -364,6 +373,11 @@ function refreshFeed() {
     }
   }, { root: view, threshold: 0.6 });
   appendCards(10);
+  const at = keepKey ? S.list.findIndex((it) => listKey(it) === keepKey) : -1;
+  if (at > 0 && at < 200) {
+    while (S.rendered <= at + 1 && S.rendered < S.list.length) appendCards(10);
+    view.scrollTop = at * view.clientHeight;
+  }
 }
 
 function appendCards(n) {
@@ -463,6 +477,7 @@ function play(it) {
     }
   }
   $("#player").hidden = false;
+  document.body.classList.add("playing");
   bump("listen", it);
   a.play().catch(() => toast("Couldn’t start the audio. Try Read to open the episode page."));
 }
@@ -555,6 +570,7 @@ function fitCard(card) {
   const inner = box?.querySelector(".concl-inner");
   const p = box?.querySelector(".concl-text:not(.none)");
   if (!box || !p) return;
+  if (!box.clientHeight) return;      // feed not on screen (another tab): fit when it comes back
   // reset, so this can run again after fonts load or the screen rotates
   p.style.webkitLineClamp = "";
   p.style.lineClamp = "";
@@ -673,7 +689,7 @@ function openInfo() {
   const exg = S.explore?.generated ? ` Trends updated ${ago(S.explore.generated)}.` : "";
   openSheet(el("div", { class: "info" },
     el("h2", { id: "sheet-title" }, "How cards are built"),
-    el("p", {}, `Every card is a PubMed record. ${gen}${exg}`),
+    el("p", {}, `Paper cards come straight from PubMed; news cards from each outlet’s own feed. ${gen}${exg}`),
     el("h3", {}, "The big text is the authors’ own words"),
     el("p", {}, "When the abstract has a labeled conclusion, the card shows it word for word, with copyright and journal boilerplate removed. Nothing is summarized or rewritten by AI."),
     el("ul", {},
@@ -1012,7 +1028,8 @@ function savedNewsEl(it) {
     el("div", { class: "paper-meta" }, el("b", {}, it.source), el("span", {}, fmtDate((it.date || "").slice(0, 10)))),
     el("h3", { class: "paper-title" }, it.title),
     it.summary ? el("p", { class: "news-teaser", style: "margin:0" }, it.summary) : null,
-    el("div", { class: "actions", style: "grid-template-columns:repeat(3,1fr)" },
+    el("div", { class: "actions", style: `grid-template-columns:repeat(${it.audio ? 4 : 3},1fr)` },
+      it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
       el("a", { class: "act", href: it.link, target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
       actionsEl(it, false).children[1],
       el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share")));
@@ -1034,7 +1051,7 @@ function renderSaved() {
     const text = items.map((i) => i.pmid
       ? `${i.title} ${i.journal}. ${(i.epub || i.added || "").slice(0, 4)}. ${pubmedUrl(i.pmid)}`
       : `${i.title} (${i.source}, ${(i.date || "").slice(0, 10)}). ${i.link}`).join("\n");
-    try { await navigator.clipboard.writeText(text); toast(`Copied ${plural(items.length, "paper")}`); } catch { toast("Couldn’t reach the clipboard"); }
+    try { await navigator.clipboard.writeText(text); toast(`Copied ${plural(items.length, "item")}`); } catch { toast("Couldn’t reach the clipboard"); }
   };
   view.append(
     el("div", { class: "saved-tools" }, el("button", { class: "act", style: "padding:0 14px", onclick: copy }, "Copy list")),
@@ -1045,13 +1062,14 @@ function renderSaved() {
 // ── tabs, header, boot ─────────────────────────────────────────────────────
 function updateHeadNote() {
   const note = $("#head-note");
-  const fresh = S.newIds.size + S.newsNew.size;
+  const fresh = S.list.filter((i) => (i.type === "paper" ? S.newIds.has(i.pmid) : i.type === "news" && S.newsNew.has(i.id))).length;
   if (S.tab === "feed" && fresh) note.textContent = `${fresh} new`;
   else if (S.tab === "feed" && S.feed) note.textContent = `Updated ${ago(S.feed.generated)}`;
   else note.textContent = "";
 }
 
 function switchTab(tab) {
+  if (S.tab === "feed" && tab !== "feed") S.lastKey = currentKey();
   S.tab = tab;
   document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   $("#view-feed").hidden = tab !== "feed";
@@ -1062,7 +1080,10 @@ function switchTab(tab) {
   $("#chips").hidden = tab !== "feed";
   $("#title").textContent = { feed: "Readout", explore: "Explore", saved: "Saved", tune: "Tune" }[tab];
   updateHeadNote();
-  if (tab === "feed" && S.feedDirty) refreshFeed();
+  if (tab === "feed") {
+    if (S.feedDirty) refreshFeed(S.lastKey);
+    else requestAnimationFrame(fitAll);       // the screen may have turned while you were away
+  }
   if (tab === "explore") renderExplore();
   if (tab === "saved") renderSaved();
   if (tab === "tune" && typeof renderTune === "function") renderTune();
@@ -1086,11 +1107,15 @@ async function reload(announce) {
   const exploreChanged = !S.explore || S.explore.generated !== was.explore;
   markNew();
   // rebuilding resets scroll position, so only do it when something changed (or the user asked)
-  if (announce || feedChanged || newsChanged) refreshFeed();
-  else updateHeadNote();
+  // rebuilding resets the feed; when it's on screen keep your place (unless you tapped refresh),
+  // when it isn't, rebuild on the way back
+  if (announce || feedChanged || newsChanged) {
+    if (S.tab === "feed") refreshFeed(announce ? null : currentKey());
+    else { S.feedDirty = true; if (announce) S.lastKey = null; }
+  } else updateHeadNote();
   if (exploreChanged || newsChanged) S.exploreKey = null;
   if (S.tab === "explore" && (announce || exploreChanged)) renderExplore();
-  if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged || exploreChanged)) renderTune();
+  if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged || exploreChanged)) renderTune(true);
   if (announce) {
     if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");
     else {
@@ -1109,7 +1134,7 @@ function boot() {
   $("#topic-back").addEventListener("click", closeTopic);
   const pa = $("#pl-audio");
   $("#pl-toggle").addEventListener("click", () => (pa.paused ? pa.play().catch(() => {}) : pa.pause()));
-  $("#pl-close").addEventListener("click", () => { pa.pause(); $("#player").hidden = true; });
+  $("#pl-close").addEventListener("click", () => { pa.pause(); $("#player").hidden = true; document.body.classList.remove("playing"); });
   ["play", "pause", "ended"].forEach((ev) => pa.addEventListener(ev, syncPlayer));
   $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
   document.addEventListener("keydown", (e) => {

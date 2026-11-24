@@ -16,6 +16,7 @@ may might more most of on or our over should than that the their them then there
 through to toward towards under up upon via was we were what when where whether which while who why will
 with within without would not no versus vs among after before during both each other per using use used
 based new novel role value its one two three four five six first second third single all any also only
+your you my his her he she i me
 """.split())
 
 # Words too generic to stand alone at either end of a phrase.
@@ -36,7 +37,18 @@ erratum correction perspective pictorial primer editorial making decision lesson
 # second halves of hyphen compounds that can be cut off ("MASLD-related" → "MASLD")
 SEPARABLE = set("related based associated derived guided assisted driven specific naive free like induced dependent matched adjusted".split())
 
-TOKEN = re.compile(r"[A-Za-z0-9]+")
+TOKEN = re.compile(r"[^\W_]+")          # letters (accented too: "Niño") and digits
+# PubMed writes isotopes as "(18)F-FDG", "(68)Ga", "(99m)Tc": join them back up
+_ISOTOPE = re.compile(r"\((\d{1,3}m?)\)\s?(?=[A-Z][a-z]?(?![a-z]))")
+# word pairs that make one term: a phrase may not start or end between them ("learning radiomics")
+COMPOUNDS = {("deep", "learning"), ("machine", "learning"), ("transfer", "learning"), ("federated", "learning"),
+             ("transition", "zone"), ("peripheral", "zone"), ("central", "zone"), ("and", "data"),
+             ("reporting", "and"), ("imaging", "reporting"), ("data", "system")}
+_VERSION = re.compile(r"^[vV]\d+(?:\.\d+)*$")
+
+
+def normalize_title(title: str) -> str:
+    return _ISOTOPE.sub(r"\1", title or "")
 ACRONYMS = {"ct", "mri", "mr", "pet", "us", "ai", "psma", "fapi", "hcc", "llm", "llms", "dect", "pcct",
             "ceus", "mrcp", "ipmn", "pdac", "rcc", "net", "sstr", "fdg", "spect", "dwi", "adc", "cad"}
 
@@ -55,6 +67,7 @@ def _fold(word: str) -> str:
 
 def phrases(title: str) -> dict[str, str]:
     """canonical phrase -> surface form, for one title."""
+    title = normalize_title(title)
     toks = list(TOKEN.finditer(title))
     out: dict[str, str] = {}
     for i in range(len(toks)):
@@ -74,6 +87,10 @@ def phrases(title: str) -> dict[str, str]:
                 continue
             raw = [t.group(0) for t in toks[i:j + 1]]
             words = [w.lower() for w in raw]
+            spaced = lambda sep: bool(re.fullmatch(r"[\s\-]+", sep))
+            prev = toks[i - 1].group(0).lower() if i > 0 and spaced(before) else ""
+            if (prev, words[0]) in COMPOUNDS or ((words[-1], nxt) in COMPOUNDS and spaced(after)):
+                continue
             if words[0] in STOP or words[-1] in STOP:
                 continue
             # "CT for pancreatic": a stopword inside a phrase only counts when hyphenated
@@ -87,6 +104,8 @@ def phrases(title: str) -> dict[str, str]:
                 if not (sum(c.isupper() for c in w) >= 2 or any(c.isdigit() for c in w)):
                     continue
                 if w.lower() in ACRONYMS:   # bare "CT", "MRI" say nothing new
+                    continue
+                if _VERSION.match(w):       # "v2024" alone: which system's version?
                     continue
             else:
                 if words[0] in EDGE_GENERIC or words[-1] in EDGE_GENERIC:
@@ -113,7 +132,7 @@ def display(canon: str, surfaces: Counter) -> str:
         if word.isupper() or sum(c.isupper() for c in word) >= 2 or any(c.isdigit() for c in word):
             return word
         return word.lower()
-    return re.sub(r"[A-Za-z0-9]+", lambda m: fix(m.group(0)), s)
+    return re.sub(r"[^\W_]+", lambda m: fix(m.group(0)), s)
 
 
 def analyze(corpus: list[dict], today: date, windows=(1, 2, 5), top_n: int = 15) -> dict:

@@ -135,3 +135,32 @@ def test_tuning_knobs_and_settings_block(env, monkeypatch):
     assert len(out["trending"]["industry"]["week"]["terms"]) <= 1
     s = out["settings"]
     assert s["top_stories"]["min_outlets"] == 4 and s["outlets"] == 5 and s["trending"]["week"] == [7, 28]
+
+
+def test_skip_https_upgrade_and_stale_outlets():
+    feed = """<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>
+      <item><title>A review of a novel</title><link>http://mag.test/non-fiction/review/</link><pubDate>Sun, 22 Nov 2026 10:00:00 GMT</pubDate></item>
+      <item><title>A poem</title><link>http://mag.test/poetry/a-poem/</link><pubDate>Sun, 22 Nov 2026 11:00:00 GMT</pubDate></item>
+      <item><title>Elsewhere</title><link>http://other.test/x</link><pubDate>Sun, 22 Nov 2026 12:00:00 GMT</pubDate></item>
+    </channel></rss>"""
+    old = feed.replace("2026", "2023")
+    pages = {"https://www.mag.test/feed": feed, "https://old.test/feed": old}
+    http = Http(transport=lambda m, u, p: (200, pages[u]) if u in pages else (404, ""), sleep=lambda s: None, retries=1)
+    got, st = build_news.fetch_source(http, {"name": "Mag", "urls": ["https://www.mag.test/feed"], "skip": "/poetry/"}, NOW)
+    links = sorted(i["link"] for i in got)
+    assert links == ["http://other.test/x", "https://mag.test/non-fiction/review/"]     # poem skipped; same-site link upgraded
+    assert st["ok"] and not st["stale"]
+    _, st2 = build_news.fetch_source(http, {"name": "Old", "urls": ["https://old.test/feed"]}, NOW)
+    assert st2["ok"] and st2["stale"]
+
+
+def test_trending_ignores_archived_promos(env, monkeypatch, tmp_path):
+    import json
+    arch = {f"g{i}": [f"2026-11-2{i % 3}T10:00:00Z", f"Gift guide {i}: best telescopes", f"Outlet{i % 4}", "science"] for i in range(8)}
+    (tmp_path / "cache").mkdir(exist_ok=True)
+    (tmp_path / "cache" / "news_archive.json").write_text(json.dumps(arch))
+    base = build_news.load_yaml("news.yaml")
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: dict(base, exclude="gift guide"))
+    out = build_news.run(env, NOW)
+    terms = [t["term"].lower() for t in out["trending"]["science"]["week"]["terms"]]
+    assert not any("gift" in t for t in terms)

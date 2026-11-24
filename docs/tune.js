@@ -474,7 +474,8 @@ function newsJob() {
   const items = n?.items || [];
   const st = n?.settings || {};
   const sources = n?.sources || [];
-  const okN = sources.filter((x) => x.ok).length;
+  const okN = sources.filter((x) => x.ok && !x.stale).length;
+  const stale = sources.filter((x) => x.ok && x.stale);
   const counts = {};
   items.forEach((i) => { counts[i.source] = (counts[i.source] || 0) + 1; });
   const byKind = {};
@@ -487,15 +488,17 @@ function newsJob() {
     !items.length ? el("p", { class: "nothing" }, "No stories yet.") : [
       el("dl", { class: "facts" },
         el("dt", {}, "Stories"), el("dd", {}, items.length.toLocaleString()),
-        el("dt", {}, "Outlets working"), el("dd", { class: failing.length ? "warn-text" : "" }, `${okN} of ${sources.length}`),
+        el("dt", {}, "Outlets working"), el("dd", { class: failing.length || stale.length ? "warn-text" : "" }, `${okN} of ${sources.length}`),
         el("dt", {}, "Podcast episodes"), el("dd", {}, String(items.filter((i) => i.audio).length))),
       stack(parts), legend(parts),
       failing.length ? el("div", {}, el("div", { class: "ctl-label warn-text" }, "Not working"),
         el("ul", { class: "settings-list" }, failing.map((x) => el("li", {}, el("b", {}, x.name), ": ", (x.tried || [])[0] || "no feed answered")))) : null,
+      stale.length ? el("div", {}, el("div", { class: "ctl-label warn-text" }, "Not updating"),
+        el("ul", { class: "settings-list" }, stale.map((x) => el("li", {}, el("b", {}, x.name), `: newest story is from ${fmtDate(x.newest.slice(0, 10))}. The outlet may have moved its feed.`)))) : null,
       el("details", { class: "outlets" }, el("summary", {}, el("span", {}, "Every outlet"), el("span", { class: "fine", style: "margin:0" }, "stories now, newest")),
         el("dl", { class: "facts small" }, sources.slice().sort((a, b) => (counts[b.name] || 0) - (counts[a.name] || 0)).map((x) => [
           el("dt", {}, swatch(x.kind || "industry"), x.name),
-          el("dd", { class: x.ok ? "" : "warn-text" }, x.ok ? `${counts[x.name] || 0} · ${x.newest ? agoShort(x.newest) : "—"}` : "not working")]))),
+          el("dd", { class: x.ok && !x.stale ? "" : "warn-text" }, !x.ok ? "not working" : x.stale ? "not updating" : `${counts[x.name] || 0} · ${x.newest ? agoShort(x.newest) : "—"}`)]))),
     ],
     el("div", { class: "ctl-label" }, "Settings in config/news.yaml"),
     settingsList(st.keep_days ? [

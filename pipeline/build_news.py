@@ -8,6 +8,7 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from urllib.parse import urlparse
 
 from . import news
 from .abstracts import compile_systems, tag_systems
@@ -20,12 +21,16 @@ def news_http() -> Http:
     return Http(intervals={}, retries=2)
 
 
+STALE_DAYS = 30
+
+
 def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dict]":
     """Try the outlet's addresses in order; the first that returns stories wins
     (or, with merge: true, every address that works is used)."""
     status = {"name": src["name"], "home": src.get("home", ""), "ok": False, "url": None, "count": 0,
               "newest": None, "tried": []}
     need = re.compile(src["require"], re.I) if src.get("require") else None
+    skip = re.compile(src["skip"], re.I) if src.get("skip") else None     # e.g. a magazine's poetry section
     found: dict[str, dict] = {}
     used = []
     for url in src.get("urls", []):
@@ -37,6 +42,13 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
             continue
         if items:
             status["ok"] = True                    # the feed works, even if nothing passes the filter today
+        host = (urlparse(url).hostname or "").removeprefix("www.")
+        for i in items:                            # same site, fetched over https: link over https too
+            u = urlparse(i["link"])
+            if url.startswith("https:") and u.scheme == "http" and (u.hostname or "").removeprefix("www.") == host:
+                i["link"] = "https:" + i["link"][5:]
+        if skip:
+            items = [i for i in items if not skip.search(i["link"] + " " + i["title"])]
         if need:
             items = [i for i in items if need.search(i["title"] + " " + i.get("summary", ""))]
         if not items:
@@ -58,6 +70,8 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
     if found:
         got = list(found.values())
         status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
+        # answers, but nothing new in a month: the outlet probably moved its feed
+        status["stale"] = status["newest"] < news._utc(now - timedelta(days=STALE_DAYS))
     elif status["ok"]:
         status["url"] = "works; no matching stories right now"
     return list(found.values()), status
@@ -120,6 +134,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     write_json(apath, archive, compact=False)
     arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
             for k, v in archive.items()]
+    if junk:                                   # headlines saved before the promo filter existed
+        arch = [a for a in arch if a["kind"] == "industry" or not junk.search(a["title"])]
 
     ts = settings.get("top_stories") or {}
     top_cfg = {"days": int(ts.get("days", 7)), "limit": int(ts.get("per_kind", 8)),
@@ -154,11 +170,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     if summary:
         rows = ["| outlet | stories | newest | address used / problems |", "|---|---|---|---|"]
         for st in statuses:
-            detail = st["url"] if st["ok"] else "; ".join(st["tried"])[:300]
+            detail = (("NOT UPDATING: " if st.get("stale") else "") + st["url"]) if st["ok"] else "; ".join(st["tried"])[:300]
             rows.append(f"| {st['name']} | {st['count']} | {(st['newest'] or '')[:10]} | {detail} |")
         with open(summary, "a", encoding="utf-8") as f:
             f.write("### Readout news feeds\n\n" + "\n".join(rows) + "\n")
-    ok = sum(1 for s in statuses if s["ok"])
+    ok = sum(1 for s in statuses if s["ok"] and not s.get("stale"))
     log(f"News: {len(kept)} stories from {ok}/{len(statuses)} outlets, "
         f"{sum(len(v) for v in out['top_stories'].values())} top stories")
     return out

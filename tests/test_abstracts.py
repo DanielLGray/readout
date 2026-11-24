@@ -223,3 +223,48 @@ def test_guideline_titles_real_examples():
         assert is_guideline(_rec(t, "x")) == "text", t
     for t in no:
         assert is_guideline(_rec(t, "x")) is None, t
+
+
+def _methods(text, title=""):
+    return {"title": title, "pub_types": [], "sections": [{"label": "Methods", "cat": "METHODS", "text": text}]}
+
+
+def test_sample_size_skips_scores_and_per_group_counts():
+    assert sample_size(_methods("171 males with 191 PI-RADS 3 lesions underwent MRI.")) == "171 males"
+    assert sample_size(_methods("Men with 191 PI-RADS 3 lesions underwent MRI.")) == "191 lesions"
+    assert sample_size(_methods("(PI-RADS) 3 lesions often undergo biopsy.")) is None
+    assert sample_size(_methods("Grade 3 tumors were seen in 87 patients.")) == "87 patients"
+    assert sample_size(_methods("Mice bearing tumors (n = 6 per group) were imaged.")) is None
+    assert sample_size(_methods("Rats (n = 5 per agent and time point); in total n = 40.")) == "n = 40"
+    assert sample_size(_methods("We saw 3.5 lesions per patient in 212 patients.")) == "212 patients"
+
+
+def test_inline_conclusion_starting_with_bracket():
+    rec = {"title": "x", "pub_types": [], "sections": [{"label": "", "cat": "",
+           "text": "HCC is common. Tumors regrew. Conclusion: [89Zr]Zr-Pani enables EGFR imaging in HCC models."}]}
+    c, _ = conclusion(rec)
+    assert c["kind"] == "structured" and c["text"].startswith("[89Zr]")
+
+
+def test_phrases_keep_isotopes_accents_and_whole_terms():
+    assert "18F-FDG PET" in phrases("Value of (18)F-FDG PET/CT in staging").values()
+    assert "68Ga-PSMA PET" in phrases("(68)Ga-PSMA PET in prostate cancer").values()
+    assert "El Niño" in phrases("El Niño brings floods").values()
+    got = set(phrases("Deep learning radiomics in the transition zone prostate").values())
+    assert {"Deep learning radiomics", "transition zone prostate"} <= got
+    assert not {"learning radiomics", "zone prostate"} & got
+    assert "v2024" not in phrases("CT/MRI LI-RADS v2024 for HCC").values()
+    assert "LI-RADS v2024" in phrases("CT/MRI LI-RADS v2024 for HCC").values()
+    assert not phrases("Your gut and you")
+
+
+def test_sample_size_ignores_sex_breakdowns():
+    txt = "One hundred fifteen patients (median age, 65 years; age range, 54-73 years; 27 females) underwent MRI (n = 115)."
+    assert sample_size(_methods(txt)) == "n = 115"
+    assert sample_size(_methods("We included 105 internal (63 males, mean age 58.9 years) and 75 external cases.")) is None
+    assert sample_size(_methods("A total of 412 women underwent screening.")) == "412 women"
+
+
+def test_sample_size_keeps_cohort_followed_by_demographics():
+    assert sample_size(_methods("A total of 237 patients (mean age, 29.4; 98 men) were followed.")) == "237 patients"
+    assert sample_size(_methods("The cohort (412 patients) was scanned twice.")) == "412 patients"

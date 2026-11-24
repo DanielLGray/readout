@@ -9,6 +9,10 @@
 # The app shows each story's headline, outlet, date and the short summary the
 # outlet puts in its own feed, and links to the article on the outlet's site.
 #
+# Per outlet, optional: merge (use every address that works), require (keep only
+# stories matching a pattern), skip (drop stories whose link or title matches),
+# max_per_day, group (sister sites that syndicate each other).
+#
 # Add an outlet: copy a block. Remove one: delete it. The "Check news feeds"
 # step of the Update news run reports which address each outlet is using.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -208,7 +212,7 @@ sources:
     home: https://www.sciencefriday.com
     merge: true
     urls:
-      - https://www.sciencefriday.com/feed/podcast/science-friday/
+      - https://feeds.simplecast.com/h18ZIZD_          # the podcast (the old WordPress podcast feed stopped in 2023)
       - https://www.sciencefriday.com/feed/
 
   - name: Radiolab
@@ -321,7 +325,8 @@ sources:
   - name: Strange Horizons
     kind: sff
     max_per_day: 3
-    home: http://strangehorizons.com
+    home: https://strangehorizons.com
+    skip: "/(poetry|fiction|podcasts?)/"   # keep reviews, columns and news; its stories and poems aren't news
     urls:
       - http://strangehorizons.com/feed/
       - https://strangehorizons.com/feed/

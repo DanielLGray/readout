@@ -47,7 +47,7 @@ _CONCL_LABEL = re.compile(
     re.IGNORECASE)
 
 
-_INLINE_CONCL = re.compile(r"(?:^|[.!?)\]]\s+)(Conclusions?|Interpretation)\s*:?\s+(?=[A-Z0-9(])((?:(?!\b(?:Conclusions?|Interpretation)\s*:?\s+[A-Z]).)+)$")
+_INLINE_CONCL = re.compile(r"(?:^|[.!?)\]]\s+)(Conclusions?|Interpretation)\s*:?\s+(?=[A-Z0-9(\[“\"'])((?:(?!\b(?:Conclusions?|Interpretation)\s*:?\s+[A-Z]).)+)$")
 
 
 def _nice_label(label: str) -> str:
@@ -247,12 +247,26 @@ def is_notice(rec: dict) -> bool:
 
 
 # ── sample size ─────────────────────────────────────────────────────────────
-_NUM = r"(\d{1,3}(?:[,  ]\d{3})+|\d+)"
-_NOUNS = (r"patients|participants|women|men|individuals|subjects|adults|children|volunteers|"
-          r"examinations|exams|scans|lesions|nodules|tumors|tumours|studies|cases")
+# a whole number ("1,284", "1 284" with a thin space), never part of "3.5" or "12,5"
+_NUM = r"(?<![\d.,])(\d{1,3}(?:[,  ]\d{3})+(?!\d)|\d+)(?![.,]\d)"
+_PEOPLE = ("patients", "participants", "women", "men", "males", "females", "individuals", "subjects", "adults",
+           "children", "volunteers")
+_ANIMALS = ("mice", "rats", "rabbits", "pigs", "animals")
+_NOUNS = "|".join(_PEOPLE + _ANIMALS + ("examinations", "exams", "scans", "lesions", "nodules", "tumors", "tumours",
+                                          "studies", "cases"))
 _SAMPLE = re.compile(_NUM + r"\s+(?:(?:consecutive|eligible|adult|pediatric|paediatric|unique|"
-                     r"included|enrolled|asymptomatic|symptomatic|treatment-na[iï]ve)\s+)*(" + _NOUNS + r")\b", re.I)
+                     r"included|enrolled|asymptomatic|symptomatic|treatment-na[iï]ve|"
+                     r"[A-Z]{1,3}-?RADS(?:\s*v?\d+(?:\.\d+)?)?\s*(?:category\s*)?[≥>]?\s*\d[a-c]?)\s+)*"
+                     r"(" + _NOUNS + r")\b", re.I)
+# "PI-RADS 3 lesions", "grade 2 tumors", "≥ 5 nodules": a score or threshold, not a count
+_SCORE_BEFORE = re.compile(r"(?:RADS\)?|grade|stage|type|category|class|score|level|phase|tier|Bosniak|Gleason|"
+                           r"ISUP|BCLC|Deauville|[≥≤<>])\s*$", re.I)
+# inside parentheses, "(median age 65 years; 27 females)" or "(63 males, mean age 59)" breaks the
+# sample down; "237 patients (mean age 29; 98 men)" is the sample itself
+_SEXES = ("women", "men", "males", "females")
+_OPEN_PAREN = re.compile(r"\(([^()]{0,80})$")
 _N_EQ = re.compile(r"\b[nN]\s*=\s*" + _NUM)
+_PER_GROUP = re.compile(r"\s*(?:\w+\s+)?(?:per|each|in each)\b", re.I)
 
 
 def sample_size(rec: dict) -> Optional[str]:
@@ -267,15 +281,19 @@ def sample_size(rec: dict) -> Optional[str]:
             continue
         if noun == "studies" and not is_review:
             continue
-        priority = 0 if noun in ("studies",) and is_review else (1 if noun in (
-            "patients", "participants", "women", "men", "individuals", "subjects", "adults", "children",
-            "volunteers") else 2)
+        if _SCORE_BEFORE.search(text[max(0, m.start() - 16):m.start()]):
+            continue
+        inside = _OPEN_PAREN.search(text[max(0, m.start() - 81):m.start()])
+        if inside and noun in _PEOPLE and (noun in _SEXES or re.search(r"\bages?\b", inside.group(1), re.I)):
+            continue
+        priority = 0 if noun == "studies" and is_review else 1 if noun in _PEOPLE else 3 if noun in _ANIMALS else 2
         if best is None or priority < best[0]:
             best = (priority, f"{n:,} {noun}")
     if best:
         return best[1]
-    m = _N_EQ.search(text)
-    if m:
+    for m in _N_EQ.finditer(text):
+        if _PER_GROUP.match(text, m.end()):            # "n = 6 per group" is not the study's size
+            continue
         n = int(re.sub(r"\D", "", m.group(1)))
         if n >= 3:
             return f"n = {n:,}"
