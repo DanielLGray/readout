@@ -11,4 +11,5 @@ jobs:
       - run: pip install --require-hashes -r requirements.txt && pip install pillow==12.0.0
       - env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          ONLY_FD: "1"
         run: python tools/probe_lib.py

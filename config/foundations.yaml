@@ -20,10 +20,10 @@ groups:
     items:
       - label: ACR incidental findings, the first white paper
         why: How the ACR approaches incidental findings on abdominal CT, the template for everything after it.
-        find: '"Managing incidental findings on abdominal CT"[ti] AND "J Am Coll Radiol"[ta]'
+        find: 'incidental[ti] AND findings[ti] AND abdominal[ti] AND "white paper"[ti] AND 2010[dp]'
       - label: Fleischner 2017 pulmonary nodules
         why: What to do with the lung nodules that every abdominal CT catches at the bases.
-        find: '"Fleischner Society 2017"[ti]'
+        find: 'Fleischner[ti] AND 2017[ti] AND nodules[ti]'
       - label: Iodinated contrast and kidney disease (ACR–NKF)
         why: The current consensus on contrast-associated kidney injury and when to hold contrast.
         find: '"Iodinated Contrast Media"[ti] AND "Kidney Disease"[ti] AND "Consensus Statements"[ti]'
@@ -42,17 +42,17 @@ groups:
         find: '"incidental liver lesions"[ti] AND "white paper"[ti]'
       - label: Liver fat on CT and MRI
         why: Proton density fat fraction and CT attenuation, the tools behind steatosis reports.
-        find: '"Quantification of Liver Fat Content with CT and MRI"[ti]'
+        find: 'liver[ti] AND fat[ti] AND quantification[ti] AND "state of the art"[ti]'
       - label: Liver ultrasound elastography (SRU)
         why: Cut-offs for shear-wave elastography and how to report liver stiffness.
-        find: '"Liver Ultrasound Elastography"[ti] AND "Society of Radiologists in Ultrasound"[ti]'
+        find: 'elastography[ti] AND "Society of Radiologists in Ultrasound"[ti] AND liver[ti] AND 2020[dp]'
 
   - id: biliary
     name: Gallbladder and bile ducts
     items:
       - label: Incidental gallbladder and biliary findings (ACR)
         why: Wall thickening, polyps, sludge and ductal dilation found by chance.
-        find: '"gallbladder and biliary findings"[ti] AND "white paper"[ti]'
+        find: '"white paper"[ti] AND gallbladder[ti] AND biliary[ti]'
       - label: Gallbladder polyps (SRU)
         why: When a polyp needs follow-up, surgery or nothing at all.
         find: '"Gallbladder Polyps"[ti] AND "Society of Radiologists in Ultrasound"[ti]'
@@ -84,14 +84,14 @@ groups:
         find: '"incidental adrenal masses"[ti] AND "white paper"[ti]'
       - label: Adrenal adenoma washout CT
         why: The study behind absolute and relative washout thresholds.
-        find: '"Adrenal masses"[ti] AND "unenhanced and delayed enhanced CT"[ti]'
+        find: 'adrenal[ti] AND unenhanced[ti] AND delayed[ti] AND Radiology[ta] AND 2002[dp]'
 
   - id: pelvis
     name: Female pelvis
     items:
       - label: O-RADS US risk stratification
         why: The ultrasound lexicon and risk categories for adnexal lesions.
-        find: '"O-RADS US Risk Stratification"[ti]'
+        find: '"O-RADS"[ti] AND "Risk Stratification and Management System"[ti] AND Radiology[ta]'
       - label: O-RADS MRI risk stratification
         why: How MRI sorts sonographically indeterminate adnexal masses.
         find: '"O-RADS MRI Risk Stratification System"[ti]'
@@ -116,10 +116,10 @@ groups:
     items:
       - label: PI-RADS version 2.1
         why: The current scoring rules for prostate MRI.
-        find: '"Prostate Imaging Reporting and Data System Version 2.1"[ti]'
+        find: '"Prostate Imaging"[ti] AND "Data System"[ti] AND 2019[ti] AND update[ti] AND "Eur Urol"[ta]'
       - label: PRECISION trial
         why: MRI-targeted biopsy against standard biopsy, the trial that changed the pathway.
-        find: '"MRI-Targeted or Standard Biopsy for Prostate-Cancer Diagnosis"[ti]'
+        find: 'targeted[ti] AND standard[ti] AND biopsy[ti] AND prostate[ti] AND "N Engl J Med"[ta] AND 2018[dp]'
       - label: PROMIS study
         why: Multiparametric MRI as a triage test before biopsy.
         find: '"PROMIS"[ti] AND "Lancet"[ta]'
@@ -135,20 +135,20 @@ groups:
         find: '"Consensus Recommendations"[ti] AND "Enterography"[ti] AND "Crohn"[ti]'
       - label: Rectal cancer MRI (ESGAR 2016 consensus)
         why: Protocol and the structured report for staging and restaging rectal cancer.
-        find: '"rectal cancer"[ti] AND "European Society of Gastrointestinal and Abdominal Radiology"[ti] AND "2016"[ti]'
+        find: 'rectal[ti] AND ESGAR[ti] AND recommendations[ti] AND "Eur Radiol"[ta]'
       - label: MERCURY study
         why: MRI predicts a clear circumferential resection margin in rectal cancer.
-        find: '"predicting curative resection of rectal cancer"[ti]'
+        find: 'preoperative[ti] AND "curative resection"[ti] AND rectal[ti] AND BMJ[ta]'
       - label: CT colonography accuracy (ACRIN 6664)
         why: The multicenter trial behind CT colonography for screening.
-        find: '"Accuracy of CT colonography for detection of large adenomas and cancers"[ti]'
+        find: '"CT colonography"[ti] AND adenomas[ti] AND "N Engl J Med"[ta]'
 
   - id: spleen
     name: Spleen, nodes and vessels
     items:
       - label: Incidental splenic and nodal findings (ACR)
         why: Splenic lesions and borderline nodes on abdominal CT.
-        find: '"splenic and nodal findings"[ti]'
+        find: '"white paper"[ti] AND splenic[ti] AND nodal[ti]'
       - label: Incidental vascular findings (ACR)
         why: Aneurysms, dissections and venous findings caught on abdominal imaging.
         find: '"white paper"[ti] AND "vascular findings"[ti] AND "J Am Coll Radiol"[ta]'
@@ -164,23 +164,23 @@ groups:
         find: '"incidental thyroid nodules"[ti] AND "white paper"[ti]'
       - label: National Lung Screening Trial
         why: Low-dose CT screening reduced lung cancer deaths by a fifth.
-        find: '"Reduced lung-cancer mortality with low-dose computed tomographic screening"[ti]'
+        find: 'reduced[ti] AND mortality[ti] AND screening[ti] AND tomographic[ti] AND "N Engl J Med"[ta] AND 2011[dp]'
 
   - id: technique
     name: Technique
     items:
       - label: Dual- and multi-energy CT
         why: How spectral CT works and what iodine maps and virtual unenhanced images can do.
-        find: '"Dual- and Multi-Energy CT"[ti] AND "Principles"[ti]'
+        find: 'energy[ti] AND principles[ti] AND "technical approaches"[ti] AND Radiology[ta]'
       - label: Photon-counting CT
         why: The detector technology now reaching clinical scanners.
-        find: '"Photon-counting CT"[ti] AND "Technical Principles and Clinical Prospects"[ti]'
+        find: 'photon[ti] AND counting[ti] AND "clinical prospects"[ti] AND Radiology[ta]'
       - label: Diffusion-weighted MRI in the body
         why: The basics of DWI and ADC for abdominal and pelvic oncology.
-        find: '"Diffusion-weighted MRI in the body"[ti]'
+        find: 'diffusion[ti] AND body[ti] AND oncology[ti] AND challenges[ti] AND "AJR Am J Roentgenol"[ta]'
       - label: "Radiomics: images are more than pictures"
         why: The paper that launched radiomics, worth knowing to read the AI literature critically.
-        find: '"Radiomics: Images Are More than Pictures"[ti]'
+        find: 'radiomics[ti] AND pictures[ti] AND data[ti] AND Radiology[ta]'
 
   - id: cardiac
     name: Cardiac CT
@@ -193,7 +193,7 @@ groups:
         find: '"CAD-RADS"[ti] AND "2.0"[ti]'
       - label: SCOT-HEART five-year outcomes
         why: Coronary CTA in stable chest pain lowered heart attacks over five years.
-        find: '"Coronary CT Angiography and 5-Year Risk of Myocardial Infarction"[ti]'
+        find: 'coronary[ti] AND angiography[ti] AND risk[ti] AND "myocardial infarction"[ti] AND "N Engl J Med"[ta] AND 2018[dp]'
 
 # The classic of the day: highly cited older papers from your areas' journals (same searches
 # as the feed), at least `min_age_years` old, ranked by citations per year.

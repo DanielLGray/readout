@@ -13,7 +13,7 @@ fd = yaml.safe_load(open("config/foundations.yaml"))
 print("== FOUNDATIONS")
 for g in fd["groups"]:
     for it in g["items"]:
-        n, ids = pm.esearch(it["find"], retmax=40)
+        n, ids = pm.esearch(f'({it["find"]}) NOT (Letter[pt] OR Comment[pt] OR "Published Erratum"[pt])', retmax=40)
         m = icite.metrics(http, ids) if ids else {}
         top = sorted(ids, key=lambda p: -(m.get(p, {}).get("cites", 0)))[:3]
         summ = {r["pmid"]: r for r in pm.summaries(top)} if top else {}
@@ -22,6 +22,8 @@ for g in fd["groups"]:
             r = summ.get(p, {})
             print(f"   {p} {m.get(p,{}).get('year')} cites={m.get(p,{}).get('cites')} | {r.get('journal')} | {r.get('title','')[:150]}")
 
+import os
+if os.environ.get("ONLY_FD"): sys.exit(0)
 print("\n== FIGURES")
 S3 = "https://pmc-oa-opendata.s3.amazonaws.com"
 for pmc in ["PMC13788141", "PMC13785406", "PMC13782375"]:
