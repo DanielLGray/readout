@@ -213,7 +213,7 @@ sources:
 
   - name: BBC Health
     kind: health
-    max_per_day: 2
+    max_per_day: 1
     everything_per_day: 1
     home: https://www.bbc.com/news/health
     link_domains: [bbc.co.uk]            # BBC stories link to bbc.co.uk addresses
@@ -488,6 +488,7 @@ sources:
   - name: BBC News
     kind: general
     max_per_day: 3
+    skip: "/sport/"
     home: https://www.bbc.com/news
     link_domains: [bbc.co.uk]
     urls:
