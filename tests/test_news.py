@@ -332,3 +332,41 @@ def test_every_outlet_has_a_listed_kind():
     assert all("news.google.com" not in u for s in cfg["sources"] for u in s["urls"])
     keep = cfg["settings"]["kind_keep_days"]
     assert keep["general"] < cfg["settings"]["other_keep_days"] < keep["light"]
+
+
+def test_one_picture_per_story_from_the_feed():
+    rss = """<?xml version="1.0"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>t</title>
+<item><title>BBC story</title><link>https://www.bbc.co.uk/news/articles/x</link><description>The verdict.</description>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/abc/live/1.jpg"/></item>
+<item><title>Times story</title><link>https://www.nytimes.com/2026/11/24/a.html</link><description>Text</description>
+<media:content height="1050" medium="image" url="https://static01.nyt.com/images/2026/11/24/a.jpg" width="1050"/></item>
+<item><title>Inline picture</title><link>https://www.atlasobscura.com/x</link><description>&lt;img src="https://feeds.feedburner.com/~r/x/~4/abc" height="1" width="1"/&gt;&lt;img src="https://img.atlasobscura.com/a.jpg" width="600"/&gt; A tiny museum.</description></item>
+<item><title>Not https</title><link>https://www.atlasobscura.com/y</link><description>&lt;img src="http://img.example.com/a.jpg"/&gt; Text.</description></item>
+<item><title>No picture</title><link>https://www.npr.org/x</link><description>Just text.</description></item>
+</channel></rss>"""
+    got = {i["title"]: i.get("img") for i in news.parse_feed(rss, "X", datetime(2026, 11, 25, tzinfo=timezone.utc))}
+    assert got["BBC story"] == "https://ichef.bbci.co.uk/ace/standard/800/cpsprodpb/abc/live/1.jpg"     # a sharper copy
+    assert got["Times story"] == "https://static01.nyt.com/images/2026/11/24/a.jpg"
+    assert got["Inline picture"] == "https://img.atlasobscura.com/a.jpg"                          # not the tracking pixel
+    assert got["Not https"] is None and got["No picture"] is None
+    wiki = news.parse_feed(WIKI.replace('&lt;img alt="" src="//x"/&gt;', '&lt;img alt="" src="//upload.wikimedia.org/a/250px-Shark.jpg" '
+                                         'srcset="//upload.wikimedia.org/a/330px-Shark.jpg 1.5x, //upload.wikimedia.org/a/500px-Shark.jpg 2x" width="250" height="160" data-file-width="1200"/&gt;'),
+                           "W", datetime(2026, 11, 25, tzinfo=timezone.utc), style="wikipedia")
+    assert wiki[0]["img"] == "https://upload.wikimedia.org/a/960px-Shark.jpg"                  # a standard size the original can fill
+    assert wiki[0]["title"] == "great white shark" and "<" not in wiki[0]["summary"]
+
+
+def test_stored_stories_follow_an_outlet_to_its_new_kind(tmp_path, monkeypatch):
+    now = datetime(2026, 11, 25, 12, tzinfo=timezone.utc)
+    cfg = {"settings": {}, "kinds": {"science": "Science", "light": "Light reading"},
+           "sources": [{"name": "Atlas Obscura", "kind": "light", "home": "https://www.atlasobscura.com", "urls": ["https://www.atlasobscura.com/feeds/latest"]}]}
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: cfg if name == "news.yaml" else {})
+    monkeypatch.setattr(build_news, "DATA", tmp_path / "data")
+    monkeypatch.setattr(build_news, "CACHE", tmp_path / "cache")
+    (tmp_path / "data").mkdir(); (tmp_path / "cache").mkdir()
+    old = {"items": [{"id": "a1", "title": "A tiny museum of paper clips", "link": "https://www.atlasobscura.com/places/clips",
+                      "source": "Atlas Obscura", "kind": "science", "date": "2026-11-24T10:00:00Z", "summary": "Clips."}]}
+    (tmp_path / "data" / "news.json").write_text(__import__("json").dumps(old))
+    http = Http(transport=lambda m, u, p: (404, "gone"), sleep=lambda s: None, retries=0)
+    out = build_news.run(http, now=now)
+    assert [i["kind"] for i in out["items"]] == ["light"]

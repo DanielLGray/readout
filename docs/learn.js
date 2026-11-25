@@ -620,10 +620,12 @@ function pickStories(n) {
     .filter(({ st }) => !hiddenByTaste({ type: "news", source: st.sources[0], title: st.title }))
     .sort((a, b) => b.st.sources.length - a.st.sources.length || (a.st.date < b.st.date ? 1 : -1));
   const out = [];
-  for (const { st, label } of tops) {
-    if (out.length >= n) break;
-    if (out.some((o) => o.title === st.title)) continue;
-    out.push({ title: st.title, items: st.items, sources: st.sources, date: st.date, label });
+  for (const pass of [1, 2]) {               // one story per kind first, so one busy kind can't take every slot
+    for (const { st, label } of tops) {
+      if (out.length >= n) break;
+      if (out.some((o) => o.title === st.title) || (pass === 1 && out.some((o) => o.label === label))) continue;
+      out.push({ title: st.title, items: st.items, sources: st.sources, date: st.date, label });
+    }
   }
   if (out.length < n) {                      // a quiet week: the newest industry stories instead
     const newest = (S.news?.items || []).filter((i) => kindOf(i) === "industry" && !mutedSrc.has(i.source) && !hiddenByTaste({ ...i, type: "news" }))

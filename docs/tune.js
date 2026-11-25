@@ -202,7 +202,7 @@ function todaySection() {
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
     tried ? el("p", { class: "fine" }, `Last 30 days: you called ${q.r} of ${plural(tried, "result")}${q.p ? `, and nearly ${q.p} more` : ""}.`) : null,
-    switchRow("Pictures from papers", "One figure from each open-access paper whose license allows it, credited. Each picture downloads once (about 50 KB).", T.pictures,
+    switchRow("Pictures", "A figure from each open-access paper whose license allows it, credited, and the picture each news outlet puts in its feed. Off: no pictures, less data.", T.pictures,
       (on) => { setTune({ pictures: on }); rerender(); }));
 }
 

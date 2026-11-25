@@ -564,6 +564,8 @@ a { color: inherit; }
   background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
 @media (min-height: 880px) { .fig { height: min(30dvh, 300px); } }       /* tall phones (Pro Max, Plus): a bigger picture */
 .fig.small { height: min(16dvh, 130px); }
+.fig.news-img { border: 0; background: var(--raise); }
+.fig.news-img img { object-fit: cover; }
 .fig.tiny { height: 84px; }
 .card .fig.gone { display: none; }
 .fig img { display: block; width: 100%; height: 100%; object-fit: contain; }

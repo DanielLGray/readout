@@ -183,7 +183,9 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     items = {k: v for k, v in items.items() if allowed(v)}
     mentions = re.compile(cfg["society_mentions"]) if cfg.get("society_mentions") else None
     meetings = load_meetings(now)
+    kind_of = {src["name"]: src.get("kind", "industry") for src in cfg.get("sources", [])}
     for it in items.values():                  # every run, so word-list changes reach stored stories too
+        it["kind"] = kind_of.get(it["source"], it.get("kind", "industry"))     # an outlet moved to another kind
         tag_meetings(it, meetings)
         it.pop("also", None)
         if mentions and it.get("kind", "industry") in ("industry", "health") and \
@@ -222,6 +224,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     acut = news._utc(now - timedelta(days=int(settings.get("archive_days", 730))))
     listed = {src["name"] for src in cfg.get("sources", [])}
     archive = {k: v for k, v in archive.items() if v[0] >= acut and v[2] in listed}   # removed outlets' titles go too
+    for v in archive.values():                 # and an outlet that moved kind takes its old titles along
+        if len(v) > 3:
+            v[3] = kind_of.get(v[2], v[3])
+        else:
+            v.append(kind_of.get(v[2], "industry"))
     write_json(apath, archive, compact=False)
     arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
             for k, v in archive.items()]

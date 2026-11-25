@@ -138,6 +138,75 @@ def wikipedia_item(summary_html: str) -> Optional[tuple]:
     return None
 
 
+# ── one picture per story, from the outlet's own feed ──────────────────────
+_IMG_TAG = re.compile(r"<img\b[^>]*>", re.I)
+_ATTR = lambda name: re.compile(name + r"\s*=\s*[\"']([^\"']+)[\"']", re.I)
+_SRC, _SRCSET, _W, _H, _FILEW = _ATTR("src"), _ATTR("srcset"), _ATTR("width"), _ATTR("height"), _ATTR("data-file-width")
+_WIKI_SIZES = (330, 500, 960)          # Wikimedia's standard thumbnail widths
+_NOT_A_PICTURE = re.compile(r"feedburner|/~r/|pixel|tracker|beacon|doubleclick|gravatar|/emoji/|spacer|blank\.gif|logo|icon|avatar|badge", re.I)
+
+
+def _https(url: str) -> str:
+    url = html.unescape(str(url or "").strip())
+    if url.startswith("//"):
+        url = "https:" + url
+    return url if re.match(r"^https://[^\s\"'<>]{4,600}$", url) and not _NOT_A_PICTURE.search(url) else ""
+
+
+def _sized(url: str) -> str:
+    """Ask image services for a phone-sized copy: BBC's 240-pixel thumbnails are blurry, NASA's
+    originals can be many megabytes."""
+    url = re.sub(r"(ichef\.bbci\.co\.uk/(?:ace|news)/(?:standard|ws))/\d+/", r"\1/800/", url)
+    if re.match(r"^https://www\.nasa\.gov/wp-content/uploads/", url) and "?" not in url:
+        url += "?w=1024"
+    return url
+
+
+def _num(v) -> int:
+    try:
+        return int(float(str(v).strip().rstrip("px")))
+    except (TypeError, ValueError):
+        return 0
+
+
+def entry_image(e, summary_html: str = "") -> str:
+    """The story's picture: media:content, media:thumbnail, an image enclosure, or the first real
+    <img> in its summary. Only https, never tracking pixels, logos or tiny icons."""
+    cands = []                                               # (preference, width, url)
+    for m in e.get("media_content", []) or []:
+        if str(m.get("medium", "")) == "image" or str(m.get("type", "")).startswith("image") or \
+                re.search(r"\.(?:jpe?g|png|webp)(?:\?|$)", str(m.get("url", "")), re.I):
+            cands.append((3, _num(m.get("width")), m.get("url")))
+    for m in e.get("media_thumbnail", []) or []:
+        cands.append((2, _num(m.get("width")), m.get("url")))
+    for enc in e.get("enclosures", []) or []:
+        if str(enc.get("type", "")).startswith("image"):
+            cands.append((2, 0, enc.get("href")))
+    for tag in _IMG_TAG.findall(summary_html or "")[:3]:
+        w, h = _num((_W.search(tag) or [None, 0])[1]), _num((_H.search(tag) or [None, 0])[1])
+        if (w and w < 120) or (h and h < 80):
+            continue
+        srcset = _SRCSET.search(tag)
+        best = None
+        if srcset:                                           # the largest copy offered
+            opts = [x.strip().split() for x in srcset.group(1).split(",") if x.strip()]
+            best = max(opts, key=lambda o: _num(o[1].rstrip("xw")) if len(o) > 1 else 1)[0] if opts else None
+        src = best or (_SRC.search(tag) or [None, ""])[1]
+        filew = _num((_FILEW.search(tag) or [None, 0])[1])
+        if filew and re.search(r"wikimedia\.org/.+/\d+px-", src):          # a sharper Wikimedia thumbnail, never wider than the original
+            fit = [x for x in _WIKI_SIZES if x <= filew]
+            if fit:
+                src = re.sub(r"/\d+px-", f"/{fit[-1]}px-", src, count=1)
+        cands.append((1, w, src))
+    for _, width, url in sorted(cands, key=lambda c: (-c[0], -c[1])):
+        if width and width < 120:
+            continue
+        u = _https(url)
+        if u:
+            return _sized(u)
+    return ""
+
+
 def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, style: str = "") -> list[dict]:
     """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}].
     verbatim: the outlet's terms say not to edit headlines, text or links (ScienceDaily, Medical
@@ -147,7 +216,9 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
     head = text.lstrip()[:600]
     if "<urlset" in head:
         return _parse_sitemap(text, source, now)
-    d = feedparser.parse(text)
+    # Wikipedia's blurbs are read raw (its picture sizes live in attributes the sanitizer drops);
+    # every summary is reduced to plain text below either way
+    d = feedparser.parse(text, sanitize_html=style != "wikipedia")
     out = []
     for e in d.entries:
         title = clean_text(e.get("title", ""))
@@ -158,6 +229,7 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
         t = e.get("published_parsed") or e.get("updated_parsed")
         when = datetime(*t[:6], tzinfo=timezone.utc) if t else now
         summary = e.get("summary", "") or (e.get("content") or [{}])[0].get("value", "")
+        img = entry_image(e, summary + " " + ((e.get("content") or [{}])[0].get("value", "") or ""))
         if style == "wikipedia":
             got = wikipedia_item(summary)
             if not got:
@@ -165,6 +237,8 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
             title, link, summary = got
         item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
                 "date": _utc(min(when, now)), "summary": clean_text(summary) if verbatim else teaser(summary)}
+        if img:
+            item["img"] = img
         audio = _audio(e)                          # podcast episode: playable in the app
         if audio:
             item["audio"] = audio

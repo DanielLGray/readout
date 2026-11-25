@@ -692,6 +692,16 @@ function cardEl(it) {
 
 const saveKey = (it) => it.pmid || `n:${it.id}`;
 
+// a story's picture, straight from the outlet (only https, shown as an image and nothing else)
+const imgUrl = (u) => (typeof u === "string" && /^https:\/\/[^\s"'<>]{4,600}$/.test(u) ? u : null);
+function newsImgEl(it) {
+  if (!T.pictures || !imgUrl(it.img)) return null;
+  const box = el("div", { class: "fig news-img", "aria-hidden": "true" });
+  const img = el("img", { src: imgUrl(it.img), alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+  img.addEventListener("error", () => { const card = box.closest(".card"); box.remove(); if (card) fitCard(card); }, { once: true });
+  box.append(img);
+  return box;
+}
 function newsCardEl(it) {
   const isNew = S.newsNew.has(it.id);
   const cats = (it.categories || []).map((c) => S.news?.categories?.[c]).filter(Boolean);
@@ -708,6 +718,7 @@ function newsCardEl(it) {
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     el("div", { class: "kind-label", "data-kind": it.kind },
       newsKinds()[it.kind] || "News", it.audio ? el("span", { class: "pod" }, `Podcast${it.duration ? `, ${it.duration} min` : ""}`) : null),
+    newsImgEl(it),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
       el("h2", { class: "news-headline" }, it.title),
       it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
@@ -874,6 +885,25 @@ function fitTop(card) {
   }
   for (const sec of secs.slice(0, -1)) { if (!over()) break; sec.hidden = true; }
 }
+// a story card: a smaller picture, then fewer lines of the teaser (the article is one tap away);
+// the picture goes only when even the headline needs its room
+function fitNews(card, box, inner, p, fig, over) {
+  const clamp = () => {
+    const lh = parseFloat(getComputedStyle(p).lineHeight) || 24;
+    const head = box.querySelector(".news-headline");
+    const n = Math.floor((box.clientHeight - (head ? head.offsetHeight + 8 : 0)) / lh);
+    p.style.webkitLineClamp = String(Math.max(1, n));
+    p.style.lineClamp = String(Math.max(1, n));
+    return n;
+  };
+  if (!over()) return;
+  if (fig) fig.classList.add("small");
+  if (!over()) return;
+  if (clamp() >= 2 || !fig) return;
+  fig.classList.add("gone");
+  p.style.webkitLineClamp = ""; p.style.lineClamp = "";
+  if (over()) clamp();
+}
 function fitCard(card) {
   if (card.classList.contains("top-card")) return fitTop(card);
   if (card.classList.contains("brief-card")) return;
@@ -882,6 +912,15 @@ function fitCard(card) {
   const box = card.querySelector(".concl");
   const inner = box?.querySelector(".concl-inner");
   const p = box?.querySelector(".concl-text:not(.none)");
+  if (box && !p && card.classList.contains("news-card")) {       // a story with no summary: only the picture can give way
+    const f = card.querySelector(".fig");
+    if (!f || !box.clientHeight) return;
+    f.classList.remove("small", "gone");
+    const over = () => inner.scrollHeight > box.clientHeight + 1;
+    if (over()) f.classList.add("small");
+    if (over()) f.classList.add("gone");
+    return;
+  }
   if (!box || !p) return;
   if (!box.clientHeight) return;      // feed not on screen (another tab): fit when it comes back
   // reset, so this can run again after fonts load or the screen rotates
@@ -900,6 +939,7 @@ function fitCard(card) {
   setSize(base);
   const over = () => inner.scrollHeight > box.clientHeight + 1;
   if (over() && extra) extra.hidden = true;
+  if (card.classList.contains("news-card")) return fitNews(card, box, inner, p, fig, over);
   if (over() && tags) tags.hidden = true;                     // with a picture, topic tags go first
   if (over() && fig) fig.classList.add("small");              // a smaller picture before smaller type
   // smaller type before cutting text: the conclusion is the point of the card
@@ -1235,7 +1275,7 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with four kinds of news: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science for everyone (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Smithsonian, Live Science, NASA…) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons, Inverse, Den of Geek…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), general news (NPR, BBC, The New York Times) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Most important"),
@@ -1247,7 +1287,7 @@ function openInfo() {
     el("h3", {}, "Light reading and general news"),
     el("p", {}, "Light reading brings curiosities, history, nature, books, food and wellness: Wikipedia’s featured article and picture of the day, NASA’s Image of the Day, Atlas Obscura, Smithsonian, Knowable Magazine, NYT Well and NPR’s books, food and animal stories. General news is the day’s top stories from NPR, the BBC and The New York Times. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
     el("h3", {}, "Pictures"),
-    el("p", {}, "Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
+    el("p", {}, "News and light-reading cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
     el("h3", {}, "Telling Readout what you like"),
     el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it. “More like this” and “Less like this” nudge all of them a little. Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
     el("h3", {}, "Meetings"),
