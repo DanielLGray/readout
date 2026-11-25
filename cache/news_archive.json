@@ -8136,7 +8136,7 @@
     "general"
   ],
   "f67625bc3bf6": [
-    "2026-11-25T11:16:00Z",
+    "2026-11-25T14:20:00Z",
     "World Trade Flows Surge as AI Boost Overwhelms Barriers",
     "WSJ Business",
     "business"
@@ -8366,8 +8366,8 @@
   "a1c42564b6fc": [
     "2026-11-25T10:00:00Z",
     "A quintessential Route 66 diner has been serving up Americana for nearly 100 years",
-    "NPR News",
-    "general"
+    "NPR Food",
+    "light"
   ],
   "0c20c7905a17": [
     "2026-11-25T10:00:00Z",
@@ -9110,8 +9110,8 @@
   "316b1b2ff5f6": [
     "2026-11-25T14:14:34Z",
     "How American Thanksgiving took root -- and evolved -- in Liberia",
-    "NPR Health",
-    "health"
+    "NPR News",
+    "general"
   ],
   "8391905f2bb8": [
     "2026-11-25T14:14:00Z",
@@ -9400,5 +9400,155 @@
     "Succumbing to certainty is a failure in science",
     "Nature",
     "science"
+  ],
+  "b10d7353b2fc": [
+    "2026-11-25T15:08:00Z",
+    "Inflation gets worse. Now the Fed no choice but to raise U.S. interest rates.",
+    "MarketWatch",
+    "business"
+  ],
+  "c1fa46ff4717": [
+    "2026-11-25T15:07:59Z",
+    "Visual Tour of NYC’s Holiday Store Windows: Macy’s, Saks and More",
+    "New York Times",
+    "general"
+  ],
+  "aed167976779": [
+    "2026-11-25T15:03:00Z",
+    "We are living in perilous times if Nvidia’s Jensen Huang dictates your 401(k) balance",
+    "MarketWatch",
+    "business"
+  ],
+  "d7cd0e2aae8d": [
+    "2026-11-25T15:01:46Z",
+    "How Certain Foods in Adolescence Are Linked to IBD Risk",
+    "MedPage Today",
+    "health"
+  ],
+  "7503985f475b": [
+    "2026-11-25T15:00:05Z",
+    "Why Aren’t the Midterms Over in Louisiana? Ask the Supreme Court.",
+    "New York Times",
+    "general"
+  ],
+  "7e3c2e2e968e": [
+    "2026-11-25T15:00:03Z",
+    "Functional traits in two Asian pines covary with climate and genomic ancestry",
+    "Phys.org",
+    "science"
+  ],
+  "9effb8208108": [
+    "2026-11-25T15:00:01Z",
+    "South Pole Telescope releases clearest map ever of matter in the distant universe",
+    "Phys.org",
+    "science"
+  ],
+  "be88aeec840e": [
+    "2026-11-25T15:00:00Z",
+    "Sjogren's Disease Brings a Lot More Misery Beyond Dryness",
+    "MedPage Today",
+    "health"
+  ],
+  "2c24e095eebe": [
+    "2026-11-25T15:00:00Z",
+    "Ianalumab Extension Study Confirms Benefit in Sjogren's, Though Still Modest",
+    "MedPage Today",
+    "health"
+  ],
+  "2c204d0c0f42": [
+    "2026-11-25T15:00:00Z",
+    "Australia’s legless geckos evolved like snakes did",
+    "Science News",
+    "science"
+  ],
+  "b325b12ef84a": [
+    "2026-11-25T15:00:00Z",
+    "Satellites watch volcanic eruptions add new beaches on Iwo Jima | Space photo of the day for Nov. 25, 2026",
+    "Space.com",
+    "science"
+  ],
+  "6d0f754c5093": [
+    "2026-11-25T15:00:00Z",
+    "Beguinage of Anderlecht in Anderlecht, Belgium",
+    "Atlas Obscura",
+    "light"
+  ],
+  "3c1ad19c716b": [
+    "2026-11-25T15:00:00Z",
+    "BOE’s Bailey Sees Lower Peak For Inflation If Energy Prices Stay Where They Are",
+    "WSJ Markets",
+    "business"
+  ],
+  "0d9a9847ed74": [
+    "2026-11-25T15:00:00Z",
+    "Celebrating Poul Anderson at 100: Five Favorite Short Works",
+    "Reactor",
+    "sff"
+  ],
+  "8b5acf785a8d": [
+    "2026-11-25T14:54:05Z",
+    "Detecting Pancreas Cancer Early; 3 Brothers, 3 Liver Transplants; IBS Developments",
+    "MedPage Today",
+    "health"
+  ],
+  "ef826dbdb9d6": [
+    "2026-11-25T14:47:00Z",
+    "Third-quarter GDP already looked great. Now it looks even better.",
+    "MarketWatch",
+    "business"
+  ],
+  "2ade0562e21e": [
+    "2026-11-25T14:46:41Z",
+    "Five Russian military jets hit in airfield strike, says Ukraine",
+    "BBC News",
+    "general"
+  ],
+  "d53820b3543b": [
+    "2026-11-25T14:45:10Z",
+    "6 Craft Retreats Offer Knitting, Pottery and More for All Skill Levels",
+    "New York Times Business",
+    "business"
+  ],
+  "79a39f07d1fb": [
+    "2026-11-25T14:45:00Z",
+    "The U.S. Army is blowing up five tons of toxic lead azide in Iowa",
+    "Scientific American",
+    "science"
+  ],
+  "1ca8b43dc398": [
+    "2026-11-25T14:42:09Z",
+    "How ’70s Movies and Prague Flea Markets Inspired the “Sunshine Noir” Look of Blade Runner 2099",
+    "Reactor",
+    "sff"
+  ],
+  "245d5e78a01b": [
+    "2026-11-25T14:40:04Z",
+    "Webb discovers farthest 'little red dot' from universe's first 500 million years",
+    "Phys.org",
+    "science"
+  ],
+  "f508a277d88c": [
+    "2026-11-25T14:31:00Z",
+    "Crude Futures Pick Up in Choppy Trading",
+    "WSJ Markets",
+    "business"
+  ],
+  "ec1fb5a93206": [
+    "2026-11-25T14:27:00Z",
+    "Retailers Have a Secret Weapon, and It’s Good Marketing",
+    "WSJ Business",
+    "business"
+  ],
+  "c574dc889340": [
+    "2026-11-25T14:20:12Z",
+    "A prickly surprise: Mexican hairy dwarf porcupines glow under UV light",
+    "Phys.org",
+    "science"
+  ],
+  "5e7e948a01e9": [
+    "2026-11-25T14:11:30Z",
+    "Nationwide Ibuprofen Recall; Trump Open to Single-Payer? U.S. Stroke Rate to Double",
+    "MedPage Today",
+    "health"
   ]
 }
