@@ -198,6 +198,16 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         return not (skip and skip.search(it["link"] + " " + it["title"])) and \
             not (need and not need.search(it["title"] + " " + it.get("summary", "")))
     items = {k: v for k, v in items.items() if allowed(v)}
+    # an outlet's daily limit applies to stories stored before it was lowered, too
+    caps = {src["name"]: int(src["max_per_day"]) for src in cfg.get("sources", []) if src.get("max_per_day")}
+    per_day: dict[tuple, list] = {}
+    for it in items.values():
+        if it["source"] in caps:
+            per_day.setdefault((it["source"], it["date"][:10]), []).append(it)
+    for (name, _), lst in per_day.items():
+        if len(lst) > caps[name]:
+            for it in sorted(lst, key=lambda i: i["date"], reverse=True)[caps[name]:]:
+                items.pop(it["id"], None)
     mentions = re.compile(cfg["society_mentions"]) if cfg.get("society_mentions") else None
     meetings = load_meetings(now)
     kind_of = {src["name"]: src.get("kind", "industry") for src in cfg.get("sources", [])}

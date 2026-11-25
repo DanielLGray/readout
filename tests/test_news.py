@@ -395,3 +395,19 @@ def test_pictures_are_phone_sized_and_show_art_is_dropped():
 def test_business_news_keeps_its_deals():
     assert "business" in build_news.DEAL_KINDS and "industry" in build_news.DEAL_KINDS
     assert "light" not in build_news.DEAL_KINDS
+
+
+def test_a_lowered_daily_limit_trims_stored_stories(tmp_path, monkeypatch):
+    now = datetime(2026, 11, 25, 12, tzinfo=timezone.utc)
+    cfg = {"settings": {}, "kinds": {"health": "Health"},
+           "sources": [{"name": "BBC Health", "kind": "health", "max_per_day": 2, "home": "https://www.bbc.com",
+                        "link_domains": ["bbc.co.uk"], "urls": ["https://feeds.bbci.co.uk/news/health/rss.xml"]}]}
+    monkeypatch.setattr(build_news, "load_yaml", lambda name: cfg if name == "news.yaml" else {})
+    monkeypatch.setattr(build_news, "DATA", tmp_path / "data")
+    monkeypatch.setattr(build_news, "CACHE", tmp_path / "cache")
+    (tmp_path / "data").mkdir(); (tmp_path / "cache").mkdir()
+    old = {"items": [{"id": f"b{k}", "title": f"Health story number {k}", "link": f"https://www.bbc.co.uk/news/articles/{k}",
+                      "source": "BBC Health", "kind": "health", "date": f"2026-11-24T{10 + k:02d}:00:00Z", "summary": "S."} for k in range(5)]}
+    (tmp_path / "data" / "news.json").write_text(__import__("json").dumps(old))
+    out = build_news.run(Http(transport=lambda m, u, p: (404, "gone"), sleep=lambda s: None, retries=0), now=now)
+    assert sorted(i["id"] for i in out["items"]) == ["b3", "b4"]          # the newest two of that day

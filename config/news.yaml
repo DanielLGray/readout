@@ -491,7 +491,7 @@ sources:
     home: https://www.bbc.com/news
     link_domains: [bbc.co.uk]
     urls:
-      - https://feeds.bbci.co.uk/news/rss.xml
+      - https://feeds.bbci.co.uk/news/world/rss.xml     # world news (the top-stories feed is mostly UK)
 
   - name: New York Times
     kind: general
