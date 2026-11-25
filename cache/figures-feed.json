@@ -10,7 +10,8 @@
         "cap": "Representative examples of CT images and visualization of prediction results of the proposed OP-PDAC using Grad-CAM",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13785406": {
       "t": "2026-11-25",
@@ -22,11 +23,13 @@
         "cap": "A patient with a TIRADS 4b nodule in the left thyroid lobe and negative cervical lymph nodes on US who underwent [18F]-FAPI PET/CT imaging. PET/CT scan showed intense [18F]-FAPI uptake in the left thyroid lobe (solid arrow), along with mild [18F]-FAPI uptake in the left cervical lymph nodes (dotted arrow), which were confirmed as LNM based on histopathological examination. [18F]-FAPI= fluorine 18 labeled fibroblast activation protein inhibitor, US=ultrasound, LNM= lymph node metastasis",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13785431": {
       "t": "2026-11-25",
-      "why": "no picture among 0 figures"
+      "why": "no picture among 0 figures",
+      "v": 2
     },
     "PMC13785468": {
       "t": "2026-11-25",
@@ -38,7 +41,8 @@
         "cap": "Multiple parathyroid adenomas on FECh PET/CT and dual-phase PCD-CT. Images from a patient with biochemically confirmed pHPT, a history of urolithiasis, and an inconclusive cervical ultrasound examination. Representative images show two histologically confirmed parathyroid adenomas. One adenoma is located orthotopically caudally, to the right of the thyroid gland (arrowhead), and one adenoma is located ectopically, paraesophageally (arrow). The images on the left (a) show the FECh PET scan, with two focal uptake spots corresponding to the adenomas, each with a suspected anatomical correlate in the axial slice from the non-contrast CT scan. The axial slice from the arterial (b) and portal-venous (c) contrast-enhanced dual-phase PCD-CT shows a clear enhancement of the lesions, particularly at 40 keV in the arterial phase, with a visually apparent washout in the venous phase, here best seen in the 70 keV images. PCD-CT, photon-counting detector CT; VNC, virtual non contrast; FECh, [18F]fluoroethylcholine",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13782085": {
       "t": "2026-11-25",
@@ -50,7 +54,8 @@
         "cap": "Representative [68Ga]Ga-DOTATATE PET/CT images illustrating the diagnostic concordance and discordance between Integrated Interpretation and Liver Threshold Interpretation. (A–D) A 62-year-old female with a retroperitoneal (para-aortic) mass histopathologically confirmed as PPGL. CT shows heterogeneous hypoattenuation within the lesion indicating necrosis (A). PET images demonstrate intense, heterogeneous tracer uptake in the solid components (B–D). SUVmax of the lesion is 19.3, liver SUVmean is 7.0, and LLR is 5.9. Both Integrated Interpretation and Liver Threshold Interpretation diagnosed PPGL, concordant with the pathological diagnosis. (E–H) A 57-year-old male with a right adrenal nodule histopathologically confirmed as PPGL. CT shows a homogeneous hypodense nodule (E). PET images reveal heterogeneous tracer uptake (F–H) with SUVmax of 41.1, liver SUVmean of 10.2, and LLR of 1.9. Integrated Interpretation misinterpreted the lesion as non-PPGL (likely due to the low-density appearance on CT), whereas Liver Threshold Interpretation correctly diagnosed PPGL because the SUVmax exceeded the liver uptake threshold and LLR > 1.0. (I–L) A 55-year-old female with a left…",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13782375": {
       "t": "2026-11-25",
@@ -62,7 +67,8 @@
         "cap": "3-T MRI in sagittal plane (a) demonstrating the placentae in a dichorionic, diamniotic twin pregnancy at 29 weeks in a patient with previous Caesarean sections. MRI allows for visualisation of the whole placenta and is useful in areas challenging for ultrasound (e.g. multiple pregnancy, fundal (Twin B, anterior) and posteriorly placed (Twin A, posterior, closest to cervix) placentae. A normal homogenous placenta (*) is seen in Twin B, with preserved retroplacental complex (arrowhead) and homogenous T2 signal. High field of view Sagittal Oblique T2 planes (b) of Twin A’s placenta; however, it demonstrates areas of focal uterine placental bulge, severe myometrial thinning and markedly heterogenous placental signal with thick, intraplacental hypointense bands (long arrows). Further abnormal vascularisation of the placental bed and impression of focal loss of the T2 retroplacental line suggest deep myoinvasive placenta adhesive disorder with likely focal full-thickness serosal penetration (placenta percreta). Both twins were delivered successfully at 34 weeks +2 days following a planned Caesarean section in conjunction with Urological and Interventional Radiology with intraoperative…",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13777914": {
       "t": "2026-11-25",
@@ -74,7 +80,8 @@
         "cap": "Preliminary phantom SPECT imaging of [135La]La-DTPA. A syringe was utilized as uniformity phantom and scanned with high-energy general-purpose mouse collimator (HE-GP-M; B, left subfigure) and general-purpose mouse collimator (GP-M; B, right subfigure) to yield image quality parameters (A-B) following methods of [33, 35]. Lanthanum-135 images of a Derenzo phantom (C-D), acquired with the HE-GP-M collimator, yielding inter-rod contrast values and recovery coefficients",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13773071": {
       "t": "2026-11-25",
@@ -86,11 +93,13 @@
         "cap": "Angiographic, optical frequency domain imaging (OFDI), and polarization-sensitive (PS)-OFDI images show a representative coronary lesion with high-risk plaque in a patient with chronic coronary syndrome. A, Coronary angiography showing a lesion in the proximal left anterior descending artery (white arrow). B, Longitudinal coronary computed tomography angiography (CCTA) view of the same segment. C1 through C3, Cross-sectional CCTA images at the levels indicated in B by the color-coded arrows. D1 through D3, Corresponding structural OFDI images showing lipid-rich plaques. E1 through E3, Birefringence maps demonstrating reduced birefringence in the plaque region. F1 through F3, Depolarization maps showing elevated depolarization signals in lipid-rich areas. G, Depolarization-derived lipid core burden index chemogram summarizing lipid-related depolarization signals along the matched coronary segment. Color scales for birefringence (Δn) and depolarization are shown at the bottom right.",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13769789": {
       "t": "2026-11-25",
-      "why": "no picture among 7 figures"
+      "why": "no picture among 7 figures",
+      "v": 2
     },
     "PMC13769785": {
       "t": "2026-11-25",
@@ -102,11 +111,13 @@
         "cap": "Example of a radiograph of the left hand and wrist after automated bone age assessment by the software BoneAge (Gleamer) in a young boy with chronological age of 7 years and 11 months (indication for imaging: suspected precocious puberty). The bone age estimation by a pediatric radiologist was 6 years, by AI software, 6 years (SD 9 months)",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13768539": {
       "t": "2026-11-25",
-      "why": "no picture among 9 figures"
+      "why": "no picture among 9 figures",
+      "v": 2
     },
     "PMC13755292": {
       "t": "2026-11-25",
@@ -118,15 +129,18 @@
         "cap": "Biodistribution of [89Zr]Zr-BI 765063. Coronal maximum intensity projections of the patient with the larynx carcinoma 120 h p.i. at the low dose (A) and the blocking dose (B). Notice the strong decrease in bone marrow uptake at the blocking dose (B), with increased residual blood radioactivity compared to the low dose (A). Corrected Patlak plots for organ uptake across all patients on a logarithmic y-scale are shown in (C). Solid lines indicate the low dose, dotted lines the blocking dose and dashed lines the time before equilibrium. The gray rectangle represents the reference values for non-target-mediated uptake (no reference for bone marrow is currently available). cTPR: corrected tissue-to-plasma ratio",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13751946": {
       "t": "2026-11-25",
-      "why": "no picture among 3 figures"
+      "why": "no picture among 3 figures",
+      "v": 2
     },
     "PMC13748144": {
       "t": "2026-11-25",
-      "why": "no picture among 7 figures"
+      "why": "no picture among 7 figures",
+      "v": 2
     },
     "PMC13745607": {
       "t": "2026-11-25",
@@ -138,7 +152,8 @@
         "cap": "The combination of FAPI and BS complemented each other to detect BM. a, Numbers of bone metastatic lesions being more detected by FAPI imaging than BS in different types of bone lesions. b, Representative imaging of FAPI and BS in a NSCLC patient with multiple osteoblastic BM. FAPI results were on the left, with 2 representative CT and SPECT/CT fusion figure of scapula lesion (above) and thoracic vertebra lesion (below). Anterior-posterior BS image was on the right. Green arrows indicate bone lesions positive on BS but negative on FAPI imaging",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13743648": {
       "t": "2026-11-25",
@@ -150,7 +165,8 @@
         "cap": "A) Coronal maximum intensity projection (MIP) of [68Ga]Ga-FAPI-04 PET (left) and extracted [18F]FDG PET (right) with extensive, heterogeneous nodal and osseous disease. B) Supraclavicular nodal metastasis (blue line) with moderate uptake of [68Ga]Ga-FAPI-04, but intense [18F]FDG accumulation. C) Mediastinal nodal metastasis (red line) with low uptake of [68Ga]Ga-FAPI-04, but intense [18F]FDG accumulation. D) Bone metastasis (green line) with moderate uptake of [68Ga]Ga-FAPI-04, but intense [18F]FDG accumulation",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13743664": {
       "t": "2026-11-25",
@@ -162,7 +178,8 @@
         "cap": "Illustration of intratumoral and peritumoral ROI generation. a The original tumor ROI was processed by a 2 mm outward dilation and a 1 mm inward erosion; the peritumoral ROI was defined as the annular boundary ring between these two masks, and the intratumoral ROI was obtained by a 1 mm erosion of the original ROI. b Original ROI overlaid on the MR image. c Intratumoral ROI overlaid on the MR image. d Peritumoral (boundary-ring) ROI overlaid on the MR image. ROI, region of interest",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13744824": {
       "t": "2026-11-25",
@@ -174,7 +191,8 @@
         "cap": "Representative cases of muscle measurements at the T12 level on cardiac CT. A: An axial noncontrast CT image of a 63-year-old female patient showing the paravertebral muscles (in green) at the T12 level, with a paravertebral muscle index of 10.23 cm2/m2, indicating the absence of sarcopenia. She underwent surgical AVR 2 days after CT and was alive at 1 year after AVR. B: An axial contrast-enhanced CT image of a 91-year-old female patient showing the paravertebral muscles (in green) at the T12 level, with a paravertebral muscle index of 5.28 cm2/m2, indicating the presence of sarcopenia. She underwent transcatheter AVR 3 days after CT and died 156 days after AVR. T12 = 12th thoracic vertebra, CT = computed tomography, AVR = aortic valve replacement",
         "lic": "CC BY-NC",
         "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13740201": {
       "t": "2026-11-25",
@@ -186,7 +204,8 @@
         "cap": "The P-SMART method demonstrated on a sagittal T2-weighted MRI. Three steps: Identify—four landmarks (the bladder-prostate angle anteriorly; the prostatic apex anterior to the urethra; the seminal vesicle-prostate angle posteriorly; the prostatic apex posterior to the urethra). Divide—the anterior line bisected; the posterior line trisected. Join—upper anterior midpoint to second posterior point (base/mid-gland boundary); lower anterior midpoint to third posterior point (mid-gland/apex boundary)",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13744818": {
       "t": "2026-11-25",
@@ -198,7 +217,8 @@
         "cap": "Imaging findings in a 72-year-old man with HCC and non-cirrhotic chronic hepatitis C virus infection. A: An axial arterial-phase CT image showing a 2.7-cm enhancing mass (arrow) in the dome of liver segments IV/VIII. B: The lesion (arrow) shows delayed washout and an enhancing capsule, representing a typical enhancement pattern of HCC on the equilibrium-phase CT image. C, D: The lesion (arrows) also shows arterial enhancement on arterial-phase gadoxetic acid-enhanced magnetic resonance imaging (C) and hypointensity on hepatobiliary-phase images (D). E, F: The index tumor (arrows) shows high signal intensity on a T2-weighted image (E) and high signal intensity on a diffusion-weighted image (F), with a b-value of 800 s/mm2. The lesion was pathologically confirmed as an Edmondson grade III HCC following surgical resection, with no cirrhosis in the background liver. HCC = hepatocellular carcinoma, CT = computed tomography",
         "lic": "CC BY-NC",
         "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13737341": {
       "t": "2026-11-25",
@@ -210,15 +230,18 @@
         "cap": "[18F] FAPI-46 PET/CT of a 46-year-old male patient who presented with papillary thyroid carcinoma one month after surgery. An enlarged lymph node measuring 15 × 13 mm was identified adjacent to the left carotid sheath. This lesion showed intense [18F] FAPI-46 uptake (SUVmax = 12.1, SUVpeak = 7.5) and only mild [18F] FDG uptake (SUVmax = 2.3, SUVpeak = 1.9). Subsequent lymph node needle biopsy confirmed papillary thyroid carcinoma metastasis",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13737284": {
       "t": "2026-11-25",
-      "why": "no picture among 7 figures"
+      "why": "no picture among 7 figures",
+      "v": 2
     },
     "PMC13737363": {
       "t": "2026-11-25",
-      "why": "no picture among 6 figures"
+      "why": "no picture among 6 figures",
+      "v": 2
     },
     "PMC13737244": {
       "t": "2026-11-25",
@@ -230,7 +253,8 @@
         "cap": "VP-PCCT perfusion maps and corresponding late arterial phase images demonstrate perfusion differences in HCC stratified by histological grade and MVI status. a, b Representative color-coded maps and corresponding late arterial phase images of HPI and BF in a 67-year-old man with well-differentiated HCC (a) and a 55-year-old man with poorly-differentiated HCC (b). c, d Maps and late arterial phase images of ALP and BF in a 41-year-old man with MVI-negative HCC (c) and a 38-year-old man with MVI-positive HCC (d). White arrows indicate tumor locations; contours delineate ROIs for tumor, peritumoral region, and liver parenchyma. Subscripts indicate measurement regions: _tumor = tumor, _peritumor = peritumoral region, _liver = liver parenchyma, _norm_peritumor = percentage of peritumoral to corresponding liver parenchymal perfusion values. HCC, hepatocellular carcinoma; MVI, microvascular invasion; VP-PCCT, dynamic volume perfusion CT with photon-counting CT",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13731590": {
       "t": "2026-11-25",
@@ -242,19 +266,13 @@
         "cap": "Representative MRI images without and with L₁-norm regularization. Sigmoid colon adenocarcinoma in a 37-year-old man (A, B) and ascending colon adenocarcinoma in a 45-year-old woman (C, D). Oblique axial T2WI without L₁-norm regularization demonstrates parallel imaging artifacts (blue arrows) (A, C). Oblique axial T2WI with L₁-norm regularization shows improved image quality with artifact reduction and better tumor delineation (B, D). T2WI, T2-weighted imaging",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13728009": {
       "t": "2026-11-25",
-      "fig": {
-        "src": "figs/PMC13728009.webp",
-        "w": 950,
-        "h": 653,
-        "n": "Fig. 4",
-        "cap": "Distribution of lymph node metastasis positivity rates across different short-axis diameter cutoff values (5–13 mm) on preoperative CT",
-        "lic": "CC BY",
-        "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      "why": "no picture among 5 figures",
+      "v": 2
     },
     "PMC13719923": {
       "t": "2026-11-25",
@@ -266,7 +284,8 @@
         "cap": "Standardized uptake value (SUV) images of two Alzheimer’s patients, aged 74 (left) and 71 (right), showing minimal motion (Mean Blurring: 0.48 mm) and severe motion (Mean Blurring: 5.01 mm), respectively, during a 30-minute acquisition. DDLM: data-driven list-mode motion correction. PRFB: post-reconstruction frame based motion correction. noMOCO: No motion Correction",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13719947": {
       "t": "2026-11-25",
@@ -278,7 +297,8 @@
         "cap": "A 56-year-old male with MASLD. a Example of ROI delineation for PDFF; b measurement diagram of visceral adipose tissue area, subcutaneous adipose tissue, and waist circumference",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13719960": {
       "t": "2026-11-25",
@@ -290,11 +310,13 @@
         "cap": "Concordance of prostate MRI quality evaluation compared with the reference pre- and post-lecture. a Overall accuracy and balanced accuracy pre- and post-lecture. b Accuracy in subgroups. Overall accuracy increased from 66.7% to 76.7%, and balanced accuracy increased from 62.9% to 84.2%. Subgroup accuracy improved from 60.0–70.0% to 70.7–82.7%. PI-QUAL, prostate imaging quality",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13719943": {
       "t": "2026-11-25",
-      "why": "no picture among 6 figures"
+      "why": "no picture among 6 figures",
+      "v": 2
     },
     "PMC13710466": {
       "t": "2026-11-25",
@@ -306,7 +328,8 @@
         "cap": "A–D Dual-isotope SPECT/CT images of mice bearing HT1080-FAP and HT1080 tumor xenografts at 4 h p.i. of 161Tb- and 177Lu-labeled FAPIs. A [161Tb]Tb-FAPI-46 and [177Lu]Lu-FAPI-46; B [161Tb]Tb-OncoFAP and [177Lu]Lu-OncoFAP; C [161Tb]Tb-FAP-2286 and [177Lu]Lu-FAP-2286; D [161Tb]Tb-3BP-3940 and [177Lu]Lu-3BP-3940. FAP+: HT1080-FAP tumor; FAP-: HT1080 tumor; Ki: Kidney; Bl: Urinary bladder; Gb: Gall bladder; Int: Intestines. Representative maximum intensity projection images of one mouse from studies performed with n = 2 mice per condition",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13695640": {
       "t": "2026-11-25",
@@ -318,19 +341,21 @@
         "cap": "An illustrative comparison between myocardial PET perfusion parameters between a 70-year-old male HD patient (A) and a 69-year-old female PD patient (B). Both patients had nephrosclerosis leading to ESRD requiring dialysis. Patient A had been on HD for 4 years, whereas patient B had been on PD for 1 year. MBFstress, myocardial blood flow at stress (ml/g/min); MBFrest, myocardial blood flow at rest (ml/g/min); CFR, coronary flow reserve",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13694640": {
       "t": "2026-11-25",
       "fig": {
         "src": "figs/PMC13694640.webp",
-        "w": 770,
-        "h": 960,
-        "n": "Fig. 1",
-        "cap": "Tracers collected from ADNI (A), SCAN (B) and Mayo (C) cohorts used in the study. The y-axis shows the number of scans next to each tracers with total count at the bottom, and the x-axis shows the study year where the PET scans were performed",
+        "w": 960,
+        "h": 609,
+        "n": "Fig. 2",
+        "cap": "Study overview. (A) PET scans from all cohorts were downloaded, converted from DICOM to NIfTI, and resampled to 1 × 1 × 1 mm³ isotropic resolution. B) ADNI and SCAN combined data was split at the participant level into training (60%), validation (20%), and internal test (20%) sets. All scans from a participant were assigned to a single split to prevent leakage. Stratification was performed using tracer label and study site ID to balance tracer-to-site strata across splits. Mayo scans were held out as an external test set. (C) Model inputs were constructed by extracting axial, coronal, and sagittal views, averaging a 10 mid-slices per view, resizing to 256 × 256, applying percentile-based intensity stretching (P1–P99), and clipping to [0,1] to form a 3-channel image. (D) A ConvNeXt-Large network initialized with ImageNet-pretrained weights was trained with global average pooling, layer normalization, and a final fully connected SoftMax classifier for either 10-class or 3-class tracer prediction. (E) Trained models were applied to the internal and external test sets for inference and performance evaluation",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13727854": {
       "t": "2026-11-25",
@@ -342,7 +367,8 @@
         "cap": "[99mTc]Tc−DPD extracardiac biodistribution phenotypes in the Bologna cohort. (A) ATTRv subtype: Whole-body scan showing intense biventricular cardiac uptake accompanied by atypical pulmonary tracer retention (Janssen Score ≥ 1) and diffuse soft-tissue fixation across the appendicular, thoracic, and abdominal regions. (B) AL amyloidosis: hepato-splenic visceral uptake acting as a tracer-independent “red flag” for light-chain disease, with minimal myocardial avidity. (C) ATTRwt subtype: Miscellaneous scans demonstrating biventricular cardiac uptake with diffuse soft-tissue fixation limited to the appendicular, thoracic, and abdominal regions",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13683290": {
       "t": "2026-11-25",
@@ -354,7 +380,8 @@
         "cap": "Clinical impact of applying the corrected liver SUV as a PROMISE score cutoff on PSMA PET imaging with 18F-PSMA-1007. (A) Distribution of PROMISE PSMA scores (0–3) across all 95 cases using three different 1–2 cutoff schemes: raw liver, spleen, and corrected liver, displayed as pie charts. (B) Among 34 lesions originally assigned score 1 using the raw liver cutoff, 61.8% remain score 1 across all schemes. Using the corrected liver cutoff, all other cases are upstaged to score 2, whereas only 11.8% are upstaged using the spleen cutoff. (C) Representative case: patient status post radiation therapy to the prostate with gradually rising PSA over the past year (up to 4.1 several weeks before imaging) under hormonal therapy. An intraprostatic focus (SUVmax 11.5) is classified as PSMA score 1 using raw liver SUV (15.7) or spleen SUV [14], and as score 2 using the corrected liver SUV (8.8). This single finding was considered positive on clinical grounds, and hormonal therapy was intensified with enzalutamide. (D) Another representative case: patient with biochemical recurrence shows focal uptake in the right ramus pubis/acetabulum (SUV 7, nonspecific subtle osteoblastic changes on CT).…",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13773070": {
       "t": "2026-11-25",
@@ -366,7 +393,8 @@
         "cap": "Incremental prognostic value of 3D computed tomography (CT) body composition. Harrell C statistics with 95% CIs are shown for clinical models alone and after addition of 3D CT body composition measures. Body composition included body surface area-indexed volumes and tissue attenuations of subcutaneous adipose tissue, visceral adipose tissue, muscular adipose tissue, and skeletal muscle. Model 1 included age and sex; Model 2 additionally included body mass index (BMI); and Model 3 additionally included hypertension, diabetes, and chronic renal failure. P values are derived from likelihood ratio (LR) tests assessing the incremental predictive information provided by body composition measures beyond the corresponding clinical model.",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13675461": {
       "t": "2026-11-25",
@@ -378,7 +406,8 @@
         "cap": "Age and 64Cu-RYM2 PET/CT in angiotensin II-infused Apoe−/− mice. (A) Illustrative examples of fused 64Cu-RYM2 PET/contrast-enhanced CT images (axial, coronal, and sagittal) acquired 7 days after starting angiotensin II infusion in young (8–10 weeks) and old (> 51 weeks) Apoe−/− mice. Red arrows indicate the suprarenal abdominal aorta. (B) Quantification of the 64Cu-RYM2 signal in the descending thoracic aorta (DTA) and suprarenal abdominal aorta (SRA) in young and old mice. **: P < 0.01. SUV: Standardized uptake value",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13675434": {
       "t": "2026-11-25",
@@ -390,19 +419,13 @@
         "cap": "A 65-year-old woman presented with a solitary adnexal mass. The sagittal T2WI FS (A), axial T2WI (D) images showed the cystic component with high intensity and the solid component with iso-high intensity. The sagittal T1WI (B) image represented the cystic component with low intensity and the solid component with lower intensity. The sagittal T1WI enhanced image (C) represented enhancement of the solid component similar to myometrium. The DWI (E) and ADC (F) maps demonstrated no obvious limited diffusion of the solid component. The ADC map showed an ADC mean value of 1.60 × 10−3 mm2/s (red circle). This case was mistakenly classified as malignant with an O-RADS MRI score of 4, while correctly categorized as benign with a score of 3 due to no limited diffusion and ADC value of cystic fluid in accordance with the modified non-contrast O-RADS MRI scoring system. The final pathology diagnosis confirmed that it was a left ovarian seromucinous cystadenoma",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13672765": {
       "t": "2026-11-25",
-      "fig": {
-        "src": "figs/PMC13672765.webp",
-        "w": 960,
-        "h": 659,
-        "n": "Fig. 2",
-        "cap": "Number of PMMRI scans with corresponding body part per case",
-        "lic": "CC BY",
-        "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      "why": "no picture among 4 figures",
+      "v": 2
     },
     "PMC13669286": {
       "t": "2026-11-25",
@@ -414,7 +437,8 @@
         "cap": "Segmentation of the renal pelvis and bladder in the excretory phase renal CT of a 46-year-old male patient",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13661840": {
       "t": "2026-11-25",
@@ -426,19 +450,13 @@
         "cap": "[18F]F-AraG Biodistribution; A) Maximum intensity projection of the baseline [18F]F-AraG PET/CT-scan of patient A at 60–70 min p.i. in SUVBW. Organs with increased uptake are depicted in orange letters. The focal uptake next to the thyroid gland is due to non-specific tracer accumulation (Suppl. Figure 4). Arrows indicate tumor locations. The right column depicts the organ uptake over time for the bone marrow (B), the spleen (C) and the liver (D). Note the slight decrease in activity for the bone marrow and spleen, suggesting reversible uptake while the increasing uptake for the liver indicates irreversible tracer accumulation. CP: choroid plexus, Pi: pituitary gland, Sa: salivary gland, T: thyroid gland, BM: bone marrow, M: myocardium, L: liver, St: stomach, Sp: spleen, Pa: pancreas, K: kidney, I: intestines, B: bladder, SUV: standardized uptake value normalized for LBM: lean body mass, BW: body weight",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13661850": {
       "t": "2026-11-25",
-      "fig": {
-        "src": "figs/PMC13661850.webp",
-        "w": 960,
-        "h": 763,
-        "n": "Fig. 3",
-        "cap": "Inter-observer variability of ADC measurements across different ROI strategies and timepoints. Bar plots show ICCs (ICC[2,1]) with 95% confidence intervals (CIs) for five ROI methods at (a) baseline (n = 25), (b) post-treatment (n = 21), and (c) as the percentage change (%ΔADC) (n = 21). d–f Display the corresponding ICCs for nADC values using muscle tissue as reference",
-        "lic": "CC BY",
-        "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      "why": "no picture among 7 figures",
+      "v": 2
     },
     "PMC13661870": {
       "t": "2026-11-25",
@@ -450,7 +468,8 @@
         "cap": "Axial contrast-enhanced CT (A) shows a hypodense lesion in the pancreatic head encasing the superior mesenteric vein, causing its deformation and narrowing. Stage according to NCCN: borderline resectable. Post-NAT MRI T2 (B), arterial phase (C), and portal-venous phase (D) images show that the lesion is reduced in size with re-expansion of the superior mesenteric vein and residual contact between the mass and the SMV < 180°. The partial response to treatment downstaged the lesion as resectable according to NCCN. The patient underwent pancreaticoduodenectomy; pathology of the resected specimen confirmed residual infiltration of the SMV and negative margins (R0)",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13661852": {
       "t": "2026-11-25",
@@ -462,7 +481,8 @@
         "cap": "B-lines on lung ultrasound. Vertical hyperechoic artifacts (arrows) originating from the pleural line and extending to the bottom of the screen without fading, indicating alveolar-interstitial syndrome consistent with pulmonary edema. This pattern is characteristic of chemical inhalation injury, acute respiratory distress syndrome, and COVID-19 pneumonia",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13658753": {
       "t": "2026-11-25",
@@ -474,11 +494,13 @@
         "cap": "Diffusion tensor imaging (DTI) in a patient with high-grade glioma as displayed on axial standard T2-weighted imaging (A) and contrast-enhanced T1-weighted imaging (B), with DTI showing directional colour coding of white matter tracts (C). According to directionally encoded colour, red, green, and blue (R/G/B) depict a principal direction (left–right, anterior–posterior, and superior–inferior), and the tumour seems to compress and disrupt white matter tracts (C)",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13667856": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC13652788": {
       "t": "2026-11-25",
@@ -490,7 +512,8 @@
         "cap": "Type I HWWS. A 15-year-old girl with an incidental finding of renal agenesis and uterine malformation. a–c Coronal (a), sagittal (b), and axial (c) T2-weighted 3D images demonstrate an oblique vaginal septum. The left lower vagina is obstructed and distended with a high T2 signal (thick red arrow), while the right vagina is collapsed and flattened (thin red arrow). c Axial image also shows a didelphic uterus (white arrow heads). d T1-weighted image reveals high T1-signal blood products within the distended left vagina. e Large-FOV coronal T2 image demonstrates the absence of the left kidney. f Spinal radiograph shows mild scoliosis. g 3D reconstructed model depicts the dilated left vagina (green) and the didelphic uterine anomaly (pink). The patient underwent excision of the oblique vaginal septum; surgery confirmed an oblique septum with a didelphic uterus, consistent with a Type I HWWS",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC13652791": {
       "t": "2026-11-25",
@@ -502,7 +525,8 @@
         "cap": "Imaging findings in a 37-year-old female with CD. T1-weighted imaging (a) and MRCP (d) demonstrate cystic dilation of the intrahepatic bile ducts, which communicate with the biliary tree (arrow). T2-weighted imaging (b) and gadoxetic acid disodium-enhanced portal venous phase imaging (c) reveal the “central dot” sign, a characteristic finding frequently identified in CD (arrow)",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     }
   },
   "idconv": {
