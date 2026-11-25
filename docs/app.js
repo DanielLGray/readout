@@ -114,6 +114,7 @@ const TUNE_DEFAULTS = {
   rank: { fresh: 7, evidence: 1, size: 0.5, concl: 0.5, systems: 1 },   // half-life in days; weights
   fav: [],              // your organ systems (a ranking boost)
   hidePending: true,    // hide papers whose abstract isn't in PubMed yet (the conclusion is the card)
+  readLast: true,       // cards you've already seen go to the end of each list
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
@@ -152,6 +153,7 @@ function loadTune() {
     topCard: typeof t.topCard === "boolean" ? t.topCard : TUNE_DEFAULTS.topCard,
     order: t.order === "ranked" ? "ranked" : "newest",
     fav: strs(t.fav), hidePending: typeof t.hidePending === "boolean" ? t.hidePending : TUNE_DEFAULTS.hidePending,
+    readLast: t.readLast !== false,
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
@@ -214,7 +216,7 @@ function bump(type, it) {
 function saveStats() {
   const cut = localDay(daysAgo(120));
   for (const d of Object.keys(stats.days)) if (d < cut) delete stats.days[d];
-  const cut2 = localDay(daysAgo(21));
+  const cut2 = localDay(daysAgo(45));
   for (const [k, d] of Object.entries(seenRecent)) if (d < cut2) delete seenRecent[k];
   store.set("seenRecent", seenRecent);
   store.set("stats", stats);
@@ -470,7 +472,18 @@ function renderChips() {
 const dayOf = (it) => (it.type === "news" ? it.date : it.added || it.epub || "").slice(0, 10);
 
 // The feed for the current chips. `f` overrides the chips; `report` (optional) counts what was left out.
+// cards you've seen go to the end. Which cards count as seen is fixed when a list is started fresh
+// (opening the app, a chip, refresh), so nothing moves while you're reading.
+const isRead = (it) => !!(T.readLast && S.readSet && it && it.type !== "top" && !SPECIAL.has(it.type) && S.readSet.has(listKey(it)));
 function filtered(f = {}, report = null) {
+  const list = buildList(f, report);
+  if (!T.readLast || (f.kind ?? S.kind) === "today" || !S.readSet?.size) return list;
+  const fresh = [], read = [];
+  for (const it of list) (isRead(it) ? read : fresh).push(it);
+  if (report && read.length) report.readLast = read.length;
+  return read.length ? fresh.concat(read) : list;
+}
+function buildList(f = {}, report = null) {
   const kind = f.kind ?? S.kind, system = f.system ?? S.system, strong = f.strong ?? S.strong, topic = f.topic ?? S.topic;
   const R = report || {};
   const drop = (why, n = 1) => { R[why] = (R[why] || 0) + n; };
@@ -564,6 +577,7 @@ function updateFeedQuietly(sinceShown) {
 // keepKey: the card you were reading; the rebuilt feed opens there if it's still in the list
 function refreshFeed(keepKey, keepIdx) {
   S.feedDirty = false;
+  if (keepKey == null && keepIdx == null) S.readSet = new Set(Object.keys(seenRecent));   // a fresh start: what you've seen goes last
   S.shownDay = localDay();
   const meeting = String(S.kind).startsWith("meeting:");
   if ((S.kind === "following" && !followRe()) || (meeting && !meetingChips().some((m) => `meeting:${m.id}` === S.kind))
@@ -714,6 +728,7 @@ function newsCardEl(it) {
       el("span", { class: "card-journal" }, it.source),
       el("span", {}, agoShort(it.date)),
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
+      isRead(it) ? el("span", { class: "lang seen" }, "Seen") : null,
       it._light ? el("span", { class: "lang light" }, "Something lighter") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
@@ -721,7 +736,7 @@ function newsCardEl(it) {
       newsKinds()[it.kind] || "News", it.audio ? el("span", { class: "pod" }, `Podcast${it.duration ? `, ${it.duration} min` : ""}`) : null),
     newsImgEl(it),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
-      el("h2", { class: "news-headline" }, it.title),
+      el("h2", { class: "news-headline" }, el("a", { class: "head-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, it.title)),
       it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
     el("div", { class: "actions" + (it.audio ? " five" : "") },
@@ -837,13 +852,15 @@ function paperCardEl(it) {
       el("span", {}, fmtDate(it.epub || it.added)),
       it.translated ? el("span", { class: "lang", title: "PubMed’s English translation of the title" }, it.language ? `In ${it.language}` : "Translated title") : null,
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
+      isRead(it) ? el("span", { class: "lang seen" }, "Seen") : null,
       it.classic ? el("span", { class: "lang classic" }, "Classic of the day") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     it.classic ? classicLine(it) : impactEl(it),
     it.retracted ? el("div", { class: "warn" }, "Retracted. See the notice on PubMed before using this.") : null,
     it.concern ? el("div", { class: "warn" }, "Expression of concern published for this paper.") : null,
-    el("h2", { class: "card-title clamp" }, it.title),
+    el("h2", { class: "card-title clamp" }, el("a", { class: "head-link", href: pubmedUrl(it.pmid),
+      onclick: (e) => { e.preventDefault(); openAbstract(it); } }, it.title)),
     fig,
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
       c.kind === "none"
@@ -1293,6 +1310,8 @@ function openInfo() {
     el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it. “More like this” and “Less like this” nudge all of them a little. Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
     el("h3", {}, "Meetings"),
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
+    el("h3", {}, "Moving around"),
+    el("p", {}, "Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news. Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
@@ -1769,9 +1788,61 @@ async function showKept() {
   keptJSON("data/explore.json").then((x) => { if (x && !S.explore) { S.explore = x; S.exploreKey = null; if (S.tab === "explore") renderExplore(); } });
 }
 
+// pull the feed down from its first card to check for new papers and news
+function setupPullToRefresh() {
+  const view = $("#view-feed"), ptr = $("#ptr");
+  if (!view || !ptr) return;
+  const TH = 64;                     // how far (after damping) counts as a pull
+  let y0 = null, x0 = 0, pull = 0, busy = false;
+  const label = ptr.querySelector("span");
+  const place = (d, text) => {
+    ptr.style.top = `${view.getBoundingClientRect().top}px`;
+    ptr.style.transform = `translate(-50%, ${Math.round(Math.min(d, TH + 36) - 20)}px)`;
+    ptr.style.opacity = String(Math.min(1, d / (TH * 0.6)));
+    ptr.classList.toggle("ready", d >= TH && !busy);
+    label.textContent = text;
+  };
+  const hide = () => {
+    ptr.classList.add("settle");
+    ptr.style.transform = "translate(-50%, -60px)";
+    ptr.style.opacity = "0";
+    setTimeout(() => ptr.classList.remove("settle"), 250);
+  };
+  view.addEventListener("touchstart", (e) => {
+    y0 = !busy && view.scrollTop <= 0 && e.touches.length === 1 && !$("#sheet").classList.contains("open") ? e.touches[0].clientY : null;
+    x0 = e.touches[0]?.clientX || 0;
+    pull = 0;
+    ptr.classList.remove("settle");
+  }, { passive: true });
+  view.addEventListener("touchmove", (e) => {
+    if (y0 == null) return;
+    const dy = e.touches[0].clientY - y0, dx = Math.abs(e.touches[0].clientX - x0);
+    if (dy <= 0 || view.scrollTop > 0 || dx > dy) {          // scrolling on, or sideways: not a pull
+      if (pull) { pull = 0; hide(); }
+      if (dy < 0) y0 = null;
+      return;
+    }
+    e.preventDefault();                                     // the feed stays put; the pill comes down
+    pull = dy * 0.5;
+    place(pull, pull >= TH ? "Release to check for new papers" : "Pull to check for new papers");
+  }, { passive: false });
+  const end = async () => {
+    if (y0 == null) return;
+    y0 = null;
+    if (pull < TH || busy) { pull = 0; hide(); return; }
+    busy = true;
+    pull = 0;
+    ptr.classList.add("busy", "settle");
+    place(TH, "Checking…");
+    try { await reload(true); } finally { busy = false; ptr.classList.remove("busy"); hide(); }
+  };
+  view.addEventListener("touchend", end);
+  view.addEventListener("touchcancel", () => { y0 = null; pull = 0; hide(); });
+}
 function boot() {
   document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
   $("#btn-refresh").addEventListener("click", () => reload(true));
+  setupPullToRefresh();
   $("#btn-search").addEventListener("click", openSearch);
   applyTextSize();
   $("#btn-info").addEventListener("click", openInfo);

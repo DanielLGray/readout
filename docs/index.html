@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preload" href="fonts/literata-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="app.css?v=26">
+  <link rel="stylesheet" href="app.css?v=27">
 </head>
 <body>
   <div class="app">
@@ -44,6 +44,10 @@
     </header>
 
     <main class="view feed" id="view-feed" aria-label="Feed"></main>
+    <div class="ptr" id="ptr" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+      <span>Pull to check for new papers</span>
+    </div>
     <main class="view" id="view-explore" aria-label="Explore" hidden></main>
     <main class="view" id="view-saved" aria-label="Saved" hidden></main>
     <main class="view" id="view-tune" aria-label="Tune" hidden></main>
@@ -97,8 +101,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=26"></script>
-  <script src="learn.js?v=26"></script>
-  <script src="tune.js?v=26"></script>
+  <script src="app.js?v=27"></script>
+  <script src="learn.js?v=27"></script>
+  <script src="tune.js?v=27"></script>
 </body>
 </html>

@@ -503,7 +503,9 @@ function mixSection() {
       (v) => { setTune({ cap: Number(v) }); rerender(); },
       "Keeps busy outlets from flooding Everything. Industry news is never limited, and held-back stories still show under their kind’s chip."),
     switchRow("Top stories card", "Opens the feed with stories that several outlets covered this week.", T.topCard,
-      (on) => { setTune({ topCard: on }); rerender(); }));
+      (on) => { setTune({ topCard: on }); rerender(); }),
+    switchRow("Cards you’ve seen go to the end", "Each list starts with what you haven’t seen; the rest follow, marked Seen. Takes effect when a list starts fresh: opening the app, a chip, or a refresh.", T.readLast,
+      (on) => { setTune({ readLast: on }); rerender(); }));
 }
 
 const WEIGHTS = [[0, "Off"], [0.5, "Low"], [1, "Medium"], [2, "High"]];

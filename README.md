@@ -36,6 +36,7 @@ From then on, the feed updates every night (3:17 AM Eastern, inside NCBI's off-p
 
 ## Using it
 
+- **Pull down** on the first card to check for new papers and news. **Tap a headline** to open it (the article for a story, the abstract for a paper). Cards you've already seen go to the end of each list, marked *Seen*, whenever a list starts fresh.
 - **Swipe up** for the next paper. The chips at the top filter by organ system. **Strong evidence** keeps only prospective studies, randomized trials, meta-analyses and guidelines.
 - **Search** (magnifier, top right) finds any paper or story on your phone by words, author or journal: the feed, Most important, Explore, news and Saved. Accents don't matter.
 - **Abstract** opens the full structured abstract. **PubMed**, **Journal** (DOI) and **Free full text** (when it's in PMC) open in the browser; **Copy citation** copies an AMA-style reference. Add your library's off-campus link in **Tune → Reading → Library access** and **Journal** opens articles through your institution's subscriptions.
