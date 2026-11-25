@@ -35,31 +35,36 @@ FIGS = "figs"
 MAX_SIDE = 960              # pixels: sharp on a phone, ~40–100 KB as WebP
 QUALITY = 74
 RECHECK_NONE = 21           # days before asking again about an article that had no usable figure
-PICK_VERSION = 2            # bump when figure_score changes: earlier choices are made again
+PICK_VERSION = 3            # bump when figure_score changes: earlier choices are made again
 LOOKUP_DAYS = 120           # look up PMCIDs for papers this young (older ones have theirs by now)
 
 _CC = re.compile(r"^CC(?:0| BY(?:-NC)?(?:-SA|-ND)?)$")
 _LICENSE_URL = {"CC0": "https://creativecommons.org/publicdomain/zero/1.0/"}
 _FLOW = re.compile(r"flow ?(?:chart|diagram)|study (?:flow|design|selection|population|profile)|patient (?:selection|enrol|inclusion|recruit)"
                    r"|inclusion and exclusion|enrol+ment|\bSTARD\b|\bCONSORT\b|\bPRISMA\b|schemat|workflow|pipeline|framework|architecture"
-                   r"|overview of (?:the )?(?:study|method|model)|graphical abstract|timeline", re.I)
+                   r"|overview of (?:the )?(?:study|method|model)|study overview|graphical abstract|timeline", re.I)
 _PLOT = re.compile(r"\bROC\b|receiver operating|\bcurves?\b|Kaplan|survival|forest plot|\bplots?\b|\bcharts?\b|\bgraphs?\b|box(?:-and-whisker)?"
                    r"|scatter|Bland|calibration|decision curve|heat ?map|correlation|histogram|nomogram|SHAP|violin|waterfall"
-                   r"|\b(?:number|numbers|proportion|percentage|distribution|frequency) of\b|confidence intervals?|\bICCs?\b|sensitivity and specificity", re.I)
+                   r"|\b(?:number|numbers|proportion|percentage|distribution|frequency) of\b|confidence intervals?|\bCIs?\b|\bICCs?\b|sensitivity and specificity"
+                   r"|statistics?\b|C-?index|hazard ratios?|odds ratios?|\btable\b|concordance|agreement between|accuracy of", re.I)
 _IMAGE = re.compile(r"\b(?:CT|MRI|MR|PET|SPECT|PET/CT|PET/MRI|US|ultrasound|sonograph\w*|radiograph\w*|images?|scans?|axial|coronal|sagittal"
                     r"|T1\w*|T2\w*|weighted|DWI|ADC|contrast-enhanced|arterial phase|portal venous|hepatobiliary phase|fused|fusion"
                     r"|maximum intensity projection|MIP|fluoroscop\w*|angiogra\w*|elastogra\w*|Doppler|representative|example|case)\b", re.I)
+_SHOWS = re.compile(r"\brepresentative\b|\bexamples?\b|\bimages?\b", re.I)
 _PATIENT = re.compile(r"\b\d{1,3}-year-old\b|\b(?:man|woman|boy|girl|patient) (?:with|who)\b", re.I)
 
 
 def figure_score(label: str, caption: str, index: int) -> float:
     """Higher is more like a picture worth showing. Below zero: not a picture."""
     text = f"{label} {caption}"
+    title = re.split(r"(?<=[.;:])\s", caption.strip(), maxsplit=1)[0]     # the caption's first sentence says what the figure is
     s = -0.2 * index
     if _FLOW.search(text):
         s -= 10
     if _PLOT.search(text):
         s -= 4
+    if _PLOT.search(title) and not _PATIENT.search(title) and not _SHOWS.search(title):
+        s -= 6
     if _IMAGE.search(text):
         s += 5
     if _PATIENT.search(text):

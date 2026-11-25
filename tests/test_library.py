@@ -39,7 +39,10 @@ def test_figure_choice_prefers_images_over_charts():
     assert figures.pick(figs[:3]) is None                       # flowchart and ROC curve: no picture
     charts = ["Bar plots show ICCs with 95% confidence intervals for five ADC ROI methods",
               "Number of PMMRI scans with corresponding body part per case",
-              "Distribution of PROMISE PSMA scores on PET, displayed as pie charts"]
+              "Distribution of PROMISE PSMA scores on PET, displayed as pie charts",
+              "Incremental prognostic value of 3D computed tomography (CT) body composition. Harrell C statistics with 95% CIs are shown",
+              "Concordance of prostate MRI quality evaluation compared with the reference. (a) The overall accuracy before and after the lecture",
+              "Study overview. (A) PET scans from all cohorts were downloaded, converted and segmented"]
     assert figures.pick([{"label": "Fig. 2", "caption": c, "href": "x"} for c in charts]) is None
     with pytest.raises(ValueError):
         figures.parse_figures('<!DOCTYPE a [<!ENTITY x "y">]><a>&x;</a>')
