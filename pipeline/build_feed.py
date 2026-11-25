@@ -10,11 +10,11 @@ import os
 from datetime import date, timedelta
 from typing import Optional
 
-from . import abstract_store
+from . import abstract_store, figures
 from .abstracts import area_require, compile_systems, is_notice, passes, refresh, to_card
 
 NO_ABSTRACT_DAYS = 21      # PubMed adds late abstracts within days; after three weeks none is coming
-from .common import DATA, fill, load_yaml, now_iso, read_json, today, write_json
+from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
 from .pubmed import MAX_IDS, PubMed
 
@@ -111,6 +111,7 @@ def run(http: Optional[Http] = None) -> dict:
             continue
         card["topics"] = sorted(topic_hits.get(pmid, set()) | set(prev.get("topics", [])))
         card["seen"] = prev.get("seen") or t.isoformat()
+        card["pmcid"] = card.get("pmcid") or prev.get("pmcid", "")      # found later through PMC's ID lookup
         if not prev:
             new += 1
         items[pmid] = card
@@ -132,6 +133,7 @@ def run(http: Optional[Http] = None) -> dict:
                      and _age_days(it.get("added") or it.get("seen"), t) > NO_ABSTRACT_DAYS)]
     kept.sort(key=lambda it: (it.get("added") or "", it.get("seen") or "", int(it["pmid"])), reverse=True)
     kept = kept[: int(settings.get("max_items", 2500))]
+    figures.attach(http, kept, data=DATA, cache_dir=CACHE, budget=int(settings.get("new_figures", 60)))
     abstract_store.save(DATA / "abstracts", "f", abstract_store.split_out(kept, "f"))
 
     out = {
@@ -162,6 +164,7 @@ def run(http: Optional[Http] = None) -> dict:
     if failed:
         out["failed_streams"] = failed
     write_json(path, out)
+    figures.prune(DATA)
     for term, notes in pm.warnings.items():
         log(f"  PubMed note for query «{term[:80]}…»: {'; '.join(notes)}")
     log(f"Feed: {new} new cards, {len(kept)} total, {http.calls} API calls")

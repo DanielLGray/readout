@@ -131,7 +131,7 @@ function backupSection() {
   const file = el("input", { type: "file", accept: ".json,application/json", hidden: true,
     onchange: (e) => { restoreFrom(e.target.files?.[0]); e.target.value = ""; } });
   return el("section", { class: "sect", id: "tune-backup" }, el("h2", {}, "Back up and restore"),
-    el("p", { class: "sub" }, `Your ${plural(n, "saved item")}, settings, followed words and reading history live only on this phone. Keep a copy in Files or iCloud Drive; restore it after deleting the app or on a new phone.`),
+    el("p", { class: "sub" }, `Your ${plural(n, "saved item")}, settings, ratings, Foundations progress and reading history live only on this phone. Keep a copy in Files or iCloud Drive; restore it after deleting the app or on a new phone.`),
     el("div", { class: "link-row" },
       el("button", { class: "act", onclick: backupNow }, "Back up"),
       el("button", { class: "act", onclick: () => file.click() }, "Restore from a backup"), file),
@@ -140,7 +140,7 @@ function backupSection() {
 
 async function backupNow() {
   const data = { app: "readout", version: 1, exported: new Date().toISOString(),
-    saved: S.saved, tune: store.get("tune", {}), stats, pos: store.get("pos", {}) };
+    saved: S.saved, tune: store.get("tune", {}), stats, pos: store.get("pos", {}), fdRead, quiz: QUIZ };
   const name = `readout-backup-${localDay()}.json`;
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   try {
@@ -169,9 +169,39 @@ async function restoreFrom(file) {
     saveStats();
   }
   if (d.pos && typeof d.pos === "object") store.set("pos", { ...d.pos, ...(store.get("pos", {}) || {}) });
+  if (d.fdRead && typeof d.fdRead === "object") {          // Foundations progress: read in either copy counts
+    for (const [k, v] of Object.entries(d.fdRead)) if (/^\d{1,9}$/.test(k) && typeof v === "string" && !fdRead[k]) fdRead[k] = v.slice(0, 10);
+    store.set("fdRead", fdRead);
+  }
+  if (d.quiz?.by && typeof d.quiz.by === "object") {
+    for (const [k, v] of Object.entries(d.quiz.by)) if (["r", "p", "w"].includes(v) && !QUIZ.by[k]) QUIZ.by[k] = v;
+    for (const [k, v] of Object.entries(d.quiz.days || {})) if (Array.isArray(v) && !QUIZ.days[k]) QUIZ.days[k] = v.slice(0, 3).map((n) => Math.max(0, Number(n) || 0));
+    store.set("quiz", QUIZ);
+  }
   toast(store.set("saved", S.saved) ? `Restored ${plural(added, "saved item")} and your settings`
     : "Couldn’t restore everything: Readout’s storage on this phone is full.");
   S.feedDirty = true; S.exploreKey = null; renderTune(true);
+}
+
+// ── Today, guess the result, pictures ──────────────────────────────────────
+function todaySection() {
+  const b = T.brief;
+  const setB = (k, v) => { setTune({ brief: { ...T.brief, [k]: v } }); rerender(); };
+  const q = quizTotals(30), tried = q.r + q.p + q.w;
+  return el("section", { class: "sect", id: "tune-today" }, el("h2", {}, "Today"),
+    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day and your next Foundations paper, then “You’re caught up.”"),
+    segPick("Open the app on", [["today", "Today"], ["all", "Everything"], ["papers", "Papers"], ["important", "Most important"]], T.startOn,
+      (v) => { setTune({ startOn: v }); rerender(); }),
+    segPick("New papers in Today", [[3, "3"], [5, "5"], [8, "8"]], b.papers, (v) => setB("papers", Number(v))),
+    segPick("Stories in Today", [[0, "None"], [2, "2"], [3, "3"]], b.stories, (v) => setB("stories", Number(v))),
+    switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
+    switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
+    segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
+      (v) => { setTune({ guess: v }); rerender(); },
+      "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
+    tried ? el("p", { class: "fine" }, `Last 30 days: you called ${q.r} of ${plural(tried, "result")}${q.p ? `, and nearly ${q.p} more` : ""}.`) : null,
+    switchRow("Pictures from papers", "One figure from each open-access paper whose license allows it, credited. Each picture downloads once (about 50 KB).", T.pictures,
+      (on) => { setTune({ pictures: on }); rerender(); }));
 }
 
 // ── your reading ───────────────────────────────────────────────────────────
@@ -184,7 +214,9 @@ function readingPane() {
   const [seen, opened, saved, listened] = sum;
   const out = [
     textSizeSection(),
-    segPick(null, [["7", "Last 7 days"], ["30", "Last 30 days"]], TU.span, (v) => { TU.span = v; rerender(); }),
+    todaySection(),
+    el("section", { class: "sect", id: "tune-stats" }, el("h2", {}, "Your reading"),
+      segPick(null, [["7", "Last 7 days"], ["30", "Last 30 days"]], TU.span, (v) => { TU.span = v; rerender(); })),
   ];
   if (!seen && !opened) {
     out.push(el("section", { class: "sect" }, el("h2", {}, "Nothing counted yet"),
@@ -327,6 +359,8 @@ function interestsPane() {
       el("div", { class: "chips wrap" }, FOLLOW_IDEAS.filter((w) => !T.follow.some((x) => x.toLowerCase() === w.toLowerCase()))
         .map((w) => el("button", { class: "chip", onclick: () => add(w) }, `+ ${w}`))),
       re ? el("p", { class: "fine" }, `${plural(followingList(null).length, "item")} match right now.`) : null),
+    tasteSection(),
+    meetingsSection(),
     el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
@@ -347,6 +381,63 @@ function interestsPane() {
   ];
 }
 
+// what you've told Readout you like (learn.js), every rating in one place
+const FEATURE_ORDER = ["sys", "tp", "jr", "ds", "src", "fl"];
+const byFeature = (a, b) => FEATURE_ORDER.indexOf(a.split(":")[0]) - FEATURE_ORDER.indexOf(b.split(":")[0])
+  || featureName(a)[0].localeCompare(featureName(b)[0]);
+function tasteRow(f, extra) {
+  const [name, kind] = featureName(f);
+  const v = T.taste[f];
+  const lw = T.learned[f] || 0;
+  return el("div", { class: "fb-row" + (v === 0 ? " pinned" : "") },
+    el("div", { class: "fb-name" }, el("b", {}, name), el("span", {}, kind),
+      v == null && lw ? el("span", { class: "fb-learned" }, lw > 0 ? "leaning more" : "leaning less") : null),
+    el("div", { class: "seg fb-seg", role: "group", "aria-label": name },
+      [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([x, l]) => el("button", { "aria-pressed": String(tastePressed(f, x)),
+        onclick: () => { setTaste(f, x); rerender(); } }, l))),
+    extra || null);
+}
+function tasteSection() {
+  const rated = Object.keys(T.taste).sort(byFeature);
+  const learned = Object.keys(T.learned).filter((f) => T.taste[f] == null).sort((a, b) => Math.abs(T.learned[b]) - Math.abs(T.learned[a])).slice(0, 30);
+  const nReacts = Object.keys(T.reacts).length;
+  const forget = (f) => el("button", { class: "fb-forget", onclick: () => {
+    const l = { ...T.learned }; delete l[f]; setTune({ learned: l }); rerender();
+  } }, "Forget what Readout learned");
+  const subjects = Object.keys(FLAVORS).map((k) => `fl:${k}`).filter((f) => T.taste[f] == null);
+  return el("section", { class: "sect", id: "tune-taste" }, el("h2", {}, "What you like"),
+    el("p", { class: "sub" }, "Tap Rate on any card to say what you think of its organ system, topic, journal, kind of study, outlet or subject. More moves those cards up, Less moves them down, Hide takes them out of every list."),
+    rated.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, `You chose (${rated.length})`), rated.map((f) => tasteRow(f)))
+      : el("p", { class: "nothing" }, "Nothing rated yet."),
+    learned.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, `Learned from ${plural(nReacts, "card")} you liked or didn’t`),
+      el("p", { class: "fine", style: "margin:2px 0 8px" }, "Each More like this or Less like this nudges these a little. Choose one to make it exact."),
+      learned.map((f) => tasteRow(f, forget(f)))) : null,
+    el("details", { class: "outlets" },
+      el("summary", {}, "Subjects you can rate", el("span", { class: "fine" }, `${subjects.length}`)),
+      el("p", { class: "fine", style: "margin:0 0 6px" }, "Found by words in the title and conclusion, in papers and news alike."),
+      el("div", { class: "taste-list" }, subjects.map((f) => tasteRow(f)))),
+    rated.length || nReacts ? el("div", { class: "link-row" },
+      rated.length ? twoTap("tasteClear", "Clear your choices", "Tap again to clear", () => { setTune({ taste: {} }); toast("Choices cleared"); rerender(); }) : null,
+      nReacts ? twoTap("learnClear", "Forget everything learned", "Tap again to forget", () => { setTune({ learned: {}, reacts: {} }); toast("Readout forgot what it learned"); rerender(); }) : null) : null);
+}
+
+function meetingsSection() {
+  const ms = S.news?.meetings || [];
+  const gone = store.get("meetingsClosed", {}) || {};
+  return el("section", { class: "sect", id: "tune-meetings" }, el("h2", {}, "Meetings"),
+    el("p", { class: "sub" }, "Four months ahead, a banner under the chips counts down to each meeting that’s on; ✕ closes it. From a week before until a week after, a chip gathers the news that mentions it."),
+    ms.length ? ms.map((m) => {
+      const on = meetingOn(m);
+      return el("div", {},
+        switchRow(m.name, `${fmtRange(m.start, m.end)}, ${m.start.slice(0, 4)}${m.place ? `, ${m.place}` : ""}. ${whenText(m)[0].toUpperCase()}${whenText(m).slice(1)}.`, on,
+          (v) => { setTune({ meetings: { ...T.meetings, [m.id]: v } }); renderBanner(); rerender(); }),
+        on && gone[m.id] ? el("button", { class: "fb-forget", onclick: () => {
+          delete gone[m.id]; store.set("meetingsClosed", gone); renderBanner(); rerender();
+        } }, "Show its banner again") : null);
+    }) : el("p", { class: "nothing" }, "The meeting list arrives with the next news update."),
+    el("div", { class: "link-row" }, linkBtn(`${GH}/edit/main/config/meetings.yaml`, "Edit the meeting list")));
+}
+
 // ── feed rules ─────────────────────────────────────────────────────────────
 function presentKinds() {
   const ks = [];
@@ -364,10 +455,11 @@ function mixPreview(n) {
 function algoPane() {
   return [importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
     el("section", { class: "sect" }, el("h2", {}, "Start over"),
-      el("p", { class: "sub" }, "Puts the mix, paper order, mutes and trend rules back to how they came. Your reading history and saved items stay."),
+      el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
         const keep = { mutedSources: [], mutedWords: [] };
-        T = { ...TUNE_DEFAULTS, ...keep }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
+        const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "meetings", "taste", "learned", "reacts"].map((k) => [k, T[k]]));
+        T = { ...TUNE_DEFAULTS, ...keep, ...mine }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
         toast("Feed rules reset"); rerender();
       })))];
 }
@@ -378,8 +470,6 @@ function importantSection() {
     el("p", { class: "sub" }, I
       ? `Ranked weekly from ${I.stats.checked.toLocaleString()} papers in your journals over the last ${I.settings.years} years, by citations against papers of the same age.`
       : "Ranked weekly by citations against papers of the same age. Not built yet."),
-    segPick("Open the app on", [["all", "Everything"], ["papers", "Papers"], ["important", "Most important"]], T.startOn,
-      (v) => { setTune({ startOn: v }); rerender(); }, "The view you see when you open Readout."),
     switchRow("Include reviews, meta-analyses and guidelines", "Off: original research only.", T.impReviews,
       (on) => { setTune({ impReviews: on }); rerender(); }));
 }
@@ -533,6 +623,7 @@ const JOBS = {
   news: { wf: "news.yml", cfg: "news.yaml", every: 7, title: "News", sub: "Outlet feeds, every 6 hours" },
   explore: { wf: "explore.yml", cfg: "topics.yaml", every: 8 * 24, title: "Trends", sub: "PubMed, iCite and ClinicalTrials.gov, every Monday" },
   important: { wf: "important.yml", cfg: "feeds.yaml", every: 8 * 24, title: "Most important papers", sub: "PubMed and NIH iCite, every Tuesday" },
+  library: { wf: "library.yml", cfg: "foundations.yaml", every: 32 * 24, title: "Foundations and classics", sub: "PubMed and NIH iCite, on the 3rd of each month" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;
@@ -573,8 +664,8 @@ function jobLinks(key, editLabel) {
 function pipelinePane() {
   loadRuns();
   return [
-    el("p", { class: "lede small" }, "Three jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
-    papersJob(), importantJob(), newsJob(), exploreJob(),
+    el("p", { class: "lede small" }, "Five jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
+    papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(),
     el("p", { class: "fine" }, "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }
@@ -677,6 +768,34 @@ function newsJob() {
       `Headlines are kept ${Math.round(st.archive_days / 365 * 10) / 10} years for trend lines.`,
     ] : []),
     jobLinks("news", "Edit outlets and settings"));
+}
+
+function libraryJob() {
+  const L = S.library;
+  const F = L?.foundations;
+  const nFd = (F?.groups || []).reduce((a, g) => a + g.items.length, 0);
+  const cl = L?.classics || {};
+  const papers = Object.values(L?.papers || {});
+  const withFig = [S.feed?.items || [], Object.values(S.important?.papers || {}), papers]
+    .map((l) => [l.filter((p) => p.fig).length, l.length]);
+  const set = L?.settings || {};
+  return el("section", { class: "sect job" }, el("h2", {}, JOBS.library.title), el("p", { class: "sub" }, JOBS.library.sub),
+    jobStatus("library", L?.generated),
+    !L ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts" },
+      el("dt", {}, "Foundations papers"), el("dd", {}, `${nFd} in ${(F?.groups || []).length} groups`),
+      el("dt", {}, "Classics to choose from"), el("dd", {}, Object.entries(cl).map(([a, ids]) => `${areaShort(a)} ${ids.length}`).join(", ") || "none")),
+    el("div", { class: "ctl-label" }, "Pictures (PMC Open Access, Creative Commons only)"),
+    el("dl", { class: "facts small" },
+      el("dt", {}, "Feed"), el("dd", {}, `${withFig[0][0]} of ${withFig[0][1]} papers`),
+      el("dt", {}, "Most important"), el("dd", {}, `${withFig[1][0]} of ${withFig[1][1]}`),
+      el("dt", {}, "Foundations and classics"), el("dd", {}, `${withFig[2][0]} of ${withFig[2][1]}`)),
+    el("p", { class: "fine" }, "Most papers aren’t open access, or have only charts and flowcharts; those get no picture. New figures are fetched by the papers job each morning."),
+    el("div", { class: "ctl-label" }, "Settings in config/foundations.yaml"),
+    settingsList(set.from_year ? [
+      `Classics: papers from ${set.from_year} that are at least ${set.min_age_years} years old, the ${set.per_area} most cited per year since publication in each area, at most ${set.per_year} from any one year.`,
+      "Foundations: each entry’s pinned PMID, or the most-cited paper its search finds.",
+    ] : []),
+    jobLinks("library", "Edit the reading path"));
 }
 
 function importantJob() {

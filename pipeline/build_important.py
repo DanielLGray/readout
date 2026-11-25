@@ -20,7 +20,7 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Optional
 
-from . import abstract_store, icite
+from . import abstract_store, figures, icite
 from .abstracts import area_require, compile_systems, is_guideline, is_notice, passes, to_card
 from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
 from .http import Http, default_http, log
@@ -196,6 +196,7 @@ def run(http: Optional[Http] = None) -> dict:
     windows = {w: {a: {k: [p for p in lst if p in papers and a in papers[p]["areas"]][:cap[k](w)] for k, lst in per.items()}
                    for a, per in v.items()}
                for w, v in windows.items()}
+    figures.attach(http, papers.values(), data=DATA, cache_dir=CACHE, budget=150, job="important")
     abstract_store.save(DATA / "abstracts", "i", abstract_store.split_out(list(papers.values()), "i"))
 
     out = {

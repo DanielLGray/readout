@@ -30,6 +30,10 @@ const ICONS = {
   pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>',
   read: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11v14H6a2 2 0 0 1-2-2z"/><path d="M15 9h4v8a2 2 0 0 1-2 2h-2"/><path d="M7.5 9h4.5M7.5 12.5h4.5"/></svg>',
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  react: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4v-9z"/><path d="M7 11l4-7c1.7 0 2.6 1.2 2.2 2.8L12.6 10H18a2 2 0 0 1 2 2.3l-1.1 6A2 2 0 0 1 17 20H7"/></svg>',
+  reacted: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v9H4v-9z"/><path d="M7 11l4-7c1.7 0 2.6 1.2 2.2 2.8L12.6 10H18a2 2 0 0 1 2 2.3l-1.1 6A2 2 0 0 1 17 20H7z"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M7 11v9H4v-9z"/><path d="M7 11l4-7c1.7 0 2.6 1.2 2.2 2.8L12.6 10H18a2 2 0 0 1 2 2.3l-1.1 6A2 2 0 0 1 17 20H7"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
 };
 const store = {
   get(k, d) { try { const v = localStorage.getItem("readout." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
@@ -93,6 +97,7 @@ const S = {
   news: null, kind: "all", newsSpan: store.get("newsSpan", "week"), newsNew: new Set(),
   feedDirty: false, runs: null,
   important: null, impWin: store.get("impWin", "1y"),
+  library: null,          // Foundations and the classics (monthly job)
 };
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
@@ -112,7 +117,15 @@ const TUNE_DEFAULTS = {
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
-  startOn: "all",       // the view the app opens on: all, papers or important
+  startOn: "today",     // the view the app opens on: today, all, papers or important
+  brief: { papers: 5, stories: 2, classic: true, foundations: true },   // what Today holds
+  guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
+  pictures: true,       // open-access figures on cards
+  meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
+  taste: {},            // what you said about a feature (sys:liver, jr:Radiology, fl:ai…): -2 hide, -1 less, 1 more
+  learned: {},          // what 👍 and 👎 taught, a little at a time (−1.5 … 1.5)
+  reacts: {},           // card → 1 (more like this) or -1 (less like this)
+  v: 2,
 };
 // stored settings are checked field by field, so an old or damaged copy can't break the app
 function loadTune() {
@@ -129,6 +142,10 @@ function loadTune() {
   if (!rank.fresh) rank.fresh = TUNE_DEFAULTS.rank.fresh;      // a half-life must be > 0
   const trend = Object.fromEntries(Object.entries(obj(t.trend))
     .filter(([k, v]) => ["breakout", "rising", "cooling", "minScale"].includes(k) && typeof v === "number" && isFinite(v)));
+  const weights = (v, ok) => Object.fromEntries(Object.entries(obj(v))
+    .filter(([k, x]) => typeof k === "string" && k.length <= 160 && typeof x === "number" && ok(x)).slice(-800));
+  const b = obj(t.brief);
+  const startOn = ["today", "all", "papers", "important"].includes(t.startOn) ? t.startOn : "today";
   return {
     mix, rank, areas, follow: strs(t.follow), hiddenSystems: strs(t.hiddenSystems),
     cap: Math.max(0, Math.round(num(t.cap, TUNE_DEFAULTS.cap))),
@@ -140,7 +157,17 @@ function loadTune() {
     impReviews: t.impReviews === true,
     textSize: TEXT_SIZES.includes(t.textSize) ? t.textSize : 1,
     library: typeof t.library === "string" && /^https?:\/\/\S{4,300}$/i.test(t.library.trim()) ? t.library.trim() : "",
-    startOn: ["all", "papers", "important"].includes(t.startOn) ? t.startOn : "all",
+    // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
+    startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
+    brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
+      classic: b.classic !== false, foundations: b.foundations !== false },
+    guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
+    pictures: t.pictures !== false,
+    meetings: Object.fromEntries(Object.entries(obj(t.meetings)).filter(([, v]) => typeof v === "boolean")),
+    taste: weights(t.taste, (x) => [-2, -1, 0, 1].includes(x)),
+    learned: weights(t.learned, (x) => isFinite(x) && Math.abs(x) <= 1.5 && x !== 0),
+    reacts: weights(t.reacts, (x) => x === 1 || x === -1),
+    v: 2,
   };
 }
 let T = loadTune();
@@ -162,14 +189,18 @@ const localDay = (t = new Date()) => `${t.getFullYear()}-${String(t.getMonth() +
 const daysAgo = (i) => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate() - i); };
 const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
+let seenRecent = store.get("seenRecent", null);
+if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next"]);
 function bump(type, it) {
-  if (!it || it.type === "top") return;
+  if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
   if (seenToday.d !== d || !Array.isArray(seenToday.seen)) seenToday = { d, seen: [], open: [], save: [], listen: [] };
   const key = saveKey(it);
   if (seenToday[type].includes(key)) return;
   if (type !== "seen") bump("seen", it);        // opening, saving or listening means you saw it
   seenToday[type].push(key);
+  if (type === "seen") seenRecent[key] = d;
   const day = stats.days[d] || (stats.days[d] = { k: {}, s: {}, y: {} });
   const i = STAT_IDX[type];
   const inc = (obj, key) => { (obj[key] || (obj[key] = [0, 0, 0, 0]))[i]++; };
@@ -183,6 +214,9 @@ function bump(type, it) {
 function saveStats() {
   const cut = localDay(daysAgo(120));
   for (const d of Object.keys(stats.days)) if (d < cut) delete stats.days[d];
+  const cut2 = localDay(daysAgo(21));
+  for (const [k, d] of Object.entries(seenRecent)) if (d < cut2) delete seenRecent[k];
+  store.set("seenRecent", seenRecent);
   store.set("stats", stats);
   store.set("seenToday", seenToday);
 }
@@ -300,9 +334,9 @@ function followingList(mute) {
   if (!re) return [];
   const seen = new Set();
   const papers = (S.feed?.items || []).concat(Object.values(S.important?.papers || {}))
-    .filter((p) => !seen.has(p.pmid) && seen.add(p.pmid) && followHit(p, re) && homeArea(p))
+    .filter((p) => !seen.has(p.pmid) && seen.add(p.pmid) && followHit(p, re) && homeArea(p) && !hiddenByTaste(p))
     .map((p) => ({ ...p, type: "paper", _when: (p.epub || p.added || "") }));
-  const news = (S.news?.items || []).filter((n) => followHit(n, re) && !(T.mutedSources || []).includes(n.source))
+  const news = (S.news?.items || []).filter((n) => followHit(n, re) && !(T.mutedSources || []).includes(n.source) && !hiddenByTaste({ ...n, type: "news" }))
     .map((n) => ({ ...n, type: "news", kind: kindOf(n), _when: (n.date || "").slice(0, 10) }));
   return papers.concat(news).filter((i) => !(mute && mute.test(i.title))).sort((a, b) => (a._when < b._when ? 1 : -1));
 }
@@ -340,7 +374,7 @@ function importantList(system = "all", strong = false, mute = null) {
   if (system !== "all") list = list.filter((i) => (i.systems || []).includes(system));
   if (strong) list = list.filter((i) => (i.design?.strength || 0) >= 3);
   if (mute) list = list.filter((i) => !mute.test(i.title));
-  return list;
+  return list.filter((i) => !hiddenByTaste(i));
 }
 const topPct = (p) => (p >= 99.5 ? "top 1%" : `top ${Math.max(1, Math.round(100 - p))}%`);
 function impactEl(it) {
@@ -377,7 +411,7 @@ function paperScore(p, now = Date.now()) {
 }
 function rankPapers(list) {
   const now = Date.now();
-  return list.map((p) => [paperScore(p, now).score, p]).sort((a, b) => b[0] - a[0]).map((x) => x[1]);
+  return list.map((p) => [paperScore(p, now).score * Math.pow(1.5, p._t || 0), p]).sort((a, b) => b[0] - a[0]).map((x) => x[1]);
 }
 
 function newsKinds() {
@@ -387,6 +421,8 @@ function newsKinds() {
 }
 const kindOf = (n) => n.kind || "industry";
 
+// Today and the meeting chips are fixed lists: a filter (organ system, topic, strong evidence) means Everything
+const leaveFixed = () => { if (S.kind === "today" || String(S.kind).startsWith("meeting:")) S.kind = "all"; };
 function renderChips() {
   const box = $("#chips");
   box.replaceChildren();
@@ -396,11 +432,13 @@ function renderChips() {
       `${topicName(S.topic)}  ✕`));
   }
   const kindChip = ([k, label]) => el("button", { class: "chip" + (k === "important" ? " chip-imp" : ""), "aria-pressed": String(S.kind === k && !S.topic),
-    onclick: () => { S.kind = k; S.topic = null; if (!["papers", "all", "important"].includes(k)) S.strong = false; refreshFeed(); } }, label);
+    onclick: () => { S.kind = k; S.topic = null; if (!["papers", "all", "important"].includes(k)) S.strong = false; if (k === "today") S.system = "all"; refreshFeed(); } }, label);
   const sep = () => el("span", { class: "chip-sep", "aria-hidden": "true" });
   // papers first, with their sub-filters right beside them; then news
-  box.append(...[["all", "Everything"], ["papers", "Papers"], ...(S.important ? [["important", "Most important"]] : []),
+  box.append(...[["today", "Today"], ["all", "Everything"], ["papers", "Papers"], ...(S.important ? [["important", "Most important"]] : []),
     ...(followRe() ? [["following", "Following"]] : [])].map(kindChip));
+  const mc = meetingChips();
+  if (mc.length) box.append(sep(), ...mc.map((m) => kindChip([`meeting:${m.id}`, m.name])));
   const onAreas = areaList().filter(([a]) => (T.areas[a] ?? 2) > 0);
   if ((S.kind === "papers" || S.kind === "important") && !S.topic && onAreas.length > 1) {   // one area at a time
     box.append(sep());
@@ -425,7 +463,7 @@ function renderChips() {
   for (const [k, label] of Object.entries(systems)) {
     if (T.hiddenSystems.includes(k) && S.system !== k) continue;
     box.append(el("button", { class: "chip", "aria-pressed": String(S.system === k),
-      onclick: () => { S.system = S.system === k ? "all" : k; refreshFeed(); } }, label));
+      onclick: () => { S.system = S.system === k ? "all" : k; leaveFixed(); refreshFeed(); } }, label));
   }
 }
 
@@ -440,24 +478,35 @@ function filtered(f = {}, report = null) {
   const mutedSrc = new Set(T.mutedSources || []);
   if (kind === "important") return importantList(system, strong, mute);
   if (kind === "following") return followingList(mute);
+  if (kind === "today") return briefList();
+  if (String(kind).startsWith("meeting:")) return meetingList(kind.slice(8), mute);
+  const taste = hasTaste();
   // papers
   let papers = (S.feed?.items || []).map((i) => ({ ...i, type: "paper" }));
   if (T.hidePending) papers = papers.filter((i) => (i.conclusion?.kind || "none") !== "none" || (drop("pending"), false));
   if (mute) papers = papers.filter((i) => !mute.test(i.title) || (drop("muted"), false));
+  if (taste) papers = papers.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false));
   if (system !== "all") papers = papers.filter((i) => (i.systems || []).includes(system));
   if (strong) papers = papers.filter((i) => (i.design?.strength || 0) >= 3);
   if (topic) papers = papers.filter((i) => (i.topics || []).includes(topic));
   const onlyArea = kind === "papers" ? areaPick() : null;
   papers = papers.filter((i) => homeArea(i, onlyArea) || (!onlyArea && drop("areaOff"), false));
   if (T.order === "ranked") papers = rankPapers(papers);
+  else if (taste) papers = byTaste(papers, (p) => Date.parse(p.added || p.epub || "") || 0, 864e5);   // more like this: up to a few days higher
   // take turns between areas by the weights you set (Tune → Interests)
   const byArea = {};
   for (const p of papers) { const a = homeArea(p, onlyArea); (byArea[a] = byArea[a] || []).push(p); }
   papers = Object.keys(byArea).length > 1 ? interleave(byArea, T.areas) : papers;
+  if (T.guess === "all") {                  // guess the result here too: about one paper in six, spaced out
+    let gap = 3;
+    for (const p of papers) if (--gap <= 0 && guessable(p)) { p._guess = true; gap = 6; }
+  }
   if (topic || strong || kind === "papers") return papers;
   // news
   let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
   news = news.filter((i) => (!mutedSrc.has(i.source) && !(mute && mute.test(i.title))) || (drop("muted"), false));
+  if (taste) news = byTaste(news.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false)),
+    (n) => Date.parse(n.date) || 0, 6 * 36e5);                       // an outlet you like: its stories a few hours higher
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
   const only = kind === "all" ? null : kind;
   const tops = T.topCard && system === "all" && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
@@ -465,31 +514,34 @@ function filtered(f = {}, report = null) {
   // Everything: take turns by weight, each stream newest first (or ranked, for papers), so the
   // newest papers sit at the top even though news arrives hours sooner than PubMed records
   const perSource = new Map();
-  const byTime = (a, b) => (a.date < b.date ? 1 : -1);
+  const byTime = taste ? () => 0 : (a, b) => (a.date < b.date ? 1 : -1);      // already in order, rated outlets shifted
   const queues = { paper: papers };
   for (const n of news.sort(byTime)) {
-    if (T.cap && n.kind !== "industry") {            // busy outlets: a few a day in Everything
+    if (T.cap && n.kind !== "industry") {            // busy outlets: a few a day in Everything (more or fewer for outlets you rated)
       const k = `${dayOf(n)}|${n.source}`;
       const c = perSource.get(k) || 0;
       perSource.set(k, c + 1);
-      if (c >= T.cap) { drop("capped"); continue; }
+      if (c >= Math.max(1, T.cap + Math.round(tasteW(`src:${n.source}`)))) { drop("capped"); continue; }
     }
     (queues[n.kind] = queues[n.kind] || []).push(n);
   }
   for (const [k, q] of Object.entries(queues)) if (q.length && (T.mix[k] ?? 1) <= 0) drop("off", q.length);
   // the same headline from two outlets (a society story an industry site also ran): show it once
   const said = new Set();
-  return tops.concat(interleave(queues, T.mix).filter((i) => {
+  const mixed = interleave(queues, T.mix).filter((i) => {
     if (i.type !== "news") return true;
     const key = i.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     if (said.has(key)) { drop("dupes"); return false; }
     said.add(key);
     return true;
-  }));
+  });
+  const classic = system === "all" && T.brief.classic ? classicToday() : null;   // today's classic, a few cards in
+  if (classic) mixed.splice(Math.min(2, mixed.length), 0, classic);
+  return tops.concat(mixed);
 }
 
 let feedObserver, seenObserver;
-const listKey = (it) => (it.type === "top" ? `top:${it.only || ""}` : saveKey(it));
+const listKey = (it) => (it.type === "top" ? `top:${it.only || ""}` : it.key && SPECIAL.has(it.type) ? it.key : saveKey(it));
 function currentKey(evenAtTop = false) {
   const v = $("#view-feed");
   if (!v.clientHeight) return null;
@@ -497,7 +549,8 @@ function currentKey(evenAtTop = false) {
   return it && (v.scrollTop > 0 || evenAtTop) ? listKey(it) : null;
 }
 // what a rendered card shows: the top-stories card changes with its stories
-const shownSig = (it) => (it.type === "top" ? `top:${JSON.stringify(topStoryLists(it.only).map(([, l]) => l.map((s) => s.title)))}` : listKey(it));
+const shownSig = (it) => (it.type === "top" ? `top:${JSON.stringify(topStoryLists(it.only).map(([, l]) => l.map((s) => s.title)))}`
+  : SPECIAL.has(it.type) ? `${it.key}:${it.sig || ""}` : `${listKey(it)}${it._guess ? ":g" : ""}${it.fig ? ":f" : ""}`);
 // after a background update: leave the screen alone when the cards already drawn are unchanged
 function updateFeedQuietly(sinceShown) {
   const next = filtered();
@@ -508,10 +561,12 @@ function updateFeedQuietly(sinceShown) {
   refreshFeed(sinceShown < 4000 && !$("#view-feed").scrollTop ? null : currentKey(true));
 }
 // keepKey: the card you were reading; the rebuilt feed opens there if it's still in the list
-function refreshFeed(keepKey) {
+function refreshFeed(keepKey, keepIdx) {
   S.feedDirty = false;
-  if ((S.kind === "following" && !followRe()) || (S.kind !== "all" && S.kind !== "papers" && S.kind !== "important"
-      && S.kind !== "following" && S.news && !newsKinds()[S.kind])) S.kind = "all";
+  S.shownDay = localDay();
+  const meeting = String(S.kind).startsWith("meeting:");
+  if ((S.kind === "following" && !followRe()) || (meeting && !meetingChips().some((m) => `meeting:${m.id}` === S.kind))
+      || (!meeting && !["all", "papers", "important", "following", "today"].includes(S.kind) && S.news && !newsKinds()[S.kind])) S.kind = "all";
   if (S.area && S.area !== "all" && (T.areas[S.area] ?? 2) <= 0) S.area = "all";
   renderChips();
   const view = $("#view-feed");
@@ -533,6 +588,14 @@ function refreshFeed(keepKey) {
       el("h2", { text: "Not ranked yet" }),
       el("p", { text: "Most important papers come from a weekly job. On GitHub, open Actions, choose “Update most important papers”, and run it. Then tap refresh here." }),
       el("button", { class: "btn", onclick: () => { S.kind = "all"; refreshFeed(); } }, "Show everything")));
+    return;
+  }
+  if (!S.list.length && meeting) {
+    const m = (S.news?.meetings || []).find((x) => `meeting:${x.id}` === S.kind);
+    view.append(el("section", { class: "empty" },
+      el("h2", { text: `No ${m?.name || "meeting"} stories yet` }),
+      el("p", { text: "Stories that mention the meeting gather here. Outlets usually start a day or two before it opens." }),
+      el("button", { class: "btn", onclick: () => openMeeting(m) }, "About the meeting")));
     return;
   }
   if (!S.list.length) {
@@ -559,7 +622,8 @@ function refreshFeed(keepKey) {
     }
   }, { root: view, threshold: 0.6 });
   appendCards(10);
-  const at = keepKey ? S.list.findIndex((it) => listKey(it) === keepKey) : -1;
+  let at = keepKey ? S.list.findIndex((it) => listKey(it) === keepKey) : -1;
+  if (at < 0 && keepIdx > 0) at = Math.min(keepIdx, S.list.length - 1);      // that card left (you hid it): stay where you were
   if (at > 0 && at < 200) {
     while (S.rendered <= at + 1 && S.rendered < S.list.length) appendCards(10);
     view.scrollTop = at * view.clientHeight;
@@ -574,7 +638,8 @@ function appendCards(n) {
   made.forEach((c) => { view.insertBefore(c, sentinel); seenObserver?.observe(c); });
   S.rendered += batch.length;
   requestAnimationFrame(() => made.forEach(fitCard));
-  if (S.rendered >= S.list.length && !view.querySelector(".feed-end")) {
+  if (S.rendered >= S.list.length && S.kind === "today") feedObserver?.disconnect();      // Today ends on its own card
+  else if (S.rendered >= S.list.length && !view.querySelector(".feed-end")) {
     feedObserver?.disconnect();
     const last = S.list.length ? dayOf(S.list[S.list.length - 1]) : "";
     view.insertBefore(el("section", { class: "feed-end" },
@@ -620,6 +685,8 @@ function evidenceEl(design, small, sample) {
 function cardEl(it) {
   if (it.type === "news") return newsCardEl(it);
   if (it.type === "top") return topCardEl(it.only);
+  if (SPECIAL.has(it.type)) return briefCardEl(it);
+  if (it._guess) return guessCardEl(it);
   return paperCardEl(it);
 }
 
@@ -644,11 +711,12 @@ function newsCardEl(it) {
       el("h2", { class: "news-headline" }, it.title),
       it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
-    el("div", { class: "actions", style: `grid-template-columns:repeat(${it.audio ? 4 : 3},1fr)` },
+    el("div", { class: "actions" + (it.audio ? " five" : "") },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
       el("a", { class: "act", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
       saveBtn,
-      el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share")));
+      el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share"),
+      reactBtn(it)));
 }
 
 // ── podcast player: keeps playing while you scroll ─────────────────────────
@@ -746,22 +814,27 @@ function openStory(st, byId) {
 function paperCardEl(it) {
   const isNew = S.newIds.has(it.pmid);
   const c = it.conclusion || { kind: "none" };
-  const extra = c.kind === "structured" && (c.text || "").length < 260 ? (it.extras || [])[0] : null;
-  const card = el("article", { class: "card", "data-pmid": it.pmid, "data-key": it.pmid },
+  const fig = figureEl(it);
+  const extra = !fig && c.kind === "structured" && (c.text || "").length < 260 ? (it.extras || [])[0] : null;
+  const old = Date.now() - Date.parse(it.added || it.epub || it.ppub || "") > 60 * 864e5;
+  const card = el("article", { class: "card" + (fig ? " has-fig" : ""), "data-pmid": it.pmid, "data-key": it.pmid },
     el("div", { class: "card-meta" },
       el("span", { class: "card-journal" }, it.journal),
       el("span", {}, fmtDate(it.epub || it.added)),
       it.translated ? el("span", { class: "lang", title: "PubMed’s English translation of the title" }, it.language ? `In ${it.language}` : "Translated title") : null,
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
+      it.classic ? el("span", { class: "lang classic" }, "Classic of the day") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
-    impactEl(it),
+    it.classic ? classicLine(it) : impactEl(it),
     it.retracted ? el("div", { class: "warn" }, "Retracted. See the notice on PubMed before using this.") : null,
     it.concern ? el("div", { class: "warn" }, "Expression of concern published for this paper.") : null,
     el("h2", { class: "card-title clamp" }, it.title),
+    fig,
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
       c.kind === "none"
-        ? el("p", { class: "concl-text none" }, "PubMed doesn’t have this abstract yet. It usually appears within a few days.")
+        ? el("p", { class: "concl-text none" }, old ? "PubMed has no abstract for this paper. Abstract and PubMed open what there is."
+          : "PubMed doesn’t have this abstract yet. It usually appears within a few days.")
         : [el("div", { class: "concl-label" + (c.kind === "structured" ? "" : " soft") }, conclLabel(c)),
           el("p", { class: `concl-text ${lenClass(c.text)}` }, c.text)],
       extra ? el("div", { class: "extra" },
@@ -769,7 +842,7 @@ function paperCardEl(it) {
         el("p", { class: "extra-text" }, extra.text)) : null)),
     evidenceEl(it.design, false, it.sample),
     (it.topics || []).length ? el("div", { class: "topic-tags" },
-      it.topics.slice(0, 3).map((t) => el("button", { class: "topic-tag", onclick: () => { S.topic = t; S.system = "all"; refreshFeed(); } }, topicName(t)))) : null,
+      it.topics.slice(0, 3).map((t) => el("button", { class: "topic-tag", onclick: () => { S.topic = t; S.system = "all"; leaveFixed(); refreshFeed(); } }, topicName(t)))) : null,
     actionsEl(it, true));
   return card;
 }
@@ -778,11 +851,12 @@ function actionsEl(it, withShare) {
   const saved = !!S.saved[saveKey(it)];
   const saveBtn = el("button", { class: "act", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
     icon(saved ? ICONS.saved : ICONS.save), saved ? "Saved" : "Save");
-  return el("div", { class: "actions", style: withShare ? null : "grid-template-columns:repeat(3,1fr)" },
+  return el("div", { class: "actions" + (withShare ? " five" : ""), style: withShare ? null : "grid-template-columns:repeat(3,1fr)" },
     el("button", { class: "act", onclick: () => openAbstract(it) }, icon(ICONS.abstract), "Abstract"),
     saveBtn,
     el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.pubmed), "PubMed"),
-    withShare ? el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share") : null);
+    withShare ? el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share") : null,
+    withShare ? reactBtn(it) : null);
 }
 
 // top stories: drop whole stories that don't fit (extra ones per kind first), never half a line
@@ -800,6 +874,8 @@ function fitTop(card) {
 }
 function fitCard(card) {
   if (card.classList.contains("top-card")) return fitTop(card);
+  if (card.classList.contains("brief-card")) return;
+  if (card.classList.contains("guess-card") && !card.classList.contains("revealed")) return fitGuess(card);
   card.querySelector(".card-title")?.classList.add("clamp");
   const box = card.querySelector(".concl");
   const inner = box?.querySelector(".concl-inner");
@@ -812,12 +888,15 @@ function fitCard(card) {
   card.querySelector(".more-note")?.remove();
   const extra = box.querySelector(".extra");
   if (extra) extra.hidden = false;
+  const fig = card.querySelector(".fig");
+  fig?.classList.remove("small");
   const sizes = ["", "l2", "l3", "l4"];
   const base = p.dataset.size ?? (p.dataset.size = sizes.find((c) => c && p.classList.contains(c)) || "");
   sizes.forEach((c) => c && p.classList.remove(c));
   if (base) p.classList.add(base);
   const over = () => inner.scrollHeight > box.clientHeight + 1;
   if (over() && extra) extra.hidden = true;
+  if (over() && fig) fig.classList.add("small");              // a smaller picture before smaller type
   // smaller type before cutting text: the conclusion is the point of the card
   let shrank = false;
   for (let i = sizes.indexOf(base) + 1; over() && i < sizes.length; i++) {
@@ -842,7 +921,7 @@ function fitCard(card) {
     return;
   }
   const note = el("button", { class: "concl-label more-note",
-    onclick: () => openAbstract(S.list.find((i) => i.pmid === card.dataset.pmid)) }, "Continues in the abstract");
+    onclick: () => openAbstract(card._it || S.list.find((i) => i.pmid === card.dataset.pmid)) }, "Continues in the abstract");
   inner.append(note);
   const lh = parseFloat(getComputedStyle(p).lineHeight) || 30;
   const label = box.querySelector(".concl-label:not(.more-note)");
@@ -934,13 +1013,14 @@ async function copyText(text, done) {
 // ── search: every paper and story on this phone ─────────────────────────────
 const fold = (s) => String(s || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 function searchIndex() {
-  const key = [S.feed?.generated, S.important?.generated, S.explore?.generated, S.news?.generated, Object.keys(S.saved).length].join("|");
+  const key = [S.feed?.generated, S.important?.generated, S.explore?.generated, S.news?.generated, S.library?.generated, Object.keys(S.saved).length].join("|");
   if (S.searchIdx?.key === key) return S.searchIdx;
   const papers = new Map(), news = new Map();
   const addP = (p) => { if (p?.pmid && p.title && !papers.has(p.pmid)) papers.set(p.pmid, p); };
   (S.feed?.items || []).forEach(addP);
   Object.values(S.important?.papers || {}).forEach(addP);
   Object.values(S.explore?.papers || {}).forEach(addP);
+  Object.values(S.library?.papers || {}).forEach(addP);
   (S.news?.items || []).forEach((n) => news.set(n.id, n));
   for (const it of Object.values(S.saved)) {
     if (it.pmid) addP(it); else if (it.id && it.title && !news.has(it.id)) news.set(it.id, it);
@@ -976,7 +1056,7 @@ function openSearch() {
     S.searchQ = input.value;
     const r = searchFind(input.value);
     if (!r) {
-      out.replaceChildren(el("p", { class: "fine" }, "Searches titles, conclusions, authors and journals of every paper here (feed, Most important, Explore, Saved) and every news story."));
+      out.replaceChildren(el("p", { class: "fine" }, "Searches titles, conclusions, authors and journals of every paper here (feed, Most important, Explore, Foundations, classics, Saved) and every news story."));
       return;
     }
     const group = (label, list, kind, rowEl) => list.length ? el("section", { class: "search-group" },
@@ -1015,6 +1095,7 @@ function setInert() {
 function refocus(elm) { if (elm?.isConnected && !elm.closest("[inert]")) elm.focus({ preventScroll: true }); }
 function openSheet(...content) {
   if (!$("#sheet").classList.contains("open")) sheetOpener = document.activeElement;
+  S.onSheetClose = null;
   const card = $("#sheet-card");
   card.replaceChildren(
     el("div", { style: "display:flex;align-items:center" },
@@ -1034,12 +1115,43 @@ function closeSheet() {
   sheet.setAttribute("aria-hidden", "true");
   setInert();
   refocus(sheetOpener);
+  const after = S.onSheetClose;
+  S.onSheetClose = null;
+  after?.();
+}
+// redraw the open sheet without jumping back to its top
+function refillSheet(...content) {
+  const top = $("#sheet-card").scrollTop;
+  const opener = sheetOpener;
+  openSheet(...content);
+  sheetOpener = opener;
+  $("#sheet-card").scrollTop = top;
 }
 
 // abstracts sit beside the data files in small buckets (pipeline/abstract_store.py)
 const absCache = new Map();
+// Some journals' PubMed records run the headings into one paragraph ("Background … Purpose … Materials and
+// Methods …"). Split those back into sections, but only when at least three headings appear in order.
+const INLINE_HEADS = [["BACKGROUND", "Background|Introduction|Context"], ["OBJECTIVE", "Purpose|Objectives?|Aims?|Rationale and Objectives"],
+  ["METHODS", "Materials and Methods|Patients and Methods|Methods?|Design|Approach"], ["RESULTS", "Results|Findings"],
+  ["CONCLUSIONS", "Conclusions?|Interpretation|Summary"]];
+const INLINE_RE = new RegExp(`(^|[.?!]\\s+)(${INLINE_HEADS.map(([, w]) => w).join("|")}):?\\s+(?=[A-Z0-9(])`, "g");
+function splitInline(secs) {
+  if (secs.length !== 1 || secs[0].label || !secs[0].text) return secs;
+  const text = secs[0].text, hits = [];
+  for (const m of text.matchAll(INLINE_RE)) {
+    const cat = INLINE_HEADS.find(([, w]) => new RegExp(`^(?:${w})$`).test(m[2]))[0];
+    hits.push({ at: m.index + m[1].length, end: m.index + m[0].length, label: m[2], cat });
+  }
+  const order = hits.map((h) => INLINE_HEADS.findIndex(([c]) => c === h.cat));
+  if (hits.length < 3 || order.some((o, i) => i && o < order[i - 1])) return secs;
+  const out = [];
+  if (hits[0].at > 0) out.push({ label: "", cat: "", text: text.slice(0, hits[0].at).trim() });
+  hits.forEach((h, i) => out.push({ label: h.label, cat: h.cat, text: text.slice(h.end, i + 1 < hits.length ? hits[i + 1].at : text.length).trim() }));
+  return out.filter((x) => x.text);
+}
 async function sectionsOf(it) {
-  if (it.sections) return it.sections;
+  if (it.sections) return splitInline(it.sections);
   if (!it.abs || !it.pmid) return [];
   const name = `${it.abs}${String(Number(it.pmid) % 50).padStart(2, "0")}`;
   const path = `data/abstracts/${name}.json`;
@@ -1054,7 +1166,7 @@ async function sectionsOf(it) {
     b = await loadJSON(path).then((x) => { absCache.set(name, Promise.resolve(x)); return x; }).catch(() => null);
   }
   if (b === null) throw new Error("offline");
-  return b?.[it.pmid] || [];
+  return splitInline(b?.[it.pmid] || []);
 }
 async function openAbstract(it) {
   if (!it) return;
@@ -1066,8 +1178,11 @@ async function openAbstract(it) {
     doiUrl(it.doi) ? el("a", { class: "act", href: libraryUrl(doiUrl(it.doi)), target: "_blank", rel: "noopener" }, T.library ? "Journal (library)" : "Journal") : null,
     pmcUrl(it.pmcid) ? el("a", { class: "act", href: pmcUrl(it.pmcid), target: "_blank", rel: "noopener" }, "Free full text") : null,
     el("button", { class: "act", onclick: () => copyText(amaCitation(it), "Citation copied (AMA style)") }, "Copy citation"),
+    fdMeta(it.pmid) ? fdReadBtn(it.pmid) : null,
   ];
+  const fd = fdMeta(it.pmid);
   openSheet(
+    fd ? el("p", { class: "fd-note" }, el("b", {}, `Foundations · ${fdGroupName(fd.group)}`), ` ${fd.why}`) : null,
     el("h2", { id: "sheet-title" }, it.title),
     el("p", { class: "sheet-meta" },
       [it.authors, it.journal, fmtDate(it.epub || it.added || it.ppub), `PMID ${it.pmid}`,
@@ -1078,6 +1193,10 @@ async function openAbstract(it) {
     it.impact ? el("p", { class: "imp-detail" }, it.impact.age >= 4
       ? `${plural(it.impact.cites, "citation")}${it.impact.age >= 12 ? ` (${it.impact.cpy} a year)` : ""}${it.impact.rcr != null ? `, Relative Citation Ratio ${it.impact.rcr}` : ""}. Cited more than ${Math.floor(it.impact.pct)}% of ${it.impact.area ? (S.feed?.areas?.[it.impact.area]?.label || areaShort(it.impact.area)).toLowerCase().replace(/\bct\b/g, "CT") : "radiology"} papers that came out in ${it.impact.q}.${it.impact.clin ? ` Cited in ${plural(it.impact.clin, "clinical paper")} (trials, guidelines).` : ""} Source: NIH iCite.`
       : `Too new to judge by citations (${Math.round(it.impact.age)} months old). Papers in ${it.journal} from the last few years average the ${Math.round(it.impact.jpct)}th percentile for citations.`) : null,
+    !it.impact && (it.classic || it.cites?.n) ? el("p", { class: "imp-detail" }, citesText(it)) : null,
+    figSrc(it.fig) && T.pictures ? el("button", { class: "fig in-sheet", "aria-label": `Open ${it.fig.n || "the figure"} with its caption`, onclick: () => openFigure(it) },
+      el("img", { src: figSrc(it.fig), alt: `${it.fig.n || "Figure"} from the paper`, loading: "lazy", width: it.fig.w, height: it.fig.h }),
+      el("span", { class: "fig-credit" }, `${it.fig.n || "Figure"} · ${it.fig.lic}`)) : null,
     el("div", { style: "height:16px" }),
     secs.length
       ? secs.map((s) => el("section", { class: "abs-sec" + (s.cat === "CONCLUSIONS" ? " key" : "") },
@@ -1113,12 +1232,20 @@ function openInfo() {
     el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),
     el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub. Text size, your library’s off-campus link and Back up and restore are under Tune → Reading."),
+    el("h3", {}, "Today"),
+    el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day and your next Foundations paper, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
+    el("h3", {}, "Pictures"),
+    el("p", {}, "Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
+    el("h3", {}, "Telling Readout what you like"),
+    el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it. “More like this” and “Less like this” nudge all of them a little. Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
+    el("h3", {}, "Meetings"),
+    el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
     el("p", {}, "Papers from MEDLINE®/PubMed®, a database of the U.S. National Library of Medicine. NLM does not endorse Readout. ",
       el("a", { href: "https://www.ncbi.nlm.nih.gov/home/about/policies/", target: "_blank", rel: "noopener" }, "NCBI disclaimer and copyright notice"),
-      ". Citation data from NIH iCite; trials from ClinicalTrials.gov. News is each outlet’s own headline and summary, credited and linked; outlets whose terms ask for it (ScienceDaily, Medical Xpress, Phys.org, The New York Times) appear exactly as their feeds supply them. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
+      ". Citation data from NIH iCite; trials from ClinicalTrials.gov; pictures from the PMC Open Access subset, each under its own Creative Commons license. News is each outlet’s own headline and summary, credited and linked; outlets whose terms ask for it (ScienceDaily, Medical Xpress, Phys.org, The New York Times) appear exactly as their feeds supply them. Fonts: Literata, Atkinson Hyperlegible Next (SIL Open Font License).")));
 }
 
 // ── explore ────────────────────────────────────────────────────────────────
@@ -1268,6 +1395,7 @@ function renderExplore(force) {
   const terms = x.terms?.[S.win] || {};
 
   const wrap = el("div", { class: "explore" },
+    fdEntryEl(),
     segEl(() => renderExplore(true)),
     el("p", { class: "ex-note" }, `Papers in the last ${yrs} compared with the ${yrs} before, adjusted for how fast imaging research grew overall. Updated ${ago(x.generated)}.`,
       TR.custom ? [" ", el("button", { class: "inline-link", onclick: () => { switchTab("tune"); setPane("algorithms", "tune-trends"); } }, "Using your trend rules.")] : null),
@@ -1413,7 +1541,7 @@ function openTopic(id) {
       el("section", { class: "sect" },
         el("h2", {}, "Go further"),
         el("div", { class: "link-row" },
-          inFeed ? el("button", { class: "act", onclick: () => { S.topic = tp.id; S.system = "all"; closeTopic(); switchTab("feed"); refreshFeed(); } },
+          inFeed ? el("button", { class: "act", onclick: () => { S.topic = tp.id; S.system = "all"; leaveFixed(); closeTopic(); switchTab("feed"); refreshFeed(); } },
             `${plural(inFeed, "card")} in your feed`) : null,
           el("a", { class: "act", href: pubmedLink, target: "_blank", rel: "noopener" }, "Open in PubMed"),
           tp.trials_term ? el("a", { class: "act", target: "_blank", rel: "noopener",
@@ -1424,6 +1552,7 @@ function openTopic(id) {
     body.scrollTop = 0;
   };
   draw();
+  S.overlay = "topic";
   const ov = $("#topic");
   if (!ov.classList.contains("open")) topicOpener = document.activeElement;
   ov.classList.add("open");
@@ -1437,7 +1566,10 @@ function closeTopic() {
   ov.setAttribute("aria-hidden", "true");
   setInert();
   refocus(topicOpener);
-  if (S.tab === "explore") renderExplore();   // no-op unless the window was changed on the topic page
+  const wasFd = S.overlay === "fd";
+  S.overlay = null;
+  if (S.tab === "explore") renderExplore(wasFd);   // no-op unless something changed on the page
+  if (wasFd && S.tab === "feed") updateFeedQuietly(1e9);     // Today's Foundations card shows your progress
 }
 
 // ── news ───────────────────────────────────────────────────────────────────
@@ -1502,6 +1634,7 @@ function switchTab(tab) {
   const tv = $("#view-tune");
   if (tv) tv.hidden = tab !== "tune";
   $("#chips").hidden = tab !== "feed";
+  renderBanner();
   $("#title").textContent = { feed: "Readout", explore: "Explore", saved: "Saved", tune: "Tune" }[tab];
   updateHeadNote();
   if (tab === "feed") {
@@ -1517,12 +1650,15 @@ async function reload(announce) {
   const before = new Set((S.feed?.items || []).map((i) => i.pmid));
   const was = { feed: S.feed?.generated, explore: S.explore?.generated, news: S.news?.generated };
   S.offline = false;
-  const wasImp = S.important?.generated;
-  const [feed, newsData, important] = await Promise.all([
+  const wasImp = S.important?.generated, wasLib = S.library?.generated;
+  const [feed, newsData, important, library] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/news.json").catch(() => null),
     loadJSON("data/important.json").catch(() => null),
+    loadJSON("data/library.json").catch(() => null),
   ]);
+  if (library) S.library = library;
+  const libChanged = !!S.library && S.library.generated !== wasLib;
   // Explore isn't needed for the feed: fetch it after, so the feed gets the bandwidth
   const exploreDone = loadJSON("data/explore.json").catch(() => null).then((explore) => {
     S.exploreLoading = false;
@@ -1543,14 +1679,16 @@ async function reload(announce) {
   markNew();
   // rebuilding resets the feed; when it's on screen keep your place (unless you tapped refresh),
   // when it isn't, rebuild on the way back
-  if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp))) {
+  if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp)) || (libChanged && !wasLib)) {
     if (S.tab === "feed") { if (announce) refreshFeed(null); else updateFeedQuietly(Date.now() - (S.shownAt || 0)); }
     else { S.feedDirty = true; if (announce) S.lastKey = null; }
   } else updateHeadNote();
   if (newsChanged) S.exploreKey = null;
   if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged)) renderTune(true);
+  if (libChanged && S.tab === "explore") renderExplore(true);
   if (!feed && !newsData && navigator.onLine === false) S.offline = true;
   updateHeadNote();
+  renderBanner();
   if (announce) {
     if (S.offline) toast(`You’re offline. Showing what’s on this phone${S.feed ? ` (papers from ${ago(S.feed.generated)})` : ""}.`);
     else if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");
@@ -1566,10 +1704,11 @@ async function reload(announce) {
 
 // open at once from what's on the phone; reload() then brings it up to date
 async function showKept() {
-  const [feed, newsData, important] = await Promise.all(["feed", "news", "important"].map((f) => keptJSON(`data/${f}.json`)));
+  const [feed, newsData, important, library] = await Promise.all(["feed", "news", "important", "library"].map((f) => keptJSON(`data/${f}.json`)));
   if (!feed && !newsData) return;
   if (S.feed || S.news) return;             // the network won the race
-  S.feed = feed; S.news = newsData; S.important = important;
+  S.feed = feed; S.news = newsData; S.important = important; S.library = library;
+  renderBanner();
   S.loadedAt = Date.now();
   markNewsNew(); markNew();
   if (S.tab === "feed") refreshFeed(); else S.feedDirty = true;
@@ -1619,8 +1758,10 @@ function boot() {
     else if ($("#topic").classList.contains("open")) closeTopic();
   });
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") { rememberSeen(); saveStats(); savePos(); }
-    else if (Date.now() - S.loadedAt > 60 * 60 * 1000) reload(false);   // home-screen apps stay open for days
+    if (document.visibilityState === "hidden") { rememberSeen(); saveStats(); savePos(); return; }
+    if (S.kind === "today" && S.tab === "feed" && S.shownDay && S.shownDay !== localDay()) refreshFeed(null);   // a new day: a new brief
+    if (Date.now() - S.loadedAt > 60 * 60 * 1000) reload(false);   // home-screen apps stay open for days
+    renderBanner();
   });
   window.addEventListener("pagehide", () => { rememberSeen(); saveStats(); savePos(); });
   let rt;
@@ -1632,4 +1773,5 @@ function boot() {
   S.exploreLoading = true;
   showKept().finally(() => reload(false));
 }
-boot();
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();

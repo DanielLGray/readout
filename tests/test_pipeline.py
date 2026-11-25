@@ -14,6 +14,7 @@ TODAY = date(2026, 11, 23)
 def env(tmp_path, monkeypatch):
     monkeypatch.setenv("READOUT_TODAY", TODAY.isoformat())
     monkeypatch.setattr(build_feed, "DATA", tmp_path / "data")
+    monkeypatch.setattr(build_feed, "CACHE", tmp_path / "cache")
     monkeypatch.setattr(build_explore, "DATA", tmp_path / "data")
     monkeypatch.setattr(build_explore, "CACHE", tmp_path / "cache")
     world = FakeWorld(TODAY)

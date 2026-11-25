@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
@@ -22,6 +22,40 @@ def news_http() -> Http:
 
 
 STALE_DAYS = 30
+MEETING_BEFORE, MEETING_AFTER = 45, 14      # days around a meeting when stories that mention it are tagged
+
+
+def load_meetings(now: datetime) -> list[dict]:
+    """Meetings from config/meetings.yaml that haven't long ended, each with its compiled pattern."""
+    try:
+        cfg = load_yaml("meetings.yaml") or {}
+    except FileNotFoundError:
+        return []
+    out = []
+    for m in cfg.get("meetings") or []:
+        try:
+            start, end = date.fromisoformat(str(m["start"])), date.fromisoformat(str(m["end"]))
+            pat = re.compile(m["match"]) if m.get("match") else None
+        except (KeyError, ValueError, re.error) as exc:
+            log(f"  meeting {m.get('id')!r} skipped: {exc}")
+            continue
+        if end < now.date() - timedelta(days=MEETING_AFTER) or start > now.date() + timedelta(days=400):
+            continue
+        out.append({"id": str(m["id"]), "name": m.get("name", m["id"]), "full": m.get("full", ""), "start": start.isoformat(),
+                    "end": end.isoformat(), "place": m.get("place", ""), "url": m.get("url", ""),
+                    "off": bool(m.get("muted")), "_re": pat})
+    return sorted(out, key=lambda m: m["start"])
+
+
+def tag_meetings(it: dict, meetings: list[dict]) -> None:
+    it.pop("meetings", None)
+    text = f"{it['title']} {it.get('summary', '')}"
+    day = it["date"][:10]
+    for m in meetings:
+        lo = (date.fromisoformat(m["start"]) - timedelta(days=MEETING_BEFORE)).isoformat()
+        hi = (date.fromisoformat(m["end"]) + timedelta(days=MEETING_AFTER)).isoformat()
+        if m["_re"] and lo <= day <= hi and m["_re"].search(text):
+            it.setdefault("meetings", []).append(m["id"])
 
 
 def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dict]":
@@ -148,7 +182,9 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             not (need and not need.search(it["title"] + " " + it.get("summary", "")))
     items = {k: v for k, v in items.items() if allowed(v)}
     mentions = re.compile(cfg["society_mentions"]) if cfg.get("society_mentions") else None
+    meetings = load_meetings(now)
     for it in items.values():                  # every run, so word-list changes reach stored stories too
+        tag_meetings(it, meetings)
         it.pop("also", None)
         if mentions and it.get("kind", "industry") in ("industry", "health") and \
                 mentions.search(it["title"] + " " + it.get("summary", "")):
@@ -211,6 +247,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         "sources": statuses,
         "categories": {k: v["label"] for k, v in cfg.get("categories", {}).items()},
         "kinds": cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"},
+        "meetings": [{k: v for k, v in m.items() if not k.startswith("_")} for m in meetings],
         "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now,
                                             group_of=group_of, **top_cfg)
                         for k in kinds},

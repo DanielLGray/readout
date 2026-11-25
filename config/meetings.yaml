@@ -1,0 +1,90 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Readout — meetings. Four months before each one starts, the app shows a banner you
+# can close; from a week before until a week after, a chip gathers the news stories
+# that mention it (`match`, a regular expression on headlines and summaries).
+# Add next year's meetings as their dates are announced. Past meetings can stay:
+# they drop out on their own two weeks after they end. `muted: true` starts one switched off.
+# ─────────────────────────────────────────────────────────────────────────────
+
+meetings:
+  - id: rsna2026
+    name: RSNA 2026
+    full: Radiological Society of North America, 112th Scientific Assembly and Annual Meeting
+    start: 2026-11-29
+    end: 2026-12-03
+    place: McCormick Place, Chicago
+    url: https://www.rsna.org/annual-meeting
+    match: '\bRSNA\b|Radiological Society of North America|RSNA 2026|#RSNA26'
+
+  - id: sar2027
+    name: SAR 2027
+    full: Society of Abdominal Radiology Annual Meeting
+    start: 2027-02-28
+    end: 2027-03-05
+    place: Omni La Costa, Carlsbad, California
+    url: https://abdominalradiology.org/
+    match: '\bSAR 2027\b|Society of Abdominal Radiology'
+
+  - id: ecr2027
+    name: ECR 2027
+    full: European Congress of Radiology
+    start: 2027-03-03
+    end: 2027-03-07
+    place: Austria Center Vienna
+    url: https://www.myesr.org/congress/
+    match: '\bECR(?: 2027)?\b|European Congress of Radiology'
+
+  - id: arrs2027
+    name: ARRS 2027
+    full: American Roentgen Ray Society Annual Meeting
+    start: 2027-05-02
+    end: 2027-05-05
+    place: Sheraton Denver Downtown, Denver
+    url: https://www.arrs.org/am27/
+    match: '\bARRS\b|American Roentgen Ray Society'
+
+  - id: ismrm2027
+    name: ISMRM 2027
+    full: ISMRM & ISMRT Annual Meeting and Exhibition
+    start: 2027-05-08
+    end: 2027-05-13
+    place: Vancouver
+    url: https://www.ismrm.org/27/
+    match: '\bISMRM\b|International Society for Magnetic Resonance in Medicine'
+    muted: true      # no banner or chip unless you turn it on in Tune
+
+  - id: snmmi2027
+    name: SNMMI 2027
+    full: Society of Nuclear Medicine and Molecular Imaging Annual Meeting
+    start: 2027-06-05
+    end: 2027-06-08
+    place: Walter E. Washington Convention Center, Washington, DC
+    url: https://snmmi.org/AM
+    match: '\bSNMMI\b|Society of Nuclear Medicine and Molecular Imaging'
+
+  - id: esgar2027
+    name: ESGAR 2027
+    full: European Society of Gastrointestinal and Abdominal Radiology Annual Meeting
+    start: 2027-06-15
+    end: 2027-06-18
+    place: Edinburgh International Conference Centre
+    url: https://esgar.org/annual-meeting
+    match: '\bESGAR\b|European Society of Gastrointestinal and Abdominal Radiology'
+
+  - id: scct2027
+    name: SCCT 2027
+    full: Society of Cardiovascular Computed Tomography Annual Scientific Meeting
+    start: 2027-07-08
+    end: 2027-07-11
+    place: Gaylord National Resort, National Harbor, Maryland
+    url: https://scct.org/
+    match: '\bSCCT\b|Society of Cardiovascular Computed Tomography'
+
+  - id: rsna2027
+    name: RSNA 2027
+    full: Radiological Society of North America Annual Meeting
+    start: 2027-11-14
+    end: 2027-11-18
+    place: McCormick Place, Chicago
+    url: https://www.rsna.org/annual-meeting
+    match: '\bRSNA\b|Radiological Society of North America|#RSNA27'

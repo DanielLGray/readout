@@ -146,6 +146,8 @@ a { color: inherit; }
   border-bottom: 1px solid var(--line); overflow: hidden;
 }
 .card-meta { display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: var(--muted); }
+.card-meta > * { flex: none; white-space: nowrap; }
+.card-meta > .card-journal { flex: 0 1 auto; min-width: 2em; overflow: hidden; text-overflow: ellipsis; }
 .card-journal { color: var(--ink); font-weight: 700; }
 .lang { font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; }
 .lang.follow { border-color: var(--heat-text); color: var(--heat-text); }
@@ -528,3 +530,111 @@ a { color: inherit; }
 .search-hit { width: 100%; text-align: left; display: grid; gap: 3px; padding: 10px 0; color: inherit; background: none; border: 0; font: inherit; }
 .search-out mark { background: color-mix(in srgb, var(--heat-text) 28%, transparent); color: inherit; border-radius: 2px; padding: 0 1px; }
 .text-in.wide { width: 100%; }
+
+/* ── meeting banner (under the chips) ──────────────────────────────────── */
+.banner { display: flex; align-items: center; gap: 2px; margin: 0 -16px; padding: 4px 4px 4px 16px;
+  border-top: 1px solid var(--line); background: var(--panel); }
+.banner-main { flex: 1; min-width: 0; text-align: left; padding: 6px 0; line-height: 1.3; font-size: 14px; }
+.banner-main b { font-weight: 700; }
+.banner-main > span:not(.banner-sub) { color: var(--ink); }
+.banner-sub { display: block; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.banner .icon-btn { flex: none; }
+
+/* ── cards: five buttons, icon over label ──────────────────────────────── */
+.actions.five { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.actions.five .act { flex-direction: column; gap: 1px; height: 48px; font-size: 12px; padding: 0 2px; }
+.actions.five .act svg { width: 18px; height: 18px; }
+@media (max-height: 760px) { .actions.five .act { height: 44px; } }
+.lang.classic { border-color: var(--k-soc); color: var(--k-soc); }
+
+/* ── pictures from papers ──────────────────────────────────────────────── */
+.fig { flex: none; position: relative; display: block; width: 100%; height: min(27dvh, 240px);
+  background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.fig.small { height: min(16dvh, 130px); }
+.fig img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.fig-credit { position: absolute; right: 6px; bottom: 6px; font-size: 11.5px; line-height: 1; color: #e8ecee;
+  background: rgba(0,0,0,.62); padding: 4px 7px; border-radius: 6px; }
+.fig.in-sheet { height: auto; max-height: 46dvh; margin-top: 12px; }
+.fig.in-sheet img { max-height: 46dvh; }
+.fig-full { display: block; background: #000; border-radius: 10px; overflow: hidden; margin: 4px 0 10px; }
+.fig-full img { display: block; width: 100%; height: auto; max-height: 62dvh; object-fit: contain; }
+.fig-cap { margin: 0; font: 400 calc(15.5px * var(--ts, 1))/1.5 var(--serif); max-width: 68ch; }
+@media (max-height: 500px) and (orientation: landscape) { .card .fig { display: none; } }
+
+/* ── what you think (feedback sheet) ───────────────────────────────────── */
+.fb-title span { color: var(--ink); font: 600 15.5px/1.35 var(--serif); }
+.fb-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fb-sect { margin-top: 10px; border-top: 1px solid var(--line); }
+.fb-row { padding: 10px 0; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.fb-name { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; }
+.fb-name b { font-size: 15.5px; }
+.fb-name span { font-size: 12.5px; color: var(--muted); }
+.fb-name .fb-learned { color: var(--heat-text); }
+.seg.fb-seg { grid-template-columns: repeat(4, 1fr); margin: 0; }
+.seg.fb-seg button { height: 34px; font-size: 13.5px; }
+.taste-list .fb-row:first-child { border-top: 1px solid var(--line); }
+.fb-forget { justify-self: start; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; padding: 4px 0; }
+
+/* ── guess the result ──────────────────────────────────────────────────── */
+.lang.guess-tag { border-color: var(--focus); color: var(--focus); }
+.guess-box .concl-inner { gap: 6px; }
+.guess-text { margin: 0 0 6px; font: 450 calc(18px * var(--ts, 1))/1.42 var(--serif); padding-left: 14px; border-left: 2px solid var(--line);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; }
+.guess-text.small { font: 400 calc(15.5px * var(--ts, 1))/1.45 var(--sans); color: var(--muted); -webkit-line-clamp: 8; }
+.guess-wait { color: var(--faint); margin: 0; }
+.reveal { flex: none; display: grid; gap: 2px; text-align: left; padding: 12px 14px; border-radius: 12px;
+  border: 1px dashed var(--focus); background: var(--panel); }
+.reveal b { font: 600 17px/1.3 var(--serif); }
+.reveal span { font-size: 13px; color: var(--muted); }
+.guess-ask { flex: none; display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 8px; align-items: center; font-size: 14px; font-weight: 700; }
+.guess-ask .act { height: 40px; }
+.guess-score { margin: 0; font-size: 14.5px; grid-column: 1 / -1; }
+.guess-score::first-line { font-weight: 700; }
+.guess-card.revealed .concl-text { border-left-color: var(--focus); }
+
+/* ── Today ─────────────────────────────────────────────────────────────── */
+.brief-cover { justify-content: flex-start; }
+.brief-date { display: grid; margin-top: 6vh; }
+.brief-day { font: 600 clamp(44px, 13vw, 64px)/1 var(--serif); letter-spacing: -0.02em; }
+.brief-md { font: 400 22px/1.3 var(--serif); color: var(--muted); margin-top: 6px; }
+.brief-lede { margin: 18px 0 0; font: 450 calc(20px * var(--ts, 1))/1.42 var(--serif); max-width: 30ch; }
+.brief-notes { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.brief-notes li { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+.brief-notes b { color: var(--ink); }
+.brief-swipe { margin-top: auto; text-align: center; }
+.brief-stories .top-title { font-size: calc(18px * var(--ts, 1)); }
+.brief-stories .news-teaser { font-size: calc(14.5px * var(--ts, 1)); }
+.brief-end { justify-content: center; }
+.brief-end-in { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 0 8px; }
+.brief-end-in h2 { margin: 0; font: 600 26px/1.25 var(--serif); }
+.brief-end-in p { margin: 0; color: var(--muted); max-width: 34ch; }
+.brief-check { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ink); }
+.brief-check svg { width: 28px; height: 28px; }
+
+/* ── Foundations ───────────────────────────────────────────────────────── */
+.progress { display: block; height: 6px; border-radius: 3px; background: var(--h0); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
+.fd-entry { display: grid; gap: 8px; width: 100%; text-align: left; margin-top: 14px; padding: 14px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--line); }
+.fd-entry-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fd-entry-h b { font: 600 18px/1.25 var(--serif); }
+.fd-entry-h span { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.fd-entry-next { font-size: 14px; color: var(--muted); }
+.fd-total { display: grid; gap: 8px; margin-top: 14px; }
+.fd-count { float: right; font: 400 13px/2 var(--sans); color: var(--muted); }
+.fd-list { margin-top: 8px; }
+.fd-row { display: grid; grid-template-columns: 44px 1fr; align-items: start; border-bottom: 1px solid var(--line); }
+.fd-check { width: 44px; height: 48px; display: grid; place-items: center; }
+.fd-check::before { content: ""; grid-area: 1 / 1; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--faint); }
+.fd-check svg { grid-area: 1 / 1; width: 16px; height: 16px; color: var(--bg); position: relative; }
+.fd-check[aria-checked="true"]::before { background: var(--ink); border-color: var(--ink); }
+.fd-open { text-align: left; display: grid; gap: 3px; padding: 12px 0; }
+.fd-open b { font-size: 16px; }
+.fd-row.read .fd-open b { color: var(--muted); }
+.fd-why { font: 400 15px/1.45 var(--serif); color: var(--muted); }
+.fd-src { font-size: 12.5px; color: var(--faint); }
+.fd-note { margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--raise); font-size: 14px; color: var(--muted); }
+.fd-note b { color: var(--ink); }
+.fd-card .progress { margin-top: -2px; }
+.fd-label { margin: 0; font: 600 calc(24px * var(--ts, 1))/1.3 var(--serif); }
+.fd-why-big { margin: 0; font: 400 calc(18px * var(--ts, 1))/1.45 var(--serif); color: var(--muted); }

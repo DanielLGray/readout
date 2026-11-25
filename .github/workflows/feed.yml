@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.name "readout-bot"
           git config user.email "readout-bot@users.noreply.github.com"
-          git add docs/data
+          git add docs/data cache
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git commit -m "Feed update $(date -u +%F)"
           for i in 1 2 3 4 5; do              # another job may have pushed meanwhile

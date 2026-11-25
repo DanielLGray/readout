@@ -45,7 +45,17 @@ def public_host(host: str) -> bool:
 
 
 def _requests_transport(method: str, url: str, params: dict) -> "tuple[int, str]":
-    headers = {"User-Agent": USER_AGENT, "Accept": ACCEPT}
+    return _send(method, url, params, raw=False)
+
+
+def _requests_bytes(method: str, url: str, params: dict) -> "tuple[int, bytes]":
+    """The same, for images: the body as bytes."""
+    return _send(method, url, params, raw=True)
+
+
+def _send(method: str, url: str, params: dict, raw: bool):
+    headers = {"User-Agent": USER_AGENT, "Accept": "image/*, */*;q=0.5" if raw else ACCEPT}
+    fail = (lambda msg: (400, msg.encode())) if raw else (lambda msg: (400, msg))
     with requests.Session() as s:
         for _ in range(MAX_REDIRECTS + 1):
             r = s.request(method, url, headers=headers, timeout=60, allow_redirects=False, stream=True,
@@ -55,7 +65,7 @@ def _requests_transport(method: str, url: str, params: dict) -> "tuple[int, str]
                 r.close()
                 u = urlparse(nxt)
                 if u.scheme not in ("http", "https") or not u.hostname or not public_host(u.hostname):
-                    return 400, f"refused a redirect to {u.scheme}://{u.hostname or ''}"
+                    return fail(f"refused a redirect to {u.scheme}://{u.hostname or ''}")
                 if r.status_code in (301, 302, 303):
                     method = "GET"
                 url, params = nxt, {}
@@ -65,19 +75,25 @@ def _requests_transport(method: str, url: str, params: dict) -> "tuple[int, str]
                 body += chunk
                 if len(body) > MAX_BYTES:
                     r.close()
-                    return 400, f"response over {MAX_BYTES // 2**20} MB refused"
+                    return fail(f"response over {MAX_BYTES // 2**20} MB refused")
+            if raw:
+                return r.status_code, bytes(body)
             r._content = bytes(body)          # let requests decode it as usual
             r._content_consumed = True
             return r.status_code, r.text
-    return 400, "too many redirects"
+    return fail("too many redirects")
 
 
 class Http:
     """Rate-limited client. `min_interval` is per host, in seconds."""
 
     def __init__(self, transport: Optional[Transport] = None, intervals: Optional[dict] = None,
-                 retries: int = 5, sleep: Callable[[float], None] = time.sleep):
+                 retries: int = 5, sleep: Callable[[float], None] = time.sleep,
+                 bytes_transport: Optional[Callable] = None):
         self.transport = transport or _requests_transport
+        # images; a test transport without one gets no images (as if every download failed)
+        self.bytes_transport = bytes_transport or (_requests_bytes if transport is None else
+                                                   (lambda m, u, p: (404, b"no image transport")))
         self.intervals = intervals or {}
         self.retries = retries
         self.sleep = sleep
@@ -94,7 +110,7 @@ class Http:
             self.sleep(gap - (now - last))
         self._last[host] = time.monotonic()
 
-    def request(self, method: str, url: str, params: dict, expect_json: bool = False):
+    def request(self, method: str, url: str, params: dict, expect_json: bool = False, raw: bool = False):
         host = urlparse(url).netloc
         delay = 2.0
         last_err = ""
@@ -102,11 +118,11 @@ class Http:
             self._wait(host)
             self.calls += 1
             try:
-                status, text = self.transport(method, url, params)
+                status, text = (self.bytes_transport if raw else self.transport)(method, url, params)
             except Exception as exc:  # network hiccup
                 status, text, last_err = 0, "", f"{type(exc).__name__}: {exc}"
             if status == 200:
-                if not expect_json:
+                if raw or not expect_json:
                     return text
                 try:
                     data = json.loads(text)
@@ -119,7 +135,7 @@ class Http:
                     else:
                         return data
             elif status in (400, 404):
-                raise HttpError(f"{status} from {host}: {text[:300]}")
+                raise HttpError(f"{status} from {host}: {text[:300]!s}")
             else:
                 last_err = last_err or f"HTTP {status}"
             if attempt < self.retries:
@@ -137,6 +153,12 @@ class Http:
     def post_text(self, url: str, params: dict) -> str:
         return self.request("POST", url, params, expect_json=False)
 
+    def get_text(self, url: str, params: dict) -> str:
+        return self.request("GET", url, params, expect_json=False)
+
+    def get_bytes(self, url: str, params: Optional[dict] = None) -> bytes:
+        return self.request("GET", url, params or {}, raw=True)
+
 
 def log(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
@@ -148,4 +170,6 @@ def default_http() -> Http:
         "eutils.ncbi.nlm.nih.gov": 0.11 if key else 0.35,   # NCBI: 10/s with key, 3/s without
         "icite.od.nih.gov": 0.2,
         "clinicaltrials.gov": 0.3,
+        "pmc-oa-opendata.s3.amazonaws.com": 0.1,
+        "pmc.ncbi.nlm.nih.gov": 0.35,
     })
