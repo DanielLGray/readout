@@ -519,6 +519,34 @@
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
       "v": 3
+    },
+    "PMC13793516": {
+      "t": "2026-11-25",
+      "why": "no picture among 1 figures",
+      "v": 3
+    },
+    "PMC13793364": {
+      "t": "2026-11-25",
+      "why": "no picture among 1 figures",
+      "v": 3
+    },
+    "PMC13793296": {
+      "t": "2026-11-25",
+      "why": "no picture among 5 figures",
+      "v": 3
+    },
+    "PMC13793406": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13793406.webp",
+        "w": 960,
+        "h": 407,
+        "n": "Fig. 2",
+        "cap": "Body morphometric evaluations of abdominal muscle and fat areas. At the L3 level, an axial CT image was segmented into the subcutaneous fat area (in blue), visceral fat area (in red), normal attenuation muscle area (in yellow), low attenuation muscle area (in purple), and intermuscular fat area (in green)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
     }
   },
   "idconv": {
@@ -922,6 +950,16 @@
     "42858215": "2026-11-25",
     "42858214": "2026-11-25",
     "42853992": "2026-11-25",
-    "42853990": "2026-11-25"
+    "42853990": "2026-11-25",
+    "43080107": "2026-11-25",
+    "43079112": "2026-11-25",
+    "43079111": "2026-11-25",
+    "43079102": "2026-11-25",
+    "43079095": "2026-11-25",
+    "43079090": "2026-11-25",
+    "43079060": "2026-11-25",
+    "43078996": "2026-11-25",
+    "43078994": "2026-11-25",
+    "43078937": "2026-11-25"
   }
 }
