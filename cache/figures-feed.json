@@ -1,0 +1,911 @@
+{
+  "figs": {
+    "PMC13788141": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13788141.webp",
+        "w": 960,
+        "h": 653,
+        "n": "Fig. 3",
+        "cap": "Representative examples of CT images and visualization of prediction results of the proposed OP-PDAC using Grad-CAM",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13785406": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13785406.webp",
+        "w": 960,
+        "h": 914,
+        "n": "Fig. 2",
+        "cap": "A patient with a TIRADS 4b nodule in the left thyroid lobe and negative cervical lymph nodes on US who underwent [18F]-FAPI PET/CT imaging. PET/CT scan showed intense [18F]-FAPI uptake in the left thyroid lobe (solid arrow), along with mild [18F]-FAPI uptake in the left cervical lymph nodes (dotted arrow), which were confirmed as LNM based on histopathological examination. [18F]-FAPI= fluorine 18 labeled fibroblast activation protein inhibitor, US=ultrasound, LNM= lymph node metastasis",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13785431": {
+      "t": "2026-11-25",
+      "why": "no picture among 0 figures"
+    },
+    "PMC13785468": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13785468.webp",
+        "w": 960,
+        "h": 693,
+        "n": "Fig. 2",
+        "cap": "Multiple parathyroid adenomas on FECh PET/CT and dual-phase PCD-CT. Images from a patient with biochemically confirmed pHPT, a history of urolithiasis, and an inconclusive cervical ultrasound examination. Representative images show two histologically confirmed parathyroid adenomas. One adenoma is located orthotopically caudally, to the right of the thyroid gland (arrowhead), and one adenoma is located ectopically, paraesophageally (arrow). The images on the left (a) show the FECh PET scan, with two focal uptake spots corresponding to the adenomas, each with a suspected anatomical correlate in the axial slice from the non-contrast CT scan. The axial slice from the arterial (b) and portal-venous (c) contrast-enhanced dual-phase PCD-CT shows a clear enhancement of the lesions, particularly at 40 keV in the arterial phase, with a visually apparent washout in the venous phase, here best seen in the 70 keV images. PCD-CT, photon-counting detector CT; VNC, virtual non contrast; FECh, [18F]fluoroethylcholine",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13782085": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13782085.webp",
+        "w": 960,
+        "h": 735,
+        "n": "Fig. 4",
+        "cap": "Representative [68Ga]Ga-DOTATATE PET/CT images illustrating the diagnostic concordance and discordance between Integrated Interpretation and Liver Threshold Interpretation. (A–D) A 62-year-old female with a retroperitoneal (para-aortic) mass histopathologically confirmed as PPGL. CT shows heterogeneous hypoattenuation within the lesion indicating necrosis (A). PET images demonstrate intense, heterogeneous tracer uptake in the solid components (B–D). SUVmax of the lesion is 19.3, liver SUVmean is 7.0, and LLR is 5.9. Both Integrated Interpretation and Liver Threshold Interpretation diagnosed PPGL, concordant with the pathological diagnosis. (E–H) A 57-year-old male with a right adrenal nodule histopathologically confirmed as PPGL. CT shows a homogeneous hypodense nodule (E). PET images reveal heterogeneous tracer uptake (F–H) with SUVmax of 41.1, liver SUVmean of 10.2, and LLR of 1.9. Integrated Interpretation misinterpreted the lesion as non-PPGL (likely due to the low-density appearance on CT), whereas Liver Threshold Interpretation correctly diagnosed PPGL because the SUVmax exceeded the liver uptake threshold and LLR > 1.0. (I–L) A 55-year-old female with a left…",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13782375": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13782375.webp",
+        "w": 960,
+        "h": 469,
+        "n": "Fig. 2",
+        "cap": "3-T MRI in sagittal plane (a) demonstrating the placentae in a dichorionic, diamniotic twin pregnancy at 29 weeks in a patient with previous Caesarean sections. MRI allows for visualisation of the whole placenta and is useful in areas challenging for ultrasound (e.g. multiple pregnancy, fundal (Twin B, anterior) and posteriorly placed (Twin A, posterior, closest to cervix) placentae. A normal homogenous placenta (*) is seen in Twin B, with preserved retroplacental complex (arrowhead) and homogenous T2 signal. High field of view Sagittal Oblique T2 planes (b) of Twin A’s placenta; however, it demonstrates areas of focal uterine placental bulge, severe myometrial thinning and markedly heterogenous placental signal with thick, intraplacental hypointense bands (long arrows). Further abnormal vascularisation of the placental bed and impression of focal loss of the T2 retroplacental line suggest deep myoinvasive placenta adhesive disorder with likely focal full-thickness serosal penetration (placenta percreta). Both twins were delivered successfully at 34 weeks +2 days following a planned Caesarean section in conjunction with Urological and Interventional Radiology with intraoperative…",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13777914": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13777914.webp",
+        "w": 960,
+        "h": 514,
+        "n": "Fig. 5",
+        "cap": "Preliminary phantom SPECT imaging of [135La]La-DTPA. A syringe was utilized as uniformity phantom and scanned with high-energy general-purpose mouse collimator (HE-GP-M; B, left subfigure) and general-purpose mouse collimator (GP-M; B, right subfigure) to yield image quality parameters (A-B) following methods of [33, 35]. Lanthanum-135 images of a Derenzo phantom (C-D), acquired with the HE-GP-M collimator, yielding inter-rod contrast values and recovery coefficients",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13773071": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13773071.webp",
+        "w": 960,
+        "h": 475,
+        "n": "Figure 2.",
+        "cap": "Angiographic, optical frequency domain imaging (OFDI), and polarization-sensitive (PS)-OFDI images show a representative coronary lesion with high-risk plaque in a patient with chronic coronary syndrome. A, Coronary angiography showing a lesion in the proximal left anterior descending artery (white arrow). B, Longitudinal coronary computed tomography angiography (CCTA) view of the same segment. C1 through C3, Cross-sectional CCTA images at the levels indicated in B by the color-coded arrows. D1 through D3, Corresponding structural OFDI images showing lipid-rich plaques. E1 through E3, Birefringence maps demonstrating reduced birefringence in the plaque region. F1 through F3, Depolarization maps showing elevated depolarization signals in lipid-rich areas. G, Depolarization-derived lipid core burden index chemogram summarizing lipid-related depolarization signals along the matched coronary segment. Color scales for birefringence (Δn) and depolarization are shown at the bottom right.",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13769789": {
+      "t": "2026-11-25",
+      "why": "no picture among 7 figures"
+    },
+    "PMC13769785": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13769785.webp",
+        "w": 759,
+        "h": 960,
+        "n": "Fig. 2",
+        "cap": "Example of a radiograph of the left hand and wrist after automated bone age assessment by the software BoneAge (Gleamer) in a young boy with chronological age of 7 years and 11 months (indication for imaging: suspected precocious puberty). The bone age estimation by a pediatric radiologist was 6 years, by AI software, 6 years (SD 9 months)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13768539": {
+      "t": "2026-11-25",
+      "why": "no picture among 9 figures"
+    },
+    "PMC13755292": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13755292.webp",
+        "w": 581,
+        "h": 960,
+        "n": "Fig. 4",
+        "cap": "Biodistribution of [89Zr]Zr-BI 765063. Coronal maximum intensity projections of the patient with the larynx carcinoma 120 h p.i. at the low dose (A) and the blocking dose (B). Notice the strong decrease in bone marrow uptake at the blocking dose (B), with increased residual blood radioactivity compared to the low dose (A). Corrected Patlak plots for organ uptake across all patients on a logarithmic y-scale are shown in (C). Solid lines indicate the low dose, dotted lines the blocking dose and dashed lines the time before equilibrium. The gray rectangle represents the reference values for non-target-mediated uptake (no reference for bone marrow is currently available). cTPR: corrected tissue-to-plasma ratio",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13751946": {
+      "t": "2026-11-25",
+      "why": "no picture among 3 figures"
+    },
+    "PMC13748144": {
+      "t": "2026-11-25",
+      "why": "no picture among 7 figures"
+    },
+    "PMC13745607": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13745607.webp",
+        "w": 960,
+        "h": 800,
+        "n": "Fig. 3",
+        "cap": "The combination of FAPI and BS complemented each other to detect BM. a, Numbers of bone metastatic lesions being more detected by FAPI imaging than BS in different types of bone lesions. b, Representative imaging of FAPI and BS in a NSCLC patient with multiple osteoblastic BM. FAPI results were on the left, with 2 representative CT and SPECT/CT fusion figure of scapula lesion (above) and thoracic vertebra lesion (below). Anterior-posterior BS image was on the right. Green arrows indicate bone lesions positive on BS but negative on FAPI imaging",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13743648": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13743648.webp",
+        "w": 386,
+        "h": 960,
+        "n": "Fig. 1",
+        "cap": "A) Coronal maximum intensity projection (MIP) of [68Ga]Ga-FAPI-04 PET (left) and extracted [18F]FDG PET (right) with extensive, heterogeneous nodal and osseous disease. B) Supraclavicular nodal metastasis (blue line) with moderate uptake of [68Ga]Ga-FAPI-04, but intense [18F]FDG accumulation. C) Mediastinal nodal metastasis (red line) with low uptake of [68Ga]Ga-FAPI-04, but intense [18F]FDG accumulation. D) Bone metastasis (green line) with moderate uptake of [68Ga]Ga-FAPI-04, but intense [18F]FDG accumulation",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13743664": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13743664.webp",
+        "w": 960,
+        "h": 494,
+        "n": "Fig. 3",
+        "cap": "Illustration of intratumoral and peritumoral ROI generation. a The original tumor ROI was processed by a 2 mm outward dilation and a 1 mm inward erosion; the peritumoral ROI was defined as the annular boundary ring between these two masks, and the intratumoral ROI was obtained by a 1 mm erosion of the original ROI. b Original ROI overlaid on the MR image. c Intratumoral ROI overlaid on the MR image. d Peritumoral (boundary-ring) ROI overlaid on the MR image. ROI, region of interest",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13744824": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13744824.webp",
+        "w": 960,
+        "h": 388,
+        "n": "Fig. 2",
+        "cap": "Representative cases of muscle measurements at the T12 level on cardiac CT. A: An axial noncontrast CT image of a 63-year-old female patient showing the paravertebral muscles (in green) at the T12 level, with a paravertebral muscle index of 10.23 cm2/m2, indicating the absence of sarcopenia. She underwent surgical AVR 2 days after CT and was alive at 1 year after AVR. B: An axial contrast-enhanced CT image of a 91-year-old female patient showing the paravertebral muscles (in green) at the T12 level, with a paravertebral muscle index of 5.28 cm2/m2, indicating the presence of sarcopenia. She underwent transcatheter AVR 3 days after CT and died 156 days after AVR. T12 = 12th thoracic vertebra, CT = computed tomography, AVR = aortic valve replacement",
+        "lic": "CC BY-NC",
+        "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
+      }
+    },
+    "PMC13740201": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13740201.webp",
+        "w": 960,
+        "h": 483,
+        "n": "Fig. 3",
+        "cap": "The P-SMART method demonstrated on a sagittal T2-weighted MRI. Three steps: Identify—four landmarks (the bladder-prostate angle anteriorly; the prostatic apex anterior to the urethra; the seminal vesicle-prostate angle posteriorly; the prostatic apex posterior to the urethra). Divide—the anterior line bisected; the posterior line trisected. Join—upper anterior midpoint to second posterior point (base/mid-gland boundary); lower anterior midpoint to third posterior point (mid-gland/apex boundary)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13744818": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13744818.webp",
+        "w": 960,
+        "h": 488,
+        "n": "Fig. 2",
+        "cap": "Imaging findings in a 72-year-old man with HCC and non-cirrhotic chronic hepatitis C virus infection. A: An axial arterial-phase CT image showing a 2.7-cm enhancing mass (arrow) in the dome of liver segments IV/VIII. B: The lesion (arrow) shows delayed washout and an enhancing capsule, representing a typical enhancement pattern of HCC on the equilibrium-phase CT image. C, D: The lesion (arrows) also shows arterial enhancement on arterial-phase gadoxetic acid-enhanced magnetic resonance imaging (C) and hypointensity on hepatobiliary-phase images (D). E, F: The index tumor (arrows) shows high signal intensity on a T2-weighted image (E) and high signal intensity on a diffusion-weighted image (F), with a b-value of 800 s/mm2. The lesion was pathologically confirmed as an Edmondson grade III HCC following surgical resection, with no cirrhosis in the background liver. HCC = hepatocellular carcinoma, CT = computed tomography",
+        "lic": "CC BY-NC",
+        "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
+      }
+    },
+    "PMC13737341": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13737341.webp",
+        "w": 960,
+        "h": 868,
+        "n": "Fig. 1",
+        "cap": "[18F] FAPI-46 PET/CT of a 46-year-old male patient who presented with papillary thyroid carcinoma one month after surgery. An enlarged lymph node measuring 15 × 13 mm was identified adjacent to the left carotid sheath. This lesion showed intense [18F] FAPI-46 uptake (SUVmax = 12.1, SUVpeak = 7.5) and only mild [18F] FDG uptake (SUVmax = 2.3, SUVpeak = 1.9). Subsequent lymph node needle biopsy confirmed papillary thyroid carcinoma metastasis",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13737284": {
+      "t": "2026-11-25",
+      "why": "no picture among 7 figures"
+    },
+    "PMC13737363": {
+      "t": "2026-11-25",
+      "why": "no picture among 6 figures"
+    },
+    "PMC13737244": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13737244.webp",
+        "w": 960,
+        "h": 696,
+        "n": "Fig. 2",
+        "cap": "VP-PCCT perfusion maps and corresponding late arterial phase images demonstrate perfusion differences in HCC stratified by histological grade and MVI status. a, b Representative color-coded maps and corresponding late arterial phase images of HPI and BF in a 67-year-old man with well-differentiated HCC (a) and a 55-year-old man with poorly-differentiated HCC (b). c, d Maps and late arterial phase images of ALP and BF in a 41-year-old man with MVI-negative HCC (c) and a 38-year-old man with MVI-positive HCC (d). White arrows indicate tumor locations; contours delineate ROIs for tumor, peritumoral region, and liver parenchyma. Subscripts indicate measurement regions: _tumor = tumor, _peritumor = peritumoral region, _liver = liver parenchyma, _norm_peritumor = percentage of peritumoral to corresponding liver parenchymal perfusion values. HCC, hepatocellular carcinoma; MVI, microvascular invasion; VP-PCCT, dynamic volume perfusion CT with photon-counting CT",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13731590": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13731590.webp",
+        "w": 960,
+        "h": 654,
+        "n": "Fig. 3",
+        "cap": "Representative MRI images without and with L₁-norm regularization. Sigmoid colon adenocarcinoma in a 37-year-old man (A, B) and ascending colon adenocarcinoma in a 45-year-old woman (C, D). Oblique axial T2WI without L₁-norm regularization demonstrates parallel imaging artifacts (blue arrows) (A, C). Oblique axial T2WI with L₁-norm regularization shows improved image quality with artifact reduction and better tumor delineation (B, D). T2WI, T2-weighted imaging",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13728009": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13728009.webp",
+        "w": 950,
+        "h": 653,
+        "n": "Fig. 4",
+        "cap": "Distribution of lymph node metastasis positivity rates across different short-axis diameter cutoff values (5–13 mm) on preoperative CT",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13719923": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13719923.webp",
+        "w": 960,
+        "h": 659,
+        "n": "Fig. 1",
+        "cap": "Standardized uptake value (SUV) images of two Alzheimer’s patients, aged 74 (left) and 71 (right), showing minimal motion (Mean Blurring: 0.48 mm) and severe motion (Mean Blurring: 5.01 mm), respectively, during a 30-minute acquisition. DDLM: data-driven list-mode motion correction. PRFB: post-reconstruction frame based motion correction. noMOCO: No motion Correction",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13719947": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13719947.webp",
+        "w": 960,
+        "h": 367,
+        "n": "Fig. 1",
+        "cap": "A 56-year-old male with MASLD. a Example of ROI delineation for PDFF; b measurement diagram of visceral adipose tissue area, subcutaneous adipose tissue, and waist circumference",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13719960": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13719960.webp",
+        "w": 659,
+        "h": 960,
+        "n": "Fig. 2",
+        "cap": "Concordance of prostate MRI quality evaluation compared with the reference pre- and post-lecture. a Overall accuracy and balanced accuracy pre- and post-lecture. b Accuracy in subgroups. Overall accuracy increased from 66.7% to 76.7%, and balanced accuracy increased from 62.9% to 84.2%. Subgroup accuracy improved from 60.0–70.0% to 70.7–82.7%. PI-QUAL, prostate imaging quality",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13719943": {
+      "t": "2026-11-25",
+      "why": "no picture among 6 figures"
+    },
+    "PMC13710466": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13710466.webp",
+        "w": 960,
+        "h": 776,
+        "n": "Fig. 4",
+        "cap": "A–D Dual-isotope SPECT/CT images of mice bearing HT1080-FAP and HT1080 tumor xenografts at 4 h p.i. of 161Tb- and 177Lu-labeled FAPIs. A [161Tb]Tb-FAPI-46 and [177Lu]Lu-FAPI-46; B [161Tb]Tb-OncoFAP and [177Lu]Lu-OncoFAP; C [161Tb]Tb-FAP-2286 and [177Lu]Lu-FAP-2286; D [161Tb]Tb-3BP-3940 and [177Lu]Lu-3BP-3940. FAP+: HT1080-FAP tumor; FAP-: HT1080 tumor; Ki: Kidney; Bl: Urinary bladder; Gb: Gall bladder; Int: Intestines. Representative maximum intensity projection images of one mouse from studies performed with n = 2 mice per condition",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13695640": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13695640.webp",
+        "w": 421,
+        "h": 960,
+        "n": "Fig. 1",
+        "cap": "An illustrative comparison between myocardial PET perfusion parameters between a 70-year-old male HD patient (A) and a 69-year-old female PD patient (B). Both patients had nephrosclerosis leading to ESRD requiring dialysis. Patient A had been on HD for 4 years, whereas patient B had been on PD for 1 year. MBFstress, myocardial blood flow at stress (ml/g/min); MBFrest, myocardial blood flow at rest (ml/g/min); CFR, coronary flow reserve",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13694640": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13694640.webp",
+        "w": 770,
+        "h": 960,
+        "n": "Fig. 1",
+        "cap": "Tracers collected from ADNI (A), SCAN (B) and Mayo (C) cohorts used in the study. The y-axis shows the number of scans next to each tracers with total count at the bottom, and the x-axis shows the study year where the PET scans were performed",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13727854": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13727854.webp",
+        "w": 960,
+        "h": 517,
+        "n": "Fig. 1",
+        "cap": "[99mTc]Tc−DPD extracardiac biodistribution phenotypes in the Bologna cohort. (A) ATTRv subtype: Whole-body scan showing intense biventricular cardiac uptake accompanied by atypical pulmonary tracer retention (Janssen Score ≥ 1) and diffuse soft-tissue fixation across the appendicular, thoracic, and abdominal regions. (B) AL amyloidosis: hepato-splenic visceral uptake acting as a tracer-independent “red flag” for light-chain disease, with minimal myocardial avidity. (C) ATTRwt subtype: Miscellaneous scans demonstrating biventricular cardiac uptake with diffuse soft-tissue fixation limited to the appendicular, thoracic, and abdominal regions",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13683290": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13683290.webp",
+        "w": 770,
+        "h": 960,
+        "n": "Fig. 4",
+        "cap": "Clinical impact of applying the corrected liver SUV as a PROMISE score cutoff on PSMA PET imaging with 18F-PSMA-1007. (A) Distribution of PROMISE PSMA scores (0–3) across all 95 cases using three different 1–2 cutoff schemes: raw liver, spleen, and corrected liver, displayed as pie charts. (B) Among 34 lesions originally assigned score 1 using the raw liver cutoff, 61.8% remain score 1 across all schemes. Using the corrected liver cutoff, all other cases are upstaged to score 2, whereas only 11.8% are upstaged using the spleen cutoff. (C) Representative case: patient status post radiation therapy to the prostate with gradually rising PSA over the past year (up to 4.1 several weeks before imaging) under hormonal therapy. An intraprostatic focus (SUVmax 11.5) is classified as PSMA score 1 using raw liver SUV (15.7) or spleen SUV [14], and as score 2 using the corrected liver SUV (8.8). This single finding was considered positive on clinical grounds, and hormonal therapy was intensified with enzalutamide. (D) Another representative case: patient with biochemical recurrence shows focal uptake in the right ramus pubis/acetabulum (SUV 7, nonspecific subtle osteoblastic changes on CT).…",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13773070": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13773070.webp",
+        "w": 960,
+        "h": 789,
+        "n": "Figure 5.",
+        "cap": "Incremental prognostic value of 3D computed tomography (CT) body composition. Harrell C statistics with 95% CIs are shown for clinical models alone and after addition of 3D CT body composition measures. Body composition included body surface area-indexed volumes and tissue attenuations of subcutaneous adipose tissue, visceral adipose tissue, muscular adipose tissue, and skeletal muscle. Model 1 included age and sex; Model 2 additionally included body mass index (BMI); and Model 3 additionally included hypertension, diabetes, and chronic renal failure. P values are derived from likelihood ratio (LR) tests assessing the incremental predictive information provided by body composition measures beyond the corresponding clinical model.",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13675461": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13675461.webp",
+        "w": 960,
+        "h": 422,
+        "n": "Fig. 2",
+        "cap": "Age and 64Cu-RYM2 PET/CT in angiotensin II-infused Apoe−/− mice. (A) Illustrative examples of fused 64Cu-RYM2 PET/contrast-enhanced CT images (axial, coronal, and sagittal) acquired 7 days after starting angiotensin II infusion in young (8–10 weeks) and old (> 51 weeks) Apoe−/− mice. Red arrows indicate the suprarenal abdominal aorta. (B) Quantification of the 64Cu-RYM2 signal in the descending thoracic aorta (DTA) and suprarenal abdominal aorta (SRA) in young and old mice. **: P < 0.01. SUV: Standardized uptake value",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13675434": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13675434.webp",
+        "w": 960,
+        "h": 608,
+        "n": "Fig. 3",
+        "cap": "A 65-year-old woman presented with a solitary adnexal mass. The sagittal T2WI FS (A), axial T2WI (D) images showed the cystic component with high intensity and the solid component with iso-high intensity. The sagittal T1WI (B) image represented the cystic component with low intensity and the solid component with lower intensity. The sagittal T1WI enhanced image (C) represented enhancement of the solid component similar to myometrium. The DWI (E) and ADC (F) maps demonstrated no obvious limited diffusion of the solid component. The ADC map showed an ADC mean value of 1.60 × 10−3 mm2/s (red circle). This case was mistakenly classified as malignant with an O-RADS MRI score of 4, while correctly categorized as benign with a score of 3 due to no limited diffusion and ADC value of cystic fluid in accordance with the modified non-contrast O-RADS MRI scoring system. The final pathology diagnosis confirmed that it was a left ovarian seromucinous cystadenoma",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13672765": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13672765.webp",
+        "w": 960,
+        "h": 659,
+        "n": "Fig. 2",
+        "cap": "Number of PMMRI scans with corresponding body part per case",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13669286": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13669286.webp",
+        "w": 960,
+        "h": 512,
+        "n": "Fig. 2",
+        "cap": "Segmentation of the renal pelvis and bladder in the excretory phase renal CT of a 46-year-old male patient",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13661840": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13661840.webp",
+        "w": 906,
+        "h": 960,
+        "n": "Fig. 2",
+        "cap": "[18F]F-AraG Biodistribution; A) Maximum intensity projection of the baseline [18F]F-AraG PET/CT-scan of patient A at 60–70 min p.i. in SUVBW. Organs with increased uptake are depicted in orange letters. The focal uptake next to the thyroid gland is due to non-specific tracer accumulation (Suppl. Figure 4). Arrows indicate tumor locations. The right column depicts the organ uptake over time for the bone marrow (B), the spleen (C) and the liver (D). Note the slight decrease in activity for the bone marrow and spleen, suggesting reversible uptake while the increasing uptake for the liver indicates irreversible tracer accumulation. CP: choroid plexus, Pi: pituitary gland, Sa: salivary gland, T: thyroid gland, BM: bone marrow, M: myocardium, L: liver, St: stomach, Sp: spleen, Pa: pancreas, K: kidney, I: intestines, B: bladder, SUV: standardized uptake value normalized for LBM: lean body mass, BW: body weight",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      }
+    },
+    "PMC13661850": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13661850.webp",
+        "w": 960,
+        "h": 763,
+        "n": "Fig. 3",
+        "cap": "Inter-observer variability of ADC measurements across different ROI strategies and timepoints. Bar plots show ICCs (ICC[2,1]) with 95% confidence intervals (CIs) for five ROI methods at (a) baseline (n = 25), (b) post-treatment (n = 21), and (c) as the percentage change (%ΔADC) (n = 21). d–f Display the corresponding ICCs for nADC values using muscle tissue as reference",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13661870": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13661870.webp",
+        "w": 950,
+        "h": 716,
+        "n": "Fig. 1",
+        "cap": "Axial contrast-enhanced CT (A) shows a hypodense lesion in the pancreatic head encasing the superior mesenteric vein, causing its deformation and narrowing. Stage according to NCCN: borderline resectable. Post-NAT MRI T2 (B), arterial phase (C), and portal-venous phase (D) images show that the lesion is reduced in size with re-expansion of the superior mesenteric vein and residual contact between the mass and the SMV < 180°. The partial response to treatment downstaged the lesion as resectable according to NCCN. The patient underwent pancreaticoduodenectomy; pathology of the resected specimen confirmed residual infiltration of the SMV and negative margins (R0)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13661852": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13661852.webp",
+        "w": 950,
+        "h": 704,
+        "n": "Fig. 1",
+        "cap": "B-lines on lung ultrasound. Vertical hyperechoic artifacts (arrows) originating from the pleural line and extending to the bottom of the screen without fading, indicating alveolar-interstitial syndrome consistent with pulmonary edema. This pattern is characteristic of chemical inhalation injury, acute respiratory distress syndrome, and COVID-19 pneumonia",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13658753": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13658753.webp",
+        "w": 960,
+        "h": 401,
+        "n": "Fig. 2",
+        "cap": "Diffusion tensor imaging (DTI) in a patient with high-grade glioma as displayed on axial standard T2-weighted imaging (A) and contrast-enhanced T1-weighted imaging (B), with DTI showing directional colour coding of white matter tracts (C). According to directionally encoded colour, red, green, and blue (R/G/B) depict a principal direction (left–right, anterior–posterior, and superior–inferior), and the tumour seems to compress and disrupt white matter tracts (C)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13667856": {
+      "t": "2026-11-25",
+      "why": "license TDM"
+    },
+    "PMC13652788": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13652788.webp",
+        "w": 960,
+        "h": 337,
+        "n": "Fig. 3",
+        "cap": "Type I HWWS. A 15-year-old girl with an incidental finding of renal agenesis and uterine malformation. a–c Coronal (a), sagittal (b), and axial (c) T2-weighted 3D images demonstrate an oblique vaginal septum. The left lower vagina is obstructed and distended with a high T2 signal (thick red arrow), while the right vagina is collapsed and flattened (thin red arrow). c Axial image also shows a didelphic uterus (white arrow heads). d T1-weighted image reveals high T1-signal blood products within the distended left vagina. e Large-FOV coronal T2 image demonstrates the absence of the left kidney. f Spinal radiograph shows mild scoliosis. g 3D reconstructed model depicts the dilated left vagina (green) and the didelphic uterine anomaly (pink). The patient underwent excision of the oblique vaginal septum; surgery confirmed an oblique septum with a didelphic uterus, consistent with a Type I HWWS",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    "PMC13652791": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC13652791.webp",
+        "w": 950,
+        "h": 720,
+        "n": "Fig. 2",
+        "cap": "Imaging findings in a 37-year-old female with CD. T1-weighted imaging (a) and MRCP (d) demonstrate cystic dilation of the intrahepatic bile ducts, which communicate with the biliary tree (arrow). T2-weighted imaging (b) and gadoxetic acid disodium-enhanced portal venous phase imaging (c) reveal the “central dot” sign, a characteristic finding frequently identified in CD (arrow)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    }
+  },
+  "idconv": {
+    "43077107": "2026-11-25",
+    "43077105": "2026-11-25",
+    "43077100": "2026-11-25",
+    "43077006": "2026-11-25",
+    "43076977": "2026-11-25",
+    "43076976": "2026-11-25",
+    "43076968": "2026-11-25",
+    "43076967": "2026-11-25",
+    "43076966": "2026-11-25",
+    "43076965": "2026-11-25",
+    "43076930": "2026-11-25",
+    "43076917": "2026-11-25",
+    "43076683": "2026-11-25",
+    "43076678": "2026-11-25",
+    "43076677": "2026-11-25",
+    "43076675": "2026-11-25",
+    "43076674": "2026-11-25",
+    "43076673": "2026-11-25",
+    "43076672": "2026-11-25",
+    "43073449": "2026-11-25",
+    "43071592": "2026-11-25",
+    "43071588": "2026-11-25",
+    "43071585": "2026-11-25",
+    "43071180": "2026-11-25",
+    "43071179": "2026-11-25",
+    "43071178": "2026-11-25",
+    "43071156": "2026-11-25",
+    "43070999": "2026-11-25",
+    "43070988": "2026-11-25",
+    "43071594": "2026-11-25",
+    "43071018": "2026-11-25",
+    "43070990": "2026-11-25",
+    "43066668": "2026-11-25",
+    "43066798": "2026-11-25",
+    "43066785": "2026-11-25",
+    "43066784": "2026-11-25",
+    "43064644": "2026-11-25",
+    "43064186": "2026-11-25",
+    "43062625": "2026-11-25",
+    "43062624": "2026-11-25",
+    "43064865": "2026-11-25",
+    "43064857": "2026-11-25",
+    "43064856": "2026-11-25",
+    "43062466": "2026-11-25",
+    "43062337": "2026-11-25",
+    "43057878": "2026-11-25",
+    "43056275": "2026-11-25",
+    "43055164": "2026-11-25",
+    "43057881": "2026-11-25",
+    "43057880": "2026-11-25",
+    "43057879": "2026-11-25",
+    "43056276": "2026-11-25",
+    "43056274": "2026-11-25",
+    "43056272": "2026-11-25",
+    "43055695": "2026-11-25",
+    "43052075": "2026-11-25",
+    "43051339": "2026-11-25",
+    "43051338": "2026-11-25",
+    "43051337": "2026-11-25",
+    "43051336": "2026-11-25",
+    "43051335": "2026-11-25",
+    "43049372": "2026-11-25",
+    "43049370": "2026-11-25",
+    "43049369": "2026-11-25",
+    "43051027": "2026-11-25",
+    "43050605": "2026-11-25",
+    "43049893": "2026-11-25",
+    "43049892": "2026-11-25",
+    "43049891": "2026-11-25",
+    "43049373": "2026-11-25",
+    "43044999": "2026-11-25",
+    "43044998": "2026-11-25",
+    "43043187": "2026-11-25",
+    "43043183": "2026-11-25",
+    "43043181": "2026-11-25",
+    "43043180": "2026-11-25",
+    "43043468": "2026-11-25",
+    "43043467": "2026-11-25",
+    "43043182": "2026-11-25",
+    "43036949": "2026-11-25",
+    "43040039": "2026-11-25",
+    "43037691": "2026-11-25",
+    "43037690": "2026-11-25",
+    "43037689": "2026-11-25",
+    "43034939": "2026-11-25",
+    "43034938": "2026-11-25",
+    "43034937": "2026-11-25",
+    "43034255": "2026-11-25",
+    "43034256": "2026-11-25",
+    "43026718": "2026-11-25",
+    "43025623": "2026-11-25",
+    "43024029": "2026-11-25",
+    "43021502": "2026-11-25",
+    "43024054": "2026-11-25",
+    "43023938": "2026-11-25",
+    "43023627": "2026-11-25",
+    "43020620": "2026-11-25",
+    "43020615": "2026-11-25",
+    "43020613": "2026-11-25",
+    "43020612": "2026-11-25",
+    "43020611": "2026-11-25",
+    "43020361": "2026-11-25",
+    "43020360": "2026-11-25",
+    "43019586": "2026-11-25",
+    "43019578": "2026-11-25",
+    "43019572": "2026-11-25",
+    "43019563": "2026-11-25",
+    "43019235": "2026-11-25",
+    "43019231": "2026-11-25",
+    "43019008": "2026-11-25",
+    "43018449": "2026-11-25",
+    "43021015": "2026-11-25",
+    "43020696": "2026-11-25",
+    "43020619": "2026-11-25",
+    "43020618": "2026-11-25",
+    "43020617": "2026-11-25",
+    "43020616": "2026-11-25",
+    "43020614": "2026-11-25",
+    "43020610": "2026-11-25",
+    "43019576": "2026-11-25",
+    "43019573": "2026-11-25",
+    "43019565": "2026-11-25",
+    "43019243": "2026-11-25",
+    "43019238": "2026-11-25",
+    "43019234": "2026-11-25",
+    "43019233": "2026-11-25",
+    "43019230": "2026-11-25",
+    "43019229": "2026-11-25",
+    "43019228": "2026-11-25",
+    "43019227": "2026-11-25",
+    "43019224": "2026-11-25",
+    "43019223": "2026-11-25",
+    "43018705": "2026-11-25",
+    "43018704": "2026-11-25",
+    "43018703": "2026-11-25",
+    "43018702": "2026-11-25",
+    "43016126": "2026-11-25",
+    "43015151": "2026-11-25",
+    "43013093": "2026-11-25",
+    "43013090": "2026-11-25",
+    "43012972": "2026-11-25",
+    "43012971": "2026-11-25",
+    "43008994": "2026-11-25",
+    "43007084": "2026-11-25",
+    "43007083": "2026-11-25",
+    "43007082": "2026-11-25",
+    "43007081": "2026-11-25",
+    "43007080": "2026-11-25",
+    "43006901": "2026-11-25",
+    "43006899": "2026-11-25",
+    "43006898": "2026-11-25",
+    "43008425": "2026-11-25",
+    "43006900": "2026-11-25",
+    "43003605": "2026-11-25",
+    "43003323": "2026-11-25",
+    "43002608": "2026-11-25",
+    "43002597": "2026-11-25",
+    "43002579": "2026-11-25",
+    "43002570": "2026-11-25",
+    "43002566": "2026-11-25",
+    "43002564": "2026-11-25",
+    "43002603": "2026-11-25",
+    "43002594": "2026-11-25",
+    "43002589": "2026-11-25",
+    "43002576": "2026-11-25",
+    "43002574": "2026-11-25",
+    "43002571": "2026-11-25",
+    "43002569": "2026-11-25",
+    "43002567": "2026-11-25",
+    "43002565": "2026-11-25",
+    "43000449": "2026-11-25",
+    "42998732": "2026-11-25",
+    "42998731": "2026-11-25",
+    "42998158": "2026-11-25",
+    "42998628": "2026-11-25",
+    "42998163": "2026-11-25",
+    "42998161": "2026-11-25",
+    "42998159": "2026-11-25",
+    "42998146": "2026-11-25",
+    "42998145": "2026-11-25",
+    "42993301": "2026-11-25",
+    "42993106": "2026-11-25",
+    "42993105": "2026-11-25",
+    "42995281": "2026-11-25",
+    "42994072": "2026-11-25",
+    "42993000": "2026-11-25",
+    "42989855": "2026-11-25",
+    "42986774": "2026-11-25",
+    "42986772": "2026-11-25",
+    "42986771": "2026-11-25",
+    "42986492": "2026-11-25",
+    "42986491": "2026-11-25",
+    "42986195": "2026-11-25",
+    "42986194": "2026-11-25",
+    "42988567": "2026-11-25",
+    "42988566": "2026-11-25",
+    "42988565": "2026-11-25",
+    "42988564": "2026-11-25",
+    "42988563": "2026-11-25",
+    "42986432": "2026-11-25",
+    "42982907": "2026-11-25",
+    "42982615": "2026-11-25",
+    "42980255": "2026-11-25",
+    "42980254": "2026-11-25",
+    "42980252": "2026-11-25",
+    "42978146": "2026-11-25",
+    "42981999": "2026-11-25",
+    "42980253": "2026-11-25",
+    "42977647": "2026-11-25",
+    "42975820": "2026-11-25",
+    "42975389": "2026-11-25",
+    "42975307": "2026-11-25",
+    "42975305": "2026-11-25",
+    "42975303": "2026-11-25",
+    "42975301": "2026-11-25",
+    "42975709": "2026-11-25",
+    "42975708": "2026-11-25",
+    "42975707": "2026-11-25",
+    "42975706": "2026-11-25",
+    "42975644": "2026-11-25",
+    "42975643": "2026-11-25",
+    "42975642": "2026-11-25",
+    "42975641": "2026-11-25",
+    "42975390": "2026-11-25",
+    "42972950": "2026-11-25",
+    "42972079": "2026-11-25",
+    "42969977": "2026-11-25",
+    "42969958": "2026-11-25",
+    "42967440": "2026-11-25",
+    "42967258": "2026-11-25",
+    "42966716": "2026-11-25",
+    "42965524": "2026-11-25",
+    "42966148": "2026-11-25",
+    "42965692": "2026-11-25",
+    "42965591": "2026-11-25",
+    "42965590": "2026-11-25",
+    "42965589": "2026-11-25",
+    "42963303": "2026-11-25",
+    "42962778": "2026-11-25",
+    "42962514": "2026-11-25",
+    "42961643": "2026-11-25",
+    "42961642": "2026-11-25",
+    "42961641": "2026-11-25",
+    "42957801": "2026-11-25",
+    "42957208": "2026-11-25",
+    "42957204": "2026-11-25",
+    "42957079": "2026-11-25",
+    "42957078": "2026-11-25",
+    "42955840": "2026-11-25",
+    "42954786": "2026-11-25",
+    "42954785": "2026-11-25",
+    "42957211": "2026-11-25",
+    "42957210": "2026-11-25",
+    "42957209": "2026-11-25",
+    "42957205": "2026-11-25",
+    "42957199": "2026-11-25",
+    "42957197": "2026-11-25",
+    "42955837": "2026-11-25",
+    "42955836": "2026-11-25",
+    "42955096": "2026-11-25",
+    "42955038": "2026-11-25",
+    "42955037": "2026-11-25",
+    "42951765": "2026-11-25",
+    "42951722": "2026-11-25",
+    "42951721": "2026-11-25",
+    "42951718": "2026-11-25",
+    "42950937": "2026-11-25",
+    "42950523": "2026-11-25",
+    "42949357": "2026-11-25",
+    "42948875": "2026-11-25",
+    "42951720": "2026-11-25",
+    "42951719": "2026-11-25",
+    "42951717": "2026-11-25",
+    "42951680": "2026-11-25",
+    "42950525": "2026-11-25",
+    "42949521": "2026-11-25",
+    "42949152": "2026-11-25",
+    "42937538": "2026-11-25",
+    "42937536": "2026-11-25",
+    "42937535": "2026-11-25",
+    "42945842": "2026-11-25",
+    "42944911": "2026-11-25",
+    "42944910": "2026-11-25",
+    "42944909": "2026-11-25",
+    "42937537": "2026-11-25",
+    "42933554": "2026-11-25",
+    "42933252": "2026-11-25",
+    "42933251": "2026-11-25",
+    "42925455": "2026-11-25",
+    "42925454": "2026-11-25",
+    "42926166": "2026-11-25",
+    "42925843": "2026-11-25",
+    "42925842": "2026-11-25",
+    "42925841": "2026-11-25",
+    "42918472": "2026-11-25",
+    "42914185": "2026-11-25",
+    "42914183": "2026-11-25",
+    "42914177": "2026-11-25",
+    "42913766": "2026-11-25",
+    "42913765": "2026-11-25",
+    "42913764": "2026-11-25",
+    "42911849": "2026-11-25",
+    "42919672": "2026-11-25",
+    "42918883": "2026-11-25",
+    "42914181": "2026-11-25",
+    "42914180": "2026-11-25",
+    "42914178": "2026-11-25",
+    "42912667": "2026-11-25",
+    "42912649": "2026-11-25",
+    "42912648": "2026-11-25",
+    "42912647": "2026-11-25",
+    "42912642": "2026-11-25",
+    "42912580": "2026-11-25",
+    "42912579": "2026-11-25",
+    "42912576": "2026-11-25",
+    "42912575": "2026-11-25",
+    "42912573": "2026-11-25",
+    "42912571": "2026-11-25",
+    "42912569": "2026-11-25",
+    "42912561": "2026-11-25",
+    "42912553": "2026-11-25",
+    "42912552": "2026-11-25",
+    "42912551": "2026-11-25",
+    "42912550": "2026-11-25",
+    "42912542": "2026-11-25",
+    "42912540": "2026-11-25",
+    "42911850": "2026-11-25",
+    "42911395": "2026-11-25",
+    "42911394": "2026-11-25",
+    "42911393": "2026-11-25",
+    "42911391": "2026-11-25",
+    "42900033": "2026-11-25",
+    "42899941": "2026-11-25",
+    "42899937": "2026-11-25",
+    "42899936": "2026-11-25",
+    "42900382": "2026-11-25",
+    "42899938": "2026-11-25",
+    "42897082": "2026-11-25",
+    "42897081": "2026-11-25",
+    "42896449": "2026-11-25",
+    "42895551": "2026-11-25",
+    "42892356": "2026-11-25",
+    "42891710": "2026-11-25",
+    "42891705": "2026-11-25",
+    "42891704": "2026-11-25",
+    "42891703": "2026-11-25",
+    "42891702": "2026-11-25",
+    "42886154": "2026-11-25",
+    "42887436": "2026-11-25",
+    "42886364": "2026-11-25",
+    "42886040": "2026-11-25",
+    "42880964": "2026-11-25",
+    "42880961": "2026-11-25",
+    "42880960": "2026-11-25",
+    "42880957": "2026-11-25",
+    "42879295": "2026-11-25",
+    "42878809": "2026-11-25",
+    "42878641": "2026-11-25",
+    "42881022": "2026-11-25",
+    "42880965": "2026-11-25",
+    "42880959": "2026-11-25",
+    "42880958": "2026-11-25",
+    "42880153": "2026-11-25",
+    "42880152": "2026-11-25",
+    "42879296": "2026-11-25",
+    "42879293": "2026-11-25",
+    "42878808": "2026-11-25",
+    "42878795": "2026-11-25",
+    "42875622": "2026-11-25",
+    "42874221": "2026-11-25",
+    "42874220": "2026-11-25",
+    "42867376": "2026-11-25",
+    "42867375": "2026-11-25",
+    "42867374": "2026-11-25",
+    "42867370": "2026-11-25",
+    "42867540": "2026-11-25",
+    "42867539": "2026-11-25",
+    "42867538": "2026-11-25",
+    "42867514": "2026-11-25",
+    "42867371": "2026-11-25",
+    "42863651": "2026-11-25",
+    "42862280": "2026-11-25",
+    "42862279": "2026-11-25",
+    "42862278": "2026-11-25",
+    "42862277": "2026-11-25",
+    "42862276": "2026-11-25",
+    "42862275": "2026-11-25",
+    "42860780": "2026-11-25",
+    "42864228": "2026-11-25",
+    "42862255": "2026-11-25",
+    "42860146": "2026-11-25",
+    "42859062": "2026-11-25",
+    "42858907": "2026-11-25",
+    "42859213": "2026-11-25",
+    "42859212": "2026-11-25",
+    "42858633": "2026-11-25",
+    "42858632": "2026-11-25",
+    "42858215": "2026-11-25",
+    "42858214": "2026-11-25",
+    "42853992": "2026-11-25",
+    "42853990": "2026-11-25"
+  }
+}
