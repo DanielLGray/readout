@@ -668,7 +668,8 @@ function refreshFeed(keepKey, keepIdx) {
   if (at < 0 && keepIdx > 0) at = Math.min(keepIdx, S.list.length - 1);      // that card left (you hid it): stay where you were
   if (at > 0 && at < 200) {
     while (S.rendered <= at + 1 && S.rendered < S.list.length) appendCards(10);
-    view.scrollTop = c.offsetTop;
+    const c = [...view.children].filter((n) => n._it)[at];
+    view.scrollTop = c ? c.offsetTop : at * view.clientHeight;
   }
 }
 
