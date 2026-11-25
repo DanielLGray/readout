@@ -101,10 +101,19 @@ const rerender = () => renderTune(true);
 // ── reading comfort, library access, your data ─────────────────────────────
 function textSizeSection() {
   return el("section", { class: "sect", id: "tune-text" }, el("h2", {}, "Text size"),
-    el("p", { class: "sub" }, "For conclusions, headlines and abstracts. Long conclusions that no longer fit continue in the abstract."),
+    el("p", { class: "sub" }, "For conclusions, headlines and abstracts. Very long conclusions continue in the abstract."),
     segPick(null, [[0.9, "Small"], [1, "Default"], [1.12, "Large"], [1.25, "Larger"]], T.textSize, (v) => {
       setTune({ textSize: Number(v) }); applyTextSize(); requestAnimationFrame(fitAll); rerender();
     }));
+}
+
+// phones only: iPads and computers always show compact cards, in columns
+function layoutSection() {
+  if (WIDE.matches) return null;
+  return el("section", { class: "sect", id: "tune-layout" }, el("h2", {}, "Cards"),
+    segPick(null, [["compact", "Compact"], ["paged", "One per screen"]], T.cardLayout, (v) => {
+      setTune({ cardLayout: v }); S.feedDirty = true; rerender();
+    }, "Compact: each card is as tall as what it holds, so the next one starts right below. One per screen: each card fills the screen and you swipe up card by card. iPads and computers always show compact cards, in columns."));
 }
 
 function librarySection() {
@@ -218,6 +227,7 @@ function readingPane() {
   const [seen, opened, saved, listened] = sum;
   const out = [
     textSizeSection(),
+    layoutSection(),
     todaySection(),
     el("section", { class: "sect", id: "tune-stats" }, el("h2", {}, "Your reading"),
       segPick(null, [["7", "Last 7 days"], ["30", "Last 30 days"]], TU.span, (v) => { TU.span = v; rerender(); })),

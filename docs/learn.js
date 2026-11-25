@@ -187,11 +187,7 @@ function openFeedback(it, picked = null) {
     S.onSheetClose = () => {
       document.querySelectorAll(`[data-key="${CSS.escape(key)}"] .act.react`).forEach((b) => b.replaceWith(reactBtn(it)));
       if (!changed) return;
-      if (S.tab === "feed") {
-        const v = $("#view-feed");
-        const idx = v.clientHeight ? Math.round(v.scrollTop / v.clientHeight) : 0;
-        refreshFeed(currentKey(true), idx);
-      }
+      if (S.tab === "feed") refreshFeed(currentKey(true), currentIdx());
     };
   };
   draw(picked);
@@ -600,7 +596,9 @@ function guessCardEl(it) {
     if (!card.isConnected) return;
     const c = paperCardEl(it);
     c._it = it;
+    c.append(clearBtn(it));
     card.replaceWith(c);
+    gridRO?.observe(c);
     seenObserver?.observe(c);
     requestAnimationFrame(() => fitCard(c));
   };
@@ -648,6 +646,13 @@ function fitGuess(card) {
   if (mLabel) mLabel.hidden = false;
   const title = card.querySelector(".card-title");
   title?.classList.add("clamp");
+  if (isFlow()) {                    // compact: the question up to six lines, the methods four, the rest a tap away
+    if (q) clamp(q, "6");
+    if (m) clamp(m, "4");
+    if ([q, m].some((p) => p && p.scrollHeight > p.clientHeight + 1))
+      inner.append(el("button", { class: "concl-label more-note", onclick: () => openGuessText(card) }, "Read the full question and methods"));
+    return;
+  }
   const over = () => inner.scrollHeight > box.clientHeight + 1;
   if (!over()) {                                            // room to spare: the whole title too, if it fits
     if (title && title.scrollHeight > title.clientHeight + 1) { title.classList.remove("clamp"); if (over()) title.classList.add("clamp"); }
@@ -824,7 +829,7 @@ function briefCoverEl(it) {
       g ? el("li", {}, el("b", {}, "Guess the result. "), `${g === 1 ? "One paper hides" : "Two papers hide"} the conclusion until you’ve thought it through.`) : null,
       it.fd ? el("li", {}, el("b", {}, "Foundations. "), `${it.fd.read} of ${it.fd.total} read.`) : null,
       m ? el("li", {}, el("b", {}, `${m.name}. `), `${whenText(m)[0].toUpperCase()}${whenText(m).slice(1)}${m.place ? `, ${m.place.split(",").pop().trim()}` : ""}.`) : null),
-    el("p", { class: "fine brief-swipe" }, n || it.stories.length ? "Swipe up to start." : "Swipe up for the rest."));
+    el("p", { class: "fine brief-swipe swipe-hint" }, n || it.stories.length ? "Swipe up to start." : "Swipe up for the rest."));
 }
 function briefStoriesEl(it) {
   const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));

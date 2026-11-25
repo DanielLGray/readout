@@ -129,6 +129,7 @@ const TUNE_DEFAULTS = {
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
   swipe: true,          // swipe a card left to save it, right to clear it
+  cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
@@ -170,6 +171,7 @@ function loadTune() {
     readLast: t.readLast !== false,
     weather: t.weather !== false,
     swipe: t.swipe !== false,
+    cardLayout: t.cardLayout === "paged" ? "paged" : "compact",
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
@@ -583,12 +585,42 @@ function buildList(f = {}, report = null) {
 
 let feedObserver, seenObserver;
 const listKey = (it) => (it.type === "top" ? `top:${it.only || ""}` : it.key && SPECIAL.has(it.type) ? it.key : saveKey(it));
+// Phones show cards compact (as tall as what they hold) unless you chose one per screen; iPads and
+// computers always do, in as many columns as fit.
+const WIDE = matchMedia("(min-width: 700px)");
+const isFlow = () => T.cardLayout !== "paged" || WIDE.matches;
+function applyLayout() {
+  const v = $("#view-feed");
+  v.classList.toggle("flow", isFlow());
+  v.classList.toggle("grid", WIDE.matches);
+}
+const feedCards = () => [...$("#view-feed").children].filter((n) => n._it);
+// the card at the top of the screen: of those still showing, the one that starts highest (in columns too)
+function currentIdx() {
+  const v = $("#view-feed");
+  if (!v.clientHeight) return 0;
+  const y = v.scrollTop + 8;
+  const cards = feedCards();
+  let best = -1;
+  cards.forEach((c, i) => { if (c.offsetTop + c.offsetHeight > y && (best < 0 || c.offsetTop < cards[best].offsetTop)) best = i; });
+  return best < 0 ? Math.max(0, cards.length - 1) : best;
+}
 function currentKey(evenAtTop = false) {
   const v = $("#view-feed");
   if (!v.clientHeight) return null;
-  const it = S.list[Math.round(v.scrollTop / v.clientHeight)];
-  return it && (v.scrollTop > 0 || evenAtTop) ? listKey(it) : null;
+  const i = currentIdx(), it = S.list[i], c = feedCards()[i];
+  if (!it || !(v.scrollTop > 0 || evenAtTop)) return null;
+  S.keepAt = { key: listKey(it), delta: c ? v.scrollTop - c.offsetTop : 0 };      // how far into it you'd scrolled
+  return S.keepAt.key;
 }
+// columns: each card spans as many 2px rows as it is tall, so short cards don't leave gaps (masonry)
+const GRID_ROW = 2, GRID_GAP = 12;
+function gridSpan(n) {
+  if (!n.parentElement?.classList.contains("grid")) { n.style.gridRowEnd = ""; return; }
+  const h = n.offsetHeight;
+  if (h) n.style.gridRowEnd = `span ${Math.ceil((h + GRID_GAP) / GRID_ROW)}`;
+}
+const gridRO = typeof ResizeObserver === "function" ? new ResizeObserver((es) => es.forEach((e) => gridSpan(e.target))) : null;
 // what a rendered card shows: the top-stories card changes with its stories
 const shownSig = (it) => (it.type === "top" ? `top:${JSON.stringify(topStoryLists(it.only).map(([, l]) => l.map((s) => s.title)))}`
   : SPECIAL.has(it.type) ? `${it.key}:${it.sig || ""}` : `${listKey(it)}${it._guess ? ":g" : ""}${it.fig ? ":f" : ""}`);
@@ -612,6 +644,8 @@ function refreshFeed(keepKey, keepIdx) {
   if (S.area && S.area !== "all" && (T.areas[S.area] ?? 2) <= 0) S.area = "all";
   renderChips();
   const view = $("#view-feed");
+  applyLayout();
+  gridRO?.disconnect();
   view.replaceChildren();
   view.scrollTop = 0;
   if (!S.feed && !S.news) {
@@ -647,7 +681,7 @@ function refreshFeed(keepKey, keepIdx) {
       el("button", { class: "btn", onclick: () => { S.system = "all"; S.strong = false; S.topic = null; S.kind = "all"; refreshFeed(); } }, "Show everything")));
     return;
   }
-  const sentinel = el("div", { "aria-hidden": "true", style: "height:1px" });
+  const sentinel = el("div", { class: "sentinel", "aria-hidden": "true" });
   view.append(sentinel);
   feedObserver?.disconnect();
   feedObserver = new IntersectionObserver((entries) => {
@@ -668,8 +702,9 @@ function refreshFeed(keepKey, keepIdx) {
   if (at < 0 && keepIdx > 0) at = Math.min(keepIdx, S.list.length - 1);      // that card left (you hid it): stay where you were
   if (at > 0 && at < 200) {
     while (S.rendered <= at + 1 && S.rendered < S.list.length) appendCards(10);
-    const c = [...view.children].filter((n) => n._it)[at];
-    view.scrollTop = c ? c.offsetTop : at * view.clientHeight;
+    const c = feedCards()[at];
+    const d = S.keepAt?.key === keepKey && c ? Math.max(-24, Math.min(S.keepAt.delta, c.offsetHeight - 40)) : 0;
+    view.scrollTop = c ? c.offsetTop + d : at * view.clientHeight;
   }
 }
 
@@ -678,17 +713,21 @@ function appendCards(n) {
   const sentinel = view.lastElementChild;
   const batch = S.list.slice(S.rendered, S.rendered + n);
   const made = batch.map((it) => { const c = cardEl(it); c._it = it; return c; });
-  made.forEach((c) => { view.insertBefore(c, sentinel); seenObserver?.observe(c); });
+  made.forEach((c) => { view.insertBefore(c, sentinel); seenObserver?.observe(c); gridRO?.observe(c); });
   S.rendered += batch.length;
-  requestAnimationFrame(() => made.forEach(fitCard));
+  // compact cards are fitted (and, in columns, given their height) at once, so positions are right straight away
+  if (isFlow()) made.forEach((c) => { fitCard(c); gridSpan(c); });
+  else requestAnimationFrame(() => made.forEach(fitCard));
   if (S.rendered >= S.list.length && S.kind === "today") feedObserver?.disconnect();      // Today ends on its own card
   else if (S.rendered >= S.list.length && !view.querySelector(".feed-end")) {
     feedObserver?.disconnect();
     const last = S.list.length ? dayOf(S.list[S.list.length - 1]) : "";
-    view.insertBefore(el("section", { class: "feed-end" },
+    const end = el("section", { class: "feed-end" },
       el("h2", { text: "You’re at the end" }),
       el("p", { text: `${plural(S.list.length, "card")} here, back to ${fmtDate(last)}. Papers arrive every morning and news every few hours.` }),
-      el("button", { class: "btn", onclick: () => { view.scrollTo({ top: 0 }); } }, "Back to newest")), sentinel);
+      el("button", { class: "btn", onclick: () => { view.scrollTo({ top: 0 }); } }, "Back to newest"));
+    view.insertBefore(end, sentinel);
+    gridRO?.observe(end);
   }
 }
 
@@ -726,6 +765,11 @@ function evidenceEl(design, small, sample) {
 }
 
 function cardEl(it) {
+  const c = cardBody(it);
+  if (it.type !== "top" && !SPECIAL.has(it.type)) c.append(clearBtn(it));
+  return c;
+}
+function cardBody(it) {
   if (it.type === "news") return newsCardEl(it);
   if (it.type === "top") return topCardEl(it.only);
   if (SPECIAL.has(it.type)) return briefCardEl(it);
@@ -853,7 +897,7 @@ function topCardEl(only) {
           el("li", {}, el("button", { onclick: () => openStory(st, byId) },
             el("span", { class: "top-title" }, st.title),
             el("span", { class: "top-meta" }, `${st.sources.length} outlets: ${st.sources.join(", ")}`)))))))),
-    el("p", { class: "fine", style: "margin:0" }, "Swipe up for the latest papers and news."));
+    el("p", { class: "fine swipe-hint", style: "margin:0" }, "Swipe up for the latest papers and news."));
 }
 
 function openStory(st, byId) {
@@ -950,7 +994,39 @@ function fitNews(card, box, inner, p, fig, over) {
   p.style.webkitLineClamp = ""; p.style.lineClamp = "";
   if (over()) clamp();
 }
+// compact cards: no fitting to the screen. Titles up to four lines, conclusions up to nine (the rest
+// continues in the abstract), story teasers three; the key result stays in the abstract.
+function fitFlow(card) {
+  if (card.classList.contains("top-card")) {
+    if (card.classList.contains("brief-card")) return;
+    const secs = [...card.querySelectorAll(".top-lists > section")];
+    const per = secs.length > 3 ? 1 : 2;
+    secs.forEach((sec, i) => { sec.hidden = i >= 6; sec.querySelectorAll("li").forEach((li, j) => { li.hidden = j >= per; }); });
+    return;
+  }
+  if (card.classList.contains("brief-card")) return;
+  if (card.classList.contains("guess-card") && !card.classList.contains("revealed")) return fitGuess(card);
+  card.querySelector(".card-title")?.classList.add("clamp");
+  card.querySelector(".more-note")?.remove();
+  const extra = card.querySelector(".extra");
+  if (extra) extra.hidden = true;
+  card.querySelector(".fig")?.classList.remove("small", "tiny", "gone");
+  const tags = card.querySelector(".topic-tags");
+  if (tags) tags.hidden = false;
+  const p = card.querySelector(".concl-text:not(.none)");
+  if (!p) return;
+  const sizes = ["l2", "l3", "l4"];
+  const base = p.dataset.size ?? (p.dataset.size = sizes.find((c) => p.classList.contains(c)) || "");
+  sizes.forEach((x) => p.classList.toggle(x, x === base));
+  const news = card.classList.contains("news-card");
+  p.style.webkitLineClamp = p.style.lineClamp = news ? "3" : "9";
+  if (!news && p.scrollHeight > p.clientHeight + 1) {
+    p.parentElement.append(el("button", { class: "concl-label more-note",
+      onclick: () => openAbstract(card._it || S.list.find((i) => i.pmid === card.dataset.pmid)) }, "Continues in the abstract"));
+  }
+}
 function fitCard(card) {
+  if (isFlow()) return fitFlow(card);
   if (card.classList.contains("top-card")) return fitTop(card);
   if (card.classList.contains("brief-card")) return;
   if (card.classList.contains("guess-card") && !card.classList.contains("revealed")) return fitGuess(card);
@@ -1341,6 +1417,7 @@ function openInfo() {
     el("h3", {}, "Weather"),
     el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
     el("h3", {}, "Moving around"),
+    el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
     el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
@@ -1827,7 +1904,7 @@ function setupSwipe() {
   const view = $("#view-feed");
   if (!view) return;
   let st = null;
-  const th = () => Math.max(90, view.clientWidth * 0.28);
+  const th = () => Math.max(90, (st?.card.clientWidth || view.clientWidth) * 0.28);
   view.addEventListener("touchstart", (e) => {
     st = null;
     if (!T.swipe || e.touches.length !== 1 || $("#sheet").classList.contains("open")) return;
@@ -1859,7 +1936,9 @@ function setupSwipe() {
 }
 function swipeStart(st) {
   const saved = !!S.saved[saveKey(st.it)];
-  st.under = el("div", { class: "swipe-under", "aria-hidden": "true", style: `top:${st.card.offsetTop}px;height:${st.card.offsetHeight}px` },
+  const c = st.card;
+  st.under = el("div", { class: "swipe-under", "aria-hidden": "true",
+    style: `top:${c.offsetTop}px;left:${c.offsetLeft}px;width:${c.offsetWidth}px;height:${c.offsetHeight}px` },
     el("span", { class: "su su-clear" }, icon(ICONS.close), "Clear"),
     el("span", { class: "su su-save" }, icon(saved ? ICONS.saved : ICONS.save), saved ? "Saved" : "Save"));
   st.card.parentNode.insertBefore(st.under, st.card);
@@ -1894,6 +1973,11 @@ function swipeEnd(st, commit) {
   card.style.opacity = "0";
   setTimeout(() => { under.remove(); clearCard(card, it); }, 200);
 }
+// with a mouse there's no swipe: a small ✕ shows on the card you point at
+function clearBtn(it) {
+  return el("button", { class: "card-x", "aria-label": "Clear this card", title: "Clear this card",
+    onclick: (e) => { const card = e.currentTarget.closest(".card"); if (card) clearCard(card, card._it || it); } }, icon(ICONS.close));
+}
 function clearCard(card, it) {
   const view = $("#view-feed");
   const key = listKey(it);
@@ -1901,11 +1985,12 @@ function clearCard(card, it) {
   setCleared(key, true);
   bump("seen", it);
   seenObserver?.unobserve(card);
-  const top = card.offsetTop;
+  gridRO?.unobserve(card);
+  const top = card.offsetTop, keep = view.scrollTop;
   card.remove();
   if (idx >= 0) { S.list.splice(idx, 1); if (idx < S.rendered) S.rendered--; }
   if (S.rendered < S.list.length && S.rendered < idx + 3) appendCards(5);      // the next ones ready
-  view.scrollTop = top;               // the next card, where this one was (the browser would snap back a card)
+  view.scrollTop = Math.min(keep, top);     // the next card where this one was (the browser would snap back a card)
   updateHeadNote();
   const listNow = S.list;
   toastAction("Cleared", "Undo", () => {
@@ -1919,8 +2004,9 @@ function clearCard(card, it) {
     S.list.splice(at, 0, it);
     S.rendered++;
     seenObserver?.observe(c);
-    view.scrollTop = c.offsetTop;
-    requestAnimationFrame(() => fitCard(c));
+    gridRO?.observe(c);
+    if (isFlow()) requestAnimationFrame(() => { fitCard(c); const r = c.getBoundingClientRect(), vr = view.getBoundingClientRect(); if (r.top < vr.top || r.bottom > vr.bottom) view.scrollTop = c.offsetTop - 8; });
+    else { view.scrollTop = c.offsetTop; requestAnimationFrame(() => fitCard(c)); }
   });
 }
 
@@ -1983,6 +2069,11 @@ function boot() {
   $("#btn-refresh").addEventListener("click", () => reload(true));
   setupPullToRefresh();
   setupSwipe();
+  applyLayout();
+  WIDE.addEventListener?.("change", () => {
+    if (S.list?.length && S.tab === "feed") { const k = currentKey(true); S.keepAt = null; refreshFeed(k, currentIdx()); }   // a new layout: start at that card
+    else { applyLayout(); S.feedDirty = true; }
+  });
   $("#btn-search").addEventListener("click", openSearch);
   applyTextSize();
   $("#btn-info").addEventListener("click", openInfo);
