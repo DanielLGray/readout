@@ -102,7 +102,7 @@ const S = {
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
-  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, sff: 1 },   // turns per round in Everything
+  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, sff: 1 },   // turns per round in Everything
   areas: { body: 3, nm: 2, cardiac: 2, general: 1 },   // interest areas: 0 off, 1 less, 2 normal, 3 more
   follow: [],           // words and phrases you follow (the Following chip)
   hiddenSystems: [],    // organ-system chips you don't want in the chip row
@@ -118,7 +118,7 @@ const TUNE_DEFAULTS = {
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true },   // what Today holds
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true },   // what Today holds
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
@@ -160,7 +160,7 @@ function loadTune() {
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
     brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
-      classic: b.classic !== false, foundations: b.foundations !== false },
+      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false },
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
     pictures: t.pictures !== false,
     meetings: Object.fromEntries(Object.entries(obj(t.meetings)).filter(([, v]) => typeof v === "boolean")),
@@ -283,7 +283,7 @@ function topicName(id) {
   return S.feed?.topics?.[id]?.name || S.explore?.topics?.find((t) => t.id === id)?.name || id;
 }
 
-const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "sff"];   // ties go in this order
+const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "light", "general", "sff"];   // ties go in this order
 
 // Everything takes turns: a kind with weight w gets w turns per round, spread evenly.
 // Card j of a kind sits at (j + phase) / w; staggered phases keep kinds from bunching up,
@@ -703,6 +703,7 @@ function newsCardEl(it) {
       el("span", { class: "card-journal" }, it.source),
       el("span", {}, agoShort(it.date)),
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
+      it._light ? el("span", { class: "lang light" }, "Something lighter") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     el("div", { class: "kind-label", "data-kind": it.kind },
@@ -1242,7 +1243,9 @@ function openInfo() {
     el("h3", {}, "Tune"),
     el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub. Text size, your library’s off-campus link and Back up and restore are under Tune → Reading."),
     el("h3", {}, "Today"),
-    el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day and your next Foundations paper, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
+    el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day, something lighter and your next Foundations paper, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
+    el("h3", {}, "Light reading and general news"),
+    el("p", {}, "Light reading brings curiosities, history, nature, books, food and wellness: Wikipedia’s featured article and picture of the day, NASA’s Image of the Day, Atlas Obscura, Smithsonian, Knowable Magazine, NYT Well and NPR’s books, food and animal stories. General news is the day’s top stories from NPR, the BBC and The New York Times. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
     el("h3", {}, "Pictures"),
     el("p", {}, "Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
     el("h3", {}, "Telling Readout what you like"),

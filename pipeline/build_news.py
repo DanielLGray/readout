@@ -70,7 +70,7 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
     for url in src.get("urls", []):
         try:
             text = http.request("GET", url, {}, expect_json=False)
-            items = news.parse_feed(text, src["name"], now, verbatim=bool(src.get("verbatim")))
+            items = news.parse_feed(text, src["name"], now, verbatim=bool(src.get("verbatim")), style=str(src.get("style") or ""))
         except (HttpError, Exception) as exc:      # bad address, block, or unreadable feed: try the next
             status["tried"].append(f"{url} → {type(exc).__name__}: {str(exc)[:80]}")
             continue

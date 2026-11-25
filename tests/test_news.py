@@ -303,3 +303,32 @@ def test_trending_lists_outlet_names_and_counts_sister_sites_once():
     assert term["sources"] == ["AuntMinnie", "AuntMinnie Europe", "Cardiovascular Business", "Radiology Business"]
     solo = news.trending(arch[:2], NOW, 7, 28, group_of=groups)       # one publisher's two sites: not a trend
     assert not any("photon" in t["key"] for t in solo["terms"])
+
+
+WIKI = """<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Wikipedia featured articles feed</title>
+<entry><id>https://en.wikipedia.org/wiki/Special:FeedItem/featured/20261124000000/en</id><title>November 24 Wikipedia featured article</title>
+<link rel="alternate" type="text/html" href="https://en.wikipedia.org/wiki/Special:FeedItem/featured/20261124000000/en"/><updated>2026-11-24T00:00:00Z</updated>
+<summary type="html">&lt;div&gt;&lt;div id="mp-tfa-img"&gt;&lt;a href="/wiki/File:Shark.jpg" title="Great white shark"&gt;&lt;img alt="" src="//x"/&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;b&gt;&lt;a href="/wiki/Great_white_shark" title="Great white shark"&gt;great white shark&lt;/a&gt;&lt;/b&gt; (&lt;i&gt;Carcharodon carcharias&lt;/i&gt;) is a large &lt;a href="/wiki/Mackerel_shark"&gt;mackerel shark&lt;/a&gt;, robustly built.&lt;/p&gt;&lt;/div&gt;</summary></entry>
+<entry><id>x2</id><title>November 23 Wikipedia featured article</title><link href="https://en.wikipedia.org/wiki/Special:FeedItem/featured/2"/>
+<updated>2026-11-23T00:00:00Z</updated><summary type="html">&lt;p&gt;No subject link here.&lt;/p&gt;</summary></entry></feed>"""
+
+
+def test_wikipedia_daily_feeds_take_the_subject_as_headline():
+    items = news.parse_feed(WIKI, "Wikipedia, today's featured article", datetime(2026, 11, 25, tzinfo=timezone.utc), style="wikipedia")
+    assert len(items) == 1                                   # an entry without a subject link is skipped
+    it = items[0]
+    assert it["title"] == "great white shark" and it["link"] == "https://en.wikipedia.org/wiki/Great_white_shark"
+    assert it["summary"].startswith("The great white shark (Carcharodon carcharias) is a large mackerel shark, robustly")
+    assert news.site_of(it["link"]) == news.site_of("https://en.wikipedia.org")
+
+
+def test_every_outlet_has_a_listed_kind():
+    from pipeline.common import load_yaml
+    cfg = load_yaml("news.yaml")
+    kinds = set(cfg["kinds"])
+    assert {"light", "general"} <= kinds
+    assert all(s.get("kind", "industry") in kinds for s in cfg["sources"])
+    assert all("news.google.com" not in u for s in cfg["sources"] for u in s["urls"])
+    keep = cfg["settings"]["kind_keep_days"]
+    assert keep["general"] < cfg["settings"]["other_keep_days"] < keep["light"]

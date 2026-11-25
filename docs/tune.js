@@ -8,7 +8,8 @@ const REPO = location.hostname.endsWith("github.io")
 const GH = `https://github.com/${REPO}`;
 const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "" };
 
-const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)", sff: "var(--h5)" };
+const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)",
+  light: "var(--k-light)", general: "var(--k-gen)", sff: "var(--h5)" };
 const kindColor = (k) => KIND_COLOR[k] || "var(--muted)";
 const kindLabel = (k) => (k === "paper" ? "Papers" : newsKinds()[k] || k);
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
@@ -189,12 +190,13 @@ function todaySection() {
   const setB = (k, v) => { setTune({ brief: { ...T.brief, [k]: v } }); rerender(); };
   const q = quizTotals(30), tried = q.r + q.p + q.w;
   return el("section", { class: "sect", id: "tune-today" }, el("h2", {}, "Today"),
-    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day and your next Foundations paper, then “You’re caught up.”"),
+    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day, something lighter and your next Foundations paper, then “You’re caught up.”"),
     segPick("Open the app on", [["today", "Today"], ["all", "Everything"], ["papers", "Papers"], ["important", "Most important"]], T.startOn,
       (v) => { setTune({ startOn: v }); rerender(); }),
     segPick("New papers in Today", [[3, "3"], [5, "5"], [8, "8"]], b.papers, (v) => setB("papers", Number(v))),
     segPick("Stories in Today", [[0, "None"], [2, "2"], [3, "3"]], b.stories, (v) => setB("stories", Number(v))),
     switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
+    switchRow("Something lighter", "One Light reading story a day: Wikipedia’s featured article, NASA’s image of the day, Atlas Obscura, Smithsonian and the like.", b.light, (on) => setB("light", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
     segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
       (v) => { setTune({ guess: v }); rerender(); },

@@ -9,7 +9,7 @@ import re
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 from xml.etree import ElementTree as ET
 
 import feedparser
@@ -117,10 +117,32 @@ def link_sites(src: dict) -> set:
            {site_of(d) for d in src.get("link_domains", [])}
 
 
-def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False) -> list[dict]:
+_WIKI_P = re.compile(r"<p\b[^>]*>(.*?)</p>", re.S | re.I)
+_WIKI_BOLD = re.compile(r"<b>\s*<a\s[^>]*?href=\"([^\"]+)\"[^>]*>(.*?)</a>\s*</b>", re.S | re.I)
+_WIKI_LINK = re.compile(r"<a\s[^>]*?href=\"([^\"]+)\"[^>]*>(.*?)</a>", re.S | re.I)
+
+
+def wikipedia_item(summary_html: str) -> Optional[tuple]:
+    """Wikipedia's daily feeds (today's featured article, picture of the day) title every entry
+    with the date. The subject is the first bold link in the blurb: (title, its page, the blurb)."""
+    for para in _WIKI_P.findall(summary_html or ""):
+        m = _WIKI_BOLD.search(para) or _WIKI_LINK.search(para)
+        if not m:
+            continue
+        link = urljoin("https://en.wikipedia.org/", html.unescape(m.group(1)))
+        if not re.match(r"^https://en\.wikipedia\.org/wiki/[^:?#]+$", link):
+            continue
+        title = clean_text(re.sub(r"<[^>]+>", "", m.group(2)))
+        if title:
+            return title, link, re.sub(r"<[^>]+>", "", para)      # links dropped without leaving gaps before commas
+    return None
+
+
+def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, style: str = "") -> list[dict]:
     """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}].
     verbatim: the outlet's terms say not to edit headlines, text or links (ScienceDaily, Medical
-    Xpress), so the summary isn't shortened and the link keeps every parameter."""
+    Xpress), so the summary isn't shortened and the link keeps every parameter.
+    style "wikipedia": take the headline and link from the blurb (see wikipedia_item)."""
     check_xml(text)
     head = text.lstrip()[:600]
     if "<urlset" in head:
@@ -136,6 +158,11 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False) ->
         t = e.get("published_parsed") or e.get("updated_parsed")
         when = datetime(*t[:6], tzinfo=timezone.utc) if t else now
         summary = e.get("summary", "") or (e.get("content") or [{}])[0].get("value", "")
+        if style == "wikipedia":
+            got = wikipedia_item(summary)
+            if not got:
+                continue
+            title, link, summary = got
         item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
                 "date": _utc(min(when, now)), "summary": clean_text(summary) if verbatim else teaser(summary)}
         audio = _audio(e)                          # podcast episode: playable in the app

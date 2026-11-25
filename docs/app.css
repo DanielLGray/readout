@@ -42,6 +42,8 @@
   --heat-text: #ffb224;
   --cold-text: #9aa6ae;
   --k-soc: #7fb3d5;         /* ACR & societies: the one cool colour, so they stand apart from industry news */
+  --k-light: #a8c69f;       /* light reading: a soft sage, clearly not part of the heat scale */
+  --k-gen: #c3ccd2;         /* general news: plain, near-neutral */
   --hot-iron: linear-gradient(90deg, #000 0%, var(--h1) 22%, var(--h2) 42%, var(--h3) 62%, var(--h4) 80%, var(--h5) 100%);
 
   --serif: "Literata", "Iowan Old Style", Georgia, serif;
@@ -69,6 +71,8 @@
     --heat-text: #b54708;
     --cold-text: #4f5d68;
     --k-soc: #2f6f99;
+    --k-light: #4f7a45;
+    --k-gen: #5f6c77;
     color-scheme: light;
   }
 }
@@ -350,6 +354,9 @@ a { color: inherit; }
 .news-card .kind-label[data-kind="science"]::before { background: var(--h4); }
 .news-card .kind-label[data-kind="sff"]::before { background: var(--h5); border-radius: 50%; }
 .news-card .kind-label[data-kind="societies"]::before { background: var(--k-soc); }
+.news-card .kind-label[data-kind="light"]::before { background: var(--k-light); }
+.news-card .kind-label[data-kind="general"]::before { background: var(--k-gen); }
+.lang.light { border-color: var(--k-light); color: var(--k-light); }
 .kind-label .pod { margin-left: 10px; color: var(--ink); font-weight: 700; }
 .player { display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 2px; border-top: 1px solid var(--line); position: relative;
   background: var(--panel); }
