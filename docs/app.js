@@ -815,7 +815,8 @@ function paperCardEl(it) {
   const isNew = S.newIds.has(it.pmid);
   const c = it.conclusion || { kind: "none" };
   const fig = figureEl(it);
-  const extra = !fig && c.kind === "structured" && (c.text || "").length < 260 ? (it.extras || [])[0] : null;
+  // a key result under a short conclusion; tall phones have room for it under longer ones too (fitCard drops it if not)
+  const extra = !fig && c.kind === "structured" && (c.text || "").length < (innerHeight >= 880 ? 420 : 260) ? (it.extras || [])[0] : null;
   const old = Date.now() - Date.parse(it.added || it.epub || it.ppub || "") > 60 * 864e5;
   const card = el("article", { class: "card" + (fig ? " has-fig" : ""), "data-pmid": it.pmid, "data-key": it.pmid },
     el("div", { class: "card-meta" },
@@ -1767,6 +1768,8 @@ function boot() {
   });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") { rememberSeen(); saveStats(); savePos(); return; }
+    if (S.updateReady && $("#player").hidden) { location.reload(); return; }
+    if (S.swReg && Date.now() - (S.swCheck || 0) > 3 * 36e5) { S.swCheck = Date.now(); S.swReg.update().catch(() => {}); }   // look for a new version
     if (S.kind === "today" && S.tab === "feed" && S.shownDay && S.shownDay !== localDay()) refreshFeed(null);   // a new day: a new brief
     if (Date.now() - S.loadedAt > 60 * 60 * 1000) reload(false);   // home-screen apps stay open for days
     renderBanner();
@@ -1776,7 +1779,12 @@ function boot() {
   window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(fitAll, 200); });
   document.fonts?.ready.then(fitAll);
   document.fonts?.addEventListener?.("loadingdone", fitAll);
-  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("sw.js").then((reg) => { S.swReg = reg; }).catch(() => {});
+    // a new version took over: switch to it the next time you come back to the app, never mid-read
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (had) S.updateReady = true; });
+  }
   S.kind = T.startOn;
   S.exploreLoading = true;
   showKept().finally(() => reload(false));
