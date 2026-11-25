@@ -535,7 +535,9 @@ function buildList(f = {}, report = null) {
       const k = `${dayOf(n)}|${n.source}`;
       const c = perSource.get(k) || 0;
       perSource.set(k, c + 1);
-      if (c >= Math.max(1, (outletCap.get(n.source) ?? T.cap) + Math.round(tasteW(`src:${n.source}`)))) { drop("capped"); continue; }
+      // an outlet's own setting moves it up or down from your limit (NYT Health +1, BBC Health −1 at the default 2)
+      const shift = outletCap.has(n.source) ? outletCap.get(n.source) - 2 : 0;
+      if (c >= Math.max(1, T.cap + shift + Math.round(tasteW(`src:${n.source}`)))) { drop("capped"); continue; }
     }
     (queues[n.kind] = queues[n.kind] || []).push(n);
   }

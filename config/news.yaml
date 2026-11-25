@@ -53,7 +53,8 @@ kinds:
   sff: Sci-fi & fantasy
 
 # max_per_day: keep at most this many stories per day from an outlet
-# everything_per_day: how many of them Everything shows a day (otherwise Tune's per-outlet limit)
+# everything_per_day: how many of them Everything shows a day at Tune's default limit of 2; a different
+#   limit in Tune moves it by the same amount (3 here and a limit of 4 in Tune: 5 a day)
 
 # Shopping and promotional posts never make a card (not applied to industry or business news,
 # where "deal" means an acquisition).

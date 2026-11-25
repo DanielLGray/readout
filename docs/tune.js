@@ -623,8 +623,8 @@ function trendSection() {
 
 // ── updates: the jobs that build the data ──────────────────────────────────
 const JOBS = {
-  feed: { wf: "feed.yml", cfg: "feeds.yaml", every: 26, title: "Papers", sub: "PubMed, every morning" },
-  news: { wf: "news.yml", cfg: "news.yaml", every: 7, title: "News", sub: "Outlet feeds, every 6 hours" },
+  feed: { wf: "feed.yml", cfg: "feeds.yaml", every: 30, title: "Papers", sub: "PubMed, every night (with backup times if GitHub skips one)" },
+  news: { wf: "news.yml", cfg: "news.yaml", every: 9, title: "News", sub: "Outlet feeds, about every 6 hours" },
   explore: { wf: "explore.yml", cfg: "topics.yaml", every: 8 * 24, title: "Trends", sub: "PubMed, iCite and ClinicalTrials.gov, every Monday" },
   important: { wf: "important.yml", cfg: "feeds.yaml", every: 8 * 24, title: "Most important papers", sub: "PubMed and NIH iCite, every Tuesday" },
   library: { wf: "library.yml", cfg: "foundations.yaml", every: 32 * 24, title: "Foundations and classics", sub: "PubMed and NIH iCite, on the 3rd of each month" },

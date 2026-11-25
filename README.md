@@ -30,7 +30,7 @@ You can do all of this in Safari on your iPhone. A computer is a bit easier.
    - choose **Update trends** and tap **Run workflow**. This takes 10–30 minutes the first time.
 6. **Install it on your iPhone.** Open `https://YOUR-GITHUB-USERNAME.github.io/readout/` in **Safari**. Tap **Share → Add to Home Screen → Add**. It now opens full screen from its own icon.
 
-From then on, the feed updates every night (3:17 AM Eastern, inside NCBI's off-peak hours for large jobs) and the trends every weekend, with no further action from you.
+From then on, the feed updates every night (11:17 PM Eastern, inside NCBI's off-peak hours for large jobs), news about every six hours and the trends every week, with no further action from you. GitHub sometimes skips or delays scheduled runs when it's busy, so each job has backup times that skip themselves once the update has happened (`pipeline/due.py`).
 
 ---
 
