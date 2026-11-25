@@ -154,12 +154,21 @@ def _https(url: str) -> str:
 
 
 def _sized(url: str) -> str:
-    """Ask image services for a phone-sized copy: BBC's 240-pixel thumbnails are blurry, NASA's
-    originals can be many megabytes."""
+    """Ask image services for a phone-sized copy (about 800–1000 pixels wide): BBC's thumbnails are
+    blurry at 240, while NPR, Future plc and WordPress sites often link originals of several MB.
+    A service that ignores the request just sends what it would have anyway."""
     url = re.sub(r"(ichef\.bbci\.co\.uk/(?:ace|news)/(?:standard|ws))/\d+/", r"\1/800/", url)
-    if re.match(r"^https://www\.nasa\.gov/wp-content/uploads/", url) and "?" not in url:
-        url += "?w=1024"
+    url = re.sub(r"(brightspotcdn\.com/dims3/default/strip/false/crop/[^/]+)/resize/[^/]+/", r"\1/resize/800/", url)
+    url = re.sub(r"(cdn\.mos\.cms\.futurecdn\.net/[^/?]+)-(?:1[0-9]{3}|[2-9][0-9]{3})-80\.", r"\1-970-80.", url)
+    if "/wp-content/uploads/" in url and not re.search(r"[?&](?:w|resize|fit)=", url) \
+            and not re.search(r"-\d{2,4}x\d{2,4}\.(?:jpe?g|png|webp)(?:\?|$)", url):
+        url += ("&" if "?" in url else "?") + "w=1024"
+    if "/wp-content/uploads/" in url:
+        url = re.sub(r"([?&]w=)(\d{4,})", lambda m: m.group(1) + ("1024" if int(m.group(2)) > 1280 else m.group(2)), url)
     return url
+
+
+resize_image = _sized
 
 
 def _num(v) -> int:

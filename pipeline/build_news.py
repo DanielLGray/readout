@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import urljoin, urlparse
@@ -56,6 +57,18 @@ def tag_meetings(it: dict, meetings: list[dict]) -> None:
         hi = (date.fromisoformat(m["end"]) + timedelta(days=MEETING_AFTER)).isoformat()
         if m["_re"] and lo <= day <= hi and m["_re"].search(text):
             it.setdefault("meetings", []).append(m["id"])
+
+
+def drop_shared_images(items: list[dict]) -> None:
+    """A picture on most of an outlet's stories is its logo or a podcast's show art, not the story's."""
+    imgs = Counter(i["img"] for i in items if i.get("img"))
+    if not imgs or len(items) < 3:
+        return
+    common, n = imgs.most_common(1)[0]
+    if n >= 3 and n > len(items) / 3:
+        for i in items:
+            if i.get("img") == common:
+                del i["img"]
 
 
 def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dict]":
@@ -157,6 +170,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         got, status = fetch_source(http, src, now)
         if junk and src.get("kind", "industry") != "industry":    # shopping / promotional posts
             got = [i for i in got if not junk.search(i["title"])]
+        drop_shared_images(got)
         status["kind"] = src.get("kind", "industry")
         statuses.append(status)
         log(f"  {src['name']}: {status['count']} stories" + (f" via {status['url']}" if status["ok"] else " — no working feed"))
@@ -184,8 +198,15 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     mentions = re.compile(cfg["society_mentions"]) if cfg.get("society_mentions") else None
     meetings = load_meetings(now)
     kind_of = {src["name"]: src.get("kind", "industry") for src in cfg.get("sources", [])}
+    by_source: dict[str, list] = {}
+    for it in items.values():
+        by_source.setdefault(it["source"], []).append(it)
+    for lst in by_source.values():             # stored stories too: logos and show art out, phone-sized pictures
+        drop_shared_images(lst)
     for it in items.values():                  # every run, so word-list changes reach stored stories too
         it["kind"] = kind_of.get(it["source"], it.get("kind", "industry"))     # an outlet moved to another kind
+        if it.get("img"):
+            it["img"] = news.resize_image(it["img"])
         tag_meetings(it, meetings)
         it.pop("also", None)
         if mentions and it.get("kind", "industry") in ("industry", "health") and \

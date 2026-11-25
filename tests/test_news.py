@@ -370,3 +370,18 @@ def test_stored_stories_follow_an_outlet_to_its_new_kind(tmp_path, monkeypatch):
     http = Http(transport=lambda m, u, p: (404, "gone"), sleep=lambda s: None, retries=0)
     out = build_news.run(http, now=now)
     assert [i["kind"] for i in out["items"]] == ["light"]
+
+
+def test_pictures_are_phone_sized_and_show_art_is_dropped():
+    from pipeline.news import resize_image as r
+    assert r("https://npr.brightspotcdn.com/dims3/default/strip/false/crop/5712x4284+0+0/resize/5712x4284!/?url=x").endswith("/resize/800/?url=x")
+    assert r("https://cdn.mos.cms.futurecdn.net/abc-1920-80.png").endswith("abc-970-80.png")
+    assert r("https://kffhealthnews.org/wp-content/uploads/2026/11/a.jpg") == "https://kffhealthnews.org/wp-content/uploads/2026/11/a.jpg?w=1024"
+    assert r("https://www.nasa.gov/wp-content/uploads/x.jpg?w=2048") == "https://www.nasa.gov/wp-content/uploads/x.jpg?w=1024"
+    assert r("https://www.statnews.com/wp-content/uploads/2026/11/a-1024x576.jpg").endswith("a-1024x576.jpg")
+    u = "https://static01.nyt.com/images/2026/11/24/a.jpg"
+    assert r(r(u)) == r(u) == u                                       # unchanged, and safe to apply twice
+    eps = [{"title": f"Episode {k}", "img": "https://image.simplecastcdn.com/show-art.png"} for k in range(5)]
+    eps[0]["img"] = "https://image.simplecastcdn.com/episode-0.png"
+    build_news.drop_shared_images(eps)
+    assert [e.get("img") for e in eps] == ["https://image.simplecastcdn.com/episode-0.png", None, None, None, None]
