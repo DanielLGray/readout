@@ -375,7 +375,8 @@ def test_stored_stories_follow_an_outlet_to_its_new_kind(tmp_path, monkeypatch):
 def test_pictures_are_phone_sized_and_show_art_is_dropped():
     from pipeline.news import resize_image as r
     assert r("https://npr.brightspotcdn.com/dims3/default/strip/false/crop/5712x4284+0+0/resize/5712x4284!/?url=x").endswith("/resize/800/?url=x")
-    assert r("https://cdn.mos.cms.futurecdn.net/abc-1920-80.png").endswith("abc-970-80.png")
+    assert r("https://cdn.mos.cms.futurecdn.net/abc-1920-80.jpg").endswith("abc-970-80.jpg")
+    assert r("https://cdn.mos.cms.futurecdn.net/abc-1920-80.png").endswith("abc-650-80.png")          # PNGs smaller still
     assert r("https://kffhealthnews.org/wp-content/uploads/2026/11/a.jpg") == "https://kffhealthnews.org/wp-content/uploads/2026/11/a.jpg?w=1024"
     assert r("https://www.nasa.gov/wp-content/uploads/x.jpg?w=2048") == "https://www.nasa.gov/wp-content/uploads/x.jpg?w=1024"
     assert r("https://www.statnews.com/wp-content/uploads/2026/11/a-1024x576.jpg").endswith("a-1024x576.jpg")
