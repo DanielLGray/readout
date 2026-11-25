@@ -205,6 +205,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         drop_shared_images(lst)
     for it in items.values():                  # every run, so word-list changes reach stored stories too
         it["kind"] = kind_of.get(it["source"], it.get("kind", "industry"))     # an outlet moved to another kind
+        if it.get("img") and it.get("audio") and "brightspotcdn.com" not in it["img"]:
+            del it["img"]
         if it.get("img"):
             it["img"] = news.resize_image(it["img"])
         tag_meetings(it, meetings)

@@ -112,7 +112,7 @@ cd docs && python -m http.server    # open http://localhost:8000
 
 ### Security
 
-- **The app** runs only its own files: a content security policy blocks scripts, frames and plug-ins from anywhere else, all feed text is shown as plain text, and links open only as web addresses. Sites you open aren't told you came from Readout.
+- **The app** runs only its own files: a content security policy blocks scripts, frames and plug-ins from anywhere else, all feed text is shown as plain text, and links open only as web addresses. Story pictures load from the outlets' own servers (https only, as images, which can't run code); turn Pictures off in Tune → Reading to load nothing from them. Sites you open aren't told you came from Readout.
 - **News outlets** can only link to their own site (or partner sites listed as `link_domains` in `config/news.yaml`), so a hacked feed can't slip in a link elsewhere; Tune → Updates counts any links dropped. Feeds that declare XML entities are refused, downloads are capped at 30 MB, and redirects may only go to public web addresses.
 - **Updates** install exact package versions checked against their published hashes (`requirements.txt`, generated from `requirements.in` with `pip-compile --generate-hashes`), and use GitHub's own actions pinned to exact commits. Dependabot proposes updates monthly as pull requests; the Tests workflow checks each one before you merge it.
 - **Secrets:** only `NCBI_API_KEY` and `NCBI_EMAIL`, given to the PubMed jobs alone and sent in request bodies, never in web addresses. The news job, which reads the most outside data, gets no secrets. Nothing secret is stored in the app.

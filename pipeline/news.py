@@ -160,6 +160,7 @@ def _sized(url: str) -> str:
     url = re.sub(r"(ichef\.bbci\.co\.uk/(?:ace|news)/(?:standard|ws))/\d+/", r"\1/800/", url)
     url = re.sub(r"(brightspotcdn\.com/dims3/default/strip/false/crop/[^/]+)/resize/[^/]+/", r"\1/resize/800/", url)
     url = re.sub(r"(cdn\.mos\.cms\.futurecdn\.net/[^/?]+)-(?:1[0-9]{3}|[2-9][0-9]{3})-80\.", r"\1-970-80.", url)
+    url = re.sub(r"(cdn\.mos\.cms\.futurecdn\.net/[^/?]+)-970-80\.png$", r"\1-650-80.png", url)     # PNGs are heavy
     if "/wp-content/uploads/" in url and not re.search(r"[?&](?:w|resize|fit)=", url) \
             and not re.search(r"-\d{2,4}x\d{2,4}\.(?:jpe?g|png|webp)(?:\?|$)", url):
         url += ("&" if "?" in url else "?") + "w=1024"
@@ -246,9 +247,9 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
             title, link, summary = got
         item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
                 "date": _utc(min(when, now)), "summary": clean_text(summary) if verbatim else teaser(summary)}
-        if img:
-            item["img"] = img
         audio = _audio(e)                          # podcast episode: playable in the app
+        if img and not (audio and "brightspotcdn.com" not in img):     # episode art is mostly the show's, at full size
+            item["img"] = img
         if audio:
             item["audio"] = audio
             dur = _duration(e.get("itunes_duration", ""))
