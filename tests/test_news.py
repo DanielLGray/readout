@@ -327,7 +327,11 @@ def test_every_outlet_has_a_listed_kind():
     from pipeline.common import load_yaml
     cfg = load_yaml("news.yaml")
     kinds = set(cfg["kinds"])
-    assert {"light", "general"} <= kinds
+    assert {"light", "general", "business"} <= kinds
+    by = {s["name"]: s for s in cfg["sources"]}
+    assert by["New York Times Health"]["max_per_day"] > by["BBC Health"]["max_per_day"]          # more Times, less BBC
+    assert by["New York Times Health"]["everything_per_day"] > by["BBC Health"]["everything_per_day"]
+    assert not any("apnews.com" in u or "reuters.com" in u for s in cfg["sources"] for u in s["urls"])
     assert all(s.get("kind", "industry") in kinds for s in cfg["sources"])
     assert all("news.google.com" not in u for s in cfg["sources"] for u in s["urls"])
     keep = cfg["settings"]["kind_keep_days"]
@@ -386,3 +390,8 @@ def test_pictures_are_phone_sized_and_show_art_is_dropped():
     eps[0]["img"] = "https://image.simplecastcdn.com/episode-0.png"
     build_news.drop_shared_images(eps)
     assert [e.get("img") for e in eps] == ["https://image.simplecastcdn.com/episode-0.png", None, None, None, None]
+
+
+def test_business_news_keeps_its_deals():
+    assert "business" in build_news.DEAL_KINDS and "industry" in build_news.DEAL_KINDS
+    assert "light" not in build_news.DEAL_KINDS

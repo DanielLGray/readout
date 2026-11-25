@@ -23,6 +23,7 @@ def news_http() -> Http:
 
 
 STALE_DAYS = 30
+DEAL_KINDS = ("industry", "business")     # where "deal" means an acquisition, not a sale: no shopping filter
 MEETING_BEFORE, MEETING_AFTER = 45, 14      # days around a meeting when stories that mention it are tagged
 
 
@@ -168,10 +169,12 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     junk = re.compile(cfg["exclude"], re.I) if cfg.get("exclude") else None
     for src in cfg.get("sources", []):
         got, status = fetch_source(http, src, now)
-        if junk and src.get("kind", "industry") != "industry":    # shopping / promotional posts
+        if junk and src.get("kind", "industry") not in DEAL_KINDS:    # shopping / promotional posts
             got = [i for i in got if not junk.search(i["title"])]
         drop_shared_images(got)
         status["kind"] = src.get("kind", "industry")
+        if isinstance(src.get("everything_per_day"), int):
+            status["feed_cap"] = max(0, src["everything_per_day"])     # how many a day Everything shows
         statuses.append(status)
         log(f"  {src['name']}: {status['count']} stories" + (f" via {status['url']}" if status["ok"] else " — no working feed"))
         for it in got:
@@ -236,7 +239,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     cut_for = lambda k: cut_kind.get(k) or (cut_industry if k == "industry" else cut_other)
     kept = [i for i in unique
             if i["date"] >= cut_for(i.get("kind", "industry"))
-            and not (junk and i.get("kind", "industry") != "industry" and junk.search(i["title"]))]
+            and not (junk and i.get("kind", "industry") not in DEAL_KINDS and junk.search(i["title"]))]
     kept = kept[: int(settings.get("max_items", 4000))]
 
     # titles-only archive for trends, kept longer than the tab
@@ -256,7 +259,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     arch = [{"id": k, "date": v[0], "title": v[1], "source": v[2], "kind": v[3] if len(v) > 3 else "industry"}
             for k, v in archive.items()]
     if junk:                                   # headlines saved before the promo filter existed
-        arch = [a for a in arch if a["kind"] == "industry" or not junk.search(a["title"])]
+        arch = [a for a in arch if a["kind"] in DEAL_KINDS or not junk.search(a["title"])]
 
     ts = settings.get("top_stories") or {}
     top_cfg = {"days": int(ts.get("days", 7)), "limit": int(ts.get("per_kind", 8)),

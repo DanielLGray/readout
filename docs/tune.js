@@ -9,7 +9,7 @@ const GH = `https://github.com/${REPO}`;
 const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "" };
 
 const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)",
-  light: "var(--k-light)", general: "var(--k-gen)", sff: "var(--h5)" };
+  light: "var(--k-light)", general: "var(--k-gen)", business: "var(--k-biz)", sff: "var(--h5)" };
 const kindColor = (k) => KIND_COLOR[k] || "var(--muted)";
 const kindLabel = (k) => (k === "paper" ? "Papers" : newsKinds()[k] || k);
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);

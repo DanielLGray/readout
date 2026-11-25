@@ -25,6 +25,7 @@ settings:
     societies: 180
     light: 45
     general: 4
+    business: 7
   max_items: 4000
   archive_days: 730       # headlines kept (titles only) for trend analysis
   top_stories:            # the first card in the feed
@@ -47,12 +48,14 @@ kinds:
   health: Health & medicine
   science: Science
   light: Light reading
-  general: General news
+  general: U.S. & world news
+  business: Business & markets
   sff: Sci-fi & fantasy
 
 # max_per_day: keep at most this many stories per day from an outlet
+# everything_per_day: how many of them Everything shows a day (otherwise Tune's per-outlet limit)
 
-# Shopping and promotional posts never make a card (not applied to industry news,
+# Shopping and promotional posts never make a card (not applied to industry or business news,
 # where "deal" means an acquisition).
 exclude: "gift guide|\\bdeals\\b|deal of the day|\\bon sale\\b|% off|coupon|black friday|cyber monday|prime day|sponsored|best .{0,40} to buy|our favorite .{0,30} for 20\\d\\d|subscribe now"
 
@@ -188,7 +191,8 @@ sources:
     kind: health
     group: nyt
     verbatim: true
-    max_per_day: 3
+    max_per_day: 6
+    everything_per_day: 3
     home: https://www.nytimes.com
     urls:
       - https://rss.nytimes.com/services/xml/rss/nyt/Health.xml
@@ -209,7 +213,8 @@ sources:
 
   - name: BBC Health
     kind: health
-    max_per_day: 6
+    max_per_day: 2
+    everything_per_day: 1
     home: https://www.bbc.com/news/health
     link_domains: [bbc.co.uk]            # BBC stories link to bbc.co.uk addresses
     urls:
@@ -472,14 +477,17 @@ sources:
   # ── General news: the day's top stories ──────────────────────────────────
   - name: NPR News
     kind: general
-    max_per_day: 4
+    group: npr
+    merge: true
+    max_per_day: 5
     home: https://www.npr.org
     urls:
-      - https://feeds.npr.org/1001/rss.xml
+      - https://feeds.npr.org/1001/rss.xml          # news
+      - https://feeds.npr.org/1003/rss.xml          # national
 
   - name: BBC News
     kind: general
-    max_per_day: 4
+    max_per_day: 3
     home: https://www.bbc.com/news
     link_domains: [bbc.co.uk]
     urls:
@@ -489,10 +497,84 @@ sources:
     kind: general
     group: nyt
     verbatim: true
-    max_per_day: 4
+    merge: true
+    max_per_day: 5
+    skip: " Here’s the latest\\.?$|/opinion/"   # live-blog stubs and opinion columns
     home: https://www.nytimes.com
     urls:
       - https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+      - https://rss.nytimes.com/services/xml/rss/nyt/US.xml
+
+  # Dow Jones (WSJ, MarketWatch) allows its feeds for individual, personal, non-commercial use, as
+  # NPR does. Most WSJ articles need a subscription to read in full.
+  - name: Wall Street Journal
+    kind: general
+    group: wsj
+    max_per_day: 4
+    skip: "/opinion/"
+    home: https://www.wsj.com
+    urls:
+      - https://feeds.content.dowjones.io/public/rss/RSSUSnews
+
+  # ── Business & markets ───────────────────────────────────────────────────
+  - name: WSJ Markets
+    kind: business
+    group: wsj
+    max_per_day: 4
+    skip: "/opinion/"
+    home: https://www.wsj.com
+    urls:
+      - https://feeds.content.dowjones.io/public/rss/RSSMarketsMain
+
+  - name: WSJ Business
+    kind: business
+    group: wsj
+    merge: true
+    max_per_day: 4
+    skip: "/opinion/"
+    home: https://www.wsj.com
+    urls:
+      - https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness
+      - https://feeds.content.dowjones.io/public/rss/socialeconomyfeed
+
+  - name: MarketWatch
+    kind: business
+    max_per_day: 4
+    home: https://www.marketwatch.com
+    urls:
+      - https://feeds.content.dowjones.io/public/rss/mw_topstories
+      - https://feeds.marketwatch.com/marketwatch/topstories
+
+  - name: New York Times Business
+    kind: business
+    group: nyt
+    verbatim: true
+    merge: true
+    max_per_day: 4
+    skip: "/opinion/|/podcasts/"
+    home: https://www.nytimes.com
+    urls:
+      - https://rss.nytimes.com/services/xml/rss/nyt/Business.xml
+      - https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml
+
+  - name: NPR Business
+    kind: business
+    group: npr
+    merge: true
+    max_per_day: 3
+    home: https://www.npr.org/sections/business/
+    urls:
+      - https://feeds.npr.org/1006/rss.xml          # business
+      - https://feeds.npr.org/1017/rss.xml          # economy
+
+  - name: Planet Money and The Indicator
+    kind: business
+    max_per_day: 2
+    merge: true
+    home: https://www.npr.org/sections/money/
+    urls:
+      - https://feeds.npr.org/510325/podcast.xml    # The Indicator: ten minutes, weekdays
+      - https://feeds.npr.org/510289/podcast.xml
 
   # ── Sci-fi & fantasy ─────────────────────────────────────────────────────
   - name: Reactor

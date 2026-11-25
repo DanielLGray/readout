@@ -102,7 +102,7 @@ const S = {
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
-  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, sff: 1 },   // turns per round in Everything
+  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, business: 1, sff: 1 },   // turns per round in Everything
   areas: { body: 3, nm: 2, cardiac: 2, general: 1 },   // interest areas: 0 off, 1 less, 2 normal, 3 more
   follow: [],           // words and phrases you follow (the Following chip)
   hiddenSystems: [],    // organ-system chips you don't want in the chip row
@@ -283,7 +283,7 @@ function topicName(id) {
   return S.feed?.topics?.[id]?.name || S.explore?.topics?.find((t) => t.id === id)?.name || id;
 }
 
-const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "light", "general", "sff"];   // ties go in this order
+const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "light", "general", "business", "sff"];   // ties go in this order
 
 // Everything takes turns: a kind with weight w gets w turns per round, spread evenly.
 // Card j of a kind sits at (j + phase) / w; staggered phases keep kinds from bunching up,
@@ -514,6 +514,7 @@ function filtered(f = {}, report = null) {
   // Everything: take turns by weight, each stream newest first (or ranked, for papers), so the
   // newest papers sit at the top even though news arrives hours sooner than PubMed records
   const perSource = new Map();
+  const outletCap = new Map((S.news?.sources || []).filter((s) => Number.isInteger(s.feed_cap)).map((s) => [s.name, s.feed_cap]));
   const byTime = taste ? () => 0 : (a, b) => (a.date < b.date ? 1 : -1);      // already in order, rated outlets shifted
   const queues = { paper: papers };
   for (const n of news.sort(byTime)) {
@@ -521,7 +522,7 @@ function filtered(f = {}, report = null) {
       const k = `${dayOf(n)}|${n.source}`;
       const c = perSource.get(k) || 0;
       perSource.set(k, c + 1);
-      if (c >= Math.max(1, T.cap + Math.round(tasteW(`src:${n.source}`)))) { drop("capped"); continue; }
+      if (c >= Math.max(1, (outletCap.get(n.source) ?? T.cap) + Math.round(tasteW(`src:${n.source}`)))) { drop("capped"); continue; }
     }
     (queues[n.kind] = queues[n.kind] || []).push(n);
   }
@@ -1275,7 +1276,7 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), general news (NPR, BBC, The New York Times) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Most important"),
@@ -1285,7 +1286,7 @@ function openInfo() {
     el("h3", {}, "Today"),
     el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day, something lighter and your next Foundations paper, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
     el("h3", {}, "Light reading and general news"),
-    el("p", {}, "Light reading brings curiosities, history, nature, books, food and wellness: Wikipedia’s featured article and picture of the day, NASA’s Image of the Day, Atlas Obscura, Smithsonian, Knowable Magazine, NYT Well and NPR’s books, food and animal stories. General news is the day’s top stories from NPR, the BBC and The New York Times. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
+    el("p", {}, "Light reading brings curiosities, history, nature, books, food and wellness: Wikipedia’s featured article and picture of the day, NASA’s Image of the Day, Atlas Obscura, Smithsonian, Knowable Magazine, NYT Well and NPR’s books, food and animal stories. U.S. & world news is the day’s top and national stories from NPR, The New York Times, The Wall Street Journal and the BBC; Business & markets comes from WSJ, MarketWatch, NYT Business and NPR. AP and Reuters no longer publish feeds Readout may use. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
     el("h3", {}, "Pictures"),
     el("p", {}, "News and light-reading cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
     el("h3", {}, "Telling Readout what you like"),
