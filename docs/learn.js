@@ -499,11 +499,13 @@ function guessCardEl(it) {
       || secs.find((s) => s.cat === "BACKGROUND" || /^(background|introduction|context)/i.test(s.label));
     const m = secs.find((s) => s.cat === "METHODS") || secs.find((s) => /method|design|materials|patients|participants|population/i.test(s.label));
     if (!q && !m) { plain(true); return; }
+    const qLabel = q && (q.cat === "BACKGROUND" || /^(background|introduction|context)/i.test(q.label)) ? "Background" : "The question";
+    Object.assign(card, { _q: q, _m: m, _qLabel: qLabel, _reveal: doReveal });
     inner.replaceChildren(
-      q ? el("div", { class: "concl-label" }, q.cat === "BACKGROUND" || /^(background|introduction|context)/i.test(q.label) ? "Background" : "The question") : null,
-      q ? el("p", { class: "guess-text" }, q.text) : null,
+      q ? el("div", { class: "concl-label" }, qLabel) : null,
+      q ? el("p", { class: "guess-text", "data-part": "q" }, q.text) : null,
       m ? el("div", { class: "concl-label" }, "How they did it") : null,
-      m ? el("p", { class: "guess-text small" }, m.text) : null);
+      m ? el("p", { class: "guess-text small", "data-part": "m" }, m.text) : null);
     requestAnimationFrame(() => fitGuess(card));
   }).catch(() => plain(false));
   function doReveal() {
@@ -523,19 +525,46 @@ function guessCardEl(it) {
   }
   return card;
 }
+// The question and methods in full whenever they fit. If not: smaller type (methods first), then
+// fewer lines of the methods, then of the question, with the full text a tap away.
 function fitGuess(card) {
   const box = card.querySelector(".guess-box"), inner = box?.querySelector(".concl-inner");
-  const ps = [...(inner?.querySelectorAll(".guess-text") || [])];
-  if (!box?.clientHeight || !ps.length) return;
-  const lines = ps.map((p) => (p.classList.contains("small") ? 8 : 6));
-  const set = () => ps.forEach((p, i) => { p.style.webkitLineClamp = String(lines[i]); p.style.lineClamp = String(lines[i]); });
-  set();
-  for (let n = 0; n < 14 && inner.scrollHeight > box.clientHeight + 1; n++) {
-    const i = lines.indexOf(Math.max(...lines));
-    if (lines[i] <= 2) break;
-    lines[i]--;
-    set();
+  const q = inner?.querySelector('.guess-text[data-part="q"]'), m = inner?.querySelector('.guess-text[data-part="m"]');
+  if (!box?.clientHeight || !(q || m)) return;
+  const clamp = (p, n) => { p.style.webkitLineClamp = n; p.style.lineClamp = n; };
+  inner.querySelector(".more-note")?.remove();
+  for (const p of [q, m]) if (p) { clamp(p, "none"); p.classList.remove("tight"); p.hidden = false; }
+  const mLabel = m?.previousElementSibling;
+  if (mLabel) mLabel.hidden = false;
+  const title = card.querySelector(".card-title");
+  title?.classList.add("clamp");
+  const over = () => inner.scrollHeight > box.clientHeight + 1;
+  if (!over()) {                                            // room to spare: the whole title too, if it fits
+    if (title && title.scrollHeight > title.clientHeight + 1) { title.classList.remove("clamp"); if (over()) title.classList.add("clamp"); }
+    return;
   }
+  for (const p of [m, q]) if (p && over()) p.classList.add("tight");
+  if (!over()) return;
+  inner.append(el("button", { class: "concl-label more-note", onclick: () => openGuessText(card) }, "Read the full question and methods"));
+  // the question is what you guess from: the methods give way first, all the way, before it's shortened
+  const fitLines = (p) => {
+    const lh = parseFloat(getComputedStyle(p).lineHeight) || 22;
+    clamp(p, String(Math.max(2, Math.floor((p.offsetHeight - (inner.scrollHeight - box.clientHeight)) / lh))));
+    for (let n = 0; n < 12 && over() && Number(p.style.webkitLineClamp) > 2; n++) clamp(p, String(Number(p.style.webkitLineClamp) - 1));
+  };
+  if (m && over()) fitLines(m);
+  if (m && q && over()) { m.hidden = true; if (mLabel) mLabel.hidden = true; }
+  if (q && over()) fitLines(q);
+}
+// the whole question and methods, still without the answer
+function openGuessText(card) {
+  const { _q: q, _m: m } = card;
+  openSheet(
+    el("h2", { id: "sheet-title" }, card.querySelector(".card-title")?.textContent || "The study"),
+    q ? [el("div", { class: "concl-label" }, card._qLabel || "The question"), el("p", { class: "guess-full" }, q.text)] : null,
+    m ? [el("div", { class: "concl-label" }, "How they did it"), el("p", { class: "guess-full small" }, m.text)] : null,
+    el("p", { class: "fine" }, "Make your guess, then see what they found."),
+    el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => { closeSheet(); card._reveal?.(); } }, "What did they find?")));
 }
 
 // ── Today ──────────────────────────────────────────────────────────────────

@@ -612,8 +612,17 @@ a { color: inherit; }
 .lang.guess-tag { border-color: var(--focus); color: var(--focus); }
 .guess-box .concl-inner { gap: 6px; }
 .guess-text { margin: 0 0 6px; font: 450 calc(17px * var(--ts, 1))/1.42 var(--serif); padding-left: 14px; border-left: 2px solid var(--line);
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; }
-.guess-text.small { font: 400 calc(15px * var(--ts, 1))/1.45 var(--sans); color: var(--muted); -webkit-line-clamp: 8; }
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: none; overflow: hidden; }
+.guess-text.small { font: 400 calc(15px * var(--ts, 1))/1.45 var(--sans); color: var(--muted); }
+.guess-text.tight { font-size: calc(15.5px * var(--ts, 1)); line-height: 1.4; }
+.guess-text.small.tight { font-size: calc(13.5px * var(--ts, 1)); }
+.guess-box .more-note { margin-top: -2px; }
+@media (max-height: 760px) {
+  .reveal { padding: 9px 14px; }
+  .reveal span { display: none; }
+}
+.guess-full { margin: 4px 0 14px; font: 450 calc(16.5px * var(--ts, 1))/1.5 var(--serif); max-width: 68ch; }
+.guess-full.small { font: 400 calc(15.5px * var(--ts, 1))/1.55 var(--sans); color: var(--muted); }
 .guess-wait { color: var(--faint); margin: 0; }
 .reveal { flex: none; display: grid; gap: 2px; text-align: left; padding: 12px 14px; border-radius: 12px;
   border: 1px dashed var(--focus); background: var(--panel); }
