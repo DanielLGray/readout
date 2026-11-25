@@ -115,6 +115,7 @@ const TUNE_DEFAULTS = {
   fav: [],              // your organ systems (a ranking boost)
   hidePending: true,    // hide papers whose abstract isn't in PubMed yet (the conclusion is the card)
   readLast: true,       // cards you've already seen go to the end of each list
+  weather: true,        // today's and tomorrow's forecast for Reno under the chips
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
@@ -154,6 +155,7 @@ function loadTune() {
     order: t.order === "ranked" ? "ranked" : "newest",
     fav: strs(t.fav), hidePending: typeof t.hidePending === "boolean" ? t.hidePending : TUNE_DEFAULTS.hidePending,
     readLast: t.readLast !== false,
+    weather: t.weather !== false,
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
@@ -1312,6 +1314,8 @@ function openInfo() {
     el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it. “More like this” and “Less like this” nudge all of them a little. Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
     el("h3", {}, "Meetings"),
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
+    el("h3", {}, "Weather"),
+    el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
     el("h3", {}, "Moving around"),
     el("p", {}, "Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
     el("h3", {}, "Search and citations"),
@@ -1764,6 +1768,7 @@ async function reload(announce) {
   if (!feed && !newsData && navigator.onLine === false) S.offline = true;
   updateHeadNote();
   renderBanner();
+  if (typeof wxRefresh === "function") wxRefresh(announce ? 5 : 30);      // minutes before a forecast counts as old
   if (announce) {
     if (S.offline) toast(`You’re offline. Showing what’s on this phone${S.feed ? ` (papers from ${ago(S.feed.generated)})` : ""}.`);
     else if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");

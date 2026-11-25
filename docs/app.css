@@ -554,6 +554,23 @@ a { color: inherit; }
 .search-out mark { background: color-mix(in srgb, var(--heat-text) 28%, transparent); color: inherit; border-radius: 2px; padding: 0 1px; }
 .text-in.wide { width: 100%; }
 
+/* ── weather strip (under the chips) ───────────────────────────────────── */
+.wx { margin: 0 -16px; border-top: 1px solid var(--line); }
+.wx-main { width: 100%; display: flex; align-items: center; gap: 14px; padding: 6px 16px; min-height: 34px; font-size: 13.5px; white-space: nowrap; overflow: hidden; }
+.wx-day { display: inline-flex; align-items: center; gap: 5px; }
+.wx-day b { font-weight: 700; }
+.wx-i { width: 19px; height: 19px; flex: none; color: var(--muted); }
+.wx-sun, .wx-partly { color: var(--h4); }
+.wx-hi { font-weight: 700; }
+.wx-lo { color: var(--muted); }
+.wx-pop { color: var(--k-soc); font-size: 12.5px; }
+.wx-place { margin-left: auto; color: var(--faint); font-size: 12.5px; }
+.wx-list { margin-top: 10px; }
+.wx-row { padding: 10px 0; }
+.wx-row-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; }
+.wx-row-h .wx-i { width: 22px; height: 22px; }
+.wx-row p { margin: 4px 0 0; font: 400 calc(15.5px * var(--ts, 1))/1.5 var(--serif); }
+
 /* ── meeting banner (under the chips) ──────────────────────────────────── */
 .banner { display: flex; align-items: center; gap: 2px; margin: 0 -16px; padding: 0 2px 0 16px; min-height: 38px;
   border-top: 1px solid var(--line); background: var(--panel); }

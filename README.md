@@ -36,6 +36,7 @@ From then on, the feed updates every night (11:17 PM Eastern, inside NCBI's off-
 
 ## Using it
 
+- **Weather:** a slim strip under the chips shows today's and tomorrow's high, low and forecast for Reno, NV (and the chance of rain or snow when it's 30% or more), from the National Weather Service. Tap it for the detailed forecast. Your phone fetches it from api.weather.gov (NOAA, public domain) about every half hour and on pull-down; turn it off in Tune → Reading.
 - **Pull down** on the first card to check for new papers and news. With a GitHub token in Tune → Updates, pulling down also runs the news update on GitHub and brings the result back in about 2 minutes. **Tap a headline** to open it (the article for a story, the abstract for a paper). Cards you've already seen go to the end of each list, marked *Seen*, whenever a list starts fresh.
 - **Swipe up** for the next paper. The chips at the top filter by organ system. **Strong evidence** keeps only prospective studies, randomized trials, meta-analyses and guidelines.
 - **Search** (magnifier, top right) finds any paper or story on your phone by words, author or journal: the feed, Most important, Explore, news and Saved. Accents don't matter.
@@ -113,7 +114,7 @@ cd docs && python -m http.server    # open http://localhost:8000
 
 ### Security
 
-- **The app** runs only its own files: a content security policy blocks scripts, frames and plug-ins from anywhere else, all feed text is shown as plain text, and links open only as web addresses. Story pictures load from the outlets' own servers (https only, as images, which can't run code); turn Pictures off in Tune → Reading to load nothing from them. Sites you open aren't told you came from Readout.
+- **The app** runs only its own files: a content security policy blocks scripts, frames and plug-ins from anywhere else, all feed text is shown as plain text, and links open only as web addresses. The forecast comes straight from api.weather.gov, the only other site the app talks to besides GitHub. Story pictures load from the outlets' own servers (https only, as images, which can't run code); turn Pictures off in Tune → Reading to load nothing from them. Sites you open aren't told you came from Readout.
 - **News outlets** can only link to their own site (or partner sites listed as `link_domains` in `config/news.yaml`), so a hacked feed can't slip in a link elsewhere; Tune → Updates counts any links dropped. Feeds that declare XML entities are refused, downloads are capped at 30 MB, and redirects may only go to public web addresses.
 - **Updates** install exact package versions checked against their published hashes (`requirements.txt`, generated from `requirements.in` with `pip-compile --generate-hashes`), and use GitHub's own actions pinned to exact commits. Dependabot proposes updates monthly as pull requests; the Tests workflow checks each one before you merge it.
 - **Optional phone token:** to let pull-to-refresh run the news job (and Run now start any job), add a fine-grained GitHub token in **Tune → Updates**, limited to this repository with only *Actions: Read and write*. It's kept only on your phone (not in settings or backups) and sent only to api.github.com. Delete it on GitHub any time.

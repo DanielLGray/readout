@@ -202,6 +202,8 @@ function todaySection() {
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
     tried ? el("p", { class: "fine" }, `Last 30 days: you called ${q.r} of ${plural(tried, "result")}${q.p ? `, and nearly ${q.p} more` : ""}.`) : null,
+    el("div", { id: "tune-weather" }, switchRow("Weather for Reno, NV", "Today’s and tomorrow’s highs, lows and forecast under the chips, from the National Weather Service (NOAA). Your phone asks api.weather.gov directly.", T.weather,
+      (on) => { setTune({ weather: on }); if (on) wxRefresh(0); else renderWx(); rerender(); })),
     switchRow("Pictures", "A figure from each open-access paper whose license allows it, credited, and the picture each news outlet puts in its feed. Off: no pictures, less data.", T.pictures,
       (on) => { setTune({ pictures: on }); rerender(); }));
 }

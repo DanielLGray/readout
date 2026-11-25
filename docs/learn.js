@@ -349,6 +349,115 @@ function drawFoundations() {
   body.scrollTop = keep;
 }
 
+// ── weather: Reno, NV, from the National Weather Service (NOAA) ───────────
+// The phone asks api.weather.gov itself (public domain, no key, open to web pages), keeps the last
+// forecast for when it's offline, and shows today and tomorrow under the chips.
+const WX = { place: "Reno, NV", short: "Reno", grid: "REV/45,106", lat: 39.5296, lon: -119.8138 };
+const WX_URL = `https://api.weather.gov/gridpoints/${WX.grid}/forecast`;
+const WX_PAGE = `https://forecast.weather.gov/MapClick.php?lat=${WX.lat}&lon=${WX.lon}`;
+let wxData = store.get("wx", null);
+if (!wxData || typeof wxData !== "object" || !Array.isArray(wxData.periods)) wxData = null;
+let wxBusy = false;
+async function wxRefresh(maxAgeMin = 30) {
+  if (!T.weather || wxBusy) { renderWx(); return; }
+  if (wxData?.at && Date.now() - wxData.at < maxAgeMin * 60e3) { renderWx(); return; }
+  wxBusy = true;
+  try {
+    const r = await fetch(WX_URL, { headers: { Accept: "application/geo+json" }, cache: "no-cache", referrerPolicy: "no-referrer" });
+    if (!r.ok) throw new Error(`NWS ${r.status}`);
+    const d = await r.json();
+    const iso = (v) => (typeof v === "string" && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d$/.test(v) ? v : null);
+    const periods = (d?.properties?.periods || []).slice(0, 8).map((p) => ({
+      n: String(p.name || "").slice(0, 40), s: iso(p.startTime), e: iso(p.endTime), day: !!p.isDaytime,
+      t: Number.isFinite(p.temperature) ? Math.round(p.temperature) : null, sf: String(p.shortForecast || "").slice(0, 90),
+      pop: Number.isFinite(p.probabilityOfPrecipitation?.value) ? p.probabilityOfPrecipitation.value : null,
+      df: String(p.detailedForecast || "").slice(0, 500) })).filter((p) => p.s && p.e && p.t != null);
+    if (!periods.length) throw new Error("no forecast");
+    wxData = { at: Date.now(), up: String(d.properties.updateTime || d.properties.generatedAt || "").slice(0, 30), periods };
+    store.set("wx", wxData);
+  } catch { /* offline or the NWS busy: keep the last forecast */ }
+  finally { wxBusy = false; }
+  renderWx();
+}
+// the forecast's own clock (Reno time): a date string for "now", from the periods' UTC offset
+function wxDate(offset, plusDays = 0) {
+  const m = /^([+-])(\d\d):(\d\d)$/.exec(offset || "");
+  const mins = m ? (m[1] === "-" ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
+  return new Date(Date.now() + mins * 60e3 + plusDays * 864e5).toISOString().slice(0, 10);
+}
+function wxDays() {
+  const left = (wxData?.periods || []).filter((p) => Date.parse(p.e) > Date.now());
+  if (!left.length) return null;
+  const off = left[0].s.slice(19), today = wxDate(off), tom = wxDate(off, 1);
+  const day = (d) => left.find((p) => p.day && p.s.slice(0, 10) === d);
+  const night = (d) => left.find((p) => !p.day && p.s.slice(0, 10) === d && Number(p.s.slice(11, 13)) >= 12);
+  const dow = new Date(`${tom}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
+  return [{ label: "Today", hi: day(today), lo: night(today) }, { label: dow, hi: day(tom), lo: night(tom) }]
+    .filter((x) => x.hi || x.lo);
+}
+const WX_ICONS = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>',
+  moon: '<path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/>',
+  cloud: '<path d="M7 18.5h10.2a3.8 3.8 0 0 0 .4-7.6 5.6 5.6 0 0 0-10.9-1.3A4.5 4.5 0 0 0 7 18.5z"/>',
+  partly: '<path d="M8 3.5v1.6M3.5 8h1.6M4.9 4.9l1.1 1.1M11.1 4.9 10 6"/><path d="M5.6 10.6A3 3 0 1 1 10.4 7"/><path d="M9 19.5h8.6a3.2 3.2 0 0 0 .3-6.4 4.7 4.7 0 0 0-9.1-1A3.7 3.7 0 0 0 9 19.5z"/>',
+  partlyNight: '<path d="M10.8 4.6A4 4 0 0 0 5.4 10a4 4 0 0 0 5.4-5.4z"/><path d="M9 19.5h8.6a3.2 3.2 0 0 0 .3-6.4 4.7 4.7 0 0 0-9.1-1A3.7 3.7 0 0 0 9 19.5z"/>',
+  rain: '<path d="M7 14.5h10.2a3.6 3.6 0 0 0 .4-7.2 5.4 5.4 0 0 0-10.5-1.2A4.2 4.2 0 0 0 7 14.5z"/><path d="M8.5 17.5l-1 2.5M12.5 17.5l-1 2.5M16.5 17.5l-1 2.5"/>',
+  snow: '<path d="M7 14.5h10.2a3.6 3.6 0 0 0 .4-7.2 5.4 5.4 0 0 0-10.5-1.2A4.2 4.2 0 0 0 7 14.5z"/><path d="M8 18.5h.01M12 20h.01M16 18.5h.01M10 21.5h.01M14 21.5h.01"/>',
+  storm: '<path d="M7 14.5h10.2a3.6 3.6 0 0 0 .4-7.2 5.4 5.4 0 0 0-10.5-1.2A4.2 4.2 0 0 0 7 14.5z"/><path d="M12.5 15.5l-2 3.5h3l-2 3.5"/>',
+  fog: '<path d="M4 9h16M6 13h12M4 17h16"/>',
+  wind: '<path d="M3 9h11a2.5 2.5 0 1 0-2.5-2.5M3 13h15a2.5 2.5 0 1 1-2.5 2.5M3 17h8"/>',
+};
+function wxKind(sf, day) {
+  const s = String(sf || "").toLowerCase();
+  if (/thunder|t-storm/.test(s)) return "storm";
+  if (/snow|flurr|sleet|blizzard|freezing|ice/.test(s)) return "snow";
+  if (/rain|shower|drizzle/.test(s)) return "rain";
+  if (/fog|haze|smoke|dust/.test(s)) return "fog";
+  if (/mostly cloudy|^cloudy|overcast/.test(s)) return "cloud";
+  if (/partly|mostly sunny|mostly clear/.test(s)) return day ? "partly" : "partlyNight";
+  if (/sunny|clear|fair/.test(s)) return day ? "sun" : "moon";
+  if (/wind|breezy|blustery|gust/.test(s)) return "wind";
+  return "cloud";
+}
+const wxIcon = (p) => {
+  const k = wxKind(p.sf, p.day);
+  return icon(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="wx-i wx-${k}">${WX_ICONS[k]}</svg>`);
+};
+function renderWx() {
+  const box = $("#wx");
+  if (!box) return;
+  const days = T.weather && S.tab === "feed" ? wxDays() : null;
+  const was = !box.hidden;
+  if (!days?.length) { box.hidden = true; box.replaceChildren(); }
+  else {
+    const rain = (x) => Math.max(x.hi?.pop ?? 0, x.lo?.pop ?? 0);
+    box.hidden = false;
+    box.replaceChildren(el("button", { class: "wx-main", onclick: openWx,
+      "aria-label": days.map((x) => `${x.label}: ${x.hi ? `high ${x.hi.t}°, ${x.hi.sf}` : ""}${x.lo ? `, low ${x.lo.t}°` : ""}`).join("; ") + `. ${WX.place}. Opens the forecast.` },
+      days.map((x) => el("span", { class: "wx-day" }, wxIcon(x.hi || x.lo),
+        el("b", {}, x.hi ? x.label : x.label === "Today" ? "Tonight" : x.label),
+        x.hi ? el("span", { class: "wx-hi" }, `${x.hi.t}°`) : null,
+        x.lo ? el("span", { class: "wx-lo" }, `${x.hi ? "/ " : ""}${x.lo.t}°`) : null,
+        rain(x) >= 30 ? el("span", { class: "wx-pop" }, `${rain(x)}%`) : null)),
+      el("span", { class: "wx-place" }, WX.short)));
+  }
+  if (was !== !box.hidden) requestAnimationFrame(fitAll);
+}
+function openWx() {
+  const left = (wxData?.periods || []).filter((p) => Date.parse(p.e) > Date.now()).slice(0, 5);
+  const fetched = wxData?.at ? ago(new Date(wxData.at).toISOString()) : "";
+  openSheet(
+    el("h2", { id: "sheet-title" }, `${WX.place} weather`),
+    el("ul", { class: "rows wx-list" }, left.map((p) => el("li", { class: "row wx-row" },
+      el("div", { class: "wx-row-h" }, wxIcon(p), el("b", {}, p.n), el("span", { class: p.day ? "wx-hi" : "wx-lo" }, `${p.day ? "High" : "Low"} ${p.t}°`),
+        p.pop >= 10 ? el("span", { class: "wx-pop" }, `${p.pop}% chance of rain or snow`) : null),
+      el("p", {}, p.df || p.sf)))),
+    el("p", { class: "fine" }, `National Weather Service forecast for ${WX.place}${wxData?.up ? `, issued ${new Date(wxData.up).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}` : ""}${fetched ? `; checked ${fetched}` : ""}.`),
+    el("div", { class: "link-row" },
+      el("a", { class: "act", href: WX_PAGE, target: "_blank", rel: "noopener" }, "Full forecast at weather.gov"),
+      el("button", { class: "act", onclick: () => { closeSheet(); switchTab("tune"); setPane("reading", "tune-weather"); } }, "Weather settings")));
+}
+
 // ── meetings ───────────────────────────────────────────────────────────────
 const dayNo = (iso) => Math.floor(Date.parse(`${String(iso).slice(0, 10)}T12:00:00`) / 864e5);
 const meetingOn = (m) => T.meetings[m.id] ?? !m.off;
@@ -407,6 +516,7 @@ function closeBanner(m) {
   toast(`${m.name} banner closed. Turn meetings on or off in Tune → Interests.`);
 }
 function renderBanner() {
+  renderWx();
   const b = $("#banner");
   if (!b) return;
   const m = S.tab === "feed" ? bannerMeeting() : null;
