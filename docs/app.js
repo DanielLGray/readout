@@ -81,10 +81,22 @@ const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : (many 
 let toastTimer;
 function toast(msg) {
   const t = $("#toast");
+  t.classList.remove("act");
   t.textContent = msg;
   t.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// a toast with one button (Undo), up a little longer
+function toastAction(msg, label, fn) {
+  const t = $("#toast");
+  t.replaceChildren(el("span", {}, msg), el("button", { class: "toast-act", onclick: () => {
+    clearTimeout(toastTimer); t.classList.remove("show", "act"); fn();
+  } }, label));
+  t.classList.add("show", "act");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show", "act"), 5000);
 }
 
 // ── state ──────────────────────────────────────────────────────────────────
@@ -116,6 +128,7 @@ const TUNE_DEFAULTS = {
   hidePending: true,    // hide papers whose abstract isn't in PubMed yet (the conclusion is the card)
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
+  swipe: true,          // swipe a card left to save it, right to clear it
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
@@ -156,6 +169,7 @@ function loadTune() {
     fav: strs(t.fav), hidePending: typeof t.hidePending === "boolean" ? t.hidePending : TUNE_DEFAULTS.hidePending,
     readLast: t.readLast !== false,
     weather: t.weather !== false,
+    swipe: t.swipe !== false,
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
@@ -474,11 +488,20 @@ function renderChips() {
 const dayOf = (it) => (it.type === "news" ? it.date : it.added || it.epub || "").slice(0, 10);
 
 // The feed for the current chips. `f` overrides the chips; `report` (optional) counts what was left out.
+// cards you swiped away (key → day), kept 90 days; Tune → Rules can bring them back
+let cleared = store.get("cleared", null);
+if (!cleared || typeof cleared !== "object" || Array.isArray(cleared)) cleared = {};
+function setCleared(key, on) {
+  if (on) cleared[key] = localDay(); else delete cleared[key];
+  const cut = localDay(daysAgo(90));
+  for (const [k, d] of Object.entries(cleared)) if (typeof d !== "string" || d < cut) delete cleared[k];
+  store.set("cleared", cleared);
+}
 // cards you've seen go to the end. Which cards count as seen is fixed when a list is started fresh
 // (opening the app, a chip, refresh), so nothing moves while you're reading.
 const isRead = (it) => !!(T.readLast && S.readSet && it && it.type !== "top" && !SPECIAL.has(it.type) && S.readSet.has(listKey(it)));
 function filtered(f = {}, report = null) {
-  const list = buildList(f, report);
+  const list = buildList(f, report).filter((it) => it.type === "top" || SPECIAL.has(it.type) || !cleared[listKey(it)]);
   if (!T.readLast || (f.kind ?? S.kind) === "today" || !S.readSet?.size) return list;
   const fresh = [], read = [];
   for (const it of list) (isRead(it) ? read : fresh).push(it);
@@ -645,7 +668,7 @@ function refreshFeed(keepKey, keepIdx) {
   if (at < 0 && keepIdx > 0) at = Math.min(keepIdx, S.list.length - 1);      // that card left (you hid it): stay where you were
   if (at > 0 && at < 200) {
     while (S.rendered <= at + 1 && S.rendered < S.list.length) appendCards(10);
-    view.scrollTop = at * view.clientHeight;
+    view.scrollTop = c.offsetTop;
   }
 }
 
@@ -725,7 +748,7 @@ function newsCardEl(it) {
   const isNew = S.newsNew.has(it.id);
   const cats = (it.categories || []).map((c) => S.news?.categories?.[c]).filter(Boolean);
   const saved = !!S.saved[saveKey(it)];
-  const saveBtn = el("button", { class: "act", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
+  const saveBtn = el("button", { class: "act save-btn", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
     icon(saved ? ICONS.saved : ICONS.save), saved ? "Saved" : "Save");
   return el("article", { class: "card news-card", "data-key": saveKey(it) },
     el("div", { class: "card-meta" },
@@ -884,7 +907,7 @@ function paperCardEl(it) {
 
 function actionsEl(it, withShare) {
   const saved = !!S.saved[saveKey(it)];
-  const saveBtn = el("button", { class: "act", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
+  const saveBtn = el("button", { class: "act save-btn", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
     icon(saved ? ICONS.saved : ICONS.save), saved ? "Saved" : "Save");
   return el("div", { class: "actions" + (withShare ? " five" : ""), style: withShare ? null : "grid-template-columns:repeat(3,1fr)" },
     el("button", { class: "act", onclick: () => openAbstract(it) }, icon(ICONS.abstract), "Abstract"),
@@ -1032,7 +1055,7 @@ function toggleSave(it, btn) {
     } else toast("Couldn’t update Saved: this phone’s storage is full.");
   }
   const on = !!S.saved[key];
-  document.querySelectorAll(`[data-key="${CSS.escape(key)}"] .act[aria-pressed]`).forEach((b) => setSaveBtn(b, on));
+  document.querySelectorAll(`[data-key="${CSS.escape(key)}"] .act.save-btn`).forEach((b) => setSaveBtn(b, on));   // not the Rate button
   if (btn) setSaveBtn(btn, on);
   if (S.tab === "saved") renderSaved();
 }
@@ -1317,7 +1340,7 @@ function openInfo() {
     el("h3", {}, "Weather"),
     el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
     el("h3", {}, "Moving around"),
-    el("p", {}, "Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
+    el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
@@ -1704,6 +1727,8 @@ function updateHeadNote() {
 }
 
 function switchTab(tab) {
+  const tt = $("#toast");
+  if (tt.classList.contains("act")) { clearTimeout(toastTimer); tt.classList.remove("show", "act"); }   // Undo belongs to the feed
   if (S.tab === "feed" && tab !== "feed") S.lastKey = currentKey();
   S.tab = tab;
   document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
@@ -1796,6 +1821,108 @@ async function showKept() {
   keptJSON("data/explore.json").then((x) => { if (x && !S.explore) { S.explore = x; S.exploreKey = null; if (S.tab === "explore") renderExplore(); } });
 }
 
+// ── swipe a card: left saves it, right clears it and the next card takes its place ──
+function setupSwipe() {
+  const view = $("#view-feed");
+  if (!view) return;
+  let st = null;
+  const th = () => Math.max(90, view.clientWidth * 0.28);
+  view.addEventListener("touchstart", (e) => {
+    st = null;
+    if (!T.swipe || e.touches.length !== 1 || $("#sheet").classList.contains("open")) return;
+    const card = e.target.closest(".card");
+    const it = card?._it;
+    if (!it || it.type === "top" || SPECIAL.has(it.type) || card.classList.contains("swiping")) return;
+    for (let n = e.target; n && n !== card; n = n.parentElement)      // a row that scrolls sideways keeps its own swipe
+      if (n.scrollWidth > n.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(n).overflowX)) return;
+    st = { card, it, x0: e.touches[0].clientX, y0: e.touches[0].clientY, dx: 0, lock: null };
+  }, { passive: true });
+  view.addEventListener("touchmove", (e) => {
+    if (!st) return;
+    const t = e.touches[0], dx = t.clientX - st.x0, dy = t.clientY - st.y0;
+    if (!st.lock) {
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+      st.lock = Math.abs(dx) > Math.abs(dy) * 1.4 ? "x" : "y";          // mostly sideways, or it's a scroll
+      if (st.lock === "y") { st = null; return; }
+      swipeStart(st);
+    }
+    e.preventDefault();
+    st.dx = dx;
+    swipeMove(st, th());
+  }, { passive: false });
+  const end = (ok) => { if (st?.lock === "x") swipeEnd(st, ok && Math.abs(st.dx) >= th()); st = null; };
+  view.addEventListener("touchend", () => end(true));
+  view.addEventListener("touchcancel", () => end(false));
+  // a swipe that ends over a headline or button isn't also a tap on it
+  view.addEventListener("click", (e) => { if (Date.now() - (S.swipedAt || 0) < 450) { e.preventDefault(); e.stopPropagation(); } }, true);
+}
+function swipeStart(st) {
+  const saved = !!S.saved[saveKey(st.it)];
+  st.under = el("div", { class: "swipe-under", "aria-hidden": "true", style: `top:${st.card.offsetTop}px;height:${st.card.offsetHeight}px` },
+    el("span", { class: "su su-clear" }, icon(ICONS.close), "Clear"),
+    el("span", { class: "su su-save" }, icon(saved ? ICONS.saved : ICONS.save), saved ? "Saved" : "Save"));
+  st.card.parentNode.insertBefore(st.under, st.card);
+  st.card.classList.add("swiping");
+}
+function swipeMove(st, th) {
+  st.card.style.transform = `translateX(${st.dx}px)`;
+  st.under.classList.toggle("left", st.dx < 0);
+  st.under.classList.toggle("right", st.dx > 0);
+  st.under.classList.toggle("armed", Math.abs(st.dx) >= th);
+}
+function swipeEnd(st, commit) {
+  const { card, it, under } = st;
+  S.swipedAt = Date.now();
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const settle = () => { card.style.transition = ""; card.style.transform = ""; card.style.opacity = ""; card.classList.remove("swiping"); under.remove(); };
+  const back = () => {
+    if (still) return settle();
+    card.style.transition = "transform .2s ease-out";
+    card.style.transform = "";
+    setTimeout(settle, 220);
+  };
+  if (!commit) return back();
+  if (st.dx < 0) {                                   // left: save (and stay)
+    if (S.saved[saveKey(it)]) toast("Already in Saved");
+    else toggleSave(it, null);
+    return back();
+  }
+  if (still) { settle(); clearCard(card, it); return; }      // right: clear
+  card.style.transition = "transform .2s ease-in, opacity .2s ease-in";
+  card.style.transform = `translateX(${card.clientWidth}px)`;
+  card.style.opacity = "0";
+  setTimeout(() => { under.remove(); clearCard(card, it); }, 200);
+}
+function clearCard(card, it) {
+  const view = $("#view-feed");
+  const key = listKey(it);
+  const idx = S.list.indexOf(it);
+  setCleared(key, true);
+  bump("seen", it);
+  seenObserver?.unobserve(card);
+  const top = card.offsetTop;
+  card.remove();
+  if (idx >= 0) { S.list.splice(idx, 1); if (idx < S.rendered) S.rendered--; }
+  if (S.rendered < S.list.length && S.rendered < idx + 3) appendCards(5);      // the next ones ready
+  view.scrollTop = top;               // the next card, where this one was (the browser would snap back a card)
+  updateHeadNote();
+  const listNow = S.list;
+  toastAction("Cleared", "Undo", () => {
+    setCleared(key, false);
+    if (S.list !== listNow || S.tab !== "feed") { S.feedDirty = true; toast("It’s back in your lists"); return; }   // the list has changed since
+    const cards = [...view.children].filter((n) => n._it);
+    const at = Math.max(0, Math.min(idx, cards.length));
+    const c = cardEl(it);
+    c._it = it;
+    view.insertBefore(c, cards[at] || view.querySelector(".feed-end") || view.lastElementChild);
+    S.list.splice(at, 0, it);
+    S.rendered++;
+    seenObserver?.observe(c);
+    view.scrollTop = c.offsetTop;
+    requestAnimationFrame(() => fitCard(c));
+  });
+}
+
 // pull the feed down from its first card to check for new papers and news
 function setupPullToRefresh() {
   const view = $("#view-feed"), ptr = $("#ptr");
@@ -1854,6 +1981,7 @@ function boot() {
   document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
   $("#btn-refresh").addEventListener("click", () => reload(true));
   setupPullToRefresh();
+  setupSwipe();
   $("#btn-search").addEventListener("click", openSearch);
   applyTextSize();
   $("#btn-info").addEventListener("click", openInfo);

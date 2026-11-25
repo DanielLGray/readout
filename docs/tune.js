@@ -507,7 +507,13 @@ function mixSection() {
     switchRow("Top stories card", "Opens the feed with stories that several outlets covered this week.", T.topCard,
       (on) => { setTune({ topCard: on }); rerender(); }),
     switchRow("Cards you’ve seen go to the end", "Each list starts with what you haven’t seen; the rest follow, marked Seen. Takes effect when a list starts fresh: opening the app, a chip, or a refresh.", T.readLast,
-      (on) => { setTune({ readLast: on }); rerender(); }));
+      (on) => { setTune({ readLast: on }); rerender(); }),
+    switchRow("Swipe cards sideways", "Left saves a card; right clears it, and the next one takes its place.", T.swipe,
+      (on) => { setTune({ swipe: on }); rerender(); }),
+    Object.keys(cleared).length ? el("div", { class: "switch-row" },
+      el("div", {}, el("div", { class: "ctl-label", style: "margin:0" }, `${plural(Object.keys(cleared).length, "card")} cleared`),
+        el("p", { class: "fine", style: "margin:2px 0 0" }, "Cleared cards stay out of every list for 90 days.")),
+      el("button", { class: "act", onclick: () => { cleared = {}; store.set("cleared", cleared); S.feedDirty = true; toast("Cleared cards are back"); rerender(); } }, "Bring back")) : null);
 }
 
 const WEIGHTS = [[0, "Off"], [0.5, "Low"], [1, "Medium"], [2, "High"]];

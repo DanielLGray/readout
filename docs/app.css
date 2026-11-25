@@ -145,7 +145,19 @@ a { color: inherit; }
 .view { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
 /* ── feed: one paper per screen ─────────────────────────────────────────── */
-.feed { scroll-snap-type: y mandatory; overscroll-behavior-y: contain; }
+.feed { scroll-snap-type: y mandatory; overscroll-behavior-y: contain; position: relative; }
+/* swiping a card sideways: left saves, right clears; what's underneath says which */
+.feed .card { background: var(--bg); touch-action: pan-y pinch-zoom; }
+.card.swiping { position: relative; z-index: 1; will-change: transform; }
+.swipe-under { position: absolute; left: 0; right: 0; z-index: 0; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; font-weight: 700; font-size: 15px; pointer-events: none; background: var(--panel); color: var(--muted); }
+.swipe-under .su { display: inline-flex; align-items: center; gap: 8px; opacity: 0; transition: transform .15s, opacity .15s; }
+.swipe-under .su svg { width: 22px; height: 22px; }
+.swipe-under.right { background: var(--raise); }
+.swipe-under.right .su-clear { opacity: .7; color: var(--ink); }
+.swipe-under.left { background: color-mix(in srgb, var(--focus) 20%, var(--panel)); }
+.swipe-under.left .su-save { opacity: .7; color: var(--focus); }
+.swipe-under.armed.left .su-save, .swipe-under.armed.right .su-clear { opacity: 1; transform: scale(1.12); }
 /* pull to refresh: a pill that follows your finger down from the top of the feed */
 .ptr { position: fixed; left: 50%; top: 0; z-index: 6; display: flex; align-items: center; gap: 8px; padding: 8px 14px;
   border-radius: 999px; background: var(--raise); border: 1px solid var(--line); color: var(--ink); font-size: 13.5px; font-weight: 600;
@@ -352,6 +364,8 @@ a { color: inherit; }
   z-index: 40; opacity: 0; transition: opacity .2s; pointer-events: none;
 }
 .toast.show { opacity: 1; }
+.toast.act { pointer-events: auto; display: flex; align-items: center; gap: 16px; padding: 6px 8px 6px 16px; }
+.toast-act { font-weight: 800; text-decoration: underline; text-underline-offset: 3px; padding: 6px 8px; color: inherit; }
 .playing .toast { bottom: calc(var(--tab-h) + var(--bottom) + 66px); }   /* clear of the player bar */
 
 .info p, .info li { font-size: 15.5px; max-width: 62ch; }
