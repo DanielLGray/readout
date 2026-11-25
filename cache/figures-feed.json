@@ -11,7 +11,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13785406": {
       "t": "2026-11-25",
@@ -24,12 +24,12 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13785431": {
       "t": "2026-11-25",
       "why": "no picture among 0 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13785468": {
       "t": "2026-11-25",
@@ -42,20 +42,20 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13782085": {
       "t": "2026-11-25",
       "fig": {
         "src": "figs/PMC13782085.webp",
-        "w": 960,
-        "h": 735,
-        "n": "Fig. 4",
-        "cap": "Representative [68Ga]Ga-DOTATATE PET/CT images illustrating the diagnostic concordance and discordance between Integrated Interpretation and Liver Threshold Interpretation. (A–D) A 62-year-old female with a retroperitoneal (para-aortic) mass histopathologically confirmed as PPGL. CT shows heterogeneous hypoattenuation within the lesion indicating necrosis (A). PET images demonstrate intense, heterogeneous tracer uptake in the solid components (B–D). SUVmax of the lesion is 19.3, liver SUVmean is 7.0, and LLR is 5.9. Both Integrated Interpretation and Liver Threshold Interpretation diagnosed PPGL, concordant with the pathological diagnosis. (E–H) A 57-year-old male with a right adrenal nodule histopathologically confirmed as PPGL. CT shows a homogeneous hypodense nodule (E). PET images reveal heterogeneous tracer uptake (F–H) with SUVmax of 41.1, liver SUVmean of 10.2, and LLR of 1.9. Integrated Interpretation misinterpreted the lesion as non-PPGL (likely due to the low-density appearance on CT), whereas Liver Threshold Interpretation correctly diagnosed PPGL because the SUVmax exceeded the liver uptake threshold and LLR > 1.0. (I–L) A 55-year-old female with a left…",
+        "w": 918,
+        "h": 960,
+        "n": "Fig. 3",
+        "cap": "PET/CT parameters in PPGL vs. non-PPGL groups. *P < 0.05, **P < 0.01. LLR: lesion-to-liver ratio; LBR: lesion-to-blood-pool ratio; LCR: lesion-to-contralateral-adrenal ratio",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13782375": {
       "t": "2026-11-25",
@@ -68,7 +68,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13777914": {
       "t": "2026-11-25",
@@ -81,7 +81,7 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13773071": {
       "t": "2026-11-25",
@@ -94,12 +94,12 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13769789": {
       "t": "2026-11-25",
       "why": "no picture among 7 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13769785": {
       "t": "2026-11-25",
@@ -112,12 +112,12 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13768539": {
       "t": "2026-11-25",
       "why": "no picture among 9 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13755292": {
       "t": "2026-11-25",
@@ -130,17 +130,17 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13751946": {
       "t": "2026-11-25",
       "why": "no picture among 3 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13748144": {
       "t": "2026-11-25",
       "why": "no picture among 7 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13745607": {
       "t": "2026-11-25",
@@ -153,7 +153,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13743648": {
       "t": "2026-11-25",
@@ -166,7 +166,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13743664": {
       "t": "2026-11-25",
@@ -179,7 +179,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13744824": {
       "t": "2026-11-25",
@@ -192,7 +192,7 @@
         "lic": "CC BY-NC",
         "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13740201": {
       "t": "2026-11-25",
@@ -205,7 +205,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13744818": {
       "t": "2026-11-25",
@@ -218,7 +218,7 @@
         "lic": "CC BY-NC",
         "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13737341": {
       "t": "2026-11-25",
@@ -231,17 +231,17 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13737284": {
       "t": "2026-11-25",
       "why": "no picture among 7 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13737363": {
       "t": "2026-11-25",
       "why": "no picture among 6 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13737244": {
       "t": "2026-11-25",
@@ -254,7 +254,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13731590": {
       "t": "2026-11-25",
@@ -267,12 +267,12 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13728009": {
       "t": "2026-11-25",
       "why": "no picture among 5 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13719923": {
       "t": "2026-11-25",
@@ -285,7 +285,7 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13719947": {
       "t": "2026-11-25",
@@ -298,25 +298,25 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13719960": {
       "t": "2026-11-25",
       "fig": {
         "src": "figs/PMC13719960.webp",
-        "w": 659,
-        "h": 960,
-        "n": "Fig. 2",
-        "cap": "Concordance of prostate MRI quality evaluation compared with the reference pre- and post-lecture. a Overall accuracy and balanced accuracy pre- and post-lecture. b Accuracy in subgroups. Overall accuracy increased from 66.7% to 76.7%, and balanced accuracy increased from 62.9% to 84.2%. Subgroup accuracy improved from 60.0–70.0% to 70.7–82.7%. PI-QUAL, prostate imaging quality",
+        "w": 960,
+        "h": 836,
+        "n": "Fig. 3",
+        "cap": "The inter-reader agreement for prostate MRI quality evaluation pre- and post-lecture. Subgroup analyses showed improvements in inter-reader agreement across participants stratified by hospital level, role in prostate MRI, professional title, prostate MRI experience, PI-QUAL knowledge, and interval from the lecture. Pre-lecture agreement ranged from poor to fair (AC1: −0.062 to 0.286), while post-lecture agreement ranged from fair to moderate across all groups (AC1: 0.395–0.537). PI-QUAL, prostate imaging quality",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13719943": {
       "t": "2026-11-25",
       "why": "no picture among 6 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13710466": {
       "t": "2026-11-25",
@@ -329,7 +329,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13695640": {
       "t": "2026-11-25",
@@ -342,20 +342,20 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13694640": {
       "t": "2026-11-25",
       "fig": {
         "src": "figs/PMC13694640.webp",
         "w": 960,
-        "h": 609,
-        "n": "Fig. 2",
-        "cap": "Study overview. (A) PET scans from all cohorts were downloaded, converted from DICOM to NIfTI, and resampled to 1 × 1 × 1 mm³ isotropic resolution. B) ADNI and SCAN combined data was split at the participant level into training (60%), validation (20%), and internal test (20%) sets. All scans from a participant were assigned to a single split to prevent leakage. Stratification was performed using tracer label and study site ID to balance tracer-to-site strata across splits. Mayo scans were held out as an external test set. (C) Model inputs were constructed by extracting axial, coronal, and sagittal views, averaging a 10 mid-slices per view, resizing to 256 × 256, applying percentile-based intensity stretching (P1–P99), and clipping to [0,1] to form a 3-channel image. (D) A ConvNeXt-Large network initialized with ImageNet-pretrained weights was trained with global average pooling, layer normalization, and a final fully connected SoftMax classifier for either 10-class or 3-class tracer prediction. (E) Trained models were applied to the internal and external test sets for inference and performance evaluation",
+        "h": 836,
+        "n": "Fig. 3",
+        "cap": "Integrated gradients from the 10-class tracer model. For each tracer and cohort, the displayed map shows positive attribution averaged across seed models for one representative candidate image. Positive values indicate image regions that increased the model output for the true tracer class. Maps visualize the image features relevant for the models’ predictions and should not be interpreted as voxelwise localization of tracer binding or disease pathology",
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13727854": {
       "t": "2026-11-25",
@@ -368,7 +368,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13683290": {
       "t": "2026-11-25",
@@ -381,20 +381,12 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13773070": {
       "t": "2026-11-25",
-      "fig": {
-        "src": "figs/PMC13773070.webp",
-        "w": 960,
-        "h": 789,
-        "n": "Figure 5.",
-        "cap": "Incremental prognostic value of 3D computed tomography (CT) body composition. Harrell C statistics with 95% CIs are shown for clinical models alone and after addition of 3D CT body composition measures. Body composition included body surface area-indexed volumes and tissue attenuations of subcutaneous adipose tissue, visceral adipose tissue, muscular adipose tissue, and skeletal muscle. Model 1 included age and sex; Model 2 additionally included body mass index (BMI); and Model 3 additionally included hypertension, diabetes, and chronic renal failure. P values are derived from likelihood ratio (LR) tests assessing the incremental predictive information provided by body composition measures beyond the corresponding clinical model.",
-        "lic": "CC BY-NC-ND",
-        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
-      },
-      "v": 2
+      "why": "no picture among 5 figures",
+      "v": 3
     },
     "PMC13675461": {
       "t": "2026-11-25",
@@ -407,7 +399,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13675434": {
       "t": "2026-11-25",
@@ -420,12 +412,12 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13672765": {
       "t": "2026-11-25",
       "why": "no picture among 4 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13669286": {
       "t": "2026-11-25",
@@ -438,7 +430,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13661840": {
       "t": "2026-11-25",
@@ -451,12 +443,12 @@
         "lic": "CC BY-NC-ND",
         "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13661850": {
       "t": "2026-11-25",
       "why": "no picture among 7 figures",
-      "v": 2
+      "v": 3
     },
     "PMC13661870": {
       "t": "2026-11-25",
@@ -469,7 +461,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13661852": {
       "t": "2026-11-25",
@@ -482,7 +474,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13658753": {
       "t": "2026-11-25",
@@ -495,12 +487,12 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13667856": {
       "t": "2026-11-25",
       "why": "license TDM",
-      "v": 2
+      "v": 3
     },
     "PMC13652788": {
       "t": "2026-11-25",
@@ -513,7 +505,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     },
     "PMC13652791": {
       "t": "2026-11-25",
@@ -526,7 +518,7 @@
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "v": 2
+      "v": 3
     }
   },
   "idconv": {
