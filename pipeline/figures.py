@@ -35,6 +35,7 @@ FIGS = "figs"
 MAX_SIDE = 960              # pixels: sharp on a phone, ~40–100 KB as WebP
 QUALITY = 74
 RECHECK_NONE = 21           # days before asking again about an article that had no usable figure
+PICK_VERSION = 2            # bump when figure_score changes: earlier choices are made again
 LOOKUP_DAYS = 120           # look up PMCIDs for papers this young (older ones have theirs by now)
 
 _CC = re.compile(r"^CC(?:0| BY(?:-NC)?(?:-SA|-ND)?)$")
@@ -42,8 +43,9 @@ _LICENSE_URL = {"CC0": "https://creativecommons.org/publicdomain/zero/1.0/"}
 _FLOW = re.compile(r"flow ?(?:chart|diagram)|study (?:flow|design|selection|population|profile)|patient (?:selection|enrol|inclusion|recruit)"
                    r"|inclusion and exclusion|enrol+ment|\bSTARD\b|\bCONSORT\b|\bPRISMA\b|schemat|workflow|pipeline|framework|architecture"
                    r"|overview of (?:the )?(?:study|method|model)|graphical abstract|timeline", re.I)
-_PLOT = re.compile(r"\bROC\b|receiver operating|\bcurves?\b|Kaplan|survival|forest plot|bar (?:chart|graph)|box(?:-and-whisker)? ?(?:plot|graph)"
-                   r"|scatter|Bland|calibration|decision curve|heat ?map|correlation|histogram|nomogram|SHAP|violin|waterfall plot", re.I)
+_PLOT = re.compile(r"\bROC\b|receiver operating|\bcurves?\b|Kaplan|survival|forest plot|\bplots?\b|\bcharts?\b|\bgraphs?\b|box(?:-and-whisker)?"
+                   r"|scatter|Bland|calibration|decision curve|heat ?map|correlation|histogram|nomogram|SHAP|violin|waterfall"
+                   r"|\b(?:number|numbers|proportion|percentage|distribution|frequency) of\b|confidence intervals?|\bICCs?\b|sensitivity and specificity", re.I)
 _IMAGE = re.compile(r"\b(?:CT|MRI|MR|PET|SPECT|PET/CT|PET/MRI|US|ultrasound|sonograph\w*|radiograph\w*|images?|scans?|axial|coronal|sagittal"
                     r"|T1\w*|T2\w*|weighted|DWI|ADC|contrast-enhanced|arterial phase|portal venous|hepatobiliary phase|fused|fusion"
                     r"|maximum intensity projection|MIP|fluoroscop\w*|angiogra\w*|elastogra\w*|Doppler|representative|example|case)\b", re.I)
@@ -235,11 +237,16 @@ def attach(http: Http, cards: Iterable[dict], data: Path = DATA, cache_dir: Path
         if not re.match(r"^PMC\d+$", pmcid):
             continue
         rec = done.get(pmcid)
-        if rec and rec.get("fig") and (folder / f"{pmcid}.webp").exists():
+        current = rec and rec.get("v") == PICK_VERSION
+        if current and rec.get("fig") and (folder / f"{pmcid}.webp").exists():
             c["fig"] = rec["fig"]
             continue
-        if rec and not rec.get("fig") and rec.get("t", "") >= (t - timedelta(days=RECHECK_NONE)).isoformat():
+        if current and not rec.get("fig") and (rec.get("why") or "").startswith("license"):
+            continue                     # a license doesn't change
+        if current and not rec.get("fig") and rec.get("t", "") >= (t - timedelta(days=RECHECK_NONE)).isoformat():
             continue
+        if rec and rec.get("fig") and not current and (folder / f"{pmcid}.webp").exists():
+            c["fig"] = rec["fig"]        # keep showing the old choice until its turn comes
         if budget <= 0:
             continue
         budget -= 1
@@ -248,14 +255,17 @@ def attach(http: Http, cards: Iterable[dict], data: Path = DATA, cache_dir: Path
         except (HttpError, ValueError, OSError, ET.ParseError) as exc:
             stats["errors"] += 1
             log(f"  figure for {pmcid}: {type(exc).__name__}: {str(exc)[:120]}")
-            done[pmcid] = {"t": t.isoformat(), "why": "error"}
+            done[pmcid] = {"t": t.isoformat(), "why": "error", "v": PICK_VERSION}
             continue
         except Exception as exc:          # a broken image file must never sink the job
             stats["errors"] += 1
             log(f"  figure for {pmcid}: {type(exc).__name__}: {str(exc)[:120]}")
-            done[pmcid] = {"t": t.isoformat(), "why": "error"}
+            done[pmcid] = {"t": t.isoformat(), "why": "error", "v": PICK_VERSION}
             continue
-        done[pmcid] = {"t": t.isoformat(), "fig": fig} if fig else {"t": t.isoformat(), "why": why}
+        done[pmcid] = {"t": t.isoformat(), "fig": fig, "v": PICK_VERSION} if fig else {"t": t.isoformat(), "why": why, "v": PICK_VERSION}
+        c.pop("fig", None)
+        if not fig and (folder / f"{pmcid}.webp").exists():
+            (folder / f"{pmcid}.webp").unlink()           # an earlier choice the new rules turn down
         if fig:
             c["fig"] = fig
             stats["new"] += 1

@@ -889,20 +889,28 @@ function fitCard(card) {
   const extra = box.querySelector(".extra");
   if (extra) extra.hidden = false;
   const fig = card.querySelector(".fig");
-  fig?.classList.remove("small");
+  fig?.classList.remove("small", "tiny", "gone");
+  const tags = fig ? card.querySelector(".topic-tags") : null;
+  if (tags) tags.hidden = false;
   const sizes = ["", "l2", "l3", "l4"];
   const base = p.dataset.size ?? (p.dataset.size = sizes.find((c) => c && p.classList.contains(c)) || "");
-  sizes.forEach((c) => c && p.classList.remove(c));
-  if (base) p.classList.add(base);
+  const setSize = (c) => { sizes.forEach((x) => x && p.classList.remove(x)); if (c) p.classList.add(c); };
+  setSize(base);
   const over = () => inner.scrollHeight > box.clientHeight + 1;
   if (over() && extra) extra.hidden = true;
+  if (over() && tags) tags.hidden = true;                     // with a picture, topic tags go first
   if (over() && fig) fig.classList.add("small");              // a smaller picture before smaller type
   // smaller type before cutting text: the conclusion is the point of the card
   let shrank = false;
-  for (let i = sizes.indexOf(base) + 1; over() && i < sizes.length; i++) {
-    sizes.forEach((c) => c && p.classList.remove(c));
-    p.classList.add(sizes[i]);
-    shrank = true;
+  const shrink = () => { for (let i = sizes.indexOf(base) + 1; over() && i < sizes.length; i++) { setSize(sizes[i]); shrank = true; } };
+  shrink();
+  if (over() && fig) fig.classList.add("tiny");               // a strip of the picture, still tappable
+  if (over() && fig) {                // still too long: the conclusion wins; the picture stays in the abstract
+    fig.classList.add("gone");
+    if (tags) tags.hidden = false;
+    setSize(base); shrank = false;
+    if (over() && tags) tags.hidden = true;
+    shrink();
   }
   if (!over()) {                     // room to spare: let a long title show in full, if the conclusion still fits
     const t = card.querySelector(".card-title.clamp");

@@ -12,6 +12,7 @@ guidelines; never case reports, letters or notices. Papers already in Foundation
 """
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from datetime import date
 from typing import Optional
@@ -24,7 +25,7 @@ from .http import Http, default_http, log
 from .pubmed import PubMed
 
 NOT_PAPERS = 'NOT (Letter[pt] OR Comment[pt] OR "Published Erratum"[pt] OR Editorial[pt])'
-DEFAULTS = {"from_year": 2000, "min_age_years": 5, "per_area": 60, "per_year": 4}
+DEFAULTS = {"from_year": 2000, "min_age_years": 5, "per_area": 60, "per_year": 4, "exclude": ""}
 
 
 def resolve(pm: PubMed, http: Http, item: dict, previous: dict) -> Optional[str]:
@@ -122,11 +123,18 @@ def run(http: Optional[Http] = None) -> dict:
         card["cites"] = {"n": c.get("cites", 0), "cpy": c.get("cpy", 0), "rcr": c.get("rcr"), "year": c.get("year")}
         papers[pmid] = card
     classics: dict[str, list] = {}
+    try:
+        exclude = re.compile(s["exclude"]) if s.get("exclude") else None
+    except re.error as exc:
+        log(f"  Classics: exclude pattern ignored ({exc})")
+        exclude = None
     for a, lst in cands.items():
         keep, per_year = [], defaultdict(int)
         for pmid in lst:
             rec = recs.get(pmid)
             if not rec or is_notice(rec) or rec.get("retracted"):
+                continue
+            if exclude and exclude.search(rec.get("title", "")):
                 continue
             c = cites.get(pmid, {})
             if kind_of(rec.get("pub_types", []), c.get("research"), rec.get("title", "")) is None:
@@ -155,7 +163,7 @@ def run(http: Optional[Http] = None) -> dict:
         "foundations": {"title": fcfg.get("title", "Foundations"), "about": fcfg.get("about", ""),
                         "groups": [g for g in groups if g["items"]], "meta": meta},
         "classics": classics,
-        "settings": {k: s[k] for k in DEFAULTS},
+        "settings": {k: s[k] for k in DEFAULTS if k != "exclude"},
         "papers": papers,
     }
     write_json(DATA / "library.json", out)

@@ -108,7 +108,7 @@ groups:
     items:
       - label: O-RADS US risk stratification
         why: The ultrasound lexicon and risk categories for adnexal lesions.
-        find: '"O-RADS US Risk Stratification and Management System"[ti]'
+        find: '"O-RADS"[ti] AND stratification[ti] AND management[ti] AND consensus[ti] AND Radiology[ta]'
       - label: O-RADS MRI risk stratification
         why: How MRI sorts sonographically indeterminate adnexal masses.
         find: '"O-RADS MRI Risk Stratification System"[ti]'
@@ -244,3 +244,5 @@ classics:
   from_year: 2000
   min_age_years: 5
   per_area: 60
+  # left out of the classics: the 2020 COVID papers were cited at pandemic rates and crowd out the rest
+  exclude: 'COVID|SARS-CoV-2|[Cc]oronavirus|2019-nCoV'

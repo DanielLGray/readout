@@ -37,6 +37,10 @@ def test_figure_choice_prefers_images_over_charts():
     best = figures.pick(figs)
     assert best["label"] == "Fig. 3" and "64-year-old" in best["caption"]
     assert figures.pick(figs[:3]) is None                       # flowchart and ROC curve: no picture
+    charts = ["Bar plots show ICCs with 95% confidence intervals for five ADC ROI methods",
+              "Number of PMMRI scans with corresponding body part per case",
+              "Distribution of PROMISE PSMA scores on PET, displayed as pie charts"]
+    assert figures.pick([{"label": "Fig. 2", "caption": c, "href": "x"} for c in charts]) is None
     with pytest.raises(ValueError):
         figures.parse_figures('<!DOCTYPE a [<!ENTITY x "y">]><a>&x;</a>')
     assert figures.media_for("x_Fig3_HTML", ["s3://pmc-oa-opendata/PMC1.1/x_Fig3_HTML.webp?md5=1"]).endswith("/PMC1.1/x_Fig3_HTML.webp")
@@ -95,6 +99,14 @@ def test_attach_and_prune(tmp_path, monkeypatch):
     pmc.calls.clear()
     figures.attach(http, cards, data=tmp_path / "data", cache_dir=tmp_path / "cache")
     assert all("amazonaws" not in c for c in pmc.calls) and cards[0]["fig"] == fig
+    # choices made under older picking rules are made again (and kept on show until then)
+    cache = json.loads((tmp_path / "cache" / "figures-feed.json").read_text())
+    cache["figs"]["PMC123"]["v"] = 1
+    (tmp_path / "cache" / "figures-feed.json").write_text(json.dumps(cache))
+    figures.attach(http, cards, data=tmp_path / "data", cache_dir=tmp_path / "cache", budget=0)
+    assert cards[0]["fig"] == fig and all("amazonaws" not in c for c in pmc.calls)
+    figures.attach(http, cards, data=tmp_path / "data", cache_dir=tmp_path / "cache")
+    assert any("PMC123.2.json" in c for c in pmc.calls) and cards[0]["fig"] == fig
     # a figure no data file uses any more is deleted; nothing is deleted while a data file is missing
     (tmp_path / "data" / "feed.json").write_text(json.dumps({"items": [cards[0]]}))
     assert figures.prune(tmp_path / "data") == 0
@@ -148,7 +160,7 @@ def test_library(lib_env, monkeypatch):
             {"label": "A pinned paper", "why": "Because.", "pmid": pinned[0]},
             {"label": "Found by searching", "why": "Also.", "find": '"Radiology"[ta]'},
             {"label": "Nothing matches", "find": "no such thing[ti]"}]}],
-        "classics": {"from_year": 2016, "min_age_years": 2, "per_area": 6, "per_year": 2}}
+        "classics": {"from_year": 2016, "min_age_years": 2, "per_area": 6, "per_year": 2, "exclude": "^$|NEVER-MATCHES"}}
     monkeypatch.setattr(build_library, "load_yaml", lambda name: fd if name == "foundations.yaml" else real(name))
     out = build_library.run(http)
     g = out["foundations"]["groups"][0]
@@ -192,3 +204,13 @@ def test_real_foundations_file_is_well_formed():
         for it in g["items"]:
             assert it.get("why") and (it.get("find") or it.get("pmid")), it["label"]
             assert not it.get("pmid") or str(it["pmid"]).isdigit()
+
+
+def test_classics_exclude(lib_env, monkeypatch):
+    world, http = lib_env
+    real = build_library.load_yaml
+    fd = {"groups": [], "classics": {"from_year": 2016, "min_age_years": 2, "per_area": 6, "per_year": 2, "exclude": "."}}
+    monkeypatch.setattr(build_library, "load_yaml", lambda name: fd if name == "foundations.yaml" else real(name))
+    out = build_library.run(http)
+    assert out["classics"] and all(not ids for ids in out["classics"].values())       # every title matches "."
+    assert "exclude" not in out["settings"]

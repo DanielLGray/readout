@@ -111,7 +111,7 @@ function phrasesOf(title) {
   const ok = (w) => w.length > 2 && !STOP.has(w.toLowerCase()) && !/^\d+$/.test(w);
   for (let i = 0; i < words.length; i++) {
     const w = words[i];
-    if (ok(w) && (/[A-Z]{2,}|-/.test(w) || w.length >= 6)) out.push(w);
+    if (ok(w) && (/[A-Z]{2,}|-|\d/.test(w) || w.length >= 9)) out.push(w);       // acronyms, hyphenated terms, long words
     if (i + 1 < words.length && ok(w) && ok(words[i + 1])) out.push(`${w} ${words[i + 1]}`.toLowerCase());
   }
   const seen = new Set();
