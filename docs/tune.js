@@ -662,15 +662,142 @@ function settingsList(rows) {
 }
 function jobLinks(key, editLabel) {
   const j = JOBS[key];
-  return el("div", { class: "link-row" }, linkBtn(`${GH}/edit/main/config/${j.cfg}`, editLabel), linkBtn(`${GH}/actions/workflows/${j.wf}`, "Run now"));
+  const run = ghToken()
+    ? el("button", { class: "act", onclick: async (e) => {
+        const b = e.currentTarget;
+        b.disabled = true;
+        try { await runJob(key); toast(`${j.title}: started on GitHub. Results in a few minutes.`); S.runs = null; setTimeout(loadRuns, 4000); }
+        catch (err) { toast(err.message); }
+        finally { b.disabled = false; }
+      } }, "Run now")
+    : linkBtn(`${GH}/actions/workflows/${j.wf}`, "Run now");
+  return el("div", { class: "link-row" }, linkBtn(`${GH}/edit/main/config/${j.cfg}`, editLabel), run);
+}
+
+// ── starting the update jobs from this phone (optional) ────────────────────
+// A fine-grained GitHub token that can only run this repository's jobs. It's kept on this phone
+// (not in Tune's settings, so not in backups) and sent only to api.github.com.
+const GH_API = `https://api.github.com/repos/${REPO}`;
+const TOKEN_RE = /^(?:github_pat_|ghp_)[A-Za-z0-9_]{20,255}$/;
+function ghToken() {
+  const t = store.get("ghToken", "");
+  return typeof t === "string" && TOKEN_RE.test(t) ? t : "";
+}
+function ghFetch(path, opts = {}, token = ghToken()) {
+  return fetch(`${GH_API}${path}`, { ...opts, cache: "no-store", referrerPolicy: "no-referrer",
+    headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(opts.headers || {}) } });
+}
+const ghProblem = (status) => (status === 401 ? "GitHub refused the token: it may have expired or been mistyped. Add a new one in Tune → Updates."
+  : status === 403 || status === 404 ? "The token can’t run this repository’s jobs. It needs Actions: Read and write, for the readout repository."
+  : `GitHub answered ${status}. Try again in a minute.`);
+async function runJob(key) {
+  const r = await ghFetch(`/actions/workflows/${JOBS[key].wf}/dispatches`,
+    { method: "POST", body: JSON.stringify({ ref: "main" }), headers: { "Content-Type": "application/json" } });
+  if (r.status !== 204 && r.status !== 200) throw new Error(ghProblem(r.status));
+}
+async function latestRun(wf) {
+  const r = await ghFetch(`/actions/workflows/${wf}/runs?per_page=1`);
+  if (!r.ok) throw new Error(ghProblem(r.status));
+  return (await r.json()).workflow_runs?.[0] || null;
+}
+const pause = (ms) => new Promise((res) => setTimeout(res, ms));
+
+// Run the news job now and bring back what it wrote. Resolves with the new news.json (read from the
+// repository, so there's no wait for the website to rebuild), or null if it's still going.
+let newsRun = null;
+function updateNewsNow() {
+  if (newsRun) return newsRun;                              // one at a time
+  newsRun = (async () => {
+    const asked = Date.now();
+    let before = await latestRun(JOBS.news.wf);
+    let run = before && before.status !== "completed" ? before : null;   // one under way already: follow it
+    if (!run) await runJob("news");
+    const until = Date.now() + 6 * 60e3;
+    while (Date.now() < until) {
+      await pause(run ? 6000 : 3500);
+      const r = await latestRun(JOBS.news.wf).catch(() => null);
+      if (r && (r.id === run?.id || (r.id !== before?.id && Date.parse(r.created_at) >= asked - 15e3))) run = r;
+      if (run?.status === "completed") break;
+    }
+    if (run?.status !== "completed") return null;
+    if (run.conclusion !== "success") throw new Error(`The news job ${run.conclusion === "cancelled" ? "was cancelled" : "failed"} on GitHub. Its log is in Tune → Updates.`);
+    const r = await ghFetch("/contents/docs/data/news.json?ref=main", { headers: { Accept: "application/vnd.github.raw+json" } });
+    if (!r.ok) throw new Error(ghProblem(r.status));
+    const text = await r.text();
+    const data = JSON.parse(text);
+    if (!data?.generated || !Array.isArray(data.items)) throw new Error("The new news file didn’t look right; the next update will bring it.");
+    try {                                                    // where the app looks first, so a restart sees it too
+      await (await caches.open(DATA_CACHE)).put("data/news.json", new Response(text, { headers: { "Content-Type": "application/json" } }));
+    } catch { /* storage full or unavailable: it's in memory for now */ }
+    return data;
+  })().finally(() => { newsRun = null; });
+  return newsRun;
+}
+
+// pulling the feed down: with a token, also update the news (unless it was updated minutes ago)
+function newsOnPull() {
+  if (!ghToken() || S.newsUpdating) return false;
+  const age = S.news?.generated ? Date.now() - Date.parse(S.news.generated) : Infinity;
+  if (age < 15 * 60e3) return false;
+  S.newsUpdating = true;
+  updateHeadNote();
+  toast("Updating the news on GitHub. About 2 minutes; keep reading.");
+  updateNewsNow().then((data) => {
+    if (!data) { toast("The news update is taking longer than usual. It will appear on its own."); return; }
+    const wasIds = new Set((S.news?.items || []).map((i) => i.id));
+    if (S.news?.generated && data.generated <= S.news.generated) { toast("News is up to date."); return; }
+    S.news = data;
+    S.exploreKey = null;
+    markNewsNew();
+    const fresh = data.items.filter((i) => !wasIds.has(i.id)).length;
+    if (S.tab === "feed") updateFeedQuietly(Date.now() - (S.shownAt || 0)); else S.feedDirty = true;
+    renderBanner();
+    toast(fresh ? `News updated: ${plural(fresh, "new story", "new stories")}` : "News updated. Nothing new since the last update.");
+  }).catch((err) => toast(err.message || "The news update didn’t finish."))
+    .finally(() => { S.newsUpdating = false; updateHeadNote(); });
+  return true;
+}
+
+function tokenSection() {
+  const has = !!ghToken();
+  const input = el("input", { type: "password", class: "text-in wide", placeholder: "github_pat_…", "aria-label": "GitHub token",
+    autocomplete: "off", autocapitalize: "off", spellcheck: "false", enterkeyhint: "done" });
+  const save = async () => {
+    const t = input.value.trim();
+    if (!TOKEN_RE.test(t)) { toast("That doesn’t look like a GitHub token. Fine-grained tokens start with github_pat_."); return; }
+    const r = await ghFetch(`/actions/workflows/${JOBS.news.wf}`, {}, t).catch(() => null);
+    if (!r) { toast("Couldn’t reach GitHub. Try again when you’re online."); return; }
+    if (!r.ok) { toast(ghProblem(r.status)); return; }
+    store.set("ghToken", t);
+    input.value = "";
+    toast("Saved. Pull the feed down to update the news.");
+    rerender();
+  };
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); save(); } });
+  return el("section", { class: "sect", id: "tune-token" }, el("h2", {}, "Start updates from this phone"),
+    el("p", { class: "sub" }, has
+      ? "On. Pulling the feed down also updates the news on GitHub (about 2 minutes, unless it was updated in the last 15), and Run now starts a job directly."
+      : "Optional. With a GitHub token, pulling the feed down also updates the news on GitHub (about 2 minutes), and Run now starts a job directly. Without one, pulling down shows what the last scheduled update brought."),
+    has ? null : [
+      el("ol", { class: "settings-list" },
+        el("li", {}, "On github.com, open Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (the button below goes there)."),
+        el("li", {}, "Repository access: Only select repositories → readout."),
+        el("li", {}, "Repository permissions: Actions → Read and write. Nothing else."),
+        el("li", {}, "Expiration: up to a year. Generate it, copy it, and paste it here.")),
+      el("div", { class: "word-add", style: "margin-top:12px" }, input, el("button", { class: "act", onclick: save }, "Save"))],
+    el("p", { class: "fine" }, "The token is kept only on this phone: it isn’t part of your settings or backups, and it’s sent only to GitHub. It can start, stop and read this repository’s jobs, nothing else; delete it on GitHub any time."),
+    el("div", { class: "link-row" },
+      has ? twoTap("token", "Remove the token", "Tap again to remove", () => { store.set("ghToken", ""); toast("Token removed from this phone"); rerender(); }) : null,
+      linkBtn("https://github.com/settings/personal-access-tokens/new", has ? "Manage tokens on GitHub" : "Make a token on GitHub")));
 }
 
 function pipelinePane() {
   loadRuns();
   return [
     el("p", { class: "lede small" }, "Five jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
-    papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(),
-    el("p", { class: "fine" }, "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
+    tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(),
+    el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }
 

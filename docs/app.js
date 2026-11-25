@@ -1313,7 +1313,7 @@ function openInfo() {
     el("h3", {}, "Meetings"),
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Moving around"),
-    el("p", {}, "Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news. Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
+    el("p", {}, "Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
@@ -1692,6 +1692,7 @@ function updateHeadNote() {
   const note = $("#head-note");
   const fresh = S.list.filter((i) => (i.type === "paper" ? S.newIds.has(i.pmid) : i.type === "news" && S.newsNew.has(i.id))).length;
   if (S.tab === "feed" && S.offline) note.textContent = S.feed ? `Offline · ${ago(S.feed.generated)}` : "Offline";
+  else if (S.tab === "feed" && S.newsUpdating) note.textContent = "Updating news…";
   else if (S.tab === "feed" && S.kind === "important" && S.important) note.textContent = `Ranked ${ago(S.important.generated)}`;
   else if (S.tab === "feed" && fresh) note.textContent = `${fresh} new`;
   else if (S.tab === "feed" && S.feed) note.textContent = `Updated ${ago(S.feed.generated)}`;
@@ -1744,7 +1745,7 @@ async function reload(announce) {
   });
   if (important) S.important = important;
   const impChanged = !!S.important && S.important.generated !== wasImp;
-  if (newsData) S.news = newsData;
+  if (newsData && !(S.news?.generated && newsData.generated < S.news.generated)) S.news = newsData;   // never an older copy
   const newsChanged = !!S.news && S.news.generated !== was.news;
   markNewsNew();
   if (feed) S.feed = feed;
@@ -1836,7 +1837,10 @@ function setupPullToRefresh() {
     pull = 0;
     ptr.classList.add("busy", "settle");
     place(TH, "Checking…");
-    try { await reload(true); } finally { busy = false; ptr.classList.remove("busy"); hide(); }
+    try {
+      await reload(true);
+      if (typeof newsOnPull === "function") newsOnPull();     // with a GitHub token: update the news too
+    } finally { busy = false; ptr.classList.remove("busy"); hide(); }
   };
   view.addEventListener("touchend", end);
   view.addEventListener("touchcancel", () => { y0 = null; pull = 0; hide(); });

@@ -36,7 +36,7 @@ From then on, the feed updates every night (11:17 PM Eastern, inside NCBI's off-
 
 ## Using it
 
-- **Pull down** on the first card to check for new papers and news. **Tap a headline** to open it (the article for a story, the abstract for a paper). Cards you've already seen go to the end of each list, marked *Seen*, whenever a list starts fresh.
+- **Pull down** on the first card to check for new papers and news. With a GitHub token in Tune → Updates, pulling down also runs the news update on GitHub and brings the result back in about 2 minutes. **Tap a headline** to open it (the article for a story, the abstract for a paper). Cards you've already seen go to the end of each list, marked *Seen*, whenever a list starts fresh.
 - **Swipe up** for the next paper. The chips at the top filter by organ system. **Strong evidence** keeps only prospective studies, randomized trials, meta-analyses and guidelines.
 - **Search** (magnifier, top right) finds any paper or story on your phone by words, author or journal: the feed, Most important, Explore, news and Saved. Accents don't matter.
 - **Abstract** opens the full structured abstract. **PubMed**, **Journal** (DOI) and **Free full text** (when it's in PMC) open in the browser; **Copy citation** copies an AMA-style reference. Add your library's off-campus link in **Tune → Reading → Library access** and **Journal** opens articles through your institution's subscriptions.
@@ -116,7 +116,8 @@ cd docs && python -m http.server    # open http://localhost:8000
 - **The app** runs only its own files: a content security policy blocks scripts, frames and plug-ins from anywhere else, all feed text is shown as plain text, and links open only as web addresses. Story pictures load from the outlets' own servers (https only, as images, which can't run code); turn Pictures off in Tune → Reading to load nothing from them. Sites you open aren't told you came from Readout.
 - **News outlets** can only link to their own site (or partner sites listed as `link_domains` in `config/news.yaml`), so a hacked feed can't slip in a link elsewhere; Tune → Updates counts any links dropped. Feeds that declare XML entities are refused, downloads are capped at 30 MB, and redirects may only go to public web addresses.
 - **Updates** install exact package versions checked against their published hashes (`requirements.txt`, generated from `requirements.in` with `pip-compile --generate-hashes`), and use GitHub's own actions pinned to exact commits. Dependabot proposes updates monthly as pull requests; the Tests workflow checks each one before you merge it.
-- **Secrets:** only `NCBI_API_KEY` and `NCBI_EMAIL`, given to the PubMed jobs alone and sent in request bodies, never in web addresses. The news job, which reads the most outside data, gets no secrets. Nothing secret is stored in the app.
+- **Optional phone token:** to let pull-to-refresh run the news job (and Run now start any job), add a fine-grained GitHub token in **Tune → Updates**, limited to this repository with only *Actions: Read and write*. It's kept only on your phone (not in settings or backups) and sent only to api.github.com. Delete it on GitHub any time.
+- **Secrets:** only `NCBI_API_KEY` and `NCBI_EMAIL`, given to the PubMed jobs alone and sent in request bodies, never in web addresses. The news job, which reads the most outside data, gets no secrets. Nothing secret is in the app's code; the optional phone token above lives only on your phone.
 - **Your GitHub account is the key to all of it.** Turn on two-factor authentication (github.com → Settings → Password and authentication) if it isn't already.
 
 ### Terms of use
