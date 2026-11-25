@@ -20,7 +20,8 @@
   "f452556a5afb": [
     "2026-11-23T16:06:13Z",
     "Older patients with MS may not need frequent MRI monitoring",
-    "AuntMinnie Europe"
+    "AuntMinnie Europe",
+    "industry"
   ],
   "a3026fbb1f6e": [
     "2026-11-23T12:12:34Z",
@@ -2636,13 +2637,13 @@
     "2026-11-01T07:39:54Z",
     "New charity uses outdoors to improve mental health",
     "BBC Health",
-    "science"
+    "health"
   ],
   "36132b544430": [
     "2026-10-31T07:04:17Z",
     "'I was heading for a breakdown, then books saved my life'",
     "BBC Health",
-    "science"
+    "health"
   ],
   "911926641a98": [
     "2026-11-23T23:12:05Z",
@@ -3158,7 +3159,7 @@
     "2026-11-19T21:00:00Z",
     "Promotions Gallery in Paris, France",
     "Atlas Obscura",
-    "science"
+    "light"
   ],
   "2bc850c56e40": [
     "2026-11-19T20:24:33Z",
@@ -3194,7 +3195,7 @@
     "2026-11-19T19:00:00Z",
     "Čigoč Stork Village in Kratečko, Croatia",
     "Atlas Obscura",
-    "science"
+    "light"
   ],
   "e5ea3064fda2": [
     "2026-11-19T19:00:00Z",
@@ -4268,7 +4269,7 @@
     "2026-11-24T15:30:00Z",
     "Macdonald Book Shop in Estes Park, Colorado",
     "Atlas Obscura",
-    "science"
+    "light"
   ],
   "ac0c8f6224c2": [
     "2026-11-24T15:28:58Z",
@@ -4280,7 +4281,7 @@
     "2026-11-24T15:26:00Z",
     "Historic Park Theatre in Estes Park, Colorado",
     "Atlas Obscura",
-    "science"
+    "light"
   ],
   "e8c37b46625b": [
     "2026-11-24T15:11:00Z",
@@ -5132,7 +5133,7 @@
     "2026-11-24T17:00:00Z",
     "Walking East in Hong Kong",
     "Atlas Obscura",
-    "science"
+    "light"
   ],
   "f336b36b8ae8": [
     "2026-11-24T17:00:00Z",
@@ -8007,5 +8008,23 @@
     "A 24-hour livestream lets you watch adorable newborn cheetah cubs at the National Zoo",
     "NPR Animals and Strange News",
     "light"
+  ],
+  "ecf821b04807": [
+    "2026-11-25T03:37:00Z",
+    "Pixel Scroll 11/24/26 The Little Fuzzies Were Unphazed To Face Fozzie Bear’s Fizzy Phaser",
+    "File 770",
+    "sff"
+  ],
+  "1c646937946d": [
+    "2026-11-25T03:20:01Z",
+    "A star's 'obliquity' likely has little impact on a given planet's habitability",
+    "Phys.org",
+    "science"
+  ],
+  "da1b4032f8d7": [
+    "2026-11-25T03:15:54Z",
+    "Officials Brief Congressional Staff on Intelligence Surrounding Nvidia Affair",
+    "New York Times",
+    "general"
   ]
 }
