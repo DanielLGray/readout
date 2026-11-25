@@ -2,75 +2,93 @@
   "figs": {
     "PMC6677371": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC8574059": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC6677285": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC8962917": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC9084630": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC13212678": {
       "t": "2026-11-25",
-      "why": "no picture among 4 figures"
+      "why": "no picture among 4 figures",
+      "v": 2
     },
     "PMC1602032": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC2654614": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4356534": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4557396": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4734157": {
       "t": "2026-11-25",
-      "why": "license unknown"
+      "why": "license unknown",
+      "v": 2
     },
     "PMC8446332": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4979083": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC5895095": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC6467207": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC2755245": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC6581228": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC7505052": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC3297750": {
       "t": "2026-11-25",
@@ -82,23 +100,28 @@
         "cap": "A 65-year-old man with stage T3a Gleason 4+3 prostate cancer at the left peripheral zone (PZ). a On the axial T2WI at mid-prostate level in the left PZ there is a low signal lesion (outlined) with obliteration of the recto-prostatic angle and extra-capsular extension (arrow). b Magnetic resonance spectroscopic imaging (MRSI) of the normal right side shows low choline+creatine, whereas on (c) MRSI of the tumour shows high choline+creatine. The choline peak of tumour is as equally as high as the citrate peak. This results in a PI-RADS score for MRSI of 3",
         "lic": "CC BY-NC",
         "lu": "https://creativecommons.org/licenses/by-nc/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC7323919": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC5927818": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4572575": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC5015423": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC5834554": {
       "t": "2026-11-25",
@@ -110,7 +133,8 @@
         "cap": "Template for structured MRI report for primary staging and restaging after chemoradiation",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC6126438": {
       "t": "2026-11-25",
@@ -122,11 +146,13 @@
         "cap": "PET/CT maximum-intensity projections of patient with metastasized pancreatic cancer (A) and patient with breast cancer (C). (B) Maximum uptake of 68Ga-FAPI-02 at 10 min, 1 h, and 3 h after administration to breast cancer patient. Me = metastases.",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC4197002": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4315487": {
       "t": "2026-11-25",
@@ -138,11 +164,13 @@
         "cap": "A patient with multifocal PCa (a, c) and another patient (b, d) with unifocal PCa with a rarely seen inguinal lymph node metastasis. Red arrows point to PCa within the prostate gland and blue arrow points to an inguinal lymph node metastasis. Both patients had GSC 7, although the tumours present with different contrast. Colour scales were automatically produced by the PET/CT machine. a Low-dose CT of the patient with a multifocal PCa, c corresponding fusion of PET and low-dose CT 1 h p.i., b low-dose CT of the patients with the unifocal PCa, d corresponding fusion of PET and low-dose CT 1 h p.i.",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC3736840": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC3843747": {
       "t": "2026-11-25",
@@ -154,23 +182,28 @@
         "cap": "SUVmax (a) of all 78 lesions characteristic for PC and their ratio to background SUVmax (= contrast, b) 1 h post-injection in both 68Ga-PSMA PET/CT (left columns) and 18F-fluoromethylcholine PET/CT (right columns). Green columns indicate lymph node metastases, blue columns local relapses, grey columns bone metastases and red columns soft tissue metastases",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/2.0/"
-      }
+      },
+      "v": 2
     },
     "PMC3622744": {
       "t": "2026-11-25",
-      "why": "no picture among 0 figures"
+      "why": "no picture among 0 figures",
+      "v": 2
     },
     "PMC3339271": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4315529": {
       "t": "2026-11-25",
-      "why": "no picture among 0 figures"
+      "why": "no picture among 0 figures",
+      "v": 2
     },
     "PMC9374044": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC6424229": {
       "t": "2026-11-25",
@@ -182,7 +215,8 @@
         "cap": "68Ga-FAPI-2 and 68Ga-FAPI-4 at different imaging time points (10 min, 1 h, and 3 h after injection) in 2 patients with metastasized breast cancer. Rapid tumor targeting and fast blood clearance are followed by long plateau phase without relevant change in image contrast (top). In comparison to 68Ga-FAPI-2, 68Ga-FAPI-4 is characterized by prolonged tumor retention time (bottom). LW = lumbar body.",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC7080117": {
       "t": "2026-11-25",
@@ -190,7 +224,8 @@
     },
     "PMC6424228": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC7837643": {
       "t": "2026-11-25",
@@ -206,23 +241,28 @@
         "cap": "Organ SUVmax of 68Ga-labeled FAPI derivatives in HT-1080-FAP tumor–bearing mice determined by small-animal PET imaging (n = 1).",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC5750522": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC2791475": {
       "t": "2026-11-25",
-      "why": "no picture among 0 figures"
+      "why": "no picture among 0 figures",
+      "v": 2
     },
     "PMC8113168": {
       "t": "2026-11-25",
-      "why": "no picture among 2 figures"
+      "why": "no picture among 2 figures",
+      "v": 2
     },
     "PMC8729871": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC5323462": {
       "t": "2026-11-25",
@@ -234,7 +274,8 @@
         "cap": "a: Patient 2, a 72-year-old patient (PSA 15 ng/ml) diagnosed with Gleason 9 (5 + 4) prostate cancer. Patient presented with a large tumor mass in the prostate gland infiltrating the left seminal vesicle and metastases to several lymph nodes in the pelvis. Two metastatic lymph nodes are located outside the pelvis, both paraaortic at level L3/4 and L5. 18F-PSMA-1007 shows high tumor uptake after 1 h and 3 h p.i in the maximum intensity projection PET-scan. Due to the lipophilic characteristics of 18F-PSMA-1007, the hepatobiliary clearance can be observed while urinary excretion is minimal. b: Patient 1, a 77-year-old prostate cancer patient (PSA 40 ng/ml) shows a large tumor mass on the mid and apical prostate and several lymph node metastases",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC8679591": {
       "t": "2026-11-25",
@@ -246,43 +287,53 @@
         "cap": "(A) Maximum-intensity projections of 68Ga-FAPI-74 PET at 10 min, 1 h, and 3 h after injection. (B–E) Direct comparison of contrast-enhanced CT (B), fusion imaging (C), and FAPI PET (D). (E and F) Superior tumor delineation consecutively improved dose application to tumor volume using volumetrically modulated arc therapy. Positive FAP uptake is marked by arrows (B–F). Green outline = GTV; orange outline = clinical target volume; red outline = planning target volume. p.i. = after injection.",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC5486817": {
       "t": "2026-11-25",
-      "why": "license unknown"
+      "why": "license unknown",
+      "v": 2
     },
     "PMC7198371": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC3789272": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC3101877": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC3747730": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC3703818": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC4351768": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC5680544": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4111957": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC7233595": {
       "t": "2026-11-25",
@@ -306,15 +357,18 @@
     },
     "PMC6821274": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC4268163": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC5137795": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC5707218": {
       "t": "2026-11-25",
@@ -326,39 +380,48 @@
         "cap": "Low-contrast dose study. (a) Coronal 120-kVp routine diagnostic CTA image in a patient who received only 20 ml of intravenous contrast, shows poor contrast opacification of the abdominal aorta as well as parenchymal organs. (b) 40 keV VMI at the same level shows significant improvement of vascular contrast in the abdominal aorta. Thus, the low-energy VMI allows the use of low contrast dose, which is valuable in patients with severe renal dysfunction",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC3391026": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC7924410": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC7899274": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC4297319": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC2923725": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC3275437": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC1705545": {
       "t": "2026-11-25",
-      "why": "license unknown"
+      "why": "license unknown",
+      "v": 2
     },
     "PMC7193906": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC7233399": {
       "t": "2026-11-25",
@@ -374,7 +437,8 @@
     },
     "PMC7924519": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC7841877": {
       "t": "2026-11-25",
@@ -382,15 +446,18 @@
     },
     "PMC5375621": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
     },
     "PMC4263618": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC3009383": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC7745997": {
       "t": "2026-11-25",
@@ -398,11 +465,13 @@
     },
     "PMC6542626": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC6542627": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC8501897": {
       "t": "2026-11-25",
@@ -414,23 +483,61 @@
         "cap": "Variations in tumor heterogeneity from less to more heterogeneous are demonstrated in these abdominal masses. (A) Axial T2-weighted MR image in a 40-year-old woman shows a large unilocular cystic lesion in the pancreas that appears to have uniform high signal intensity (SI), with only minor nonenhancing peripheral septa and a smooth border. This appearance is typical for a mucinous cystadenoma. After surgical resection, no invasive malignancy was found. (B) Axial CT image shows a partly heterogeneous mass in the left kidney, which appears well defined and contains predominantly homogeneous bland-appearing tissue with streaks of vascularity. This was found to be a spindle-cell sarcoma after surgical resection. (C, D) Axial nonenhanced (C) and contrast-enhanced (D) CT images of a fibrolamellar hepatocellular carcinoma clearly show the heterogeneous nature of this malignant tumor, with irregular vascular enhancing tissue surrounding a less-vascular central component. Contrast-enhanced imaging is often used in radiomic analyses and is useful to help highlight vascularity and spatial heterogeneity, a determinant of tumor behavior and resistance to therapy that is not readily apparent…",
         "lic": "CC BY",
         "lu": "https://creativecommons.org/licenses/by/4.0/"
-      }
+      },
+      "v": 2
     },
     "PMC6438362": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC4263653": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC6939957": {
       "t": "2026-11-25",
-      "why": "not in the open-access dataset"
+      "why": "not in the open-access dataset",
+      "v": 2
     },
     "PMC2692243": {
       "t": "2026-11-25",
-      "why": "license TDM"
+      "why": "license TDM",
+      "v": 2
+    },
+    "PMC8241747": {
+      "t": "2026-11-25",
+      "fig": {
+        "src": "figs/PMC8241747.webp",
+        "w": 708,
+        "h": 364,
+        "n": "Fig. 6",
+        "cap": "Example maximum intensity projection (MIP, top row) and axial PET images (bottom row) images for a 57-year-old female with non-small cell lung cancer, presented are images for the regular SAFOV acquisitions on the left (blue margin) and the LAFOV for 10-, 4-, 2-, 1- and 0.5-min acquisitions (right, red margin). For reference, the PET window is set to 0 to 8.5 SUV",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 2
+    },
+    "PMC7262220": {
+      "t": "2026-11-25",
+      "why": "not in the open-access dataset",
+      "v": 2
+    },
+    "PMC7106943": {
+      "t": "2026-11-25",
+      "why": "not in the open-access dataset",
+      "v": 2
+    },
+    "PMC7997616": {
+      "t": "2026-11-25",
+      "why": "not in the open-access dataset",
+      "v": 2
+    },
+    "PMC3632805": {
+      "t": "2026-11-25",
+      "why": "not in the open-access dataset",
+      "v": 2
     }
   }
 }
