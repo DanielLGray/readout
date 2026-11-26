@@ -179,8 +179,7 @@ def test_build_keeps_a_failed_source_and_falls_back_for_the_fed():
                 {"id": "old", "name": "Old", "start": "2025-11-30", "end": "2025-12-04"}]
     out = build(http, cfg, meetings, prev, datetime(2026, 11, 26, 15, 0, tzinfo=timezone.utc))
     ids = {e["id"] for e in out["events"]}
-    assert "bls-jobs-report-2026-12-04" in ids                        # kept from the last run
-    assert "bls-cpi-inflation-report-2026-12-10" not in ids           # the fallback only when nothing was kept
+    assert "bls-cpi-inflation-report-2026-12-10" in ids and "bls-jobs-report-2026-12-04" not in ids   # the schedule in the config, not last run's
     assert not out["sources"]["bls"]["ok"] and out["sources"]["fed"].get("fallback")
     assert "fomc-2026-12-09" in ids and "bea-pce-inflation-report-2026-12-23" in ids
     assert next(e for e in out["events"] if e["id"] == "bea-pce-inflation-report-2026-12-23")["sub"] == "November 2026 numbers"

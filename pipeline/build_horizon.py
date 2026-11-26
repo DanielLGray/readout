@@ -84,7 +84,8 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> d
         events.extend(H.fomc_events(fb, no_decision, start, stop))
         status["fed"]["fallback"] = True
     source("bls", lambda: H.releases(http.get_text(BLS, {}), cfg.get("bls") or [], "BLS", BLS_PAGE, start, stop))
-    if not status["bls"]["ok"] and not any(e.get("src") == "BLS" for e in events):
+    if not status["bls"]["ok"] and cfg.get("bls_fallback"):      # BLS's published schedule, from the config
+        events[:] = [e for e in events if e.get("src") != "BLS"]
         rules = {r["title"]: r for r in cfg.get("bls") or []}
         for title, days in (cfg.get("bls_fallback") or {}).items():
             for d in days:
