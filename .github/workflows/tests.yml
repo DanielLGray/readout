@@ -2,24 +2,33 @@ name: Tests
 
 on:
   push:
-    paths: ["pipeline/**", "config/**", "tests/**", "docs/*.js", "docs/*.html", "requirements.txt", "requirements.in"]
+    paths: ["pipeline/**", "config/**", "tests/**", "docs/*.js", "docs/*.html", "requirements*.txt", "requirements*.in", ".github/workflows/**"]
   pull_request: {}                # Dependabot's update proposals get tested before you merge them
   workflow_dispatch: {}
 
 permissions:
   contents: read                  # tests only read the code
 
+concurrency:
+  group: tests-${{ github.ref }}  # a newer push replaces a run still going for the same branch
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install --require-hashes -r requirements.txt   # exact versions, checked against their published hashes
-      - run: pip install "pytest>=8,<10"                         # test tool only; this job can't write or see secrets
+      - run: pip install --require-hashes -r requirements.txt        # exact versions, checked against their published hashes
+      - run: pip install --require-hashes -r requirements-test.txt   # pytest and zizmor, the same way
       - run: python -m pytest -q
       - name: App scripts parse
         run: for f in docs/*.js; do node --check "$f"; done
+      - name: Workflow files have no security mistakes   # zizmor: token handling, injection, unpinned actions
+        run: zizmor --offline .github/workflows

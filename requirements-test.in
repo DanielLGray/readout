@@ -1,0 +1,4 @@
+# Tools for the Tests workflow only (never installed by the update jobs).
+# Lock with: pip-compile --allow-unsafe --generate-hashes --output-file=requirements-test.txt --strip-extras requirements-test.in
+pytest>=8,<10
+zizmor>=1.33,<2          # checks the workflow files for security mistakes
