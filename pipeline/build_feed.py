@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import os
 
-from datetime import date, timedelta
+from datetime import date
 from typing import Optional
 
 from . import abstract_store, alerts, figures

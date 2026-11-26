@@ -152,8 +152,6 @@ def test_important_papers(env, monkeypatch):
             assert lst and all(p in out["papers"] for p in lst)
             assert all(out["papers"][p]["impact"]["kind"] == "research" and area in out["papers"][p]["areas"] for p in lst)
     # proven lists: ranked by citation percentile within the area and quarter, nothing too new to judge
-    from pipeline.build_important import proven
-    t = date.fromisoformat(out["today"])
     keys = [50 + (out["papers"][p]["impact"]["pcts"]["body"] - 50) * min(1, out["papers"][p]["impact"]["age"] / 12)
             for p in out["windows"]["3y"]["body"]["research"]]
     assert all(a >= b - 0.6 for a, b in zip(keys, keys[1:])) and keys[0] >= 90       # young papers count for less

@@ -64,11 +64,12 @@ alerts:
       group: uspstf
       label: USPSTF
       title: ['USPSTF|Preventive Services Task Force', '\b(?:recommend\w*|guideline\w*|screen\w*|draft|final\w*|propos\w*|lower\w*|expand\w*)\b']
+    # "ACS" alone also means acute coronary syndrome: it counts only beside cancer or screening
     - id: acs
       group: acs
       label: American Cancer Society
-      title: ['American Cancer Society', '\b(?:guideline\w*|recommend\w*|screen\w*)\b']
-      text: ['\b(?:new|updat\w*|chang\w*|revis\w*|now|lower\w*|expand\w*|first|issu\w*|releas\w*)\b']
+      title: ['American Cancer Society|\bACS\b', '\b(?:guideline\w*|recommend\w*|screen\w*)\b']
+      text: ['\b(?:cancer\w*|screen\w*|tumou?r\w*|oncolog\w*|mammogra\w*|colonoscop\w*|PSA)\b', '\b(?:new|updat\w*|chang\w*|revis\w*|now|lower\w*|expand\w*|broad\w*|first|issu\w*|releas\w*|support\w*|urg\w*)\b']
     - id: society
       group: societies
       label: Guideline

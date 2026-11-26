@@ -2086,7 +2086,11 @@ function openClearWhy(it, key, undo) {
     closeSheet();
     let reacted = false;
     if (why === "notme" && (T.reacts[saveKey(it)] || 0) !== -1) { react(it, -1); reacted = true; }
-    if (why === "later") setCleared(key, true, localDay(daysAgo(-3)));
+    if (why === "later") {              // back in 3 days, as new: not among the cards you've seen (they go last)
+      setCleared(key, true, localDay(daysAgo(-3)));
+      delete seenRecent[saveKey(it)];
+      store.set("seenRecent", seenRecent);
+    }
     tallyWhy(why, 1);
     const msg = { know: "Noted: already known", notme: "Got it: fewer like this", weak: "Noted: weak study", later: "Back in 3 days" }[why];
     toastAction(msg, "Undo", () => {

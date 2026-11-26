@@ -14,7 +14,7 @@ def _data(tmp_path, generated):
 
 
 def test_hours_rule(tmp_path):
-    fresh, stale = _data(tmp_path, "2026-11-25T04:20:00Z"), None
+    fresh = _data(tmp_path, "2026-11-25T04:20:00Z")
     assert round(age_hours(fresh, NOW), 2) == 2.45
     assert not is_due(fresh, "5", "schedule", NOW)
     assert is_due(_data(tmp_path, "2026-11-24T22:00:00Z"), "5", "schedule", NOW)

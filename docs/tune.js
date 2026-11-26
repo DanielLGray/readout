@@ -141,7 +141,7 @@ function backupSection() {
   const file = el("input", { type: "file", accept: ".json,application/json", hidden: true,
     onchange: (e) => { restoreFrom(e.target.files?.[0]); e.target.value = ""; } });
   return el("section", { class: "sect", id: "tune-backup" }, el("h2", {}, "Back up and restore"),
-    el("p", { class: "sub" }, `Your ${plural(n, "saved item")}, settings, ratings, Foundations progress and reading history live only on this phone. Keep a copy in Files or iCloud Drive; restore it after deleting the app or on a new phone.`),
+    el("p", { class: "sub" }, `Your ${plural(n, "saved item")}, settings, ratings, cleared cards, Foundations progress and reading history live only on this phone. Keep a copy in Files or iCloud Drive; restore it after deleting the app or on a new phone.`),
     el("div", { class: "link-row" },
       el("button", { class: "act", onclick: backupNow }, "Back up"),
       el("button", { class: "act", onclick: () => file.click() }, "Restore from a backup"), file),
@@ -150,7 +150,7 @@ function backupSection() {
 
 async function backupNow() {
   const data = { app: "readout", version: 1, exported: new Date().toISOString(),
-    saved: S.saved, tune: store.get("tune", {}), stats, pos: store.get("pos", {}), fdRead, quiz: QUIZ };
+    saved: S.saved, tune: store.get("tune", {}), stats, pos: store.get("pos", {}), fdRead, quiz: QUIZ, cleared, whyTally };
   const name = `readout-backup-${localDay()}.json`;
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   try {
@@ -187,6 +187,16 @@ async function restoreFrom(file) {
     for (const [k, v] of Object.entries(d.quiz.by)) if (["r", "p", "w"].includes(v) && !QUIZ.by[k]) QUIZ.by[k] = v;
     for (const [k, v] of Object.entries(d.quiz.days || {})) if (Array.isArray(v) && !QUIZ.days[k]) QUIZ.days[k] = v.slice(0, 3).map((n) => Math.max(0, Number(n) || 0));
     store.set("quiz", QUIZ);
+  }
+  if (d.cleared && typeof d.cleared === "object") {        // cards you cleared stay cleared (and snoozed ones snoozed)
+    for (const [k, v] of Object.entries(d.cleared)) {
+      if (typeof k === "string" && k.length < 80 && typeof v === "string" && /^(?:z:)?\d{4}-\d{2}-\d{2}$/.test(v) && !cleared[k]) cleared[k] = v;
+    }
+    setCleared("", false);                                  // saves, and drops anything past its 90 days
+  }
+  if (d.whyTally && typeof d.whyTally === "object") {      // the larger count of each, so restoring your own backup doesn't double it
+    for (const k of Object.keys(WHY)) { const n = Math.floor(Number(d.whyTally[k]) || 0); if (n > (whyTally[k] || 0)) whyTally[k] = Math.min(n, 1e6); }
+    store.set("whyTally", whyTally);
   }
   toast(store.set("saved", S.saved) ? `Restored ${plural(added, "saved item")} and your settings`
     : "Couldn’t restore everything: Readout’s storage on this phone is full.");
@@ -708,7 +718,17 @@ function jobLinks(key, editLabel) {
     ? el("button", { class: "act", onclick: async (e) => {
         const b = e.currentTarget;
         b.disabled = true;
-        try { await runJob(key); toast(`${j.title}: started on GitHub. Results in a few minutes.`); S.runs = null; setTimeout(loadRuns, 4000); }
+        try {
+          // a second tap, or a run already under way: don't queue another (it would only redo the same work)
+          // (GitHub takes a few seconds to list a new run, so a start in the last minute counts too)
+          const started = (jobLinks.started ||= {});
+          const last = await latestRun(j.wf).catch(() => null);
+          if ((last && last.status !== "completed") || Date.now() - (started[key] || 0) < 60e3) {
+            toast(`${j.title}: already running on GitHub. Results in a few minutes.`); return;
+          }
+          await runJob(key); started[key] = Date.now();
+          toast(`${j.title}: started on GitHub. Results in a few minutes.`); S.runs = null; setTimeout(loadRuns, 4000);
+        }
         catch (err) { toast(err.message); }
         finally { b.disabled = false; }
       } }, "Run now")

@@ -86,3 +86,18 @@ def test_guideline_papers_become_alerts_once():
     # a paper already alerted keeps its first day, so it still drops out a week later
     later = alerts.paper_alerts(pm, cfg, date(2026, 11, 26), [{"pmid": "1", "date": "2026-11-18"}], card, {}, lambda r: False)
     assert "p:1" not in [a["id"] for a in later]
+
+
+def test_acs_means_the_cancer_society_only_beside_cancer_words():
+    cfg = load_yaml("news.yaml")
+    rules = alerts.compile_rules(cfg["alerts"])
+    rule = lambda t, s="": (alerts.rule_for({"title": t, "summary": s}, rules) or {}).get("id")
+    assert rule("Broader Prostate Screening Supported in ACS Guidelines") == "acs"
+    assert rule("American Cancer Society updates cervical cancer screening guideline") == "acs"
+    assert rule("ACS guideline updates for acute coronary syndrome care", "heart attack") is None
+    assert rule("New ACC/AHA guideline for ACS management") == "society"
+    # the story two other outlets ran without naming the society still counts toward its outlets
+    a = [_item(1, "Broader Prostate Screening Supported in ACS Guidelines", "The Imaging Wire", 30),
+         _item(2, "Prostate cancer screening now urged for men in their 50s, new guidelines say", "The Conversation", 20)]
+    out = alerts.news_alerts(a, cfg, NOW)
+    assert [x["rule"] for x in out] == ["acs"] and len(out[0]["sources"]) == 2

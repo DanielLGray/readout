@@ -319,6 +319,13 @@ function alertCards() {
   });
 }
 const outletsText = (s = []) => (s.length <= 2 ? s.join(" and ") : `${s.slice(0, 2).join(", ")} and ${plural(s.length - 2, "more outlet")}`);
+// a guideline carries the day PubMed listed it, not a time: count whole days, not hours since midnight UTC
+function alertWhen(a) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date || "")) return agoShort(a.date);
+  const [y, m, d] = a.date.split("-").map(Number);
+  const days = Math.round((Date.parse(`${localDay()}T12:00:00`) - new Date(y, m - 1, d, 12).getTime()) / 864e5);
+  return days <= 0 ? "today" : `${days} d`;
+}
 function alertSrc(a) { return a.via === "pubmed" ? `${a.journal} · from PubMed` : outletsText(a.sources); }
 function alertOpen(a) {
   if (a.via === "pubmed") {
@@ -336,7 +343,7 @@ function alertCardEl(it) {
   const what = a.via === "pubmed" ? "New guideline" : a.rule === "fda" ? "FDA action" : "Guideline change";
   return el("article", { class: "card brief-card alert-card", "data-key": it.key, "data-group": a.group },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal alert-label" }, a.label), el("span", {}, what),
-      el("span", { class: "spacer" }), el("span", {}, agoShort(a.date))),
+      el("span", { class: "spacer" }), el("span", {}, alertWhen(a))),
     el("h2", { class: "card-title" }, el("a", { class: "head-link", href: a.via === "pubmed" ? pubmedUrl(a.pmid) : safeUrl(a.link || ""),
       onclick: (e) => { e.preventDefault(); alertOpen(a); } }, a.title)),
     el("p", { class: "alert-src" }, alertSrc(a)),
@@ -352,7 +359,7 @@ function openAlerts() {
     el("p", { class: "sheet-meta" }, el("span", {}, "FDA actions on imaging agents and radiopharmaceuticals, and guideline changes. Each stays a week.")),
     all.length ? el("ul", { class: "rows" }, all.map((a) => el("li", { class: "news-item" },
       el("button", { class: "alert-row", onclick: () => alertOpen(a) },
-        el("span", { class: "news-src" }, el("b", {}, a.label), el("span", {}, agoShort(a.date)), isCleared(`alert:${a.id}`) ? el("span", {}, "dismissed") : null),
+        el("span", { class: "news-src" }, el("b", {}, a.label), el("span", {}, alertWhen(a)), isCleared(`alert:${a.id}`) ? el("span", {}, "dismissed") : null),
         el("span", { class: "news-title" }, a.title),
         el("span", { class: "alert-src" }, alertSrc(a))))))
       : el("p", { class: "fine" }, "None this week. Most weeks have none: they’re meant to be rare."),
@@ -370,7 +377,7 @@ function wideToday() {
   const ok = (p) => I.papers[p] && !hiddenByTaste({ ...I.papers[p], type: "paper" }) && !isCleared(p) && !(mute && mute.test(I.papers[p].title));
   const card = (p) => ({ ...I.papers[p], type: "paper", _wide: true });
   const wd = store.get("wideDay", null);
-  if (wd?.d === d && ok(wd.pmid)) return card(wd.pmid);
+  if (wd?.d === d) return I.papers[wd.pmid] && ok(wd.pmid) ? card(wd.pmid) : null;    // one a day: clearing it doesn't bring another
   let hist = store.get("wideHist", {});
   if (!hist || typeof hist !== "object" || Array.isArray(hist)) hist = {};
   const cut = localDay(daysAgo(365));

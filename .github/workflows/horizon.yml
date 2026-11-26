@@ -18,11 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main                  # the newest data, not the commit the run was queued at (a run waiting behind another of the same job would start from stale files)
       - name: Already up to date?          # a backup run skips when today's update is done
         id: due
         run: python3 -m pipeline.due docs/data/horizon.json daily
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.due.outputs.run == 'true'
         with:
           python-version: "3.12"
@@ -44,7 +46,7 @@ jobs:
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git commit -m "Coming up $(date -u +%F)"
           for i in 1 2 3 4 5; do              # another job may have pushed meanwhile
-            git pull --rebase --autostash && git push && exit 0
+            git pull --rebase -X theirs --autostash && git push && exit 0   # a clash in a data file: this run's copy is the newer one
             git rebase --abort 2>/dev/null || true
             sleep $((i * 5))
           done
