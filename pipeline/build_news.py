@@ -271,6 +271,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     if junk:                                   # headlines saved before the promo filter existed
         arch = [a for a in arch if a["kind"] in DEAL_KINDS or not junk.search(a["title"])]
 
+    obits = news.mark_obituaries(kept, arch + [{"date": i["date"], "title": i["title"], "source": i["source"]} for i in kept], group_of)
+
     ts = settings.get("top_stories") or {}
     top_cfg = {"days": int(ts.get("days", 7)), "limit": int(ts.get("per_kind", 8)),
                "min_outlets": int(ts.get("min_outlets", 2)), "match": float(ts.get("match", 0.5))}
@@ -316,7 +318,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             f.write("### Readout news feeds\n\n" + "\n".join(rows) + "\n")
     ok = sum(1 for s in statuses if s["ok"] and not s.get("stale"))
     log(f"News: {len(kept)} stories from {ok}/{len(statuses)} outlets, "
-        f"{sum(len(v) for v in out['top_stories'].values())} top stories, {len(out['alerts'])} alerts")
+        f"{sum(len(v) for v in out['top_stories'].values())} top stories, {len(out['alerts'])} alerts, {obits} death notices")
     return out
 
 

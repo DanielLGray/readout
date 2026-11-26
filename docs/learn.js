@@ -883,7 +883,7 @@ function pickLight(d) {
   const since = new Date(Date.now() - 4 * 864e5).toISOString();
   const mutedSrc = new Set(T.mutedSources || []);
   const pool = (S.news?.items || []).filter((i) => kindOf(i) === "light" && (i.date || "") >= since && !seen[i.id]
-    && !mutedSrc.has(i.source) && !hiddenByTaste({ ...i, type: "news" }));
+    && !mutedSrc.has(i.source) && !hiddenByTaste({ ...i, type: "news" }) && !obitHidden(i));
   if (!pool.length) return null;
   const srcs = [...new Set(pool.map((i) => i.source))].sort();
   const src = srcs[dayNo(d) % srcs.length];
@@ -907,7 +907,7 @@ function pickStories(n) {
     }
   }
   if (out.length < n) {                      // a quiet week: the newest industry stories instead
-    const newest = (S.news?.items || []).filter((i) => kindOf(i) === "industry" && !mutedSrc.has(i.source) && !hiddenByTaste({ ...i, type: "news" }))
+    const newest = (S.news?.items || []).filter((i) => kindOf(i) === "industry" && !mutedSrc.has(i.source) && !hiddenByTaste({ ...i, type: "news" }) && !obitHidden(i))
       .slice(0, 12).filter((i) => !out.some((o) => o.items.includes(i.id)));
     for (const i of newest.slice(0, n - out.length)) out.push({ title: i.title, items: [i.id], sources: [i.source], date: i.date, label: newsKinds().industry || "Industry news" });
   }

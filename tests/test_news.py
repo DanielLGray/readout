@@ -411,3 +411,33 @@ def test_a_lowered_daily_limit_trims_stored_stories(tmp_path, monkeypatch):
     (tmp_path / "data" / "news.json").write_text(__import__("json").dumps(old))
     out = build_news.run(Http(transport=lambda m, u, p: (404, "gone"), sleep=lambda s: None, retries=0), now=now)
     assert sorted(i["id"] for i in out["items"]) == ["b3", "b4"]          # the newest two of that day
+
+
+def test_death_notices_and_how_widely_they_were_covered():
+    from pipeline import news as N
+    assert N.is_obituary("Andy Taylor, Duran Duran’s ‘Live-Wire’ Guitarist, Dies at 65")
+    assert N.is_obituary("Strobe Talbott, Journalist Who Joined Clinton’s State Department, Has Died")
+    assert N.is_obituary("Andrew Ramage Has Died. He Found Receipts for the ‘World’s First Millionaire.’")
+    assert N.is_obituary("Veteran Nigerian Nollywood actor Pete Edochie dies aged 79")
+    assert N.is_obituary("Karen Lansdale (1952-2026)")
+    assert N.is_obituary("A headline without the words", "https://www.nytimes.com/2026/11/24/arts/pierre-bellocq-dead.html")
+    for t in ["The Penny Is Dead. Now It’s Official.", "Third patient has died in outbreak, officials say",
+              "Early Sepsis Interventions Didn't Reduce Risk of Death", "Europe’s earliest farmers offered milk to their dead"]:
+        assert not N.is_obituary(t), t
+    assert N.obit_name("Veteran Nigerian Nollywood actor Pete Edochie dies aged 79") == ["Pete", "Edochie"]
+    assert N.obit_name("Donald Hooton Sr., Who Crusaded Against Steroids in Sports, Has Died") == ["Donald", "Hooton"]
+    group_of = {"New York Times": "nyt", "New York Times Business": "nyt"}
+    heads = [
+        {"date": "2026-11-26T10:00:00Z", "title": "Andy Taylor, Duran Duran’s ‘Live-Wire’ Guitarist, Dies at 65", "source": "New York Times"},
+        {"date": "2026-11-26T11:00:00Z", "title": "Andy Taylor, guitarist of new wave icons Duran Duran, dies at 65", "source": "NPR News"},
+        {"date": "2026-11-26T12:00:00Z", "title": "Remembering Andy Taylor’s riffs", "source": "New York Times Business"},   # same publisher
+        {"date": "2026-11-20T12:00:00Z", "title": "Former President Jimmy Carter Dies at 100", "source": "New York Times"},
+        {"date": "2026-11-20T13:00:00Z", "title": "Jimmy Carter, 39th U.S. president, dies at 100", "source": "NPR News"},
+        {"date": "2026-11-20T14:00:00Z", "title": "Jimmy Carter: Former US president dies aged 100", "source": "BBC News"},
+        {"date": "2026-11-20T15:00:00Z", "title": "Jimmy Carter, the 39th President, Has Died", "source": "Wall Street Journal"},
+    ]
+    items = [dict(h, id=str(k)) for k, h in enumerate(heads)]
+    assert N.mark_obituaries(items, heads, group_of) == 6
+    assert items[0]["obit"] == {"n": 2}                         # NYT and NPR: two publishers
+    assert items[3]["obit"]["n"] == 4 and items[3]["obit"]["hi"]   # everyone, and high office
+    assert "obit" not in items[2]

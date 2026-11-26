@@ -411,6 +411,69 @@ def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
     return out[:limit]
 
 
+# ── death notices ────────────────────────────────────────────────────────────
+# "Jane Doe, Pioneering Chemist, Dies at 91", "… Has Died", "… dies aged 79", "Name (1952–2026)",
+# and The New York Times's obituary pages (their addresses end in -dead.html).
+_OBIT_TITLE = re.compile(
+    r"\b(?:dies|died|is dead)\b,?\s+(?:at|aged)\s+(?:age\s+)?\d{1,3}\b"
+    r"|\bhas died\b(?=\s*(?:[.,:;!]|$|at\b|aged\b))"
+    r"|\bdies\s*:"
+    r"|\(\s*\d{4}\s*[–-]\s*\d{4}\s*\)\s*$", re.I)
+_OBIT_LINK = re.compile(r"nytimes\.com/.+-dead\.html|/obituar(?:y|ies)/", re.I)
+# people whose death is news whoever reports it
+HIGH_OFFICE = re.compile(r"\b(?:President|Vice President|Prime Minister|Pope|Chief Justice|Supreme Court|Secretary of State"
+                         r"|First Lady|Secretary-General|Emperor|Empress|Monarch|(?:King|Queen) \w+ I{1,3}V?)\b")
+_HONORIFIC = {"Sir", "Dame", "Dr", "Lord", "Lady", "Rev", "Mr", "Mrs", "Ms", "Prof", "Gen", "Sen", "Rep", "Gov", "Former", "The",
+              "Jr", "Sr", "II", "III", "IV"}
+
+
+def is_obituary(title: str, link: str = "") -> bool:
+    return bool(_OBIT_TITLE.search(title or "") or _OBIT_LINK.search(link or ""))
+
+
+def _fold(s: str) -> str:
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c)).lower()
+
+
+def obit_name(title: str) -> list[str]:
+    """The person's name, as the last two capitalized words before the comma, colon or "dies"."""
+    head = re.split(r",|:|\(|\s+(?:dies|died|has died|is dead)\b", title or "", maxsplit=1, flags=re.I)[0]
+    words = [w.strip("’'\".") for w in head.split()]
+    caps = [w for w in words if len(w) > 1 and w[:1].isupper() and w.rstrip(".") not in _HONORIFIC]
+    return caps[-2:]
+
+
+def obit_coverage(item: dict, headlines: list[dict], group_of: Optional[dict] = None, days: int = 3) -> int:
+    """How many publishers ran a headline naming the same person within `days` days."""
+    group_of = group_of or {}
+    name = obit_name(item["title"])
+    if not name:
+        return 1
+    pats = [re.compile(rf"(?<!\w){re.escape(_fold(w))}(?!\w)") for w in name]
+    when = parse_date(item["date"]) or datetime.now(timezone.utc)
+    lo, hi = _utc(when - timedelta(days=days)), _utc(when + timedelta(days=days))
+    groups = {group_of.get(item["source"], item["source"])}
+    for h in headlines:
+        if lo <= h["date"] <= hi and all(p.search(_fold(h["title"])) for p in pats):
+            groups.add(group_of.get(h["source"], h["source"]))
+    return len(groups)
+
+
+def mark_obituaries(items: list[dict], headlines: list[dict], group_of: Optional[dict] = None) -> int:
+    """Give each death notice its coverage, so the app can show only those many outlets ran
+    (or about someone who held high office)."""
+    n = 0
+    for it in items:
+        it.pop("obit", None)
+        if is_obituary(it["title"], it.get("link", "")):
+            it["obit"] = {"n": obit_coverage(it, headlines, group_of)}
+            if HIGH_OFFICE.search(it["title"]):
+                it["obit"]["hi"] = True
+            n += 1
+    return n
+
+
 # ── trending phrases in headlines ────────────────────────────────────────────
 def trending(archive: list[dict], now: datetime, days: int, prior_days: int, top_n: int = 12,
              group_of: Optional[dict] = None) -> dict:

@@ -156,6 +156,7 @@ const TUNE_DEFAULTS = {
   swipe: true,          // swipe a card left to save it, right to clear it
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
+  obits: "wide",        // death notices: "wide" (only those many outlets ran, or high office), "all" or "none"
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
@@ -200,6 +201,7 @@ function loadTune() {
     weather: t.weather !== false,
     swipe: t.swipe !== false,
     cardLayout: t.cardLayout === "paged" ? "paged" : "compact",
+    obits: ["wide", "all", "none"].includes(t.obits) ? t.obits : "wide",
     alerts: Object.fromEntries(Object.keys(ALERT_GROUPS).map((k) => [k, (t.alerts || {})[k] !== false])),
     horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
@@ -522,6 +524,17 @@ function renderChips() {
 
 const dayOf = (it) => (it.type === "news" ? it.date : it.added || it.epub || "").slice(0, 10);
 
+// Death notices (the news job marks them, with how many publishers ran each): by default only
+// those at least OBIT_MIN news organizations reported, or about someone who held high office.
+// Industry and society news keep theirs: a radiologist's obituary there is the field's news.
+const OBIT_MIN = 3;
+const obitHidden = (it) => {
+  if (!it?.obit || T.obits === "all") return false;
+  const k = kindOf(it);
+  if (k === "industry" || k === "societies") return false;
+  return T.obits === "none" || !(it.obit.hi || (it.obit.n || 1) >= OBIT_MIN);
+};
+
 // The feed for the current chips. `f` overrides the chips; `report` (optional) counts what was left out.
 // cards you swiped away (key → day), kept 90 days; Tune → Rules can bring them back.
 // A card put off with "Not now" is stored as "z:" + the day it comes back.
@@ -597,6 +610,7 @@ function buildList(f = {}, report = null) {
   // news
   let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
   news = news.filter((i) => (!mutedSrc.has(i.source) && !(mute && mute.test(i.title))) || (drop("muted"), false));
+  news = news.filter((i) => !obitHidden(i) || (drop("obits"), false));
   if (taste) news = byTaste(news.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false)),
     (n) => Date.parse(n.date) || 0, 6 * 36e5);                       // an outlet you like: its stories a few hours higher
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
@@ -928,7 +942,9 @@ function topStoryLists(only) {
   const t = S.news?.top_stories || {};
   const mute = mutedRe();
   const mutedSrc = new Set(T.mutedSources || []);
-  const keep = (l) => l.filter((st) => !(mute && mute.test(st.title)) && st.sources.some((x) => !mutedSrc.has(x)));
+  const byId = new Map((S.news?.items || []).map((i) => [i.id, i]));
+  const keep = (l) => l.filter((st) => !(mute && mute.test(st.title)) && st.sources.some((x) => !mutedSrc.has(x))
+    && !obitHidden(byId.get(st.items?.[0])));
   if (Array.isArray(t)) return keep(t).length ? [["Industry news", keep(t)]] : [];
   return Object.entries(newsKinds()).filter(([k]) => !only || k === only)
     .map(([k, label]) => [label, keep(t[k] || []), k]).filter(([, l]) => l.length);
@@ -1453,6 +1469,8 @@ function openInfo() {
     el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
+    el("h3", {}, "Death notices"),
+    el("p", {}, "Obituaries show only when at least 3 news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice), so a head of state's death always shows and a less-known person's doesn't. Tune → Rules → Death notices can show all or none. Industry and society news always keep theirs."),
     el("h3", {}, "Alerts"),
     el("p", {}, "Rare cards pinned at the top of Everything and Today for a week: FDA approvals and safety warnings for radiopharmaceuticals and imaging agents, and guideline changes from the USPSTF, the American Cancer Society and the imaging and cardiac societies. A news story makes one only when two different publishers carry it, or when the FDA or the society says it itself; new guidelines also come straight from PubMed (USPSTF statements in JAMA, American Cancer Society guidelines in CA, and the ACR, SAR, SNMMI, EANM, SCCT, Fleischner, ACC/AHA, ESC and AASLD). Dismiss one and it’s gone; Tune → Rules → Alerts turns each kind off."),
     el("h3", {}, "Outside your areas"),

@@ -290,3 +290,19 @@ def test_calendar_text_cannot_start_a_line_of_its_own():
     assert all("\r" not in ln and "\n" not in ln for ln in lines)
     assert "SUMMARY:Bad\\nATTACH:http://e" in lines and not any(ln.startswith("URL:") for ln in lines)
     assert "URL:https://imdb.com/title/tt1" in H.vevent({**ev, "url": "https://imdb.com/title/tt1"})
+
+
+def test_movies_already_out_or_old_are_left_out():
+    def film(mid, dates, premiere):
+        return {"id": mid, "title": f"Film {mid}", "release_date": premiere, "popularity": 50, "genres": [{"name": "Science Fiction"}],
+                "release_dates": {"results": [{"iso_3166_1": "US", "release_dates": [{"type": t, "release_date": f"{d}T00:00:00.000Z", "note": n}
+                                                                                    for t, d, n in dates]}]}}
+    # out in July; TMDB also lists a December date (a re-release or second run): not upcoming
+    assert H.tmdb_movie_event(film(10, [(3, "2026-07-31", ""), (3, "2026-12-04", "")], "2026-07-29"), START, STOP) is None
+    # a 2006 film's IMAX re-release, and a 1977 film whose only US entry is its re-release
+    assert H.tmdb_movie_event(film(11, [(3, "2006-10-20", ""), (3, "2027-01-29", "IMAX")], "2006-10-17"), START, STOP) is None
+    assert H.tmdb_movie_event(film(12, [(3, "2027-02-19", "")], "1977-05-25"), START, STOP) is None
+    # an anime out in Japan this spring, in US theaters for the first time in January: upcoming
+    assert H.tmdb_movie_event(film(13, [(3, "2027-01-16", "")], "2026-02-20"), START, STOP)["start"] == "2027-01-16"
+    # a limited run last week, going wide at Christmas: upcoming, on the wide date
+    assert H.tmdb_movie_event(film(14, [(2, "2026-11-20", ""), (3, "2026-12-25", "")], "2026-11-20"), START, STOP)["start"] == "2026-12-25"

@@ -331,6 +331,7 @@ function feedNowSection() {
     R.pending ? `${R.pending.toLocaleString()} papers waiting for an abstract` : null,
     R.areaOff ? `${R.areaOff.toLocaleString()} papers from areas you turned off` : null,
     R.dupes ? `${R.dupes.toLocaleString()} repeat headlines` : null,
+    R.obits ? `${plural(R.obits, "death notice")} few outlets ran` : null,
   ].filter(Boolean);
   return tsec("Your feed right now", `Everything has ${plural(list.length, "card")}, going back ${S.feed?.settings?.keep_days || 180} days for papers.`,
     stack(parts), legend(parts),
@@ -536,6 +537,9 @@ function mixSection() {
     segPick("Most stories from one outlet per day", [[1, "1"], [2, "2"], [3, "3"], [5, "5"], [0, "No limit"]], T.cap,
       (v) => { setTune({ cap: Number(v) }); rerender(); },
       "Keeps busy outlets from flooding Everything. Industry news is never limited, and held-back stories still show under their kind’s chip."),
+    segPick("Death notices", [["wide", "Widely covered"], ["all", "All"], ["none", "None"]], T.obits,
+      (v) => { setTune({ obits: v }); S.feedDirty = true; rerender(); },
+      `Widely covered: at least ${OBIT_MIN} news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice). Industry and society news always keep theirs.`),
     switchRow("Top stories card", "Opens the feed with stories that several outlets covered this week.", T.topCard,
       (on) => { setTune({ topCard: on }); rerender(); }),
     switchRow("Cards you’ve seen go to the end", "Each list starts with what you haven’t seen; the rest follow, marked Seen. Takes effect when a list starts fresh: opening the app, a chip, or a refresh.", T.readLast,

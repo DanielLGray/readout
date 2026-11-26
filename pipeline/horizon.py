@@ -418,8 +418,11 @@ def fr_meetings(data: dict, include: str, start: date, stop: date) -> list[dict]
 # ── movies (TMDB) ─────────────────────────────────────────────────────────────
 
 def us_release(details: dict, start: date, stop: date) -> Optional[tuple[date, str]]:
-    """The movie's US theatrical date in the window: wide (type 3) first, else limited (type 2)."""
-    best = {}
+    """The movie's US theatrical opening, if it's still to come: wide (type 3) first, else limited
+    (type 2). A film already out is left out, however many later dates TMDB lists for it (a
+    re-release, an IMAX run, a second wide date): its first US wide date has passed, its first US
+    date of any kind is months back, or it first came out anywhere more than a year ago."""
+    best, first, first_wide = {}, None, None
     for country in ((details.get("release_dates") or {}).get("results") or []):
         if country.get("iso_3166_1") != "US":
             continue
@@ -429,8 +432,20 @@ def us_release(details: dict, start: date, stop: date) -> Optional[tuple[date, s
                 d = date.fromisoformat(str(r.get("release_date") or "")[:10])
             except ValueError:
                 continue
-            if t in (2, 3) and start <= d <= stop and (t not in best or d < best[t][0]):
+            if t not in (2, 3):
+                continue
+            first = d if first is None or d < first else first
+            if t == 3:
+                first_wide = d if first_wide is None or d < first_wide else first_wide
+            if start <= d <= stop and (t not in best or d < best[t][0]):
                 best[t] = (d, str(r.get("note") or ""))
+    try:
+        premiere = date.fromisoformat(str(details.get("release_date") or "")[:10])
+    except ValueError:
+        premiere = None
+    if (first_wide and first_wide < start) or (first and first < start - timedelta(days=90)) \
+            or (premiere and premiere < start - timedelta(days=365)):
+        return None
     return best.get(3) or best.get(2)
 
 
