@@ -11,8 +11,8 @@ DTSTAMP:20270211T133000Z
 DTSTART:20270211T133000Z
 DTEND:20270211T143000Z
 SUMMARY:CPI inflation report
-DESCRIPTION:From BLS’s published schedule Consumer prices\, from the Bur
- eau of Labor Statistics. Source: BLS.
+DESCRIPTION:January 2027 numbers Consumer prices\, from the Bureau of Labo
+ r Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT

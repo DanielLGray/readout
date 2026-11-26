@@ -66,8 +66,8 @@ DTSTAMP:20261204T133000Z
 DTSTART:20261204T133000Z
 DTEND:20261204T143000Z
 SUMMARY:Jobs report
-DESCRIPTION:From BLS’s published schedule Payrolls and the unemployment 
- rate\, from the Bureau of Labor Statistics. Source: BLS.
+DESCRIPTION:November 2026 numbers Payrolls and the unemployment rate\, fro
+ m the Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -89,8 +89,8 @@ DTSTAMP:20261210T133000Z
 DTSTART:20261210T133000Z
 DTEND:20261210T143000Z
 SUMMARY:CPI inflation report
-DESCRIPTION:From BLS’s published schedule Consumer prices\, from the Bur
- eau of Labor Statistics. Source: BLS.
+DESCRIPTION:November 2026 numbers Consumer prices\, from the Bureau of Lab
+ or Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -195,8 +195,8 @@ DTSTAMP:20270108T133000Z
 DTSTART:20270108T133000Z
 DTEND:20270108T143000Z
 SUMMARY:Jobs report
-DESCRIPTION:From BLS’s published schedule Payrolls and the unemployment 
- rate\, from the Bureau of Labor Statistics. Source: BLS.
+DESCRIPTION:December 2026 numbers Payrolls and the unemployment rate\, fro
+ m the Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -238,8 +238,8 @@ DTSTAMP:20270113T133000Z
 DTSTART:20270113T133000Z
 DTEND:20270113T143000Z
 SUMMARY:CPI inflation report
-DESCRIPTION:From BLS’s published schedule Consumer prices\, from the Bur
- eau of Labor Statistics. Source: BLS.
+DESCRIPTION:December 2026 numbers Consumer prices\, from the Bureau of Lab
+ or Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -343,8 +343,8 @@ DTSTAMP:20270205T133000Z
 DTSTART:20270205T133000Z
 DTEND:20270205T143000Z
 SUMMARY:Jobs report
-DESCRIPTION:From BLS’s published schedule Payrolls and the unemployment 
- rate\, from the Bureau of Labor Statistics. Source: BLS.
+DESCRIPTION:January 2027 numbers Payrolls and the unemployment rate\, from
+  the Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -366,8 +366,8 @@ DTSTAMP:20270211T133000Z
 DTSTART:20270211T133000Z
 DTEND:20270211T143000Z
 SUMMARY:CPI inflation report
-DESCRIPTION:From BLS’s published schedule Consumer prices\, from the Bur
- eau of Labor Statistics. Source: BLS.
+DESCRIPTION:January 2027 numbers Consumer prices\, from the Bureau of Labo
+ r Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -443,8 +443,8 @@ DTSTAMP:20270305T133000Z
 DTSTART:20270305T133000Z
 DTEND:20270305T143000Z
 SUMMARY:Jobs report
-DESCRIPTION:From BLS’s published schedule Payrolls and the unemployment 
- rate\, from the Bureau of Labor Statistics. Source: BLS.
+DESCRIPTION:February 2027 numbers Payrolls and the unemployment rate\, fro
+ m the Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
@@ -454,8 +454,8 @@ DTSTAMP:20270310T133000Z
 DTSTART:20270310T133000Z
 DTEND:20270310T143000Z
 SUMMARY:CPI inflation report
-DESCRIPTION:From BLS’s published schedule Consumer prices\, from the Bur
- eau of Labor Statistics. Source: BLS.
+DESCRIPTION:February 2027 numbers Consumer prices\, from the Bureau of Lab
+ or Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
