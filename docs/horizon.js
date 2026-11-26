@@ -224,7 +224,7 @@ function drawHorizon() {
       el("ul", { class: "rows plain" }, unsched.map((u) => el("li", { class: "hz-un" }, el("span", { class: "hz-t" }, hzDot(u.kind), u.title), el("span", { class: "hz-s" }, u.when))))) : null,
     H ? el("div", { class: "link-row" }, el("a", { class: "act wide", href: webcal }, icon(ICONS.calendar), "Subscribe in Calendar")) : null,
     H ? el("p", { class: "fine" }, "Subscribing adds these events (not earnings) to your phone’s Calendar app as a calendar of its own, and it keeps itself up to date.") : null,
-    H ? el("p", { class: "fine" }, `From the Federal Reserve, the Bureau of Labor Statistics, the Bureau of Economic Analysis, FDA, NYSE’s holiday rules, Launch Library 2 (The Space Devs), your meetings and dates checked by hand${key ? ", with earnings from Alpha Vantage" : ""}. Updated ${ago(H.generated)}.`,
+    H ? el("p", { class: "fine" }, `From the Federal Reserve, the Bureau of Labor Statistics, the Bureau of Economic Analysis, FDA notices in the Federal Register, NYSE’s holiday rules, Launch Library 2 (The Space Devs), your meetings and dates checked by hand${key ? ", with earnings from Alpha Vantage" : ""}. Updated ${ago(H.generated)}.`,
       bad.length ? ` Couldn’t read ${bad.join(", ")} on the last update; its dates are from the run before.` : "") : null));
   body.scrollTop = keep;
 }

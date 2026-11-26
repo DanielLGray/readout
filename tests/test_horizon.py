@@ -102,6 +102,25 @@ def test_bea_gdp_label():
     assert ev["sub"] == "Third estimate for Q3 2026"
 
 
+FR = {"results": [
+    {"title": "Circulatory System Devices Panel of the Medical Devices Advisory Committee; Notice of Meeting; Establishment of a Public Docket; Request for Comments--Transcatheter Tricuspid Valve",
+     "dates": "The meeting will take place virtually on December 3, 2026, from 9 a.m. to 6 p.m. Eastern Time.", "html_url": "https://www.federalregister.gov/d/2026-1"},
+    {"title": "Radiological Devices Panel of the Medical Devices Advisory Committee; Notice of Meeting",
+     "dates": "The meeting will be held on January 14 and 15, 2027, from 8 a.m. to 5 p.m.", "html_url": "https://www.federalregister.gov/d/2026-2"},
+    {"title": "Microbiology Devices Panel of the Medical Devices Advisory Committee; Notice of Meeting", "dates": "December 8, 2026"},
+    {"title": "Circulatory System Devices Panel; Notice of Meeting", "dates": "The meeting was held on May 1, 2026."},
+    {"title": "Medical Imaging Drugs Advisory Committee; Cancellation of Meeting", "dates": "December 10, 2026"},
+]}
+
+
+def test_federal_register_meetings():
+    evs = H.fr_meetings(FR, "Circulatory System Devices|Radiological Devices|Medical Imaging", START, STOP)
+    assert [e["title"] for e in evs] == ["FDA panel: Circulatory System Devices Panel", "FDA panel: Radiological Devices Panel"]
+    assert evs[0]["sub"] == "Transcatheter Tricuspid Valve" and evs[0]["start"] == "2026-12-03"
+    assert evs[1]["start"] == "2027-01-14" and evs[1]["end"] == "2027-01-15"
+    assert evs[0]["url"] == "https://www.federalregister.gov/d/2026-1"
+
+
 def test_launch_filter():
     evs = H.launch_events(LL2, {"rockets": "Starship|SLS", "mission_types": "Human Exploration|Planetary", "skip_names": "Starlink"}, START, STOP)
     assert [e["title"] for e in evs] == ["Launch: Crew-13", "Launch: Flight 14"]
@@ -135,6 +154,11 @@ class FakeHttp:
         raise RuntimeError(f"no page for {url}")
 
     def get_json(self, url, params):
+        if "federalregister" in url:
+            v = self.pages.get("federalregister", {"results": []})
+            if isinstance(v, Exception):
+                raise v
+            return v
         return LL2
 
 
@@ -145,7 +169,7 @@ def test_build_keeps_a_failed_source_and_falls_back_for_the_fed():
                      "bea.gov/news/schedule": '<a href="/news/schedule/ics/online-calendar-subscription.ics">ICS</a>',
                      "online-calendar-subscription.ics": "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nDTSTART;TZID=America/New_York:20261223T083000\r\n"
                                                          "SUMMARY:Personal Income and Outlays, November 2026\r\nEND:VEVENT\r\nEND:VCALENDAR",
-                     "fda.gov": FDA_PAGE})
+                     "fda.gov": FDA_PAGE, "federalregister": FR})
     cfg = {"bea": [{"match": "^Personal Income and Outlays", "title": "PCE inflation report"}], "bls": RULES,
            "fda_include": "Circulatory", "launches": {"rockets": "Starship", "mission_types": "Human"},
            "fomc": {"fallback": [["2026-12-08", "2026-12-09", "sep"]]}, "bls_fallback": {"CPI inflation report": ["2026-12-10"]},
@@ -168,9 +192,9 @@ def test_build_keeps_a_failed_source_and_falls_back_for_the_fed():
 
 
 def test_bls_fallback_when_nothing_kept():
-    http = FakeHttp({"federalreserve.gov": FED_PAGE, "bls.gov": RuntimeError("403"), "bea.gov": RuntimeError("down"), "fda.gov": "<p>no links</p>"})
+    http = FakeHttp({"federalreserve.gov": FED_PAGE, "bls.gov": RuntimeError("403"), "bea.gov": RuntimeError("down"), "federalregister": "not json"})
     cfg = {"bls": RULES, "bls_fallback": {"CPI inflation report": ["2026-12-10", "2027-01-13"]}, "launches": {}}
     out = build(http, cfg, [], {}, datetime(2026, 11, 26, 15, 0, tzinfo=timezone.utc))
     cpi = [e for e in out["events"] if e["src"] == "BLS"]
     assert [e["start"] for e in cpi] == ["2026-12-10T08:30:00-05:00", "2027-01-13T08:30:00-05:00"]
-    assert out["sources"]["bls"]["fallback"] and not out["sources"]["fda"]["ok"]     # an empty FDA page is a failure, not "no meetings"
+    assert out["sources"]["bls"]["fallback"] and not out["sources"]["fda"]["ok"]     # an odd answer is a failure, not "no meetings"

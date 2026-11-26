@@ -648,7 +648,7 @@ const JOBS = {
   explore: { wf: "explore.yml", cfg: "topics.yaml", every: 8 * 24, title: "Trends", sub: "PubMed, iCite and ClinicalTrials.gov, every Monday" },
   important: { wf: "important.yml", cfg: "feeds.yaml", every: 8 * 24, title: "Most important papers", sub: "PubMed and NIH iCite, every Tuesday" },
   library: { wf: "library.yml", cfg: "foundations.yaml", every: 32 * 24, title: "Foundations and classics", sub: "PubMed and NIH iCite, on the 3rd of each month" },
-  horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, FDA and launch calendars, every morning" },
+  horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, Federal Register (FDA) and launch calendars, every morning" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;

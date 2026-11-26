@@ -312,6 +312,39 @@ def fda_meetings(page: str, include: str, start: date, stop: date) -> list[dict]
     return out
 
 
+def fr_meetings(data: dict, include: str, start: date, stop: date) -> list[dict]:
+    """FDA advisory committee meetings from Federal Register notices (each notice's DATES section
+    says when the meeting is: "The meeting will take place virtually on December 3, 2025, ...")."""
+    out, seen = [], set()
+    inc = re.compile(include, re.I)
+    for d in (data or {}).get("results", []):
+        title = clean(d.get("title") or "")
+        if not inc.search(title) or not re.search(r"notice of meeting", title, re.I) or re.search(r"cancel|postpone", title, re.I):
+            continue
+        m = re.search(r"\b(%s) (\d{1,2})(?:\s*(?:-|–|and|through)\s*(\d{1,2}))?,? (\d{4})" % MONTH_RE, d.get("dates") or "", re.I)
+        if not m:
+            continue
+        mo, y = MONTHS.index(m.group(1).lower()) + 1, int(m.group(4))
+        try:
+            first, last = date(y, mo, int(m.group(2))), date(y, mo, int(m.group(3) or m.group(2)))
+        except ValueError:
+            continue
+        if last < start or first > stop:
+            continue
+        name = re.split(r";", title)[0]
+        name = re.sub(r"\s+of the (?:Medical Devices )?Advisory Committee$", "", name, flags=re.I).strip()
+        key = (name, first)
+        if key in seen:
+            continue
+        seen.add(key)
+        topic = re.split(r"--|—", title)[-1].strip() if re.search(r"--|—", title) else ""
+        out.append(event(f"fda-{first}-{slug(name)}", "medicine", f"FDA panel: {name}", first, last,
+                         sub=topic or "Public advisory committee meeting",
+                         about="FDA's outside experts discuss and vote on a product or question; FDA usually follows their advice.",
+                         url=d.get("html_url") or "", src="FDA"))
+    return out
+
+
 # ── launches (Launch Library 2, The Space Devs) ──────────────────────────────
 
 PRECISE = {"second", "minute", "hour", "day"}

@@ -23,6 +23,7 @@ BLS = "https://www.bls.gov/schedule/news_release/bls.ics"
 BLS_PAGE = "https://www.bls.gov/schedule/news_release/"
 BEA_PAGE = "https://www.bea.gov/news/schedule"
 FDA = "https://www.fda.gov/advisory-committees/advisory-committee-calendar"
+FED_REG = "https://www.federalregister.gov/api/v1/documents.json"
 LL2 = ["https://ll.thespacedevs.com/2.3.0/launches/upcoming/", "https://ll.thespacedevs.com/2.2.0/launch/upcoming/"]
 
 SOURCES = {          # source name → the `src` its events carry, to keep them when it can't be read
@@ -94,12 +95,15 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> d
         status["bls"]["fallback"] = True
     source("bea", lambda: H.releases(bea_calendar(http), cfg.get("bea") or [], "BEA", BEA_PAGE, start, stop))
     def fda():
-        page = http.get_text(FDA, {})
-        listed = len(set(h for h, _ in H.FDA_LINK.findall(page)))
-        if not listed:
-            raise RuntimeError("no meetings found on FDA's calendar page (its layout may have changed)")
-        got = H.fda_meetings(page, cfg.get("fda_include") or "^$", start, stop)
-        log(f"  fda: {listed} meetings listed, {len(got)} on imaging or heart devices")
+        # the Federal Register carries every FDA advisory committee meeting notice, with an API for exactly this
+        data = http.get_json(FED_REG, {"conditions[agencies][]": "food-and-drug-administration", "conditions[type][]": "NOTICE",
+                                       "conditions[term]": '"Notice of Meeting" "Advisory Committee"', "order": "newest", "per_page": 100,
+                                       "conditions[publication_date][gte]": (today - timedelta(days=150)).isoformat(),
+                                       "fields[]": ["title", "dates", "html_url", "publication_date"]})
+        if not isinstance(data, dict) or "results" not in data:
+            raise RuntimeError("the Federal Register sent something unexpected")
+        got = H.fr_meetings(data, cfg.get("fda_include") or "^$", start, stop)
+        log(f"  fda: {len(data.get('results') or [])} FDA meeting notices, {len(got)} upcoming on imaging or heart devices")
         return got
 
     source("fda", fda)
@@ -142,7 +146,7 @@ def main() -> int:
     email = os.environ.get("NCBI_EMAIL", "").strip()
     if "@" in email:            # BLS asks automated requests to carry a contact email
         http_mod.HOST_AGENTS["www.bls.gov"] = f"{http_mod.USER_AGENT} contact: {email}"
-    http = Http(intervals={"ll.thespacedevs.com": 5.0, "www.bls.gov": 2.0, "www.bea.gov": 1.0}, retries=3)
+    http = Http(intervals={"ll.thespacedevs.com": 5.0, "www.bls.gov": 2.0, "www.bea.gov": 1.0, "www.federalregister.gov": 1.0}, retries=3)
     data = build(http, cfg, meetings, prev, datetime.now(timezone.utc))
     write_json(DATA / "horizon.json", data)
     write_calendars(data)
