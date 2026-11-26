@@ -1,0 +1,115 @@
+# Watch: changes in structured public records that matter to your work, read daily by
+# pipeline/build_watch.py (.github/workflows/watch.yml) into docs/data/watch.json.
+#
+#   trials   ClinicalTrials.gov: new trials, status changes, results posted, primary completion
+#            reached or moved, for the topics below; Phase 3 primary completions ahead go to Coming up
+#   devices  FDA 510(k) clearances from the radiology panel (openFDA, updated monthly), and PMA
+#            approvals for the product codes below (originals and new indications)
+#   drugs    FDA approvals of radiopharmaceuticals and contrast agents (Drugs@FDA via openFDA):
+#            new applications and new indications
+#   rules    Federal Register: final and proposed rules and guidance notices below; comment
+#            deadlines and effective dates go to Coming up
+#
+# A change is an "alert" (top of Today and Everything, like the other alerts) only when it's
+# major: a new radiopharmaceutical or contrast approval or indication, a new PMA approval,
+# results posted for a Phase 3 trial, or a final rule marked alert below. The rest shows in
+# Explore → Watch and once in Today's Watch card.
+
+settings:
+  days: 120                # changes are kept this long
+  first_days: 30           # on the first run (no history yet), how far back counts as new
+  readout_days: 120        # Coming up: Phase 3 primary completions this far ahead
+  pcd_shift_days: 60       # a primary completion date that moves this much is a change
+  readouts_every_days: 7   # how often the full list of active trials is read again
+
+trials:
+  # term: ClinicalTrials.gov search syntax (quotes for phrases, AND, OR, NOT).
+  # phases: which trials count (PHASE1, PHASE2, PHASE3, PHASE4; NA for device trials with no phase).
+  # min_n: smallest enrollment that counts.
+  - id: rlt
+    name: Radioligand therapy
+    term: '"radioligand" OR "177Lu" OR "Lu-177" OR "lutetium" OR "225Ac" OR "Ac-225" OR "actinium" OR "radiopharmaceutical therapy" OR "PRRT" OR "radioembolization"'
+    phases: [PHASE1, PHASE2, PHASE3]
+  - id: tracers
+    name: PET and SPECT tracers
+    term: '("PET" OR "positron" OR "SPECT") AND ("18F" OR "F-18" OR "68Ga" OR "Ga-68" OR "64Cu" OR "Cu-64" OR "89Zr" OR "Zr-89" OR "PSMA" OR "FAPI" OR "fluoroestradiol" OR "tracer" OR "radiotracer")'
+    phases: [PHASE2, PHASE3]
+  - id: tavr
+    name: TAVR and aortic stenosis
+    term: '"transcatheter aortic valve" OR "TAVR" OR "TAVI"'
+    phases: [PHASE2, PHASE3, PHASE4, NA]
+    min_n: 100
+  - id: cardiac-ct
+    name: Cardiac CT
+    term: '"coronary CT angiography" OR "coronary computed tomography" OR "CCTA" OR "CT-FFR" OR "FFRct" OR "coronary artery calcium"'
+    phases: [PHASE2, PHASE3, PHASE4, NA]
+    min_n: 200
+  - id: screening
+    name: Cancer screening with imaging
+    term: '"lung cancer screening" OR "low-dose CT" OR "breast cancer screening" OR "abbreviated MRI" OR "contrast-enhanced mammography" OR "prostate MRI"'
+    phases: [PHASE2, PHASE3, PHASE4, NA]
+    min_n: 500
+  - id: ai
+    name: AI in imaging
+    term: '("artificial intelligence" OR "deep learning" OR "machine learning") AND ("radiology" OR "CT" OR "MRI" OR "mammography" OR "PET" OR "imaging")'
+    phases: [PHASE2, PHASE3, PHASE4, NA]
+    min_n: 500
+
+# trials to follow wherever they are, by NCT number (each change shows, whatever its phase)
+follow: []
+
+devices:
+  panels: [RA]             # FDA advisory panel codes: RA = radiology
+  window_days: 75          # openFDA's 510(k) data is refreshed monthly
+  # product codes of AI software for images; device names with these words count as AI too
+  ai_codes: [QAS, QIH, QFM, POK, QDQ, MYN, QBS]
+  ai_words: '\b(?:AI|A\.I\.|artificial intelligence|deep[- ]learning|machine[- ]learning|neural network|algorithm|computer[- ]aided|computer[- ]assisted|CADe|CADx|triage|auto[- ]?segment\w*)\b'
+  pma_codes: [NPT]         # transcatheter aortic valves: new approvals and new indications
+
+drugs:
+  window_days: 60
+  # radionuclides in an active ingredient's name (F-18, LU 177, TC-99M…)
+  isotopes: [F18, GA68, GA67, LU177, TC99M, CU64, CU67, ZR89, I123, I124, I131, IN111, RB82, N13, O15, C11, RA223, AC225, PB212, PB203, Y90, SM153, XE133, TL201, SR89]
+  agents: '\b(?:GADO\w+|IOHEXOL|IOPAMIDOL|IODIXANOL|IOVERSOL|IOPROMIDE|IOMEPROL|IOBITRIDOL|DIATRIZOATE\w*|PERFLUTREN|PERFLEXANE|SULFUR HEXAFLUORIDE|FERUMOXYTOL|INDOCYANINE GREEN)\b'
+  # site licenses for long-established PET drugs (dozens a year, none of them news)
+  skip: '\b(?:FLUDEOXYGLUCOSE|AMMONIA N\W?13|SODIUM FLUORIDE F\W?18)\b'
+
+rules:
+  # agency: the Federal Register's name for it; cfr: [title, part]; types: RULE, PRORULE, NOTICE
+  # title: only documents whose title matches; alert: a final rule whose title matches is an alert
+  - id: cms-pfs
+    name: Medicare physician fee schedule
+    agency: centers-for-medicare-medicaid-services
+    cfr: [42, 414]
+    types: [RULE, PRORULE]
+    title: '(?i)physician fee schedule|part b payment|appropriate use|radiolog|imaging'
+    alert: '(?i)physician fee schedule'
+  - id: cms-opps
+    name: Hospital outpatient payment (OPPS)
+    agency: centers-for-medicare-medicaid-services
+    cfr: [42, 419]
+    types: [RULE, PRORULE]
+    title: '(?i)outpatient prospective payment|radiopharm|imaging'
+    alert: '(?i)outpatient prospective payment'
+  - id: nrc-35
+    name: NRC medical use of radioactive material (10 CFR 35)
+    agency: nuclear-regulatory-commission
+    cfr: [10, 35]
+    types: [RULE, PRORULE]
+    alert: '.'
+  - id: fda-892
+    name: FDA radiology device rules (21 CFR 892)
+    agency: food-and-drug-administration
+    cfr: [21, 892]
+    types: [RULE, PRORULE]
+  - id: fda-mqsa
+    name: Mammography quality standards (21 CFR 900)
+    agency: food-and-drug-administration
+    cfr: [21, 900]
+    types: [RULE, PRORULE]
+  - id: fda-guidance
+    name: FDA guidance on imaging, radiopharmaceuticals and AI
+    agency: food-and-drug-administration
+    types: [NOTICE]
+    term: guidance
+    title: '(?i)guidance.*(?:radiopharm|imaging|radiolog|radiation|artificial intelligence|machine learning|AI-enabled|contrast|mammogra|positron|ultrasound|computed tomography|magnetic resonance)'

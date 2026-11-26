@@ -1,12 +1,12 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback).
    On each app change, bump BUILD here and the ?v= numbers in index.html together. */
-const BUILD = "45";
+const BUILD = "46";
 const VERSION = `readout-v${BUILD}`;
 const DATA = "readout-data";        // last copy of each data file; kept across app updates (the app reads it too)
 const FIGS = "readout-figs";        // pictures from papers: kept once fetched, the newest 400 or so
 const MAX_FIGS = 400;
 const SHELL = [
-  "./", "index.html", `app.css?v=${BUILD}`, `app.js?v=${BUILD}`, `learn.js?v=${BUILD}`, `tune.js?v=${BUILD}`, `horizon.js?v=${BUILD}`, `radar.js?v=${BUILD}`, "manifest.webmanifest",
+  "./", "index.html", `app.css?v=${BUILD}`, `app.js?v=${BUILD}`, `learn.js?v=${BUILD}`, `tune.js?v=${BUILD}`, `horizon.js?v=${BUILD}`, `radar.js?v=${BUILD}`, `watch.js?v=${BUILD}`, `week.js?v=${BUILD}`, "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
   "fonts/literata-latin-opsz-normal.woff2", "fonts/literata-latin-ext-opsz-normal.woff2",
   "fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2", "fonts/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2",

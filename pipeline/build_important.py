@@ -201,6 +201,29 @@ def wide_pool(pm: PubMed, http: Http, cfg: dict, t: date, corpus: dict, compiled
     return order, cards
 
 
+MILESTONES = (25, 50, 100, 250, 500, 1000)
+
+
+def milestones(prev: dict, rows: dict, t: date, before: list) -> "tuple[list[dict], dict]":
+    """Papers in your areas whose citations passed a round number since last week's count, newest
+    first and biggest first, kept four weeks; and this week's counts, to compare with next week."""
+    new = []
+    for pmid, r in rows.items():
+        was = prev.get(pmid)
+        if not isinstance(was, int):
+            continue
+        crossed = [m for m in MILESTONES if was < m <= r["cites"]]
+        if crossed:
+            new.append({"pmid": pmid, "mark": crossed[-1], "cites": r["cites"], "was": was, "date": t.isoformat()})
+    new.sort(key=lambda m: (-m["mark"], -(m["cites"] - m["was"])))
+    new = new[:15]
+    fresh = {m["pmid"] for m in new}
+    cut = (t - timedelta(days=28)).isoformat()
+    kept = [m for m in before if isinstance(m, dict) and m.get("date", "") >= cut and m.get("pmid") not in fresh and m.get("date") != t.isoformat()]
+    snapshot = {p: r["cites"] for p, r in rows.items() if r["cites"] >= 10}
+    return new + kept[:25], snapshot
+
+
 def run(http: Optional[Http] = None) -> dict:
     cfg = load_yaml("feeds.yaml")
     s = settings_from(cfg)
@@ -233,7 +256,10 @@ def run(http: Optional[Http] = None) -> dict:
     rules = area_require(cfg.get("areas"))
     windows = pick(rows, t, s, areas)
 
-    chosen = list(dict.fromkeys(p for w in windows.values() for per in w.values() for lst in per.values() for p in lst))
+    prev_out = read_json(DATA / "important.json", {}) or {}
+    miles, snapshot = milestones(read_json(CACHE / "important_cites.json", {}) or {}, rows, t, prev_out.get("milestones") or [])
+    chosen = list(dict.fromkeys([p for w in windows.values() for per in w.values() for lst in per.values() for p in lst]
+                                + [m["pmid"] for m in miles]))          # and the papers that passed a citation milestone
     log(f"Important: fetching {len(chosen)} papers for cards")
     papers = {}
     for rec in pm.fetch(chosen):
@@ -281,9 +307,11 @@ def run(http: Optional[Http] = None) -> dict:
         "systems": {k: v["label"] for k, v in cfg["systems"].items()},
         "windows": windows,
         "wide": wide,
+        "milestones": [m for m in miles if m["pmid"] in papers],
         "papers": papers,
     }
     write_json(DATA / "important.json", out)
+    write_json(CACHE / "important_cites.json", snapshot)
     log(f"Important: {len(papers)} papers; checked {len(corpus)}, {out['stats']['research']} original research, "
         f"{out['stats']['other']} reviews/guidelines, {skipped} skipped")
     return out

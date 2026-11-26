@@ -220,6 +220,8 @@ function todaySection() {
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
     switchRow("Coming up", `The next ${b.hzDays} days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.`, b.horizon, (on) => setB("horizon", on)),
     b.horizon ? segPick("Coming up covers", [[3, "3 days"], [7, "7 days"], [14, "14 days"]], b.hzDays, (v) => setB("hzDays", Number(v))) : null,
+    segPick("Your week, as a card", WEEK_DAYS, b.week, (v) => setB("week", Number(v)),
+      "A summary of the last seven days on that day: alerts, Watch changes, the Radar, papers passing citation milestones, the biggest stories and your reading. Explore → Your week has it any day."),
     segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
@@ -229,7 +231,9 @@ function todaySection() {
     switchRow("Pictures", "A figure from each open-access paper whose license allows it, credited, and the picture each news outlet puts in its feed. Off: no pictures, less data.", T.pictures,
       (on) => { setTune({ pictures: on }); rerender(); }),
     switchRow("Bylines", "Who wrote each news story, under its summary, when the outlet’s feed says. Rate on a story can hide or favor a writer either way.", T.bylines,
-      (on) => { setTune({ bylines: on }); rerender(); }));
+      (on) => { setTune({ bylines: on }); rerender(); }),
+    switchRow("Why this card", "A line on each paper and story saying what put it there: the list, words you follow, what you’ve rated, its area. Tap it for the whole account, with the paper’s score.", T.why,
+      (on) => { setTune({ why: on }); rerender(); }));
 }
 
 // ── your reading ───────────────────────────────────────────────────────────
@@ -433,6 +437,7 @@ function interestsPane() {
     meetingsSection(),
     typeof horizonSection === "function" ? horizonSection() : null,
     typeof radarSection === "function" ? radarSection() : null,
+    typeof watchSection === "function" ? watchSection() : null,
     el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
@@ -743,6 +748,7 @@ const JOBS = {
   library: { wf: "library.yml", cfg: "foundations.yaml", every: 32 * 24, title: "Foundations and classics", sub: "PubMed and NIH iCite, on the 3rd of each month" },
   horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, Federal Register (FDA) and launch calendars, every morning" },
   radar: { wf: "radar.yml", cfg: "radar.yaml", every: 30, title: "Radar", sub: "Research news, arXiv preprints and OpenAlex research counts, every day" },
+  watch: { wf: "watch.yml", cfg: "watch.yaml", every: 30, title: "Watch", sub: "ClinicalTrials.gov, openFDA and the Federal Register, every morning" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;
@@ -968,8 +974,8 @@ function tokenSection() {
 function pipelinePane() {
   loadRuns();
   return [
-    el("p", { class: "lede small" }, "Five jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
-    setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(),
+    el("p", { class: "lede small" }, `${["", "", "", "", "", "Five", "Six", "Seven", "Eight", "Nine"][Object.keys(JOBS).length] || Object.keys(JOBS).length} jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run.`),
+    setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(), radarJob(), watchJob(),
     el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }
@@ -1088,6 +1094,25 @@ function horizonJob() {
     H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS turns away GitHub’s servers even with a contact email, so the jobs and CPI dates come from BLS’s published schedule, copied into the config (through December 2027).") : null,
     el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Interests → Coming up)."),
     jobLinks("horizon", "Edit dates and filters"));
+}
+function radarJob() {
+  const R = S.radar;
+  return el("section", { class: "sect job" }, el("h2", {}, JOBS.radar.title), el("p", { class: "sub" }, JOBS.radar.sub),
+    jobStatus("radar", R?.generated),
+    !R ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },
+      (R.sources || []).map((x) => [el("dt", {}, x.name), el("dd", { class: x.ok ? "" : "warn-text" }, x.ok ? (x.count != null ? String(x.count) : "read") : "couldn’t read")]),
+      el("dt", {}, "Topics"), el("dd", {}, String((R.topics || []).length))),
+    jobLinks("radar", "Edit topics and sources"));
+}
+function watchJob() {
+  const W = S.watch;
+  return el("section", { class: "sect job" }, el("h2", {}, JOBS.watch.title), el("p", { class: "sub" }, JOBS.watch.sub),
+    jobStatus("watch", W?.generated),
+    !W ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },
+      (W.sources || []).map((x) => [el("dt", {}, x.name), el("dd", { class: x.ok ? "" : "warn-text" }, x.ok ? `${x.count} new` : "couldn’t read; kept the last run’s")]),
+      el("dt", {}, "Changes kept"), el("dd", {}, String((W.events || []).length)),
+      el("dt", {}, "Trials under way"), el("dd", {}, String(W.tracked || 0))),
+    jobLinks("watch", "Edit topics and rules"));
 }
 function libraryJob() {
   const L = S.library;

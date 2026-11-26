@@ -295,6 +295,82 @@ function wordPicker(start, done) {
     note);
 }
 
+// ── why this card ──────────────────────────────────────────────────────────
+// What put a card here: the list it's in, words you follow, what you've rated (chosen or learned),
+// its area or kind of news, and for papers what the score counts. A line on the card (Tune →
+// Reading can turn it off); tap it for the whole account.
+const AREA_LEVEL = ["Off", "Less", "Normal", "More"];
+function whyParts(it) {
+  const out = [];
+  const news = isNewsItem(it);
+  const kindNow = S.kind;
+  if (it.classic) out.push({ s: "Classic of the day", l: "A highly cited paper at least five years old from one of your areas, one a day; areas you weight more come round more often." });
+  else if (it._wide) out.push({ s: "Outside your areas", l: "One paper a day from the big general journals your area searches wouldn’t find, chosen weekly for early citations and study design." });
+  else if (it._light) out.push({ s: "Something lighter", l: "Today’s one Light reading story." });
+  else if (kindNow === "today" && !news) out.push({ s: "Today’s pick", l: `One of today’s ${T.brief.papers} best new papers for your areas: its score, times your ratings, times 1.6 if it has a word you follow. Papers an earlier Today showed don’t come back.` });
+  else if (kindNow === "important" && it.impact) out.push({ s: it.impact.age >= 4 ? `${topPct(it.impact.pct)} for citations` : "New, in a well-cited journal",
+    l: "Most important ranks papers by citations against others from the same quarter in your areas (NIH iCite), refreshed every Tuesday." });
+  else if (kindNow === "following") out.push({ s: "Following list", l: "The Following chip lists every paper and story with a word you follow, newest first." });
+  const fw = (T.follow || []).filter((w) => wordRe([w])?.test(`${it.title} ${shownText(it)}`));
+  if (fw.length) out.push({ s: `Follows “${fw[0]}”`, l: `It has ${fw.map((w) => `“${w}”`).join(", ")}, which you follow.` });
+  const rated = featuresOf(it).concat(byFeatures(it)).map((f) => [f, tasteW(f)]).filter(([, w]) => w).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+  for (const [f, w] of rated.slice(0, 4)) {
+    const [name, kind] = featureName(f);
+    out.push({ s: `${name} ${w > 0 ? "↑" : "↓"}`, w,
+      l: `${kind}: ${name}. ${T.taste[f] != null ? `You chose ${w > 0 ? "More" : "Less"} in Rate` : `Learned from what you rated, opened and saved (${w > 0 ? "+" : ""}${w})`}.` });
+  }
+  if (!news) {
+    const a = homeArea(it);
+    if (a) {
+      const label = (areaList().find(([k]) => k === a)?.[1]?.label) || areaShort(a);
+      out.push({ s: areaShort(a), l: `Your ${label} area, set to ${AREA_LEVEL[T.areas[a] ?? 2]}. In Everything and Papers the areas take turns by these settings.` });
+    }
+    const d = designOf(it);
+    if (d && (it.design?.strength || 0) >= 3) out.push({ s: d, l: `${d}: a strong study design, which counts for more in the score.` });
+  } else {
+    const k = it.kind || kindOf(it);
+    const label = newsKinds()[k] || "News";
+    out.push({ s: label, l: `${label}, from ${it.source}. In Everything it gets ${plural(T.mix[k] ?? 1, "turn")} per round${T.cap && k !== "industry" ? `, and at most ${T.cap} a day from one outlet` : ""}.` });
+    const many = topStoryLists(null).some(([, l]) => l.some((st) => (st.items || []).includes(it.id)));
+    if (many) out.push({ s: "Several outlets", l: "Other outlets covered this story too: it’s in Top stories." });
+  }
+  if (isRead(it)) out.push({ s: "Seen", l: "You’ve seen it before, so it comes after cards you haven’t (Tune → Rules → Cards you’ve seen go to the end)." });
+  return out;
+}
+function whyEl(it) {
+  if (!T.why || !it || SPECIAL.has(it.type)) return null;
+  const parts = whyParts(it);
+  if (!parts.length) return null;
+  return el("button", { class: "why-line", "aria-label": `Why this card: ${parts.map((p) => p.s).join(", ")}. Tap for more.`, onclick: () => openWhy(it) },
+    el("span", { class: "why-k" }, "Why"), el("span", { class: "why-t" }, parts.slice(0, 3).map((p) => p.s).join(" · ")));
+}
+function openWhy(it) {
+  const news = isNewsItem(it);
+  const parts = whyParts(it);
+  const sc = news ? null : paperScore(it);
+  const t = hasTaste() ? tasteOf(it) : 0;
+  const n2 = (x) => (Math.round(x * 100) / 100).toString();
+  const row = (k, v, note) => [el("dt", {}, k), el("dd", {}, v, note ? el("span", { class: "fine" }, ` ${note}`) : null)];
+  openSheet(
+    el("h2", { id: "sheet-title" }, "Why this card"),
+    el("p", { class: "sheet-meta fb-title" }, el("span", {}, it.title)),
+    el("ul", { class: "why-list" }, parts.map((p) => el("li", {}, el("b", {}, p.s), el("span", {}, p.l)))),
+    sc ? el("div", {}, el("div", { class: "ctl-label" }, "The paper’s score"),
+      el("dl", { class: "facts small why-score" },
+        row("Freshness", `× ${n2(sc.fresh)}`, `halves every ${plural(T.rank.fresh, "day")}`),
+        row("Evidence", `+ ${n2(sc.parts.evidence)}`), row("Study size", `+ ${n2(sc.parts.size)}`),
+        row("Labeled conclusion", `+ ${n2(sc.parts.concl)}`), row("Your organ systems", `+ ${n2(sc.parts.systems)}`),
+        row("Your ratings", t ? `× ${n2(Math.pow(1.5, t))}` : "none", t ? `(${t > 0 ? "+" : ""}${n2(t)})` : null),
+        row("Score", n2(sc.score * Math.pow(1.5, t)))),
+      el("p", { class: "fine" }, T.order === "ranked" || S.kind === "today"
+        ? "Freshness × (1 + the rest), then your ratings. Weights are in Tune → Rules → Paper order."
+        : "Papers is set to newest first, so the score doesn’t order this list (Tune → Rules → Paper order); Today still uses it.")) : null,
+    !news || t ? el("p", { class: "fine" }, t === -Infinity ? "" : t ? `Your ratings add up to ${t > 0 ? "+" : ""}${n2(t)} for this card (kept within ±3): ${news ? "news moves up or down a few hours per point" : "each point moves a paper about a day in Newest first"}.` : "") : null,
+    el("div", { class: "link-row" },
+      el("button", { class: "act", onclick: () => openFeedback(it) }, icon(ICONS.react), "Rate"),
+      el("button", { class: "act", onclick: () => { closeSheet(); switchTab("tune"); setPane("interests", "tune-taste"); } }, "Tune")));
+}
+
 // ── pictures ───────────────────────────────────────────────────────────────
 const figSrc = (fig) => (fig && /^figs\/PMC\d{1,10}\.webp$/.test(String(fig.src || "")) ? `data/${fig.src}` : null);
 function figureEl(it) {
@@ -368,7 +444,7 @@ function classicToday() {
 function activeAlerts() {
   const cut = Date.now() - 7.5 * 864e5;
   const seen = new Set();
-  return [...(S.feed?.alerts || []), ...(S.news?.alerts || [])]
+  return [...(S.feed?.alerts || []), ...(S.news?.alerts || []), ...(typeof watchAlerts === "function" ? watchAlerts() : [])]
     .filter((a) => a?.id && a.title && !seen.has(a.id) && seen.add(a.id) && T.alerts?.[a.group] !== false && Date.parse(a.date) >= cut)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
@@ -395,8 +471,12 @@ function alertWhen(a) {
   const days = Math.round((Date.parse(`${localDay()}T12:00:00`) - new Date(y, m - 1, d, 12).getTime()) / 864e5);
   return days <= 0 ? "today" : `${days} d`;
 }
-function alertSrc(a) { return a.via === "pubmed" ? `${a.journal} · from PubMed` : outletsText(a.sources); }
+function alertSrc(a) {
+  if (a.via === "watch") return [a.ev.what, a.ev.sub].filter(Boolean).join(" · ");
+  return a.via === "pubmed" ? `${a.journal} · from PubMed` : outletsText(a.sources);
+}
 function alertOpen(a) {
+  if (a.via === "watch") { openWatchEvent(a.ev); return; }
   if (a.via === "pubmed") {
     const p = (S.feed?.items || []).find((x) => x.pmid === a.pmid) || a.card;
     if (p) openAbstract({ ...p, type: "paper" });
@@ -409,7 +489,7 @@ function alertOpen(a) {
 }
 function alertCardEl(it) {
   const a = it.a;
-  const what = a.via === "pubmed" ? "New guideline" : a.rule === "fda" ? "FDA action" : "Guideline change";
+  const what = a.via === "watch" ? (WATCH_KINDS[a.ev.kind] || "Watch") : a.via === "pubmed" ? "New guideline" : a.rule === "fda" ? "FDA action" : "Guideline change";
   return el("article", { class: "card brief-card alert-card", "data-key": it.key, "data-group": a.group },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal alert-label" }, a.label), el("span", {}, what),
       el("span", { class: "spacer" }), el("span", {}, alertWhen(a))),
@@ -417,7 +497,7 @@ function alertCardEl(it) {
       onclick: (e) => { e.preventDefault(); alertOpen(a); } }, a.title)),
     el("p", { class: "alert-src" }, alertSrc(a)),
     el("div", { class: "alert-acts" },
-      el("button", { class: "act", onclick: () => alertOpen(a) }, a.via === "pubmed" ? "Abstract" : (a.items || []).length > 1 ? `All ${a.sources.length} outlets` : "Read"),
+      el("button", { class: "act", onclick: () => alertOpen(a) }, a.via === "watch" ? "Details" : a.via === "pubmed" ? "Abstract" : (a.items || []).length > 1 ? `All ${a.sources.length} outlets` : "Read"),
       el("button", { class: "act", onclick: (e) => clearCard(e.currentTarget.closest(".card"), it) }, "Dismiss"),
       it.more ? el("button", { class: "act", onclick: openAlerts }, `${it.more} more`) : null));
 }
@@ -425,7 +505,7 @@ function openAlerts() {
   const all = activeAlerts();
   openSheet(
     el("h2", { id: "sheet-title" }, "This week’s alerts"),
-    el("p", { class: "sheet-meta" }, el("span", {}, "FDA actions on imaging agents and radiopharmaceuticals, and guideline changes. Each stays a week.")),
+    el("p", { class: "sheet-meta" }, el("span", {}, "FDA actions on imaging agents, radiopharmaceuticals and heart valves, guideline changes, Phase 3 trial results and final federal rules. Each stays a week.")),
     all.length ? el("ul", { class: "rows" }, all.map((a) => el("li", { class: "news-item" },
       el("button", { class: "alert-row", onclick: () => alertOpen(a) },
         el("span", { class: "news-src" }, el("b", {}, a.label), el("span", {}, alertWhen(a)), isCleared(`alert:${a.id}`) ? el("span", {}, "dismissed") : null),
@@ -1001,6 +1081,10 @@ function briefList() {
   if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
   const rd = typeof radarCardItem === "function" ? radarCardItem() : null;
   if (rd) out.push(rd);
+  const wt = typeof watchCardItem === "function" ? watchCardItem() : null;
+  if (wt) out.push(wt);
+  const wk = typeof weekCardItem === "function" ? weekCardItem() : null;
+  if (wk) out.splice(out.findIndex((x) => x.type === "brief-cover") + 1, 0, wk);
   papers.forEach((p, i) => {
     out.push(p);
     if (i === 1 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
@@ -1019,6 +1103,8 @@ function briefCardEl(it) {
   if (it.type === "alert") return alertCardEl(it);
   if (it.type === "brief-horizon") return hzCardEl(it);
   if (it.type === "brief-radar") return radarCardEl(it);
+  if (it.type === "brief-watch") return watchCardEl(it);
+  if (it.type === "brief-week") return weekCardEl(it);
   if (it.type === "brief-cover") return briefCoverEl(it);
   if (it.type === "brief-stories") return briefStoriesEl(it);
   if (it.type === "fd-next") return fdNextEl(it);

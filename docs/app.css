@@ -903,3 +903,27 @@ a { color: inherit; }
 .fb-by .fine { margin-bottom: 0; }
 .fb-from { margin-top: 12px; }
 .fb-from .chips { margin-top: 6px; }
+/* ── Watch ─────────────────────────────────────────────────────────────── */
+.w-row { width: 100%; text-align: left; display: grid; gap: 3px; padding: 10px 0; }
+.w-what { font-size: 14px; font-weight: 600; color: var(--ink); }
+.w-what.big { font-size: 16px; margin: 4px 0; }
+.w-major { flex: none; font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 1px 6px; color: var(--heat-text); border: 1px solid var(--heat-text); }
+.w-chips { margin: 6px 0 2px; }
+.w-card .rows, .wk-card .rows { margin: 0; }
+.w-ahead { margin-top: 4px; }
+/* ── Your week ─────────────────────────────────────────────────────────── */
+.wk-lines { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 15px; line-height: 1.4; }
+.wk-lines dt { font-weight: 700; color: var(--muted); font-size: 13px; padding-top: 2px; }
+.wk-lines dd { margin: 0; min-width: 0; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.wk-entry .rd-mini > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wk-sec { margin-top: 2px; }
+/* ── Why this card ─────────────────────────────────────────────────────── */
+.why-line { display: flex; align-items: baseline; gap: 8px; width: 100%; min-width: 0; text-align: left; margin: 2px 0 0; padding: 4px 0;
+  font-size: calc(12.5px * var(--ts, 1)); line-height: 1.35; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.why-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.why-k { flex: none; font-weight: 700; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 0 5px; }
+.why-list { list-style: none; margin: 8px 0 12px; padding: 0; display: grid; gap: 10px; }
+.why-list li { display: grid; gap: 2px; }
+.why-list b { font-size: 15px; }
+.why-list span { font-size: 14px; color: var(--muted); line-height: 1.4; }
+.why-score dd { font-variant-numeric: tabular-nums; }

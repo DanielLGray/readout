@@ -123,7 +123,8 @@ function hzEvents(days = 90) {
   const kinds = T.horizon.kinds;
   const now = new Date(), stop = new Date(); stop.setHours(23, 59, 59); stop.setDate(stop.getDate() + days);
   const earn = kinds.markets ? earnEvents() : [];
-  let evs = (S.horizon?.events || []).filter((e) => kinds[e.kind] !== false && (!e.meeting || hzMeetingOn(e.meeting)));
+  const watched = T.watch?.dates !== false ? (S.watch?.dates || []).filter((e) => e?.id && e.start && e.title) : [];   // Watch: readouts ahead, rule deadlines
+  let evs = (S.horizon?.events || []).concat(watched).filter((e) => kinds[e.kind] !== false && (!e.meeting || hzMeetingOn(e.meeting)));
   // the banks' real dates replace the estimated start of earnings season
   const banks = earn.filter((e) => BANKS.has(e.earn)).sort((a, b) => a.start.localeCompare(b.start));
   evs = evs.filter((e) => !e.id.startsWith("season-") || !banks.some((b) => Math.abs(dayDiff(hzDate(b.start)) - dayDiff(hzDate(e.start))) <= 14));
