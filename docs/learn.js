@@ -31,6 +31,8 @@ function featuresOf(it) {
   const f = [];
   if (isNewsItem(it)) {
     if (it.source) f.push(`src:${it.source}`);
+    (it.systems || []).forEach((y) => f.push(`sys:${y}`));         // the same organ systems as papers
+    (it.categories || []).forEach((c) => f.push(`cat:${c}`));      // industry news: FDA & safety, AI, business…
   } else {
     (it.systems || []).forEach((y) => f.push(`sys:${y}`));
     (it.topics || []).forEach((t) => f.push(`tp:${t}`));
@@ -66,6 +68,7 @@ function featureName(f) {
     case "ds": return [DESIGN_NAMES[v] || v, "Kind of study"];
     case "fl": return [FLAVORS[v]?.[0] || v, "Subject"];
     case "src": return [v, "Outlet"];
+    case "cat": return [S.news?.categories?.[v] || v, "News category"];
     default: return [v, k];
   }
 }
@@ -82,7 +85,7 @@ function react(it, dir) {
   const now = was === dir ? 0 : dir;
   const learned = { ...T.learned };
   for (const f of featuresOf(it)) {
-    const v = Math.round(((learned[f] || 0) + 0.5 * (now - was)) * 2) / 2;
+    const v = Math.round(((learned[f] || 0) + 0.5 * (now - was)) * 20) / 20;
     const c = Math.max(-1.5, Math.min(1.5, v));
     if (c) learned[f] = c; else delete learned[f];
   }
@@ -94,6 +97,41 @@ function react(it, dir) {
   setTune({ learned, reacts });
   return now;
 }
+// What you open, save or listen to teaches a little too (a tenth, or a quarter for a save, of a
+// More like this), once per card. Nothing you skip or clear counts against anything: only Less like
+// this and Not for me do. Tune → Interests → What you like can turn this off.
+const NUDGE = { open: 0.1, listen: 0.1, save: 0.25 };
+let taught = store.get("taught", null);
+if (!taught || typeof taught !== "object" || Array.isArray(taught)) taught = {};
+function learnFrom(it, type) {
+  if (!T.learnImplicit || !NUDGE[type] || !it || SPECIAL.has(it.type)) return;
+  const key = saveKey(it);
+  if ((T.reacts[key] || 0) < 0 || (taught[key] || "").includes(type[0])) return;     // you said less like this; or already counted
+  const learned = { ...T.learned };
+  for (const f of featuresOf(it)) {
+    const v = Math.max(-1.5, Math.min(1.5, Math.round(((learned[f] || 0) + NUDGE[type]) * 20) / 20));
+    if (v) learned[f] = v; else delete learned[f];
+  }
+  taught[key] = (taught[key] || "") + type[0];
+  const keys = Object.keys(taught);
+  if (keys.length > 1500) keys.slice(0, keys.length - 1500).forEach((k) => delete taught[k]);
+  store.set("taught", taught);
+  T = { ...T, learned };                 // not setTune: the feed you're reading stays put; this counts from the next fresh start
+  store.set("tune", T);
+}
+// Learned leanings fade (they halve over about four months), so an old phase or a one-off rating
+// doesn't steer the feed for good. Your own choices in Rate don't fade.
+(function fadeLearned() {
+  const today = localDay();
+  if (!T.learnedAt) { T = { ...T, learnedAt: today }; store.set("tune", T); return; }
+  const days = Math.round((Date.parse(`${today}T12:00:00`) - Date.parse(`${T.learnedAt}T12:00:00`)) / 864e5);
+  if (!(days >= 7)) return;
+  const k = Math.pow(0.5, days / 120);
+  const learned = {};
+  for (const [f, v] of Object.entries(T.learned)) { const x = Math.round(v * k * 20) / 20; if (x) learned[f] = x; }
+  T = { ...T, learned, learnedAt: today };
+  store.set("tune", T);
+})();
 function reactBtn(it) {
   const r = T.reacts[saveKey(it)] || 0;
   return el("button", { class: "act react", "aria-pressed": String(!!r), "aria-label": "Tell Readout what you think of this",
@@ -894,10 +932,12 @@ function pickLight(d) {
 }
 function pickStories(n) {
   if (!n) return [];
+  const newsById = new Map((S.news?.items || []).map((i) => [i.id, i]));
   const mutedSrc = new Set(T.mutedSources || []);
   const tops = topStoryLists(null).flatMap(([label, list, k]) => ((T.mix[k] ?? 1) > 0 ? list.map((st) => ({ st, k, label })) : []))
     .filter(({ st }) => !hiddenByTaste({ type: "news", source: st.sources[0], title: st.title }))
-    .sort((a, b) => b.st.sources.length - a.st.sources.length || (a.st.date < b.st.date ? 1 : -1));
+    .map((x) => { const lead = newsById.get(x.st.items?.[0]); return { ...x, t: lead ? Math.max(-2, tasteOf({ ...lead, type: "news" })) : 0 }; })
+    .sort((a, b) => (b.st.sources.length + b.t) - (a.st.sources.length + a.t) || (a.st.date < b.st.date ? 1 : -1));
   const out = [];
   for (const pass of [1, 2]) {               // one story per kind first, so one busy kind can't take every slot
     for (const { st, label } of tops) {
@@ -1016,5 +1056,7 @@ function briefEndEl(it) {
       el("div", { class: "link-row", style: "justify-content:center" },
         el("button", { class: "act", onclick: () => { S.kind = "all"; S.topic = null; refreshFeed(); } }, "Keep reading: Everything"),
         fdState() ? el("button", { class: "act", onclick: openFoundations }, "Foundations") : null),
+      readingHints().length ? el("p", { class: "fine" }, "Readout noticed something in your reading. ",
+        el("button", { class: "inline-link", onclick: () => { switchTab("tune"); setPane("reading", "tune-hints"); } }, "See the suggestion")) : null,
       el("p", { class: "fine" }, "Tomorrow’s brief comes with the morning’s papers.")));
 }

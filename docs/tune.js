@@ -238,6 +238,7 @@ function readingPane() {
   kinds.forEach((k) => (agg.k[k] || [0, 0, 0, 0]).forEach((n, i) => { sum[i] += n; }));
   const [seen, opened, saved, listened] = sum;
   const out = [
+    hintsSection(),
     textSizeSection(),
     layoutSection(),
     todaySection(),
@@ -269,8 +270,6 @@ function readingPane() {
         el("span", { class: "row-name" }, swatch(r.k), kindLabel(r.k)),
         el("span", { class: "row-fig" }, r.s ? `${pctOf(r.o, r.s)}%` : "—"),
         el("span", { class: "row-sub" }, hbar(r.rate / maxRate, kindColor(r.k)), el("span", {}, `${r.o} of ${r.s}`))))))));
-    const hints = suggestions(rows, seen, opened);
-    if (hints.length) out.push(el("div", { class: "hints" }, hints));
 
     const srcs = Object.entries(agg.s).filter(([, v]) => v[1]).sort((a, b) => b[1][1] - a[1][1] || b[1][0] - a[1][0]).slice(0, 6);
     if (srcs.length) {
@@ -297,25 +296,66 @@ function readingPane() {
   return out;
 }
 
-function suggestions(rows, seen, opened) {
-  if (!opened || seen < 30) return [];
-  const avg = opened / seen;
+// Suggestions from your reading (the last 30 days): each says what it noticed and offers one change.
+// Nothing changes until you tap; Not now hides one for a month.
+let hintsOff = store.get("hintsOff", null);
+if (!hintsOff || typeof hintsOff !== "object" || Array.isArray(hintsOff)) hintsOff = {};
+function readingHints() {
+  const agg = statsFor(30);
+  const cut = localDay(daysAgo(30));
+  const off = (id) => hintsOff[id] && hintsOff[id] >= cut;
   const out = [];
-  for (const r of rows) {
-    const w = T.mix[r.k] ?? 1;
-    if (r.s >= 12 && r.rate >= 1.6 * avg && w < 4) {
-      out.push(el("div", { class: "hint" },
-        el("p", {}, `You open ${kindLabel(r.k).toLowerCase()} ${(r.rate / avg).toFixed(1)}× as often as the rest of the feed.`),
-        el("button", { class: "act", onclick: () => { setTune({ mix: { ...T.mix, [r.k]: w + 1 } }); toast(`${kindLabel(r.k)}: ${w + 1} turns per round`); rerender(); } },
-          `Give ${kindLabel(r.k).toLowerCase()} more turns`)));
-    } else if (r.s >= 25 && r.rate <= 0.35 * avg && w > 0) {
-      out.push(el("div", { class: "hint" },
-        el("p", {}, `You open ${pctOf(r.o, r.s)}% of ${kindLabel(r.k).toLowerCase()} cards, well below your average of ${pctOf(opened, seen)}%.`),
-        el("button", { class: "act", onclick: () => { setTune({ mix: { ...T.mix, [r.k]: w - 1 } }); toast(w - 1 ? `${kindLabel(r.k)}: ${w - 1} turn per round` : `${kindLabel(r.k)} left Everything`); rerender(); } },
-          w - 1 ? `Fewer ${kindLabel(r.k).toLowerCase()}` : `Take ${kindLabel(r.k).toLowerCase()} out of Everything`)));
+  const kinds = ["paper", ...Object.keys(newsKinds())];
+  let seen = 0, opened = 0;
+  kinds.forEach((k) => { const v = agg.k[k] || []; seen += v[0] || 0; opened += (v[1] || 0) + (v[2] || 0) + (v[3] || 0); });
+  // kinds you open far more, or far less, than the rest of the feed
+  if (opened && seen >= 30) {
+    const avg = opened / seen;
+    for (const k of kinds.filter((x) => x !== "paper")) {
+      const v = agg.k[k] || [];
+      const s = v[0] || 0, o = (v[1] || 0) + (v[2] || 0) + (v[3] || 0), w = T.mix[k] ?? 1, name = kindLabel(k).toLowerCase();
+      if (s >= 12 && o / s >= 1.6 * avg && w < 4) {
+        out.push({ id: `more:${k}`, text: `You open ${name} ${(o / s / avg).toFixed(1)}× as often as the rest of the feed.`,
+          label: `Give ${name} more turns`, apply: () => { setTune({ mix: { ...T.mix, [k]: w + 1 } }); toast(`${kindLabel(k)}: ${w + 1} turns per round`); } });
+      } else if (s >= 25 && o / s <= 0.35 * avg && w > 0) {
+        out.push({ id: `less:${k}`, text: `You open ${pctOf(o, s)}% of ${name} cards, well below your average of ${pctOf(opened, seen)}%.`,
+          label: w - 1 ? `Fewer ${name}` : `Take ${name} out of Everything`,
+          apply: () => { setTune({ mix: { ...T.mix, [k]: w - 1 } }); toast(w - 1 ? `${kindLabel(k)}: ${w - 1} turn per round` : `${kindLabel(k)} left Everything`); } });
+      }
     }
   }
-  return out.slice(0, 2);
+  const outlets = new Set((S.news?.sources || []).map((x) => x.name));
+  const muted = new Set(T.mutedSources || []);
+  for (const [name, v] of Object.entries(agg.s)) {
+    const [, o = 0, sv = 0, l = 0, c = 0] = v;
+    const f = outlets.has(name) ? `src:${name}` : `jr:${name}`;
+    // an outlet you keep clearing and never open
+    if (outlets.has(name) && !muted.has(name) && c >= 6 && !o && !sv && !l && T.taste[f] == null) {
+      out.push({ id: `drop:${name}`, text: `You cleared ${c} stories from ${name} this month and opened none.`,
+        label: `Less from ${name}`, apply: () => { setTaste(f, -1); toast(`Less from ${name}. Undo in Tune → Interests.`); } });
+    }
+    // a journal or outlet you save from often
+    if (sv >= 3 && (T.taste[f] ?? 0) < 1 && tasteW(f) < 1) {
+      out.push({ id: `keep:${name}`, text: `You saved ${sv} ${outlets.has(name) ? "stories" : "papers"} from ${name} this month.`,
+        label: `More from ${name}`, apply: () => { setTaste(f, 1); toast(`More from ${name}. Undo in Tune → Interests.`); } });
+    }
+  }
+  if ((whyTally.weak || 0) >= 5 && T.order !== "ranked") {
+    out.push({ id: "rank", text: `You’ve cleared ${whyTally.weak} papers as weak studies.`,
+      label: "Put stronger evidence first", apply: () => { setTune({ order: "ranked" }); toast("Papers ranked: evidence, size and freshness"); } });
+  }
+  return out.filter((h) => !off(h.id)).slice(0, 3);
+}
+function hintsSection() {
+  const hints = readingHints();
+  if (!hints.length) return null;
+  return el("section", { class: "sect", id: "tune-hints" }, el("h2", {}, "Suggestions from your reading"),
+    el("p", { class: "sub" }, "From the last 30 days on this phone. Nothing changes until you tap."),
+    el("div", { class: "hints" }, hints.map((h) => el("div", { class: "hint" },
+      el("p", {}, h.text),
+      el("div", { class: "link-row", style: "margin:0" },
+        el("button", { class: "act", onclick: () => { h.apply(); rerender(); } }, h.label),
+        el("button", { class: "act", onclick: () => { hintsOff[h.id] = localDay(); store.set("hintsOff", hintsOff); rerender(); } }, "Not now"))))));
 }
 
 function feedNowSection() {
@@ -437,16 +477,18 @@ function tasteSection() {
     el("p", { class: "sub" }, "Tap Rate on any card to say what you think of its organ system, topic, journal, kind of study, outlet or subject. More moves those cards up, Less moves them down, Hide takes them out of every list."),
     rated.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, `You chose (${rated.length})`), rated.map((f) => tasteRow(f)))
       : el("p", { class: "nothing" }, "Nothing rated yet."),
-    learned.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, `Learned from ${plural(nReacts, "card")} you liked or didn’t`),
-      el("p", { class: "fine", style: "margin:2px 0 8px" }, "Each More like this or Less like this nudges these a little. Choose one to make it exact."),
+    learned.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, "Learned from what you rated, opened and saved"),
+      el("p", { class: "fine", style: "margin:2px 0 8px" }, "More like this, Less like this and Not for me nudge these; opening, saving or listening nudges them a little toward more. Choose one to make it exact."),
       learned.map((f) => tasteRow(f, forget(f)))) : null,
+    switchRow("Learn from what you open and save", "Each card you open, save or listen to nudges its organ system, topic, journal, outlet and subjects a little toward more. Nothing you skip or clear counts against anything; only Less like this and Not for me do. Learned leanings fade by half over about four months; your own choices above don’t.",
+      T.learnImplicit, (on) => { setTune({ learnImplicit: on }); rerender(); }),
     el("details", { class: "outlets" },
       el("summary", {}, "Subjects you can rate", el("span", { class: "fine" }, `${subjects.length}`)),
       el("p", { class: "fine", style: "margin:0 0 6px" }, "Found by words in the title and conclusion, in papers and news alike."),
       el("div", { class: "taste-list" }, subjects.map((f) => tasteRow(f)))),
-    rated.length || nReacts ? el("div", { class: "link-row" },
+    rated.length || nReacts || learned.length ? el("div", { class: "link-row" },
       rated.length ? twoTap("tasteClear", "Clear your choices", "Tap again to clear", () => { setTune({ taste: {} }); toast("Choices cleared"); rerender(); }) : null,
-      nReacts ? twoTap("learnClear", "Forget everything learned", "Tap again to forget", () => { setTune({ learned: {}, reacts: {} }); toast("Readout forgot what it learned"); rerender(); }) : null) : null);
+      nReacts || learned.length ? twoTap("learnClear", "Forget everything learned", "Tap again to forget", () => { setTune({ learned: {}, reacts: {} }); taught = {}; store.set("taught", taught); toast("Readout forgot what it learned"); rerender(); }) : null) : null);
 }
 
 function meetingsSection() {

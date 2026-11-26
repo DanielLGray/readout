@@ -167,7 +167,9 @@ const TUNE_DEFAULTS = {
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
   taste: {},            // what you said about a feature (sys:liver, jr:Radiology, fl:ai…): -2 hide, -1 less, 1 more
-  learned: {},          // what 👍 and 👎 taught, a little at a time (−1.5 … 1.5)
+  learned: {},          // what 👍, 👎, Not for me, and what you open and save taught, a little at a time (−1.5 … 1.5)
+  learnedAt: "",        // the day learned leanings last faded (they halve over about four months)
+  learnImplicit: true,  // learn a little from what you open, save and listen to (never from what you skip)
   reacts: {},           // card → 1 (more like this) or -1 (less like this)
   v: 2,
 };
@@ -222,6 +224,8 @@ function loadTune() {
     taste: weights(t.taste, (x) => [-2, -1, 0, 1].includes(x)),
     learned: weights(t.learned, (x) => isFinite(x) && Math.abs(x) <= 1.5 && x !== 0),
     reacts: weights(t.reacts, (x) => x === 1 || x === -1),
+    learnedAt: /^\d{4}-\d{2}-\d{2}$/.test(t.learnedAt || "") ? t.learnedAt : "",
+    learnImplicit: t.learnImplicit !== false,
     v: 2,
   };
 }
@@ -235,7 +239,7 @@ function setTune(patch) {
 }
 
 // ── reading metrics, counted on this phone ─────────────────────────────────
-const STAT_IDX = { seen: 0, open: 1, save: 2, listen: 3 };
+const STAT_IDX = { seen: 0, open: 1, save: 2, listen: 3, clear: 4 };
 let stats = store.get("stats", null);
 if (!stats || typeof stats.days !== "object" || !stats.days || Array.isArray(stats.days)) stats = { days: {} };
 let seenToday = store.get("seenToday", null);
@@ -250,15 +254,17 @@ const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
-  if (seenToday.d !== d || !Array.isArray(seenToday.seen)) seenToday = { d, seen: [], open: [], save: [], listen: [] };
+  if (seenToday.d !== d || !Array.isArray(seenToday.seen)) seenToday = { d, seen: [], open: [], save: [], listen: [], clear: [] };
   const key = saveKey(it);
-  if (seenToday[type].includes(key)) return;
+  const done = (seenToday[type] ||= []);
+  if (done.includes(key)) return;
   if (type !== "seen") bump("seen", it);        // opening, saving or listening means you saw it
-  seenToday[type].push(key);
+  done.push(key);
+  if (type === "open" || type === "save" || type === "listen") learnFrom(it, type);   // learn.js: a small nudge toward cards like it
   if (type === "seen") seenRecent[key] = d;
   const day = stats.days[d] || (stats.days[d] = { k: {}, s: {}, y: {} });
   const i = STAT_IDX[type];
-  const inc = (obj, key) => { (obj[key] || (obj[key] = [0, 0, 0, 0]))[i]++; };
+  const inc = (obj, key) => { const a = obj[key] || (obj[key] = [0, 0, 0, 0, 0]); a[i] = (a[i] || 0) + 1; };
   inc(day.k, itemKind(it));
   const src = it.pmid ? it.journal : it.source;
   if (src) inc(day.s, src);
@@ -282,8 +288,8 @@ function statsFor(days) {
     const day = stats.days[d] || {};
     for (const grp of ["k", "s", "y"]) {
       for (const [key, v] of Object.entries(day[grp] || {})) {
-        const t = out[grp][key] || (out[grp][key] = [0, 0, 0, 0]);
-        v.forEach((n, j) => { t[j] += n; });
+        const t = out[grp][key] || (out[grp][key] = [0, 0, 0, 0, 0]);
+        v.forEach((n, j) => { t[j] = (t[j] || 0) + (n || 0); });
       }
     }
     let seen = 0, open = 0;
@@ -702,7 +708,7 @@ function updateFeedQuietly(sinceShown) {
 // keepKey: the card you were reading; the rebuilt feed opens there if it's still in the list
 function refreshFeed(keepKey, keepIdx) {
   S.feedDirty = false;
-  if (keepKey == null && keepIdx == null) S.readSet = new Set(Object.keys(seenRecent));   // a fresh start: what you've seen goes last
+  if (keepKey == null && keepIdx == null) { S.readSet = new Set(Object.keys(seenRecent)); S.topFresh = Date.now(); }   // a fresh start: what you've seen goes last
   S.shownDay = localDay();
   const meeting = String(S.kind).startsWith("meeting:");
   if ((S.kind === "following" && !followRe()) || (meeting && !meetingChips().some((m) => `meeting:${m.id}` === S.kind))
@@ -950,9 +956,36 @@ function topStoryLists(only) {
     .map(([k, label]) => [label, keep(t[k] || []), k]).filter(([, l]) => l.length);
 }
 
+// The Top stories card shows a few stories per kind. Each fresh start (opening the app, a refresh,
+// a chip) leads with ones you haven't been shown in the last day and a half; ones you have move
+// down, unless at least two more outlets have picked them up since.
+let topSeen = store.get("topSeen", null);
+if (!topSeen || typeof topSeen !== "object" || Array.isArray(topSeen)) topSeen = {};
+const storyKey = (st) => st.items?.[st.items.length - 1] || st.title;       // its first headline: the key stays as outlets join
+function topPicks(only) {
+  const slot = only || "";
+  if (!S.topPick || S.topPick.at !== S.topFresh) S.topPick = { at: S.topFresh, lists: {} };
+  if (S.topPick.lists[slot]) return S.topPick.lists[slot];
+  const now = Date.now(), recent = now - 36 * 36e5;
+  const lists = topStoryLists(only);
+  const per = lists.length > 2 ? 2 : 3;
+  const picked = lists.map(([label, list, k]) => {
+    const fresh = [], shown = [];
+    for (const st of list) {
+      const s = topSeen[storyKey(st)];
+      (s && s.t > recent && st.sources.length < (s.n || 0) + 2 ? shown : fresh).push(st);
+    }
+    shown.sort((a, b) => topSeen[storyKey(a)].t - topSeen[storyKey(b)].t);   // the longest ago first
+    return [label, fresh.concat(shown).slice(0, per), k];
+  });
+  for (const [, l] of picked) for (const st of l) topSeen[storyKey(st)] = { t: now, n: st.sources.length };
+  for (const [key, s] of Object.entries(topSeen)) if (!s || s.t < now - 7 * 864e5) delete topSeen[key];
+  store.set("topSeen", topSeen);
+  return (S.topPick.lists[slot] = picked);
+}
 function topCardEl(only) {
   const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));
-  const lists = topStoryLists(only);
+  const lists = topPicks(only);
   const ts = S.news?.settings?.top_stories || {};
   const span = !ts.days || ts.days === 7 ? "this week" : `in the last ${ts.days} days`;
   return el("article", { class: "card top-card", "data-key": "top" },
@@ -961,7 +994,7 @@ function topCardEl(only) {
     el("div", { class: "top-lists" },
       lists.map(([label, list]) => el("section", {},
         el("h3", { class: "top-h" }, label),
-        el("ol", { class: "top-list" }, list.slice(0, lists.length > 2 ? 2 : 3).map((st) =>
+        el("ol", { class: "top-list" }, list.map((st) =>
           el("li", {}, el("button", { onclick: () => openStory(st, byId) },
             el("span", { class: "top-title" }, st.title),
             el("span", { class: "top-meta" }, `${st.sources.length} outlets: ${st.sources.join(", ")}`)))))))),
@@ -2074,6 +2107,7 @@ function clearCard(card, it) {
   const idx = S.list.indexOf(it);
   setCleared(key, true);
   bump("seen", it);
+  bump("clear", it);                  // counted for Tune's suggestions; it doesn't teach the feed anything
   seenObserver?.unobserve(card);
   gridRO?.unobserve(card);
   const top = card.offsetTop, keep = view.scrollTop;
