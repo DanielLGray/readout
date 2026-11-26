@@ -1,0 +1,134 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Readout — "Coming up": events on the horizon (Today card, Explore → Coming up).
+#
+# The daily job (pipeline/build_horizon.py) reads the official calendars itself:
+#   Federal Reserve FOMC calendar, BLS release calendar (jobs, CPI), BEA release
+#   calendar (GDP, PCE), FDA advisory committee calendar, Launch Library 2 (The
+#   Space Devs) for launches, and config/meetings.yaml for your meetings. Stock
+#   market holidays are worked out from NYSE's rules. Earnings dates come to your
+#   phone from Alpha Vantage with your own key (Tune → Interests → Coming up).
+#
+# This file holds what no calendar publishes in a form the job can read: dates
+# checked by hand, each with where it came from. Add next year's as they're
+# announced; past ones drop out by themselves.
+# ─────────────────────────────────────────────────────────────────────────────
+
+days_ahead: 120          # how far ahead the job looks (the app shows 90 days)
+
+# BLS and BEA releases worth a line, matched on the calendar entry's title
+bls:
+  - match: '^Employment Situation'
+    title: Jobs report
+    about: Payrolls and the unemployment rate, from the Bureau of Labor Statistics.
+  - match: '^Consumer Price Index'
+    title: CPI inflation report
+    about: Consumer prices, from the Bureau of Labor Statistics.
+bea:
+  - match: '^GDP \((Advance|Second|Third) Estimate\)'
+    title: GDP report
+    about: Gross domestic product, from the Bureau of Economic Analysis.
+  - match: '^Personal Income and Outlays'
+    title: PCE inflation report
+    about: Personal income and spending, with the PCE price index the Fed watches most closely.
+
+# FDA advisory committee meetings to show (a regular expression on the committee's name)
+fda_include: 'Circulatory System Devices|Radiological Devices|Medical Imaging'
+
+# Launch Library 2: which upcoming launches are worth a line
+launches:
+  rockets: 'Starship|SLS|New Glenn|Falcon Heavy|Neutron'
+  mission_types: 'Human Exploration|Planetary|Astrophysics|Heliophysics|Lunar|Space Science'
+  skip_names: 'Starlink|Kuiper|OneWeb|Qianfan|Guowang'
+  max: 12
+
+# The Fed's own page is read every day; these are the fallback if it can't be, from the Fed's
+# press release of Nov 12, 2026 (federalreserve.gov/newsevents/pressreleases/monetary20261112a.htm).
+# Policy decisions are on the second day.
+fomc:
+  no_decision: [2027-10-27]          # the October 2027 meeting is for strategy only
+  fallback:
+    - [2026-12-08, 2026-12-09, sep]
+    - [2027-01-26, 2027-01-27]
+    - [2027-03-16, 2027-03-17, sep]
+    - [2027-04-27, 2027-04-28]
+    - [2027-06-08, 2027-06-09, sep]
+    - [2027-07-27, 2027-07-28]
+    - [2027-09-14, 2027-09-15, sep]
+    - [2027-10-26, 2027-10-27]
+    - [2027-11-16, 2027-11-17, sep]
+    - [2028-01-25, 2028-01-26]
+
+# Dated events. kind: markets | medicine | science | news
+events:
+  - id: jpm2027
+    kind: medicine
+    title: J.P. Morgan Healthcare Conference
+    start: 2027-01-11
+    end: 2027-01-14
+    place: Westin St. Francis, San Francisco
+    about: The year's biggest healthcare investor week. Imaging, medtech and radiopharma companies give their outlooks, and deals get announced.
+    url: https://www.biopharmadive.com/news/top-biotech-pharma-medical-conferences-2027/832075/
+  - id: ces2027
+    kind: news
+    title: CES 2027
+    start: 2027-01-06
+    end: 2027-01-09
+    place: Las Vegas
+    about: The consumer technology show, where AI, health tech and car makers show what's next.
+    url: https://www.ces.tech/
+  # eclipses: NASA (science.nasa.gov/eclipses/future-eclipses, eclipse.gsfc.nasa.gov/OH/OH2027.html)
+  - id: eclipse-2027-02-06
+    kind: science
+    title: Annular solar eclipse
+    start: 2027-02-06
+    about: A "ring of fire" eclipse, annular in southern Chile and Argentina, partial across South America and western Africa. Not visible from North America.
+    url: https://science.nasa.gov/eclipses/future-eclipses/
+  - id: eclipse-2027-02-20
+    kind: science
+    title: Penumbral lunar eclipse
+    start: 2027-02-20
+    about: The Moon dims slightly in Earth's outer shadow, a subtle one.
+    url: https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+  - id: eclipse-2027-07-18
+    kind: science
+    title: Penumbral lunar eclipse
+    start: 2027-07-18
+    about: The Moon dims slightly in Earth's outer shadow, a subtle one.
+    url: https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+  - id: eclipse-2027-08-02
+    kind: science
+    title: Total solar eclipse
+    start: 2027-08-02
+    about: One of the longest totalities of the century, over 6 minutes, across southern Spain, North Africa (Morocco to Egypt), Saudi Arabia and Yemen.
+    url: https://science.nasa.gov/eclipses/future-eclipses/
+  - id: eclipse-2027-08-17
+    kind: science
+    title: Penumbral lunar eclipse
+    start: 2027-08-17
+    about: The Moon dims slightly in Earth's outer shadow, a subtle one.
+    url: https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+  - id: eclipse-2028-01-26
+    kind: science
+    title: Annular solar eclipse
+    start: 2028-01-26
+    about: Annular across Ecuador, Peru and Brazil, then the North Atlantic to Portugal and Spain.
+    url: https://science.nasa.gov/eclipses/future-eclipses/
+  - id: eclipse-2028-07-22
+    kind: science
+    title: Total solar eclipse
+    start: 2028-07-22
+    about: Total across Australia and New Zealand.
+    url: https://science.nasa.gov/eclipses/future-eclipses/
+
+# Expected, but no date set yet: listed at the end of Coming up until a date is announced
+# (then move it to events above).
+unscheduled:
+  - kind: news
+    title: State of the Union
+    when: Usually late January to early March; the date is set when the Speaker of the House invites the president.
+  - kind: news
+    title: Apple's WWDC
+    when: Usually the first or second week of June; Apple announces it in March.
+  - kind: news
+    title: End of the Supreme Court term
+    when: The biggest decisions usually come in the last two weeks of June.

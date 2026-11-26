@@ -112,6 +112,14 @@ const S = {
   library: null,          // Foundations and the classics (monthly job)
 };
 
+// earnings dates to watch (Tune → Interests → Coming up): market movers, then imaging, radiopharma and structural heart
+const WATCH_DEFAULT = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", "JPM", "BAC", "WFC", "C", "GS",
+  "GEHC", "SMMNY", "PHG", "EW", "MDT", "LNTH", "RDNT"];
+const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "Amazon", GOOGL: "Alphabet", META: "Meta", TSLA: "Tesla",
+  JPM: "JPMorgan Chase", BAC: "Bank of America", WFC: "Wells Fargo", C: "Citigroup", GS: "Goldman Sachs", GEHC: "GE HealthCare",
+  SMMNY: "Siemens Healthineers", PHG: "Philips", EW: "Edwards Lifesciences", MDT: "Medtronic", LNTH: "Lantheus", RDNT: "RadNet" };
+const HZ_KINDS = { markets: "Markets & economy", medicine: "Medicine & imaging", science: "Science & space", news: "Big scheduled news" };
+
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
   mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, business: 1, sff: 1 },   // turns per round in Everything
@@ -129,6 +137,7 @@ const TUNE_DEFAULTS = {
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
   swipe: true,          // swipe a card left to save it, right to clear it
+  horizon: { kinds: { markets: true, medicine: true, science: true, news: true }, watch: WATCH_DEFAULT },   // Coming up
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
@@ -161,6 +170,7 @@ function loadTune() {
   const weights = (v, ok) => Object.fromEntries(Object.entries(obj(v))
     .filter(([k, x]) => typeof k === "string" && k.length <= 160 && typeof x === "number" && ok(x)).slice(-800));
   const b = obj(t.brief);
+  const hz = obj(t.horizon), hzk = obj(hz.kinds);
   const startOn = ["today", "all", "papers", "important"].includes(t.startOn) ? t.startOn : "today";
   return {
     mix, rank, areas, follow: strs(t.follow), hiddenSystems: strs(t.hiddenSystems),
@@ -172,6 +182,9 @@ function loadTune() {
     weather: t.weather !== false,
     swipe: t.swipe !== false,
     cardLayout: t.cardLayout === "paged" ? "paged" : "compact",
+    horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
+      watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
+        : WATCH_DEFAULT.slice() },
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
@@ -180,7 +193,7 @@ function loadTune() {
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
     brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
-      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false },
+      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false },
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
     pictures: t.pictures !== false,
     meetings: Object.fromEntries(Object.entries(obj(t.meetings)).filter(([, v]) => typeof v === "boolean")),
@@ -211,7 +224,7 @@ const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
 let seenRecent = store.get("seenRecent", null);
 if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
-const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next"]);
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon"]);
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
@@ -1416,6 +1429,9 @@ function openInfo() {
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Weather"),
     el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
+    el("h3", {}, "Coming up"),
+    el("p", {}, "A card in Today shows the next 7 days of events you follow; Explore → Coming up shows 90 days, by week. Markets and the economy: Fed decisions (Federal Reserve calendar), jobs and CPI reports (Bureau of Labor Statistics), GDP and PCE reports (Bureau of Economic Analysis), stock market holidays (NYSE rules) and earnings for the companies you watch. Medicine: your meetings, FDA advisory panels on imaging and heart devices, J.P. Morgan Healthcare week. Science: notable launches (Launch Library 2, The Space Devs) and eclipses (NASA). News: CES and other set dates, plus a list of events expected without a date yet. A daily job reads the calendars; times show in your phone’s time zone."),
+    el("p", {}, "Earnings dates come from Alpha Vantage, straight to your phone, with your own free key (Tune → Interests → Coming up). The key stays on this phone, out of backups, and goes only to alphavantage.co about once a day. Until you add one, each earnings season’s start is estimated. Tap any event for details and Add to Calendar; Subscribe in Calendar adds them all (not earnings) as a calendar that keeps itself up to date."),
     el("h3", {}, "Moving around"),
     el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
     el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
@@ -1575,6 +1591,7 @@ function renderExplore(force) {
 
   const wrap = el("div", { class: "explore" },
     fdEntryEl(),
+    typeof hzEntryEl === "function" ? hzEntryEl() : null,
     segEl(() => renderExplore(true)),
     el("p", { class: "ex-note" }, `Papers in the last ${yrs} compared with the ${yrs} before, adjusted for how fast imaging research grew overall. Updated ${ago(x.generated)}.`,
       TR.custom ? [" ", el("button", { class: "inline-link", onclick: () => { switchTab("tune"); setPane("algorithms", "tune-trends"); } }, "Using your trend rules.")] : null),
@@ -1746,6 +1763,7 @@ function closeTopic() {
   setInert();
   refocus(topicOpener);
   const wasFd = S.overlay === "fd";
+  if (S.overlay === "hz") S.hzFilter = null;
   S.overlay = null;
   if (S.tab === "explore") renderExplore(wasFd);   // no-op unless something changed on the page
   if (wasFd && S.tab === "feed") updateFeedQuietly(1e9);     // Today's Foundations card shows your progress
@@ -1833,12 +1851,17 @@ async function reload(announce) {
   const was = { feed: S.feed?.generated, explore: S.explore?.generated, news: S.news?.generated };
   S.offline = false;
   const wasImp = S.important?.generated, wasLib = S.library?.generated;
-  const [feed, newsData, important, library] = await Promise.all([
+  const wasHz = S.horizon?.generated;
+  const [feed, newsData, important, library, hz] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/news.json").catch(() => null),
     loadJSON("data/important.json").catch(() => null),
     loadJSON("data/library.json").catch(() => null),
+    loadJSON("data/horizon.json").catch(() => null),
   ]);
+  if (hz) S.horizon = hz;
+  const hzChanged = !!S.horizon && S.horizon.generated !== wasHz;
+  if (typeof earnRefresh === "function") earnRefresh(false);      // earnings dates, with your key, at most once a day
   if (library) S.library = library;
   const libChanged = !!S.library && S.library.generated !== wasLib;
   // Explore isn't needed for the feed: fetch it after, so the feed gets the bandwidth
@@ -1861,13 +1884,14 @@ async function reload(announce) {
   markNew();
   // rebuilding resets the feed; when it's on screen keep your place (unless you tapped refresh),
   // when it isn't, rebuild on the way back
-  if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp)) || (libChanged && !wasLib)) {
+  if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp)) || (libChanged && !wasLib) || (hzChanged && S.kind === "today")) {
     if (S.tab === "feed") { if (announce) refreshFeed(null); else updateFeedQuietly(Date.now() - (S.shownAt || 0)); }
     else { S.feedDirty = true; if (announce) S.lastKey = null; }
   } else updateHeadNote();
   if (newsChanged) S.exploreKey = null;
   if (S.tab === "tune" && typeof renderTune === "function" && (announce || feedChanged || newsChanged)) renderTune(true);
-  if (libChanged && S.tab === "explore") renderExplore(true);
+  if ((libChanged || hzChanged) && S.tab === "explore") renderExplore(true);
+  if (hzChanged && S.overlay === "hz" && typeof drawHorizon === "function") drawHorizon();
   if (!feed && !newsData && navigator.onLine === false) S.offline = true;
   updateHeadNote();
   renderBanner();
@@ -1887,10 +1911,11 @@ async function reload(announce) {
 
 // open at once from what's on the phone; reload() then brings it up to date
 async function showKept() {
-  const [feed, newsData, important, library] = await Promise.all(["feed", "news", "important", "library"].map((f) => keptJSON(`data/${f}.json`)));
+  const [feed, newsData, important, library, hz] = await Promise.all(["feed", "news", "important", "library", "horizon"].map((f) => keptJSON(`data/${f}.json`)));
   if (!feed && !newsData) return;
   if (S.feed || S.news) return;             // the network won the race
   S.feed = feed; S.news = newsData; S.important = important; S.library = library;
+  if (hz && !S.horizon) S.horizon = hz;
   renderBanner();
   S.loadedAt = Date.now();
   markNewsNew(); markNew();

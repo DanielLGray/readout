@@ -207,6 +207,7 @@ function todaySection() {
     switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
     switchRow("Something lighter", "One Light reading story a day: Wikipedia’s featured article, NASA’s image of the day, Atlas Obscura, Smithsonian and the like.", b.light, (on) => setB("light", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
+    switchRow("Coming up", "The next 7 days of events you follow: earnings, the Fed, economic reports, meetings, launches. Choose which in Tune → Interests.", b.horizon, (on) => setB("horizon", on)),
     segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
@@ -375,6 +376,7 @@ function interestsPane() {
       re ? el("p", { class: "fine" }, `${plural(followingList(null).length, "item")} match right now.`) : null),
     tasteSection(),
     meetingsSection(),
+    typeof horizonSection === "function" ? horizonSection() : null,
     el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
@@ -646,6 +648,7 @@ const JOBS = {
   explore: { wf: "explore.yml", cfg: "topics.yaml", every: 8 * 24, title: "Trends", sub: "PubMed, iCite and ClinicalTrials.gov, every Monday" },
   important: { wf: "important.yml", cfg: "feeds.yaml", every: 8 * 24, title: "Most important papers", sub: "PubMed and NIH iCite, every Tuesday" },
   library: { wf: "library.yml", cfg: "foundations.yaml", every: 32 * 24, title: "Foundations and classics", sub: "PubMed and NIH iCite, on the 3rd of each month" },
+  horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, FDA and launch calendars, every morning" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;
@@ -814,7 +817,7 @@ function pipelinePane() {
   loadRuns();
   return [
     el("p", { class: "lede small" }, "Five jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
-    tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(),
+    tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(),
     el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }
@@ -919,6 +922,18 @@ function newsJob() {
     jobLinks("news", "Edit outlets and settings"));
 }
 
+function horizonJob() {
+  const H = S.horizon;
+  const names = { fed: "Federal Reserve", bls: "BLS (jobs, CPI)", bea: "BEA (GDP, PCE)", fda: "FDA panels", launches: "Launches",
+    markets: "Market holidays", seasons: "Earnings seasons (estimated)", meetings: "Your meetings", dates: "Dates checked by hand" };
+  return el("section", { class: "sect job" }, el("h2", {}, JOBS.horizon.title), el("p", { class: "sub" }, JOBS.horizon.sub),
+    jobStatus("horizon", H?.generated),
+    !H ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },
+      Object.entries(H.sources || {}).map(([k, v]) => [el("dt", {}, names[k] || k),
+        el("dd", { class: v.ok ? "" : "warn-text" }, v.ok ? `${v.n}${v.fallback ? " (from the list in the config)" : ""}` : "couldn’t read; last run’s dates kept")])),
+    el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Interests → Coming up)."),
+    jobLinks("horizon", "Edit dates and filters"));
+}
 function libraryJob() {
   const L = S.library;
   const F = L?.foundations;

@@ -1,0 +1,48 @@
+name: Update coming up
+
+on:
+  schedule:
+    - cron: "47 11 * * *"      # daily, early morning in the US (the release calendars change little)
+    - cron: "17 15 * * *"      # backup, in case GitHub drops the first; it skips when the first ran
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readout-horizon
+  cancel-in-progress: false
+
+jobs:
+  horizon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Already up to date?          # a backup run skips when today's update is done
+        id: due
+        run: python3 -m pipeline.due docs/data/horizon.json daily
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        if: steps.due.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install --require-hashes -r requirements.txt   # exact versions, checked against their published hashes
+        if: steps.due.outputs.run == 'true'
+      - name: Read the calendars
+        if: steps.due.outputs.run == 'true'
+        run: python -m pipeline.build_horizon
+      - name: Save to the repository
+        if: steps.due.outputs.run == 'true'
+        run: |
+          git config user.name "readout-bot"
+          git config user.email "readout-bot@users.noreply.github.com"
+          git add docs/data/horizon.json docs/data/horizon.ics docs/data/ics
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Coming up $(date -u +%F)"
+          for i in 1 2 3 4 5; do              # another job may have pushed meanwhile
+            git pull --rebase --autostash && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          exit 1

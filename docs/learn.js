@@ -790,6 +790,8 @@ function briefList() {
   const light = lightItem ? { ...lightItem, type: "news", kind: kindOf(lightItem), _light: true } : null;
   const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, fd?.read, fd?.next, light?.id].join("|");
   const out = [{ type: "brief-cover", key: "brief:cover", sig, plan, classic, fd, stories, light }];
+  const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(7) : [];
+  if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
   papers.forEach((p, i) => {
     out.push(p);
     if (i === 1 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
@@ -803,6 +805,7 @@ function briefList() {
   return out;
 }
 function briefCardEl(it) {
+  if (it.type === "brief-horizon") return hzCardEl(it);
   if (it.type === "brief-cover") return briefCoverEl(it);
   if (it.type === "brief-stories") return briefStoriesEl(it);
   if (it.type === "fd-next") return fdNextEl(it);
