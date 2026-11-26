@@ -1,0 +1,674 @@
+{
+  "openalex": {
+    "fusion": {
+      "years": {
+        "2026": 5056,
+        "2025": 3669,
+        "2024": 3368,
+        "2023": 2771,
+        "2017": 2717,
+        "2016": 2619,
+        "2019": 2614,
+        "2018": 2573,
+        "2021": 2556,
+        "2014": 2530,
+        "2020": 2456,
+        "2015": 2434,
+        "2013": 2387,
+        "2022": 2358,
+        "2011": 2329,
+        "2012": 2322,
+        "2002": 2287,
+        "2010": 2118,
+        "2009": 2059,
+        "2003": 2021,
+        "2006": 1933,
+        "2005": 1921,
+        "2008": 1867,
+        "2007": 1794,
+        "2001": 1746,
+        "2004": 1684,
+        "1997": 1551,
+        "1996": 1506,
+        "1999": 1505,
+        "1995": 1498,
+        "2000": 1497,
+        "1998": 1456,
+        "1992": 1436,
+        "1989": 1367,
+        "1990": 1362,
+        "1986": 1301,
+        "1994": 1301,
+        "1991": 1293,
+        "1987": 1279,
+        "1993": 1237,
+        "1981": 1232,
+        "1985": 1134,
+        "1988": 1091,
+        "1983": 1067,
+        "1979": 1061,
+        "1984": 1061,
+        "1980": 953,
+        "1982": 949,
+        "1977": 927,
+        "1978": 834,
+        "1976": 665,
+        "1975": 474,
+        "1974": 339,
+        "1973": 225,
+        "1972": 181,
+        "1971": 179,
+        "1970": 130,
+        "1969": 90,
+        "1966": 62,
+        "1962": 53,
+        "1967": 46,
+        "1963": 45,
+        "1964": 41,
+        "1968": 41,
+        "1965": 39,
+        "1958": 37,
+        "1960": 36,
+        "1959": 27,
+        "1961": 26,
+        "1957": 17,
+        "1900": 14,
+        "1954": 9,
+        "1953": 8,
+        "1956": 8,
+        "1952": 5,
+        "1955": 5,
+        "1948": 4,
+        "1950": 4,
+        "1909": 2,
+        "1931": 2,
+        "1940": 2,
+        "1941": 2,
+        "1942": 2,
+        "1947": 2,
+        "1951": 2,
+        "1874": 1,
+        "1882": 1,
+        "1893": 1,
+        "1904": 1,
+        "1908": 1,
+        "1910": 1,
+        "1911": 1,
+        "1918": 1,
+        "1919": 1,
+        "1923": 1,
+        "1930": 1,
+        "1934": 1,
+        "1937": 1,
+        "1946": 1,
+        "2027": 1
+      },
+      "papers": [
+        {
+          "title": "Direct Energy Conversion for a D–³He Tandem-Mirror Burner: Recovering Charged-Particle Power Directly Without a Thermal Cycle",
+          "venue": "Zenodo (CERN European Organization for Nuclear Research)",
+          "date": "2026-09-07",
+          "cites": 115,
+          "link": "https://doi.org/10.5281/zenodo.22645699"
+        },
+        {
+          "title": "The REBCO High-Field Superconductor Basis: Conductor, Winding, and the Field Envelope for the Breeder Centrepost and Burner Plug",
+          "venue": "Zenodo (CERN European Organization for Nuclear Research)",
+          "date": "2026-09-07",
+          "cites": 115,
+          "link": "https://doi.org/10.5281/zenodo.22645696"
+        },
+        {
+          "title": "Hyperion as a Strategic-Materials Platform: Gain, Tritium Breeding, He-3 Co-Production, and 14 MeV Neutron Output from a Compact Spherical-Tokamak",
+          "venue": "Zenodo (CERN European Organization for Nuclear Research)",
+          "date": "2026-09-07",
+          "cites": 115,
+          "link": "https://doi.org/10.5281/zenodo.22645690"
+        },
+        {
+          "title": "The new ITER baseline, research plan and open R&D issues",
+          "venue": "Plasma Physics and Controlled Fusion",
+          "date": "2025-06-05",
+          "cites": 113,
+          "link": "https://doi.org/10.1088/1361-6587/add9c9"
+        },
+        {
+          "title": "Unraveling electronic correlations in warm dense quantum plasmas",
+          "venue": "Nature Communications",
+          "date": "2025-06-02",
+          "cites": 81,
+          "link": "https://doi.org/10.1038/s41467-025-60278-3"
+        }
+      ],
+      "at": "2026-11-26"
+    },
+    "space-elevator": {
+      "years": {
+        "2026": 236,
+        "2014": 160,
+        "2024": 160,
+        "2020": 158,
+        "2009": 152,
+        "2025": 152,
+        "2019": 151,
+        "2018": 143,
+        "2016": 142,
+        "2021": 142,
+        "2013": 130,
+        "2006": 129,
+        "2010": 126,
+        "2017": 126,
+        "2012": 125,
+        "2015": 124,
+        "2023": 120,
+        "2011": 114,
+        "2005": 108,
+        "2004": 105,
+        "2007": 99,
+        "2002": 98,
+        "2008": 98,
+        "2022": 94,
+        "2003": 81,
+        "2001": 78,
+        "2000": 64,
+        "1998": 42,
+        "1999": 38,
+        "1988": 25,
+        "1994": 24,
+        "1986": 21,
+        "1991": 20,
+        "1992": 20,
+        "1993": 20,
+        "1995": 20,
+        "1997": 19,
+        "1987": 18,
+        "1996": 18,
+        "1990": 16,
+        "1989": 15,
+        "1985": 9,
+        "1981": 8,
+        "1966": 6,
+        "1975": 6,
+        "1982": 6,
+        "1984": 6,
+        "1979": 5,
+        "1956": 4,
+        "1957": 4,
+        "1958": 4,
+        "1980": 4,
+        "1955": 3,
+        "1963": 3,
+        "1964": 3,
+        "1977": 3,
+        "1983": 3,
+        "1950": 2,
+        "1952": 2,
+        "1960": 2,
+        "1962": 2,
+        "1965": 2,
+        "1978": 2,
+        "1943": 1,
+        "1947": 1,
+        "1948": 1,
+        "1953": 1,
+        "1954": 1,
+        "1959": 1,
+        "1961": 1,
+        "1967": 1,
+        "1968": 1,
+        "1972": 1,
+        "1974": 1,
+        "1976": 1
+      },
+      "papers": [
+        {
+          "title": "Energy recovery and energy-saving control of a novel hybrid electromagnetic active suspension system for electric vehicles",
+          "venue": "Energy",
+          "date": "2025-08-12",
+          "cites": 20,
+          "link": "https://doi.org/10.1016/j.energy.2025.138030"
+        },
+        {
+          "title": "Skyhook-Based Techniques for Vehicle Suspension Control: A Review of the State of the Art",
+          "venue": "Machines",
+          "date": "2025-08-15",
+          "cites": 14,
+          "link": "https://doi.org/10.3390/machines13080727"
+        },
+        {
+          "title": "Data-driven multi-objective optimization of dual-channel magnetorheological dampers for suspension systems",
+          "venue": "International Journal of Mechanical Sciences",
+          "date": "2025-07-26",
+          "cites": 12,
+          "link": "https://doi.org/10.1016/j.ijmecsci.2025.110664"
+        },
+        {
+          "title": "Flexible-rigid dynamics and vibration suppression of slender structures on partial space elevator",
+          "venue": "Applied Mathematical Modelling",
+          "date": "2025-07-22",
+          "cites": 9,
+          "link": "https://doi.org/10.1016/j.apm.2025.116326"
+        },
+        {
+          "title": "Nanotechnology: An Inherent Technology for Miniaturization and Space Exploration",
+          "venue": "Aerotecnica Missili & Spazio",
+          "date": "2025-09-10",
+          "cites": 7,
+          "link": "https://doi.org/10.1007/s42496-025-00295-z"
+        }
+      ],
+      "at": "2026-11-26"
+    }
+  },
+  "preprints": {
+    "fusion": [
+      {
+        "id": "arxiv:2611.34890",
+        "title": "The Splash population confined to the Milky Way bar region",
+        "source": "arXiv",
+        "date": "2026-11-25T18:46:15Z",
+        "link": "https://arxiv.org/abs/2611.34890",
+        "summary": "We investigate the chemo-dynamical properties of in-situ stars in the Galactic bar region (central $5$ kpc), specifically the inner Galactic counterpart of the solar-neighbourhood Splash population (in situ halo). We use a sample of APOGEE DR17 red giants with Gaia astrometry and AstroNN distances…",
+        "authors": "Aakash Pandey, Ortwin Gerhard"
+      },
+      {
+        "id": "arxiv:2611.34802",
+        "title": "Tipping the scales in Blue Jay: Dust energy balance overpredicts IR luminosity in galaxies at $z\\sim2$",
+        "source": "arXiv",
+        "date": "2026-11-25T17:53:50Z",
+        "link": "https://arxiv.org/abs/2611.34802",
+        "summary": "The spectral energy distribution (SED) of a galaxy encodes vital information about its chemical composition, stellar populations, and dust content. To model the infrared emission, many modern SED-fitting codes rely on dust energy balance, which assumes that all energy absorbed by dust in the…",
+        "authors": "Benjamin P. Collins, Sirio Belli, Letizia Bugiani et al."
+      },
+      {
+        "id": "arxiv:2611.34789",
+        "title": "The THESAN-ZOOM project: interpreting candidate Population III-enriched absorption line systems during reionization",
+        "source": "arXiv",
+        "date": "2026-11-25T17:43:16Z",
+        "link": "https://arxiv.org/abs/2611.34789",
+        "summary": "With JWST, metal absorption lines are now being detected at increasingly high redshift, where signatures of the first generation of stars (Population III) may be observable. Interpreting observations of possible Pop III-enriched gas is challenging, as metals released by stars inevitably mix with…",
+        "authors": "Giulia Pruto, Laura Keating, Rahul Kannan et al."
+      },
+      {
+        "id": "arxiv:2611.34786",
+        "title": "Modeling time series of high-resolution spectra using the asymmetric Hilbert-Schmidt decomposition with application to radial velocity exoplanet searches",
+        "source": "arXiv",
+        "date": "2026-11-25T17:42:37Z",
+        "link": "https://arxiv.org/abs/2611.34786",
+        "summary": "We describe a framework for building low-rank separable expansions to model spectroscopic data from systems with time-varying spectra, in settings where the spectral dimension is finely sampled (in wavelength), but the temporal dimension is sparsely and possibly irregulary sampled. The motivating…",
+        "authors": "Kevin Tao, Thomas Loredo, David Ruppert"
+      },
+      {
+        "id": "arxiv:2611.34775",
+        "title": "State of the UNIONS: Four Milky Way companions discovered in a systematic search for northern Local Group satellites",
+        "source": "arXiv",
+        "date": "2026-11-25T17:37:22Z",
+        "link": "https://arxiv.org/abs/2611.34775",
+        "summary": "We present four newly discovered Milky Way satellites from a systematic search through the $gri$ photometry from the Ultraviolet Near-Infrared Optical Northern Survey (UNIONS). Two of these satellites are likely ultra-faint dwarf galaxies that we have named Boötes VI and Draco III. Both galaxy…",
+        "authors": "Simon E. T. Smith, Alan W. McConnachie, Thomas de Boer et al."
+      },
+      {
+        "id": "arxiv:2611.34720",
+        "title": "NASA's Pandora SmallSat Mission: Gaussian Processes for Simulated Stellar Heterogeneity Corrections under Imperfect Stellar Models",
+        "source": "arXiv",
+        "date": "2026-11-25T17:09:32Z",
+        "link": "https://arxiv.org/abs/2611.34720",
+        "summary": "Stellar contamination is the primary bottleneck limiting robust atmospheric characterization of exoplanets orbiting active K- and M-dwarfs with James Webb Space Telescope (JWST) transmission spectroscopy. Launched in January 2026, NASA's Pandora SmallSat mission addresses this challenge through…",
+        "authors": "Zoe Ko, Peter McGill, Benjamin V. Rackham et al."
+      },
+      {
+        "id": "arxiv:2611.34717",
+        "title": "A 2D fluid model in BOUT++/Hermes-3 for simulating detached divertor plasmas in tokamaks",
+        "source": "arXiv",
+        "date": "2026-11-25T17:08:44Z",
+        "link": "https://arxiv.org/abs/2611.34717",
+        "summary": "Detached divertor operation is essential for controlling target heat fluxes in future high-power tokamaks. We present a two-dimensional fluid model implemented in BOUT++/Hermes-3 for simulating detached divertor plasmas with plasma-neutral interactions and fixed-fraction impurity radiation. We…",
+        "authors": "Malamas Tsagkaridis, Ben Dudson, Mike Kryjak et al."
+      },
+      {
+        "id": "arxiv:2611.34674",
+        "title": "A Large Envelope Can Explain Super-Puffs",
+        "source": "arXiv",
+        "date": "2026-11-25T16:38:44Z",
+        "link": "https://arxiv.org/abs/2611.34674",
+        "summary": "Super-puffs are a class of exoplanets with extremely low bulk densities, having masses of a few to tens of Earth masses but radii comparable to that of Jupiter. Observations suggest that these inflated radii can persist for Gyr timescales, even for planets receiving relatively low stellar…",
+        "authors": "Xiumin Huang, Darius Modirrousta-Galian, Dong Lai et al."
+      }
+    ],
+    "space-elevator": [
+      {
+        "id": "arxiv:2609.14853",
+        "title": "A Review of ERA5 Equatorial Wind Data and Impact on a Space Elevator",
+        "source": "arXiv",
+        "date": "2026-09-13T23:53:21Z",
+        "link": "https://arxiv.org/abs/2609.14853",
+        "summary": "This paper uses the ERA5 weather dataset to assess the impact of the wind on an equatorial space elevator. An analytical formulation establishes that the effect of wind on tether inclination and payload capacity can be captured by a single scalar: RMS wind velocity, averaged over air pressure. This…",
+        "authors": "Blaise Gassend, Jonathan Gassend"
+      },
+      {
+        "id": "arxiv:2611.18584",
+        "title": "Powering the Space Elevator",
+        "source": "arXiv",
+        "date": "2026-08-06T04:26:02Z",
+        "link": "https://arxiv.org/abs/2611.18584",
+        "summary": "Powering the Space Elevator is a report on the work of an International Space Elevator Consortium study group tasked with determining the technology options for delivering power to the climbers on the space elevator at any altitude above Earth. The book covers options such as laser power beaming…",
+        "authors": "Larry Bartoszek, A. J. Burke, Shreyansh Chauhan et al."
+      },
+      {
+        "id": "arxiv:2604.11221",
+        "title": "Space-Clock Elevator: Multi-Stage Orbital Transport via Rotating Tethers and Elliptical Nodes",
+        "source": "arXiv",
+        "date": "2026-04-13T09:22:17Z",
+        "link": "https://arxiv.org/abs/2604.11221",
+        "summary": "Rotating space tethers have long been proposed as momentum-exchange devices capable of transporting payloads between orbital regimes without continuous propellant expenditure, offering a potential alternative to conventional propulsion for transfers from low Earth orbit to higher orbits. In this…",
+        "authors": "Maksim A Kazanskii"
+      },
+      {
+        "id": "arxiv:2601.00614",
+        "title": "From 2D to 3D terrain-following area coverage path planning",
+        "source": "arXiv",
+        "date": "2026-01-02T09:00:48Z",
+        "link": "https://arxiv.org/abs/2601.00614",
+        "summary": "An algorithm for 3D terrain-following area coverage path planning is presented. Multiple adjacent paths are generated that are (i) locally apart from each other by a distance equal to the working width of a machinery, while (ii) simultaneously floating at a projection distance equal to a specific…",
+        "authors": "Mogens Plessen"
+      },
+      {
+        "id": "arxiv:2509.20407",
+        "title": "UNAGI: A Conceptual Electrodynamic Tethered Spacecraft Demonstration Mission for Propellantless Landing on Io",
+        "source": "arXiv",
+        "date": "2025-09-24T00:34:40Z",
+        "link": "https://arxiv.org/abs/2509.20407",
+        "summary": "This paper presents UNAGI, a novel spacecraft mission developed by Spartan Space Systems, a student engineering team at San Jose State University, aiming for the first controlled landing on Jupiter's volcanically active moon Io. Inspired by the Japanese freshwater eel's agility, UNAGI employs an…",
+        "authors": "Spencer Devins, Svitlana Kuklenko, Abhik Das et al."
+      },
+      {
+        "id": "arxiv:2509.16231",
+        "title": "Non-Equatorial Uniform-Stress Space Elevators",
+        "source": "arXiv",
+        "date": "2025-09-15T05:34:58Z",
+        "link": "https://arxiv.org/abs/2509.16231",
+        "summary": "Non-equatorial space elevators are interesting as they give more freedom for anchor location, avoid the highly occupied geosynchronous orbit and the areas of highest radiation in the Van Allen belts. We review the static equation for a uniform-stress tether, and use it to study the tapering of a…",
+        "authors": "Blaise Gassend"
+      },
+      {
+        "id": "arxiv:2503.12891",
+        "title": "VISKY: Virtual Inertia Skyhook Control for Semi-Active Suspension Systems Using Magnetorheological Dampers",
+        "source": "arXiv",
+        "date": "2025-03-17T07:36:26Z",
+        "link": "https://arxiv.org/abs/2503.12891",
+        "summary": "This paper presents a Virtual Inertia Skyhook (VISKY) controller for magnetorheological (MR) dampers in semi-active suspensions. The proposed law is derived from a continuous sky-ground damping baseline augmented with acceleration feedback on the sprung and unsprung masses. In the closed-loop…",
+        "authors": "Hansol Lim, Jee Won Lee, Seung-Bok Choi et al."
+      },
+      {
+        "id": "arxiv:2412.17198",
+        "title": "Exponential Tethers for Accelerated Space Elevator Deployment",
+        "source": "arXiv",
+        "date": "2024-12-23T00:25:52Z",
+        "link": "https://arxiv.org/abs/2412.17198",
+        "summary": "An exponential space elevator is a space elevator with a tether cross-section that varies exponentially with altitude. With such an elevator it is possible to reel in tether material at one end of the elevator while reeling out at the other end, without changing the overall taper profile. I show…",
+        "authors": "Blaise Gassend"
+      }
+    ],
+    "smr": [
+      {
+        "id": "arxiv:2611.27957",
+        "title": "Load-Following Dynamics of an SMR-Powered All-Electric Ship with Battery Energy Storage",
+        "source": "arXiv",
+        "date": "2026-11-20T18:30:11Z",
+        "link": "https://arxiv.org/abs/2611.27957",
+        "summary": "Small modular reactors (SMRs) are being considered as compact, high-energy-density power sources for future all-electric ships. In such systems, propulsion-load variations can propagate through the electrical network, turbine-generator set, steam generator, and reactor, producing coupled nuclear…",
+        "authors": "Ali Mahboub Rad, Jie Zhang"
+      },
+      {
+        "id": "arxiv:2611.26418",
+        "title": "Future avenues for precision oscillation measurements with compact movable reactors",
+        "source": "arXiv",
+        "date": "2026-11-19T17:01:51Z",
+        "link": "https://arxiv.org/abs/2611.26418",
+        "summary": "No planned neutrino experiment is expected to surpass Daya Bay's precision on $\\thone$. Doing so requires innovative strategies to reduce statistical and systematic uncertainties. In this study, we consider a futuristic program with a movable reactor antineutrino source placed within short…",
+        "authors": "Matheus Hostert, Stephan A. Meighen-Berger, Maxim Pospelov"
+      },
+      {
+        "id": "arxiv:2611.17067",
+        "title": "An Invariant Neural-Network Eddy-Viscosity Closure with Iterative Solver Coupling for Molten Salt Fast Reactor Thermal-Hydraulics",
+        "source": "arXiv",
+        "date": "2026-11-12T16:41:34Z",
+        "link": "https://arxiv.org/abs/2611.17067",
+        "summary": "System thermal-hydraulics codes such as the System Analysis Module (SAM) close turbulence on coarse meshes with algebraic zero-equation mixing-length models. These models cannot represent the non-equilibrium turbulence, flow separation, and large-scale recirculation of open-cavity advanced…",
+        "authors": "Zaid Abulawi, William Oliveira, Akzhol Almukhametov et al."
+      },
+      {
+        "id": "arxiv:2611.04423",
+        "title": "SWAP-INR: Implicit Neural Representation with Switchable Attention Paths for Time-varying Multivariate Scientific Data Compression",
+        "source": "arXiv",
+        "date": "2026-11-03T07:10:43Z",
+        "link": "https://arxiv.org/abs/2611.04423",
+        "summary": "Visualizing multivariate scientific simulation data is essential for understanding complex physical phenomena, yet the massive scale of such data imposes a severe storage bottleneck in high-performance computing environments. Implicit neural representations (INRs) have emerged as a promising…",
+        "authors": "Hyunsoo Son, Jeonghyun Noh, Chaoli Wang et al."
+      },
+      {
+        "id": "arxiv:2611.01001",
+        "title": "GURU: A Hierarchical Neuro-Symbolic Multi-Agent System for Verification-Aware Automation of Mission-Critical Digital Engineering and Operations",
+        "source": "arXiv",
+        "date": "2026-10-31T14:41:00Z",
+        "link": "https://arxiv.org/abs/2611.01001",
+        "summary": "An AI can find a safe action faster than any human, but it must never decide what counts as safe. We present GURU, a hierarchical neuro-symbolic multi-agent system for mission-critical digital engineering and operations, built on one partition of authority: learned models propose, rank, and…",
+        "authors": "Allan Grosvenor, Anton Zemlyansky, Abdul Wahab et al."
+      },
+      {
+        "id": "arxiv:2611.00276",
+        "title": "Low Contrast Absorber Localization in Heat Pipe Microreactors Using Physics Informed Muon Tomography for Reactivity Monitoring",
+        "source": "arXiv",
+        "date": "2026-10-30T19:01:20Z",
+        "link": "https://arxiv.org/abs/2611.00276",
+        "summary": "Microreactors require nonintrusive monitoring methods that can provide information about internal control states without opening or modifying the sealed system. In heat pipe microreactors, rotating control drums regulate reactivity by changing the angular orientation of neutron absorber coatings…",
+        "authors": "Reshma Ughade, Stylianos Chatzidakis"
+      },
+      {
+        "id": "arxiv:2610.15089",
+        "title": "Role of defect trapping in the enhanced corrosion resistance of Ni-Mo alloys with yttrium and yttrium oxide additions",
+        "source": "arXiv",
+        "date": "2026-10-10T17:50:47Z",
+        "link": "https://arxiv.org/abs/2610.15089",
+        "summary": "Corrosion of structural alloys remains a critical challenge for advanced molten salt reactors, where aggressive fluoride salts promote continuous dissolution at the salt-metal interface. While most mitigation strategies emphasize thermodynamic stability, kinetic control of atomic transport has…",
+        "authors": "Jia-Hong Ke, Xinchang Zhang, Jingfan Yang et al."
+      },
+      {
+        "id": "arxiv:2610.07703",
+        "title": "Airborne liquid marble: Evaporation dynamics of liquid marble in acoustic levitation",
+        "source": "arXiv",
+        "date": "2026-10-06T03:53:41Z",
+        "link": "https://arxiv.org/abs/2610.07703",
+        "summary": "Liquid marbles (LMs), droplets encapsulated by hydrophobic particles, allow for non-wetting manipulation and containerless handling, making them well-suited for applications such as microreactors. When integrated with acoustic levitation, the LMs serve as contact-free reaction platforms. However…",
+        "authors": "Keigo Noro, Xiao Ma, Koji Hasegawa"
+      }
+    ],
+    "quantum": [
+      {
+        "id": "arxiv:2611.34889",
+        "title": "The Price of Quantum Advantage in Computational Chemistry",
+        "source": "arXiv",
+        "date": "2026-11-25T18:45:50Z",
+        "link": "https://arxiv.org/abs/2611.34889",
+        "summary": "As the fault-tolerant era approaches, the question shifts from ``is it possible'' to ``is it worthwhile.'' To assess practical quantum advantage against reliable classical baselines, we examine 26 benchmark instances including FeMoco, iron-sulfur clusters, cytochrome P450, and ruthenium catalysts…",
+        "authors": "Haejung Koh, Katerina Gratsea, Hao Zhang et al."
+      },
+      {
+        "id": "arxiv:2611.34803",
+        "title": "$\\mathsf{AC}^0 \\not\\subseteq \\mathsf{BQAC}^0/\\mathsf{qpoly}$ via Sublinear-Degree Pauli Approximation",
+        "source": "arXiv",
+        "date": "2026-11-25T17:53:53Z",
+        "link": "https://arxiv.org/abs/2611.34803",
+        "summary": "We prove $\\mathsf{AC}^0 \\not\\subseteq \\mathsf{BQAC}^0/\\mathsf{qpoly}$ in the single-copy, single-output model via an explicit $\\mathsf{P}$-uniform family of linear-size monotone depth-2 CNFs. Every $\\mathsf{QAC}^0$ circuit with arbitrary quantum advice achieves only an inverse-polynomial worst-case…",
+        "authors": "Xiaoming Sun, Jingheng Wang"
+      },
+      {
+        "id": "arxiv:2611.34768",
+        "title": "The integrable Lie-Trotter-Suzuki decomposition for nonlinear dynamics: Efficient Hamiltonian simulation of the Stepanoff flow",
+        "source": "arXiv",
+        "date": "2026-11-25T17:34:18Z",
+        "link": "https://arxiv.org/abs/2611.34768",
+        "summary": "We propose an efficient unitary numerical time integration strategy for nonlinear dynamical systems: the integrable Lie-Trotter-Suzuki decomposition (I-LTS). First, express the generator as a sum of integrable parts. Second, approximate the full evolution operator using a Lie-Trotter-Suzuki (LTS)…",
+        "authors": "Ilon Joseph, Ivan Novikau, Michael R. Montgomery et al."
+      },
+      {
+        "id": "arxiv:2611.34668",
+        "title": "Magic Moments: An Operational Approach of Certifying Nonstabilizerness from Few Copies",
+        "source": "arXiv",
+        "date": "2026-11-25T16:36:18Z",
+        "link": "https://arxiv.org/abs/2611.34668",
+        "summary": "Magic is the key resource enabling universal fault-tolerant quantum computation beyond classically simulable stabilizer circuits. Certifying it, however, usually requires either full state tomography or an optimization over the set of stabilizer states, both of which rapidly become prohibitive as…",
+        "authors": "Kunal Sharma, Sudip Chakrabarty, Saheli Mukherjee et al."
+      },
+      {
+        "id": "arxiv:2611.34634",
+        "title": "LatentRL-QAS: Transfer via Latent Reinforcement Learning for Quantum Architecture Search",
+        "source": "arXiv",
+        "date": "2026-11-25T16:20:02Z",
+        "link": "https://arxiv.org/abs/2611.34634",
+        "summary": "Reinforcement learning (RL) emerges as a prominent approach to quantum architecture search (QAS), the automated design of quantum circuits. However, transferring what an agent has learned from one number of qubits to another is still weakly explored: the state, the action space and the neural…",
+        "authors": "Maria Ilektra Plakitsi, Sebastian Feld, Akash Kundu"
+      },
+      {
+        "id": "arxiv:2611.34481",
+        "title": "High-Throughput GPU Decoding of Quantum Bivariate Bicycle Codes under Circuit-Level Noise",
+        "source": "arXiv",
+        "date": "2026-11-25T14:43:40Z",
+        "link": "https://arxiv.org/abs/2611.34481",
+        "summary": "Bivariate bicycle (BB) codes reduce the physical-qubit overhead of quantum error correction compared to other codes such as Surface codes, but circuit-level faults create dependencies across measurement rounds that limit decoding throughput. We present a parallel-window GPU decoder that combines…",
+        "authors": "Aditya Sodhani, Keshab K. Parhi"
+      },
+      {
+        "id": "arxiv:2611.34266",
+        "title": "Quantum Algorithm for Direct Estimation of Energy-Level Differences via Quantum Dynamics Simulation",
+        "source": "arXiv",
+        "date": "2026-11-25T12:27:31Z",
+        "link": "https://arxiv.org/abs/2611.34266",
+        "summary": "We present a quantum algorithm for the early fault-tolerant quantum computing (early-FTQC) era that estimates minute energy-level differences, such as energy gradients and molecular forces, at a lower sampling cost than existing phase-estimation methods. Such energy derivatives, accessed as the…",
+        "authors": "Norifumi Matsumoto, Yuya O. Nakagawa, Shota Kanasugi et al."
+      },
+      {
+        "id": "arxiv:2611.34029",
+        "title": "Quantum Advantage in Privacy-Preserving Hypothesis Testing via Entanglement-Assisted Classical Communication",
+        "source": "arXiv",
+        "date": "2026-11-25T09:15:24Z",
+        "link": "https://arxiv.org/abs/2611.34029",
+        "summary": "Quantum mechanisms satisfying quantum local differential privacy (QLDP) have been shown to achieve a quantum advantage over classical local differential privacy (LDP) mechanisms in certain hypothesis-testing problems. While previous demonstrations have considered the transmission of quantum states…",
+        "authors": "Ji-Ho Jung, Seung-Hyun Nam, Si-Hyeon Lee"
+      }
+    ]
+  },
+  "cand_research": {},
+  "candidates": {
+    "riemann hypothesis": {
+      "term": "riemann hypothesis",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "cop31": {
+      "term": "COP31",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "el niño": {
+      "term": "el niño",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "bepicolombo": {
+      "term": "BepiColombo",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "climate change": {
+      "term": "climate change",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "homo erectus": {
+      "term": "homo erectus",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "maha": {
+      "term": "MAHA",
+      "kind": "health",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "next generation": {
+      "term": "next-generation",
+      "kind": "radar",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "black hole": {
+      "term": "black holes",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "star trek": {
+      "term": "star trek",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "anthropic mathematician": {
+      "term": "anthropic mathematician",
+      "kind": "science",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "artificial intelligence": {
+      "term": "artificial intelligence",
+      "kind": "health",
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "weeks": [
+        "2026-W48"
+      ]
+    }
+  },
+  "auto": {},
+  "retired": {}
+}
