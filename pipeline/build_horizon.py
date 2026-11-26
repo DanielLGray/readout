@@ -9,10 +9,12 @@ read keeps its events from the last good run, and the app says which one is behi
 """
 from __future__ import annotations
 
+import os
 import re
 from datetime import date, datetime, timedelta, timezone
 
 from . import horizon as H
+from . import http as http_mod
 from .common import DATA, load_yaml, now_iso, read_json, write_json
 from .http import Http, log
 
@@ -81,8 +83,26 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> d
         events.extend(H.fomc_events(fb, no_decision, start, stop))
         status["fed"]["fallback"] = True
     source("bls", lambda: H.releases(http.get_text(BLS, {}), cfg.get("bls") or [], "BLS", BLS_PAGE, start, stop))
+    if not status["bls"]["ok"] and not any(e.get("src") == "BLS" for e in events):
+        rules = {r["title"]: r for r in cfg.get("bls") or []}
+        for title, days in (cfg.get("bls_fallback") or {}).items():
+            for d in days:
+                when = datetime.combine(H._d(d), datetime.min.time().replace(hour=8, minute=30), tzinfo=H.ET)
+                if start <= when.date() <= stop:
+                    events.append(H.event(f"bls-{H.slug(title)}-{when.date()}", "markets", title, when, sub="From BLS’s published schedule",
+                                          about=rules.get(title, {}).get("about", ""), url=BLS_PAGE, src="BLS"))
+        status["bls"]["fallback"] = True
     source("bea", lambda: H.releases(bea_calendar(http), cfg.get("bea") or [], "BEA", BEA_PAGE, start, stop))
-    source("fda", lambda: H.fda_meetings(http.get_text(FDA, {}), cfg.get("fda_include") or "^$", start, stop))
+    def fda():
+        page = http.get_text(FDA, {})
+        listed = len(set(h for h, _ in H.FDA_LINK.findall(page)))
+        if not listed:
+            raise RuntimeError("no meetings found on FDA's calendar page (its layout may have changed)")
+        got = H.fda_meetings(page, cfg.get("fda_include") or "^$", start, stop)
+        log(f"  fda: {listed} meetings listed, {len(got)} on imaging or heart devices")
+        return got
+
+    source("fda", fda)
     source("launches", lambda: H.launch_events(launches(http), cfg.get("launches") or {}, start, stop))
     for name, got in (("markets", H.market_events(start, stop)), ("seasons", H.season_events(start, stop)),
                       ("meetings", H.meeting_events(meetings, start, stop)), ("dates", H.config_events(cfg.get("events"), start, stop))):
@@ -119,6 +139,9 @@ def main() -> int:
     cfg = load_yaml("horizon.yaml")
     meetings = (load_yaml("meetings.yaml") or {}).get("meetings") or []
     prev = read_json(DATA / "horizon.json", {}) or {}
+    email = os.environ.get("NCBI_EMAIL", "").strip()
+    if "@" in email:            # BLS asks automated requests to carry a contact email
+        http_mod.HOST_AGENTS["www.bls.gov"] = f"{http_mod.USER_AGENT} contact: {email}"
     http = Http(intervals={"ll.thespacedevs.com": 5.0, "www.bls.gov": 2.0, "www.bea.gov": 1.0}, retries=3)
     data = build(http, cfg, meetings, prev, datetime.now(timezone.utc))
     write_json(DATA / "horizon.json", data)

@@ -15,6 +15,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 
 USER_AGENT = "Mozilla/5.0 (compatible; Readout/1.0; personal literature reader; +https://github.com/DanielLGray/readout)"
+HOST_AGENTS: dict = {}          # a different User-Agent for a host that asks for one (BLS wants a contact email)
 ACCEPT = "application/json, application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8"
 
 
@@ -54,7 +55,7 @@ def _requests_bytes(method: str, url: str, params: dict) -> "tuple[int, bytes]":
 
 
 def _send(method: str, url: str, params: dict, raw: bool):
-    headers = {"User-Agent": USER_AGENT, "Accept": "image/*, */*;q=0.5" if raw else ACCEPT}
+    headers = {"User-Agent": HOST_AGENTS.get(urlparse(url).hostname or "", USER_AGENT), "Accept": "image/*, */*;q=0.5" if raw else ACCEPT}
     fail = (lambda msg: (400, msg.encode())) if raw else (lambda msg: (400, msg))
     with requests.Session() as s:
         for _ in range(MAX_REDIRECTS + 1):

@@ -930,7 +930,9 @@ function horizonJob() {
     jobStatus("horizon", H?.generated),
     !H ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },
       Object.entries(H.sources || {}).map(([k, v]) => [el("dt", {}, names[k] || k),
-        el("dd", { class: v.ok ? "" : "warn-text" }, v.ok ? `${v.n}${v.fallback ? " (from the list in the config)" : ""}` : "couldn’t read; last run’s dates kept")])),
+        el("dd", { class: v.ok || v.fallback ? "" : "warn-text" }, v.fallback ? "from the published schedule in the config"
+          : v.ok ? String(v.n) : "couldn’t read; last run’s dates kept")])),
+    H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS asks for a contact email before its calendar can be read automatically; add your NCBI_EMAIL secret on GitHub and the job uses it. Until then, the jobs and CPI dates come from BLS’s published schedule, copied into the config.") : null,
     el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Interests → Coming up)."),
     jobLinks("horizon", "Edit dates and filters"));
 }

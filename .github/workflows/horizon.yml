@@ -31,6 +31,8 @@ jobs:
         if: steps.due.outputs.run == 'true'
       - name: Read the calendars
         if: steps.due.outputs.run == 'true'
+        env:
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}     # BLS asks for a contact email; without it, the dates in the config are used
         run: python -m pipeline.build_horizon
       - name: Save to the repository
         if: steps.due.outputs.run == 'true'

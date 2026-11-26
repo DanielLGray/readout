@@ -31,6 +31,13 @@ bea:
     title: PCE inflation report
     about: Personal income and spending, with the PCE price index the Fed watches most closely.
 
+# BLS asks automated requests for its calendar to carry a contact email: the job uses your NCBI_EMAIL
+# secret (GitHub → Settings → Secrets and variables → Actions). Without it, these dates from BLS's
+# published schedule are used (bls.gov/schedule/news_release/empsit.htm and cpi.htm). Times: 8:30 am ET.
+bls_fallback:
+  Jobs report: [2026-12-04, 2027-01-08, 2027-02-05, 2027-03-05, 2027-04-02]
+  CPI inflation report: [2026-12-10, 2027-01-13, 2027-02-11, 2027-03-10, 2027-04-13]
+
 # FDA advisory committee meetings to show (a regular expression on the committee's name)
 fda_include: 'Circulatory System Devices|Radiological Devices|Medical Imaging'
 

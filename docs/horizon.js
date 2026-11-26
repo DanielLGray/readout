@@ -202,7 +202,7 @@ function drawHorizon() {
   }
   const H = S.horizon;
   const key = store.get("avKey", ""), earn = store.get("earn", null);
-  const bad = Object.entries(H?.sources || {}).filter(([, v]) => !v.ok).map(([k]) => ({ fed: "the Federal Reserve", bls: "BLS", bea: "BEA", fda: "FDA", launches: "Launch Library 2" }[k] || k));
+  const bad = Object.entries(H?.sources || {}).filter(([, v]) => !v.ok && !v.fallback).map(([k]) => ({ fed: "the Federal Reserve", bls: "BLS", bea: "BEA", fda: "FDA", launches: "Launch Library 2" }[k] || k));
   const unsched = (H?.unscheduled || []).filter((u) => T.horizon.kinds[u.kind] !== false && (f === "all" || u.kind === f));
   const webcal = `webcal://${location.host}${location.pathname.replace(/[^/]*$/, "")}data/horizon.ics`;
   body.replaceChildren(el("div", { class: "hz-page" },
