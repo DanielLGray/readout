@@ -77,7 +77,7 @@ def test_guideline_papers_become_alerts_once():
         "4": {"pmid": "4", "title": "Erratum: Fleischner guideline", "added": "2026-11-19", "journal": "Radiology", "notice": True},
         "5": {"pmid": "5", "title": "SNMMI procedure standard for PSMA PET", "added": "2026-11-02", "journal": "J Nucl Med"},
     }
-    pm = _PM({"Preventive Services": ["1"], "ACC[ti]": ["2", "3"], "Fleischner": ["4"], "SNMMI": ["5"]}, recs)
+    pm = _PM({"preventive[ti]": ["1"], "ACC[ti]": ["2", "3"], "Fleischner": ["4"], "SNMMI": ["5"]}, recs)
     card = lambda rec, comp: {"pmid": rec["pmid"], "title": rec["title"], "journal": rec["journal"], "added": rec["added"]}
     out = alerts.paper_alerts(pm, cfg, t, [], card, {}, lambda r: r.get("notice", False))
     assert [a["rule"] for a in out] == ["uspstf", "acc_aha"]        # one copy of the joint guideline; the erratum and the old one out

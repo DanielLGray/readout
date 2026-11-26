@@ -125,7 +125,8 @@ alerts:
     - id: uspstf
       group: uspstf
       label: USPSTF
-      query: '"US Preventive Services Task Force"[cn] AND recommendation[ti] AND statement[ti]'
+      # titles end "…: US Preventive Services Task Force Recommendation Statement"
+      query: 'preventive[ti] AND services[ti] AND task[ti] AND force[ti] AND recommendation[ti] AND statement[ti] NOT (Editorial[pt] OR Comment[pt] OR Letter[pt] OR "Published Erratum"[pt])'
     - id: acs
       group: acs
       label: American Cancer Society
