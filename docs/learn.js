@@ -171,15 +171,15 @@ function openFeedback(it, picked = null) {
             [[0, "Off"], [1, "1"], [2, "2"], [3, "3"]].map(([x, l]) => el("button", { "aria-pressed": String((T.mix[kind] ?? 1) === x),
               onclick: () => { setTune({ mix: { ...T.mix, [kind]: x } }); redraw(); } }, l)))) : null),
       el("div", { class: "ctl-label" }, "Words"),
-      el("p", { class: "fine", style: "margin-top:2px" }, "Tap one to follow it (its own chip) or mute it (gone everywhere)."),
+      el("p", { class: "fine", style: "margin-top:2px" }, "Tap one to follow it (its own chip) or mute it (gone everywhere), or type your own."),
       el("div", { class: "chips wrap" },
         followed.map((w) => el("button", { class: "chip", "aria-pressed": "true", onclick: () => { setTune({ follow: T.follow.filter((x) => x !== w) }); redraw(); } }, `Following ${w}  ✕`)),
         muted.map((w) => el("button", { class: "chip", "aria-pressed": "true", onclick: () => { setTune({ mutedWords: T.mutedWords.filter((x) => x !== w) }); redraw(); } }, `Muted ${w}  ✕`)),
         phrases.filter((w) => !followed.concat(muted).some((x) => x.toLowerCase() === w.toLowerCase()))
-          .map((w) => el("button", { class: "chip" + (picked === w ? " chip-topic" : ""), onclick: () => draw(picked === w ? null : w) }, w))),
-      picked ? el("div", { class: "link-row" },
-        el("button", { class: "act", onclick: () => { setTune({ follow: [...T.follow, picked] }); toast(`Following “${picked}”`); redraw(null); } }, `Follow “${picked}”`),
-        el("button", { class: "act", onclick: () => { setTune({ mutedWords: [...T.mutedWords, picked] }); toast(`Muted “${picked}”`); redraw(null); } }, `Mute “${picked}”`)) : null,
+          .map((w) => el("button", { class: "chip" + (picked === w ? " chip-topic" : ""), onclick: () => draw(picked === w ? null : w) }, w)),
+        el("button", { class: "chip chip-own" + (picked === OWN_WORD ? " chip-topic" : ""), "aria-expanded": String(picked === OWN_WORD),
+          onclick: () => draw(picked === OWN_WORD ? null : OWN_WORD) }, "＋ Your own")),
+      picked ? wordPicker(picked === OWN_WORD ? "" : picked, () => redraw(null)) : null,
       el("p", { class: "fine" }, "Changes apply at once, on this phone. Everything you’ve told Readout is in Tune → Interests, where you can change or undo it."),
       el("div", { class: "link-row" },
         el("button", { class: "act", onclick: closeSheet }, "Done"),
@@ -192,6 +192,38 @@ function openFeedback(it, picked = null) {
   };
   draw(picked);
   if (!$("#sheet").classList.contains("open")) openSheet();
+}
+// a word or phrase to follow or mute: a chip from the title to edit (say, "PSMA PET/CT" down to
+// "PSMA"), or your own. Shows how many cards it matches right now.
+const OWN_WORD = "\u0000own";
+function wordPicker(start, done) {
+  const input = el("input", { type: "text", class: "text-in", value: start, maxlength: "60", placeholder: "A word or phrase, like PSMA",
+    "aria-label": "Word or phrase to follow or mute", autocapitalize: "off", autocomplete: "off", spellcheck: "false", enterkeyhint: "done" });
+  const note = el("p", { class: "fine fb-word-note" });
+  const count = () => {
+    const w = input.value.trim(), r = w ? wordRe([w]) : null;
+    if (!r) { note.textContent = "Whole words, so AI doesn’t catch “air”; end one with * for any ending, like radiomic*."; return; }
+    const n = (S.feed?.items || []).filter((p) => r.test(`${p.title} ${p.conclusion?.text || ""}`)).length
+      + (S.news?.items || []).filter((x) => r.test(`${x.title} ${x.summary || ""}`)).length;
+    note.textContent = `In ${plural(n, "card")} right now.`;
+  };
+  const add = (kind) => {
+    const w = input.value.trim().replace(/\s+/g, " ");
+    if (!w || !wordRe([w])) { input.focus(); return; }
+    const k = kind === "follow" ? "follow" : "mutedWords";
+    if (!(T[k] || []).some((x) => x.toLowerCase() === w.toLowerCase())) setTune({ [k]: [...(T[k] || []), w] });
+    toast(kind === "follow" ? `Following “${w}”: it has its own chip` : `Muted “${w}” everywhere`);
+    done();
+  };
+  input.addEventListener("input", count);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); input.blur(); } });
+  count();
+  if (!start) requestAnimationFrame(() => input.focus({ preventScroll: true }));
+  return el("div", { class: "fb-word" },
+    el("div", { class: "word-add two" }, input,
+      el("button", { class: "act", onclick: () => add("follow") }, "Follow"),
+      el("button", { class: "act", onclick: () => add("mute") }, "Mute")),
+    note);
 }
 
 // ── pictures ───────────────────────────────────────────────────────────────

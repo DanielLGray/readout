@@ -1,6 +1,6 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback).
    On each app change, bump BUILD here and the ?v= numbers in index.html together. */
-const BUILD = "38";
+const BUILD = "39";
 const VERSION = `readout-v${BUILD}`;
 const DATA = "readout-data";        // last copy of each data file; kept across app updates (the app reads it too)
 const FIGS = "readout-figs";        // pictures from papers: kept once fetched, the newest 400 or so
