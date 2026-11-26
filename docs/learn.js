@@ -1085,6 +1085,8 @@ function briefList() {
   if (rd) out.push(rd);
   const wt = typeof watchCardItem === "function" ? watchCardItem() : null;
   if (wt) out.push(wt);
+  const ct = typeof citeCardItem === "function" ? citeCardItem() : null;
+  if (ct) out.push(ct);
   const wk = typeof weekCardItem === "function" ? weekCardItem() : null;
   if (wk) out.splice(out.findIndex((x) => x.type === "brief-cover") + 1, 0, wk);
   papers.forEach((p, i) => {
@@ -1107,6 +1109,7 @@ function briefCardEl(it) {
   if (it.type === "brief-radar") return radarCardEl(it);
   if (it.type === "brief-watch") return watchCardEl(it);
   if (it.type === "brief-week") return weekCardEl(it);
+  if (it.type === "brief-cites") return citeCardEl(it);
   if (it.type === "brief-cover") return briefCoverEl(it);
   if (it.type === "brief-stories") return briefStoriesEl(it);
   if (it.type === "fd-next") return fdNextEl(it);

@@ -1,12 +1,12 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback).
    On each app change, bump BUILD here and the ?v= numbers in index.html together. */
-const BUILD = "47";
+const BUILD = "48";
 const VERSION = `readout-v${BUILD}`;
 const DATA = "readout-data";        // last copy of each data file; kept across app updates (the app reads it too)
 const FIGS = "readout-figs";        // pictures from papers: kept once fetched, the newest 400 or so
 const MAX_FIGS = 400;
 const SHELL = [
-  "./", "index.html", `app.css?v=${BUILD}`, `app.js?v=${BUILD}`, `learn.js?v=${BUILD}`, `tune.js?v=${BUILD}`, `horizon.js?v=${BUILD}`, `radar.js?v=${BUILD}`, `watch.js?v=${BUILD}`, `week.js?v=${BUILD}`, "manifest.webmanifest",
+  "./", "index.html", `app.css?v=${BUILD}`, `app.js?v=${BUILD}`, `learn.js?v=${BUILD}`, `tune.js?v=${BUILD}`, `horizon.js?v=${BUILD}`, `radar.js?v=${BUILD}`, `watch.js?v=${BUILD}`, `week.js?v=${BUILD}`, `cites.js?v=${BUILD}`, `push.js?v=${BUILD}`, "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
   "fonts/literata-latin-opsz-normal.woff2", "fonts/literata-latin-ext-opsz-normal.woff2",
   "fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2", "fonts/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2",
@@ -41,6 +41,28 @@ function offlineCopy(res) {
   headers.set("x-readout-offline", "1");
   return res.blob().then((body) => new Response(body, { status: res.status, statusText: res.statusText, headers }));
 }
+
+// Notifications (alerts, from the notify job through the phone's push service): show each one;
+// a tap opens Readout at this week's alerts. Only Readout's own pages are ever opened.
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data ? e.data.text() : "" }; }
+  const title = String(d.title || "Readout").slice(0, 120);
+  const body = String(d.body || "").slice(0, 300);
+  const url = new URL(typeof d.url === "string" && /^\.\/(#[a-z]+)?$/.test(d.url) ? d.url : "./", self.registration.scope).href;
+  e.waitUntil(self.registration.showNotification(title, { body, tag: String(d.tag || "readout").slice(0, 64), data: { url },
+    icon: "icons/icon-192.png", badge: "icons/icon-192.png" }));
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data?.url || self.registration.scope;
+  e.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    const mine = wins.find((c) => c.url.startsWith(self.registration.scope));
+    if (mine) { await mine.focus(); if (mine.navigate) await mine.navigate(url).catch(() => {}); return; }
+    await self.clients.openWindow(url);
+  })());
+});
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);

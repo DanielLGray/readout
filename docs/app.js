@@ -84,6 +84,23 @@ const doiUrl = (doi) => (/^10\.\d{4,9}\/[^\s"<>]+$/.test(String(doi || "")) ? `h
 const pmcUrl = (id) => (/^PMC\d{1,9}$/.test(String(id || "")) ? `https://pmc.ncbi.nlm.nih.gov/articles/${id}/` : null);
 // links from outlets' feeds: web addresses only
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || "")) ? u : "#");
+// The best way to read a paper in full: a free copy the papers jobs found in Europe PMC (PubMed
+// Central, the publisher's free version, or a repository copy Unpaywall knows), else through your
+// library's link, else nothing (the card keeps PubMed). A saved copy picks up a link found since.
+let ftIndex = { feed: null, map: new Map() };
+function latestCard(it) {
+  if (!it?.pmid) return null;
+  if (ftIndex.feed !== S.feed) ftIndex = { feed: S.feed, map: new Map((S.feed?.items || []).map((p) => [p.pmid, p])) };
+  return ftIndex.map.get(it.pmid) || S.important?.papers?.[it.pmid] || S.library?.papers?.[it.pmid] || null;
+}
+function fullTextOf(it) {
+  const ft = it?.ft || latestCard(it)?.ft;
+  if (ft && /^https:\/\//.test(String(ft.u || ""))) return { url: ft.u, free: true, where: ft.s, pdf: !!ft.pdf };
+  if (pmcUrl(it?.pmcid)) return { url: pmcUrl(it.pmcid), free: true, where: "PMC" };
+  if (T?.library && doiUrl(it?.doi)) return { url: libraryUrl(doiUrl(it.doi)), free: false, where: "library" };
+  return null;
+}
+const FT_WHERE = { PMC: "PubMed Central", publisher: "the journal’s free version", repository: "a free copy (Unpaywall)", library: "your library" };
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : (many || one + "s")}`;
 
 let toastTimer;
@@ -153,6 +170,7 @@ const TUNE_DEFAULTS = {
   topAgain: 36,         // hours before a top story you were shown leads the card again (12, 36 or 72)
   bylines: true,        // the writers' names under news stories, when the outlet's feed gives them
   why: true,            // a line on each card saying what put it there
+  citeAlerts: true,     // new papers citing ones you saved (this phone asks NIH iCite once a day)
   muteIn: "text",       // muted words: "title" (headlines only) or "text" (headlines and the text on the card)
   order: "newest",      // papers: "newest" or "ranked"
   rank: { fresh: 7, evidence: 1, size: 0.5, concl: 0.5, systems: 1 },   // half-life in days; weights
@@ -212,6 +230,7 @@ function loadTune() {
     topAgain: [12, 36, 72].includes(t.topAgain) ? t.topAgain : 36,
     bylines: t.bylines !== false,
     why: t.why !== false,
+    citeAlerts: t.citeAlerts !== false,
     muteIn: t.muteIn === "title" ? "title" : "text",
     order: t.order === "ranked" ? "ranked" : "newest",
     fav: strs(t.fav), hidePending: typeof t.hidePending === "boolean" ? t.hidePending : TUNE_DEFAULTS.hidePending,
@@ -275,7 +294,7 @@ const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
 let seenRecent = store.get("seenRecent", null);
 if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
-const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "brief-watch", "brief-week", "alert"]);
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "brief-watch", "brief-week", "brief-cites", "alert"]);
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
@@ -1081,6 +1100,7 @@ function paperCardEl(it) {
       isRead(it) ? el("span", { class: "lang seen" }, "Seen") : null,
       it.classic ? el("span", { class: "lang classic" }, "Classic of the day") : null,
       it._wide ? el("span", { class: "lang wide" }, "Outside your areas") : null,
+      fullTextOf(it)?.free ? el("span", { class: "lang free" }, "Free full text") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     it.classic ? classicLine(it) : it._wide ? wideLine(it) : impactEl(it),
@@ -1106,6 +1126,12 @@ function paperCardEl(it) {
   return card;
 }
 
+function fullTextBtn(it) {
+  const ft = fullTextOf(it);
+  return ft ? el("a", { class: "act", href: safeUrl(ft.url), target: "_blank", rel: "noopener", "aria-label": `Full text, from ${FT_WHERE[ft.where] || "the journal"}`,
+    onclick: () => bump("open", it) }, icon(ICONS.read), "Full text")
+    : el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.pubmed), "PubMed");
+}
 function actionsEl(it, withShare) {
   const saved = !!S.saved[saveKey(it)];
   const saveBtn = el("button", { class: "act save-btn", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
@@ -1113,7 +1139,7 @@ function actionsEl(it, withShare) {
   return el("div", { class: "actions" + (withShare ? " five" : ""), style: withShare ? null : "grid-template-columns:repeat(3,1fr)" },
     el("button", { class: "act", onclick: () => openAbstract(it) }, icon(ICONS.abstract), "Abstract"),
     saveBtn,
-    el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.pubmed), "PubMed"),
+    fullTextBtn(it),
     withShare ? el("button", { class: "act", onclick: () => share(it) }, icon(ICONS.share), "Share") : null,
     withShare ? reactBtn(it) : null);
 }
@@ -1504,7 +1530,7 @@ async function openAbstract(it) {
   const links = [
     el("a", { class: "act", href: pubmedUrl(it.pmid), target: "_blank", rel: "noopener" }, "PubMed"),
     doiUrl(it.doi) ? el("a", { class: "act", href: libraryUrl(doiUrl(it.doi)), target: "_blank", rel: "noopener" }, T.library ? "Journal (library)" : "Journal") : null,
-    pmcUrl(it.pmcid) ? el("a", { class: "act", href: pmcUrl(it.pmcid), target: "_blank", rel: "noopener" }, "Free full text") : null,
+    fullTextOf(it)?.free ? el("a", { class: "act", href: safeUrl(fullTextOf(it).url), target: "_blank", rel: "noopener" }, fullTextOf(it).pdf ? "Free PDF" : "Free full text") : null,
     el("button", { class: "act", onclick: () => copyText(amaCitation(it), "Citation copied (AMA style)") }, "Copy citation"),
     fdMeta(it.pmid) ? fdReadBtn(it.pmid) : null,
   ];
@@ -1591,6 +1617,8 @@ function openInfo() {
     el("h3", {}, "Moving around"),
     el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
     el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back. Why? after a clear lets you say why: Already know it, Not for me (fewer like this, the same as Less in Rate), Weak study, or Not now (back in 3 days); only Not for me changes what you see (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
+    el("h3", {}, "Full text, citations and notifications"),
+    el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → Reading), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Rules → Alerts and paste the setup into GitHub once. Tune → Rules → What your filters hid lists what each mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
@@ -1966,7 +1994,13 @@ function renderSaved() {
     `Copied ${plural(items.length, "reference")} (AMA style)`);
   view.append(
     el("div", { class: "saved-tools" }, el("button", { class: "act", style: "padding:0 14px", onclick: copy }, "Copy list")),
-    el("div", { class: "saved-list" }, items.map((i) => paperEl(i))));
+    typeof citeSavedEl === "function" ? citeSavedEl() : null,
+    el("div", { class: "saved-list" }, items.map((i) => {
+      const e = paperEl(i);
+      const line = typeof citeLineEl === "function" ? citeLineEl(i) : null;
+      if (line) e.append(line);
+      return e;
+    })));
   view.scrollTop = keep;
 }
 
@@ -2002,7 +2036,7 @@ function switchTab(tab) {
     else requestAnimationFrame(fitAll);       // the screen may have turned while you were away
   }
   if (tab === "explore") renderExplore();
-  if (tab === "saved") renderSaved();
+  if (tab === "saved") { renderSaved(); if (typeof citeCheck === "function") citeCheck(); }
   if (tab === "tune" && typeof renderTune === "function") renderTune();
 }
 
@@ -2025,6 +2059,7 @@ async function reload(announce) {
   if (rd) S.radar = rd;
   if (wt) S.watch = wt;
   const hzChanged = !!S.horizon && S.horizon.generated !== wasHz;
+  if (typeof citeCheck === "function") setTimeout(() => citeCheck(), 2500);
   if (typeof earnRefresh === "function") earnRefresh(false);      // earnings dates, with your key, at most once a day
   if (library) S.library = library;
   const libChanged = !!S.library && S.library.generated !== wasLib;
@@ -2046,6 +2081,7 @@ async function reload(announce) {
   if (feed || newsData) S.loadedAt = Date.now();
   const feedChanged = !S.feed || S.feed.generated !== was.feed;
   markNew();
+  if (typeof openAlertsFromHash === "function") openAlertsFromHash();      // a tapped notification
   // rebuilding resets the feed; when it's on screen keep your place (unless you tapped refresh),
   // when it isn't, rebuild on the way back
   if (announce || feedChanged || newsChanged || (impChanged && (S.kind === "important" || !wasImp)) || (libChanged && !wasLib) || (hzChanged && S.kind === "today")) {
@@ -2082,6 +2118,7 @@ async function showKept() {
   if (hz && !S.horizon) S.horizon = hz;
   if (rd && !S.radar) S.radar = rd;
   if (wt && !S.watch) S.watch = wt;
+  if (typeof citeCheck === "function") setTimeout(() => citeCheck(), 4000);     // new papers citing your saved ones, once a day
   renderBanner();
   S.loadedAt = Date.now();
   markNewsNew(); markNew();

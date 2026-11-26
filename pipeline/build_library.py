@@ -17,7 +17,7 @@ from collections import defaultdict
 from datetime import date
 from typing import Optional
 
-from . import abstract_store, figures, icite
+from . import abstract_store, figures, fulltext, icite
 from .abstracts import area_require, compile_systems, is_notice, passes, to_card
 from .build_important import kind_of
 from .common import CACHE, DATA, fill, load_yaml, now_iso, read_json, today, write_json
@@ -157,6 +157,7 @@ def run(http: Optional[Http] = None) -> dict:
         log(f"Classics: {a}: {len(keep)} papers")
 
     figures.attach(http, papers.values(), data=DATA, cache_dir=CACHE, budget=120, lookup=False, job="library")
+    fulltext.attach(http, papers.values(), cache_dir=CACHE, job="library", budget=1200)
     abstract_store.save(DATA / "abstracts", "l", abstract_store.split_out(list(papers.values()), "l"))
     out = {
         "generated": now_iso(),

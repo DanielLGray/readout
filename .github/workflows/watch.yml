@@ -131,3 +131,13 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
+
+  # new alerts to your phone, if notifications are set up (Tune → Rules → Alerts)
+  notify:
+    needs: save
+    if: needs.save.result == 'success'
+    permissions:
+      contents: write              # its own save job records which alerts went out
+    uses: ./.github/workflows/notify.yml   # zizmor: ignore[self-repository] the documented path for a workflow in this repository; needs no checkout
+    secrets:
+      PUSH_SETUP: ${{ secrets.PUSH_SETUP }}

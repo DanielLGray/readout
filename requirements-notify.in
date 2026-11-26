@@ -1,0 +1,3 @@
+pywebpush>=2,<3        # alerts as phone notifications (Web Push; the notify job only)
+PyYAML>=6.0,<7         # the pipeline's shared helpers read config with it
+requests>=2.31,<3

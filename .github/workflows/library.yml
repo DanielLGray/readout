@@ -86,7 +86,7 @@ jobs:
           path: ${{ runner.temp }}/in
       - name: Check and apply the results
         env:
-          ALLOW: '^(?:docs/data/library\.json|docs/data/abstracts/l[0-9]{2}\.json|docs/data/figs/PMC[0-9]{1,10}\.webp|cache/figures-library\.json)$'
+          ALLOW: '^(?:docs/data/library\.json|docs/data/abstracts/l[0-9]{2}\.json|docs/data/figs/PMC[0-9]{1,10}\.webp|cache/figures-library\.json|cache/fulltext-library\.json)$'
           IN: ${{ runner.temp }}/in
         run: |
           python3 -I - <<'PY'

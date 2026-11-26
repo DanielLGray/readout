@@ -383,7 +383,8 @@ function feedNowSection() {
   return tsec("Your feed right now", `Everything has ${plural(list.length, "card")}, going back ${S.feed?.settings?.keep_days || 180} days for papers.`,
     stack(parts), legend(parts),
     left.length ? el("p", { class: "fine" }, `Left out of Everything: ${left.join("; ")}. Each kind’s chip still shows its full list.`) : null,
-    el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => setPane("algorithms") }, "Change the mix")));
+    el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => setPane("algorithms") }, "Change the mix"),
+      el("button", { class: "act", onclick: () => setPane("algorithms", "tune-hidden") }, "What your filters hid")));
 }
 
 // ── interests ──────────────────────────────────────────────────────────────
@@ -541,11 +542,82 @@ function alertsSection() {
     el("p", { class: "sub" }, "Rare, and pinned at the top of Everything and Today for a week. A news story counts only when two independent sources carry it (copies of one press release or wire story count once), or the FDA or a society says it itself; new guidelines also come straight from PubMed."),
     Object.entries(ALERT_GROUPS).map(([k, [name, what]]) => switchRow(name, what, T.alerts[k] !== false,
       (on) => { setTune({ alerts: { ...T.alerts, [k]: on } }); S.feedDirty = true; rerender(); })),
-    el("div", { class: "link-row" }, el("button", { class: "act", onclick: openAlerts }, n ? `This week’s alerts (${n})` : "This week’s alerts")));
+    el("div", { class: "link-row" }, el("button", { class: "act", onclick: openAlerts }, n ? `This week’s alerts (${n})` : "This week’s alerts")),
+    typeof pushSectionEl === "function" ? pushSectionEl() : null,
+    typeof citeSettingEl === "function" ? citeSettingEl() : null);
+}
+
+// ── what your filters hid ──────────────────────────────────────────────────
+// Each paper and story from the last week that a filter kept out of Everything, under the first
+// filter that caught it, so a mute or rating that hides too much is easy to see and undo.
+function hiddenReport(days = 7) {
+  const cut = Date.now() - days * 864e5;
+  const groups = new Map();
+  const add = (key, label, kind, it, undo) => {
+    let g = groups.get(key);
+    if (!g) groups.set(key, (g = { key, label, kind, undo, items: [] }));
+    g.items.push(it);
+  };
+  const words = (T.mutedWords || []).map((w) => [w, wordRe([w])]).filter(([, re]) => re);
+  const mutedSrc = new Set(T.mutedSources || []);
+  const taste = hasTaste();
+  const papers = (S.feed?.items || []).filter((p) => (Date.parse(p.added || p.epub || "") || 0) >= cut).map((p) => ({ ...p, type: "paper" }));
+  const news = (S.news?.items || []).filter((n) => (Date.parse(n.date || "") || 0) >= cut).map((n) => ({ ...n, type: "news", kind: kindOf(n) }));
+  let total = 0;
+  for (const it of papers.concat(news)) {
+    total++;
+    const isNews = it.type === "news";
+    if (isNews && mutedSrc.has(it.source)) {
+      add(`src:${it.source}`, `Muted outlet: ${it.source}`, "outlet", it, () => setTune({ mutedSources: T.mutedSources.filter((n) => n !== it.source) }));
+      continue;
+    }
+    const w = words.find(([, re]) => mutedHit(it, re));
+    if (w) { add(`w:${w[0]}`, `Muted “${w[0]}”`, "word", it, () => setTune({ mutedWords: T.mutedWords.filter((x) => x !== w[0]) })); continue; }
+    if (taste && tasteOf(it) === -Infinity) {
+      const f = featuresOf(it).concat(byFeatures(it)).find((x) => T.taste[x] === HIDE);
+      if (f) {
+        const [name, kind] = featureName(f);
+        add(`t:${f}`, `Hidden ${kind.toLowerCase()}: ${name}`, "rating", it, () => setTaste(f, 0));
+        continue;
+      }
+    }
+    if (isNews && obitHidden(it)) { add("obits", T.obits === "none" ? "Death notices (all)" : "Death notices few outlets ran", "obit", it, () => setTune({ obits: "all" })); continue; }
+    if (!isNews && !homeArea(it)) { add("area", "Papers from areas you turned off", "area", it, null); continue; }
+    if (!isNews && T.hidePending && (it.conclusion?.kind || "none") === "none") { add("pending", "Papers waiting for an abstract", "pending", it, () => setTune({ hidePending: false })); continue; }
+    if (isNews && (T.mix[it.kind] ?? 1) <= 0) add(`kind:${it.kind}`, `${kindLabel(it.kind)}, turned off in Everything`, "kind", it, () => setTune({ mix: { ...T.mix, [it.kind]: 1 } }));
+  }
+  const list = [...groups.values()].sort((a, b) => b.items.length - a.items.length);
+  list.forEach((g) => { g.lot = (g.kind === "word" || g.kind === "rating" || g.kind === "outlet") && (g.items.length >= 25 || g.items.length >= total * 0.05); });
+  return { list, total, hidden: list.reduce((a, g) => a + g.items.length, 0), days };
+}
+const UNDO_LABEL = { word: "Unmute", outlet: "Unmute", rating: "Show again", obit: "Show all", pending: "Show them", kind: "Turn back on" };
+function openHidden(g) {
+  const row = (it) => el("li", { class: "news-item" }, el("button", { class: "w-row", onclick: () => (it.type === "paper" ? openAbstract(it) : window.open(safeUrl(it.link), "_blank", "noopener")) },
+    el("span", { class: "news-src" }, el("b", {}, it.type === "paper" ? it.journal : it.source), el("span", {}, fmtDate(dayOf(it)))),
+    el("span", { class: "news-title" }, it.title)));
+  openSheet(
+    el("h2", { id: "sheet-title" }, g.label),
+    el("p", { class: "sheet-meta" }, el("span", {}, `${plural(g.items.length, "card")} kept out in the last 7 days`)),
+    g.lot ? el("p", { class: "fine warn-text" }, "That’s a lot for one filter: check the list for cards you’d have wanted.") : null,
+    el("ul", { class: "rows" }, g.items.sort((a, b) => (dayOf(a) < dayOf(b) ? 1 : -1)).slice(0, 100).map(row)),
+    g.items.length > 100 ? el("p", { class: "fine" }, `And ${g.items.length - 100} more.`) : null,
+    el("div", { class: "link-row" },
+      g.undo ? el("button", { class: "act", onclick: () => { g.undo(); closeSheet(); toast("Done: they’re back"); if (S.tab === "tune") rerender(); } }, UNDO_LABEL[g.kind] || "Undo")
+        : el("button", { class: "act", onclick: () => { closeSheet(); setPane("interests", "tune-areas"); } }, "Areas")));
+}
+function hiddenSection() {
+  const r = hiddenReport(7);
+  return el("section", { class: "sect", id: "tune-hidden" }, el("h2", {}, "What your filters hid"),
+    el("p", { class: "sub" }, r.hidden ? `In the last 7 days your filters kept ${plural(r.hidden, "card")} of ${r.total.toLocaleString()} out of Everything. Each counts under the first filter that caught it. Kind chips and search still show them.`
+      : "Nothing in the last 7 days. Mutes, ratings set to Hide, death notices and areas you turn off show here with what they kept out."),
+    r.list.length ? el("ul", { class: "rows" }, r.list.map((g) => el("li", { class: "row hid-row" },
+      el("button", { class: "hid-b", onclick: () => openHidden(g) },
+        el("span", { class: "row-name" }, g.label, g.lot ? el("span", { class: "w-major" }, "hides a lot") : null),
+        el("span", { class: "hid-n" }, String(g.items.length)))))) : null);
 }
 
 function algoPane() {
-  return [alertsSection(), importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
+  return [alertsSection(), hiddenSection(), importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
     el("section", { class: "sect" }, el("h2", {}, "Start over"),
       el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
@@ -687,11 +759,16 @@ function muteSection() {
   const counts = {};
   (S.news?.items || []).forEach((i) => { counts[i.source] = (counts[i.source] || 0) + 1; });
   const sources = S.news?.sources || [];
+  const hidN = Object.fromEntries(hiddenReport(7).list.map((g) => [g.key, g.items.length]));
   return el("section", { class: "sect", id: "tune-mute" }, el("h2", {}, "Mute"),
     el("p", { class: "sub" }, "Hide words or whole outlets everywhere in the feed. Whole words, so AI doesn’t hide “air”; end one with * for any ending. To hide a writer or an author, tap Rate on one of their cards."),
     el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: add }, "Mute")),
-    words.length ? el("div", { class: "chips wrap" }, words.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Unmute ${w}`,
-      onclick: () => { setTune({ mutedWords: words.filter((x) => x !== w) }); rerender(); } }, `${w}  ✕`))) : null,
+    words.length ? el("div", { class: "chips wrap" }, words.map((w) => {
+      const n = (hidN[`w:${w}`] || 0);
+      return el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Unmute ${w} (hid ${n} this week)`,
+        onclick: () => { setTune({ mutedWords: words.filter((x) => x !== w) }); rerender(); } }, `${w} · ${n}  ✕`);
+    })) : null,
+    words.length ? el("p", { class: "fine" }, "The number is how many cards each kept out in the last 7 days. See them in What your filters hid, above.") : null,
     segPick("Muted words match", [["title", "Headlines"], ["text", "Headlines and text"]], T.muteIn,
       (v) => { setTune({ muteIn: v }); rerender(); },
       "Text: what a card shows under its headline, a paper’s conclusion or a story’s summary. Words match from the start, so “Marvel” also hides “Marvel’s”."),
@@ -749,6 +826,7 @@ const JOBS = {
   horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, Federal Register (FDA) and launch calendars, every morning" },
   radar: { wf: "radar.yml", cfg: "radar.yaml", every: 30, title: "Radar", sub: "Research news, arXiv preprints and OpenAlex research counts, every day" },
   watch: { wf: "watch.yml", cfg: "watch.yaml", every: 30, title: "Watch", sub: "ClinicalTrials.gov, openFDA and the Federal Register, every morning" },
+  notify: { wf: "notify.yml", cfg: "", every: 24 * 30, title: "Notifications", sub: "New alerts to your phone, after each news, papers and watch update" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;

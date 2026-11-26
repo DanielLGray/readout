@@ -10,7 +10,7 @@ import os
 from datetime import date
 from typing import Optional
 
-from . import abstract_store, alerts, figures
+from . import abstract_store, alerts, figures, fulltext
 from .abstracts import area_require, compile_systems, is_notice, passes, refresh, to_card
 
 NO_ABSTRACT_DAYS = 21      # PubMed adds late abstracts within days; after three weeks none is coming
@@ -144,6 +144,7 @@ def run(http: Optional[Http] = None) -> dict:
                 a["card"]["sections"] = stored[a["pmid"]]
     log(f"Alerts: {len(found_alerts)} guideline papers ({', '.join(a['label'] for a in found_alerts) or 'none'})")
     figures.attach(http, kept, data=DATA, cache_dir=CACHE, budget=int(settings.get("new_figures", 60)))
+    fulltext.attach(http, kept + [a["card"] for a in found_alerts], cache_dir=CACHE, job="feed")
     abstract_store.save(DATA / "abstracts", "f", abstract_store.split_out(kept + [a["card"] for a in found_alerts], "f"))
 
     out = {

@@ -25,7 +25,8 @@ function weekSummary() {
   const st = statsFor(7);
   const reading = [0, 1, 2, 4].map((i) => Object.values(st.k).reduce((a, v) => a + (v[i] || 0), 0));
   const ahead = typeof hzEvents === "function" ? hzEvents(7) : [];
-  return { since, alerts, watch, watchTop, heating, devs, added, retired, miles, stories, reading, ahead };
+  const filters = typeof hiddenReport === "function" ? hiddenReport(7) : null;
+  return { since, alerts, watch, watchTop, heating, devs, added, retired, miles, stories, reading, ahead, filters };
 }
 const weekSpan = () => {
   const a = daysAgo(6), b = new Date();
@@ -53,6 +54,7 @@ function weekLines(w) {
   }
   if (w.stories.length) out.push(["Biggest story", `${w.stories[0].title} (${coverageText(w.stories[0])})`]);
   if (w.reading[0]) out.push(["You", `saw ${plural(w.reading[0], "card")}, opened ${w.reading[1]} and saved ${w.reading[2]}`]);
+  if (w.filters?.hidden) out.push(["Filters", `kept out ${plural(w.filters.hidden, "card")}${w.filters.list[0] ? `, most by ${w.filters.list[0].label.replace(/^Muted /, "")}` : ""}`]);
   return out;
 }
 
@@ -129,7 +131,9 @@ function drawWeek() {
     el("section", { class: "wk-sec" }, el("h3", { class: "sys-head" }, "Your reading"),
       w.reading[0] ? el("p", {}, `You saw ${plural(w.reading[0], "card")}, opened ${w.reading[1]}, saved ${w.reading[2]} and cleared ${w.reading[3]}. `,
         el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("reading", "tune-stats"); } }, "More in Tune"))
-        : el("p", { class: "fine" }, "Nothing counted on this phone this week.")),
+        : el("p", { class: "fine" }, "Nothing counted on this phone this week."),
+      w.filters?.hidden ? el("p", {}, `Your filters kept ${plural(w.filters.hidden, "card")} out. `,
+        el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("algorithms", "tune-hidden"); } }, "See what")) : null),
     el("p", { class: "fine" }, T.brief.week < 0 ? "The weekly card in Today is off (Tune → Reading → Today)."
       : `Today shows this as a card each ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][T.brief.week]} (Tune → Reading → Today).`)));
 }
