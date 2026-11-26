@@ -52,7 +52,8 @@ FED_PAGE = """
 <div class="fomc-meeting"><div class="fomc-meeting__month"><strong>December</strong></div><div class="fomc-meeting__date">8-9*</div></div></div>
 <div class="panel"><h4>2027 FOMC Meetings</h4>
 <div><strong>January</strong></div><div>26-27</div><div><strong>April/May</strong></div><div>30-1</div>
-<div><strong>October</strong></div><div>26-27</div><div><strong>November</strong></div><div>16-17*</div></div>
+<div><strong>October</strong></div><div>26-27</div><div><strong>November</strong></div><div>16-17*</div>
+<p>Note: A two-day meeting is scheduled for January 25-26, 2028.</p></div>
 """
 
 
@@ -61,6 +62,7 @@ def test_fomc_page_and_events():
     assert (date(2026, 12, 8), date(2026, 12, 9), True) in ms
     assert (date(2027, 4, 30), date(2027, 5, 1), False) in ms
     assert all(m[0] != date(2026, 11, 18) for m in ms)                 # a minutes date isn't a meeting
+    assert (date(2028, 1, 25), date(2028, 1, 26), False) in ms and all(m[0] != date(2027, 1, 25) for m in ms)
     evs = H.fomc_events(ms, {date(2027, 10, 27)}, START, date(2027, 12, 31))
     dec = next(e for e in evs if e["id"] == "fomc-2026-12-09")
     assert dec["title"] == "Fed rate decision" and dec["start"] == "2026-12-09T14:00:00-05:00" and "projections" in dec["sub"]

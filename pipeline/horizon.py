@@ -129,7 +129,7 @@ def releases(text: str, rules: list[dict], src: str, url: str, start: date, stop
 
 # ── Federal Reserve ──────────────────────────────────────────────────────────
 
-FOMC_RE = re.compile(r"\b(%s)(?:/(%s))?\s+(\d{1,2})\s*-\s*(\d{1,2})(\*)?" % (MONTH_RE, MONTH_RE), re.I)
+FOMC_RE = re.compile(r"\b(%s)(?:/(%s))?\s+(\d{1,2})\s*-\s*(\d{1,2})(\*)?(?:,\s*(\d{4}))?" % (MONTH_RE, MONTH_RE), re.I)
 
 
 def fomc_meetings(page: str) -> list[tuple[date, date, bool]]:
@@ -139,9 +139,9 @@ def fomc_meetings(page: str) -> list[tuple[date, date, bool]]:
     heads = list(re.finditer(r"\b(\d{4}) FOMC Meetings\b", text))
     out = []
     for i, h in enumerate(heads):
-        year = int(h.group(1))
         block = text[h.end(): heads[i + 1].start() if i + 1 < len(heads) else len(text)]
         for m in FOMC_RE.finditer(block):
+            year = int(m.group(6) or h.group(1))       # "January 25-26, 2028" in a note under 2027 is 2028
             m1 = MONTHS.index(m.group(1).lower()) + 1
             m2 = MONTHS.index(m.group(2).lower()) + 1 if m.group(2) else m1
             d1, d2 = int(m.group(3)), int(m.group(4))
