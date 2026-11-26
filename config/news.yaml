@@ -123,7 +123,7 @@ sources:
   - name: Cardiovascular Business
     home: https://cardiovascularbusiness.com
     group: innovate            # sister site of Radiology Business
-    require: "\\bCT\\b|computed tomography|CCTA|imaging|TAVR|TAVI|transcatheter|structural heart|calcium scor|SCCT|FFR|PET|SPECT|MRI"
+    require: "\\bCT\\b|computed tomography|CCTA|imaging|TAVR|TAVI|transcatheter|structural heart|calcium scor|SCCT|FFR|PET|\\bSPECT\\b|MRI"
     urls:
       - https://cardiovascularbusiness.com/rss.xml
       - https://cardiovascularbusiness.com/feed
@@ -185,14 +185,14 @@ sources:
   - name: FDA press releases
     home: https://www.fda.gov
     stale_days: 3650             # weeks can pass with nothing about imaging
-    require: "radiopharm|radioligand|radiotracer|\\btracer|imaging|contrast (?:agent|media)|gadolin|iodinated|\\bPET\\b|positron|SPECT|PSMA|lutetium|gallium|technetium|theranostic|nuclear medicine|mammogra|\\bMRI\\b|\\bCT\\b|computed tomography|ultrasound|radiolog|isotope|Mo-99"
+    require: "radiopharm|radioligand|radiotracer|\\btracer|imaging|contrast (?:agent|media)|gadolin|iodinated|\\bPET\\b|positron|\\bSPECT\\b|PSMA|lutetium|gallium|technetium|theranostic|nuclear medicine|mammogra|\\bMRI\\b|\\bCT\\b|computed tomography|ultrasound|radiolog(?:y|ists?)\\b|isotope|Mo-99"
     urls:
       - https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml
 
   - name: FDA safety alerts
     home: https://www.fda.gov
     stale_days: 3650
-    require: "radiopharm|radioligand|radiotracer|\\btracer|imaging agent|contrast (?:agent|media)|gadolin|iodinated|\\bPET\\b|SPECT|PSMA|lutetium|gallium|technetium|theranostic|nuclear medicine|\\bMRI\\b|\\bCT\\b|computed tomography|ultrasound|isotope"
+    require: "radiopharm|radioligand|radiotracer|\\btracer|imaging agent|contrast (?:agent|media)|gadolin|iodinated|\\bPET\\b|\\bSPECT\\b|PSMA|lutetium|gallium|technetium|theranostic|nuclear medicine|\\bMRI\\b|\\bCT\\b|computed tomography|ultrasound|isotope"
     urls:
       - https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/medwatch/rss.xml
 
