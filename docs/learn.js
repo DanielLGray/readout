@@ -44,11 +44,20 @@ function featuresOf(it) {
   for (const [k, [, re]] of Object.entries(FLAVORS)) if (re.test(text)) f.push(`fl:${k}`);
   return f;
 }
+// Bylines: a story's writers (from the outlet's feed) or a paper's listed authors. Only what you
+// choose for them in Rate counts; 👍, 👎 and what you open don't teach names (there are too many).
+function bylinesOf(it) {
+  const list = isNewsItem(it) ? it.by : it.cite?.au;
+  return (Array.isArray(list) ? list : []).filter((x) => typeof x === "string" && x && x.length <= 80).slice(0, 3);
+}
+const byFeatures = (it) => bylinesOf(it).map((n) => `by:${n}`);
+let byMemo = [null, false];
+const byTasteOn = () => (byMemo[0] === T.taste ? byMemo[1] : (byMemo = [T.taste, Object.keys(T.taste).some((k) => k.startsWith("by:"))])[1]);
 // −Infinity: hidden. Otherwise the sum, kept within ±3.
 function tasteOf(it) {
   if (!hasTaste()) return 0;
   let s = 0;
-  for (const f of featuresOf(it)) {
+  for (const f of byTasteOn() ? featuresOf(it).concat(byFeatures(it)) : featuresOf(it)) {
     if (T.taste[f] === HIDE) return -Infinity;
     s += tasteW(f);
   }
@@ -69,6 +78,7 @@ function featureName(f) {
     case "fl": return [FLAVORS[v]?.[0] || v, "Subject"];
     case "src": return [v, "Outlet"];
     case "cat": return [S.news?.categories?.[v] || v, "News category"];
+    case "by": return [v, "Byline"];
     default: return [v, k];
   }
 }
@@ -109,7 +119,7 @@ function learnFrom(it, type) {
   if ((T.reacts[key] || 0) < 0 || (taught[key] || "").includes(type[0])) return;     // you said less like this; or already counted
   const learned = { ...T.learned };
   for (const f of featuresOf(it)) {
-    const v = Math.max(-1.5, Math.min(1.5, Math.round(((learned[f] || 0) + NUDGE[type]) * 20) / 20));
+    const v = Math.max(-1.5, Math.min(1.5, Math.round(((learned[f] || 0) + NUDGE[type] * (T.learnRate || 1)) * 20) / 20));
     if (v) learned[f] = v; else delete learned[f];
   }
   taught[key] = (taught[key] || "") + type[0];
@@ -119,14 +129,14 @@ function learnFrom(it, type) {
   T = { ...T, learned };                 // not setTune: the feed you're reading stays put; this counts from the next fresh start
   store.set("tune", T);
 }
-// Learned leanings fade (they halve over about four months), so an old phase or a one-off rating
-// doesn't steer the feed for good. Your own choices in Rate don't fade.
+// Learned leanings fade (they halve over about four months, or what Tune → Interests says), so an
+// old phase or a one-off rating doesn't steer the feed for good. Your own choices in Rate don't fade.
 (function fadeLearned() {
   const today = localDay();
-  if (!T.learnedAt) { T = { ...T, learnedAt: today }; store.set("tune", T); return; }
+  if (!T.learnedAt || !T.fade) { if (T.learnedAt !== today) { T = { ...T, learnedAt: today }; store.set("tune", T); } return; }
   const days = Math.round((Date.parse(`${today}T12:00:00`) - Date.parse(`${T.learnedAt}T12:00:00`)) / 864e5);
   if (!(days >= 7)) return;
-  const k = Math.pow(0.5, days / 120);
+  const k = Math.pow(0.5, days / T.fade);
   const learned = {};
   for (const [f, v] of Object.entries(T.learned)) { const x = Math.round(v * k * 20) / 20; if (x) learned[f] = x; }
   T = { ...T, learned, learnedAt: today };
@@ -142,15 +152,21 @@ const STOP = new Set(("a an and are as at be by for from has have how in into is
   + "one two three four five first second year years month months day days week weeks assessing assessment evaluating evaluation evaluate comparing comparison compared analysis analyses association associated outcome outcomes "
   + "result results clinical imaging multicenter multicentre retrospective prospective single center centre cohort review systematic diagnostic performance accuracy role value impact effect effects predicting prediction predictive "
   + "prognostic early late progress current adult adults case cases report series trial randomized model models approach method methods novel towards toward insights update experience real-world "
-  + "change changes significance significant longitudinal factors features patterns characteristics findings detection identification management response levels measurement measurements").split(" "));
-function phrasesOf(title) {
+  + "change changes significance significant longitudinal factors features patterns characteristics findings detection identification management response levels measurement measurements "
+  + "might could would should will been being ever also just more most many much some such very said says say according about over under than then there these those they them his her she he we you your "
+  + "researchers scientists experts officials people found finds find shows show showed suggests suggest suggested reveals revealed thanks identified recorded reported reports here now still even really "
+  + "provide provides provided improve improves improved reduce reduces reduced increase increases increased demonstrate demonstrates demonstrated achieve achieves achieved "
+  + "across within superior inferior compared higher lower better worse similar overall respectively but yet not nor amid above below deserve deserves").split(" "));
+// prose (a summary or a conclusion): pairs of two plain nouns or names, not "detecting appendicular"
+function phrasesOf(title, prose = false) {
   const words = String(title || "").replace(/[“”"’‘()[\]:;,.?!]/g, " ").split(/\s+/).filter(Boolean);
   const out = [];
   const ok = (w) => w.length > 2 && !STOP.has(w.toLowerCase()) && !/^\d+$/.test(w);
   for (let i = 0; i < words.length; i++) {
     const w = words[i];
     if (ok(w) && (/[A-Z]{2,}|-|\d/.test(w) || w.length >= 9)) out.push(w);       // acronyms, hyphenated terms, long words
-    if (i + 1 < words.length && ok(w) && ok(words[i + 1])) out.push(`${w} ${words[i + 1]}`.toLowerCase());
+    const plain = (x) => !prose || !/(?:ing|ed|ly)$/i.test(x);
+    if (i + 1 < words.length && ok(w) && ok(words[i + 1]) && plain(w) && plain(words[i + 1])) out.push(`${w} ${words[i + 1]}`.toLowerCase());
   }
   const seen = new Set();
   return out.filter((p) => { const k = p.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 10);
@@ -179,9 +195,14 @@ function openFeedback(it, picked = null) {
     };
     const area = !news ? homeArea(it) : null;
     const kind = news ? kindOf(it) : null;
-    const phrases = phrasesOf(it.title);
-    const followed = (T.follow || []).filter((w) => wordRe([w])?.test(`${it.title} ${it.conclusion?.text || it.summary || ""}`));
-    const muted = (T.mutedWords || []).filter((w) => wordRe([w])?.test(it.title));
+    const followed = (T.follow || []).filter((w) => wordRe([w])?.test(`${it.title} ${shownText(it)}`));
+    const muted = (T.mutedWords || []).filter((w) => mutedHit(it, wordRe([w])));
+    const taken = new Set(followed.concat(muted).map((x) => x.toLowerCase()));
+    const fresh = (list) => list.filter((w) => !taken.has(w.toLowerCase()) && taken.add(w.toLowerCase()));
+    const phrases = fresh(phrasesOf(it.title));
+    const textPhrases = fresh(phrasesOf(shownText(it), true)).slice(0, 8);
+    const wordChip = (w) => el("button", { class: "chip" + (picked === w ? " chip-topic" : ""), onclick: () => draw(picked === w ? null : w) }, w);
+    const bylines = byFeatures(it);
     refillSheet(
       el("h2", { id: "sheet-title" }, "What do you think?"),
       el("p", { class: "sheet-meta fb-title" }, el("span", {}, it.title)),
@@ -192,7 +213,7 @@ function openFeedback(it, picked = null) {
         el("button", { class: "act", "aria-pressed": String(r < 0 || T.reacts[key] < 0), onclick: () => {
           const now = react(it, -1); toast(now ? "Got it: a little less like this" : "Taken back"); redraw();
         } }, icon(ICONS.down), "Less like this")),
-      el("p", { class: "fine" }, "These nudge everything below a little. To be exact, choose what should change:"),
+      el("p", { class: "fine" }, `These nudge everything below${bylines.length ? (isNewsItem(it) ? " but the byline" : " but the authors") : ""} a little. To be exact, choose what should change:`),
       el("section", { class: "fb-sect" }, feats.map(row),
         area ? el("div", { class: "fb-row" },
           el("div", { class: "fb-name" }, el("b", {}, (areaList().find(([a]) => a === area)?.[1]?.label) || area), el("span", {}, "Area")),
@@ -208,16 +229,26 @@ function openFeedback(it, picked = null) {
           el("div", { class: "seg fb-seg", role: "group", "aria-label": "Turns in Everything" },
             [[0, "Off"], [1, "1"], [2, "2"], [3, "3"]].map(([x, l]) => el("button", { "aria-pressed": String((T.mix[kind] ?? 1) === x),
               onclick: () => { setTune({ mix: { ...T.mix, [kind]: x } }); redraw(); } }, l)))) : null),
+      bylines.length ? el("section", { class: "fb-sect fb-by" },
+        el("div", { class: "ctl-label" }, isNewsItem(it) ? "Byline" : "Authors"),
+        el("p", { class: "fine", style: "margin-top:2px" }, isNewsItem(it)
+          ? "Hide a writer’s stories, or move them up or down. Only what you choose here counts for names."
+          : "The first listed authors. Hide their papers, or move them up or down; only what you choose here counts for names."),
+        bylines.map(row)) : null,
       el("div", { class: "ctl-label" }, "Words"),
-      el("p", { class: "fine", style: "margin-top:2px" }, "Tap one to follow it (its own chip) or mute it (gone everywhere), or type your own."),
+      el("p", { class: "fine", style: "margin-top:2px" }, `Tap one to follow it (its own chip) or mute it (gone everywhere${T.muteIn === "title" ? ", when it’s in a headline" : ""}), or type your own.`),
       el("div", { class: "chips wrap" },
         followed.map((w) => el("button", { class: "chip", "aria-pressed": "true", onclick: () => { setTune({ follow: T.follow.filter((x) => x !== w) }); redraw(); } }, `Following ${w}  ✕`)),
         muted.map((w) => el("button", { class: "chip", "aria-pressed": "true", onclick: () => { setTune({ mutedWords: T.mutedWords.filter((x) => x !== w) }); redraw(); } }, `Muted ${w}  ✕`)),
-        phrases.filter((w) => !followed.concat(muted).some((x) => x.toLowerCase() === w.toLowerCase()))
-          .map((w) => el("button", { class: "chip" + (picked === w ? " chip-topic" : ""), onclick: () => draw(picked === w ? null : w) }, w)),
+        phrases.map(wordChip),
         el("button", { class: "chip chip-own" + (picked === OWN_WORD ? " chip-topic" : ""), "aria-expanded": String(picked === OWN_WORD),
           onclick: () => draw(picked === OWN_WORD ? null : OWN_WORD) }, "＋ Your own")),
-      picked ? wordPicker(picked === OWN_WORD ? "" : picked, () => redraw(null)) : null,
+      picked && !textPhrases.includes(picked) ? wordPicker(picked === OWN_WORD ? "" : picked, () => redraw(null)) : null,
+      textPhrases.length ? el("div", { class: "fb-from" },
+        el("div", { class: "ctl-label" }, isNewsItem(it) ? "From the summary" : "From the conclusion"),
+        el("div", { class: "chips wrap" }, textPhrases.map(wordChip)),
+        picked && textPhrases.includes(picked) ? wordPicker(picked, () => redraw(null)) : null,
+        T.muteIn === "title" ? el("p", { class: "fine" }, "Muted words match headlines only (Tune → Rules → Mute), so muting one of these hides only cards with it in the headline.") : null) : null,
       el("p", { class: "fine" }, "Changes apply at once, on this phone. Everything you’ve told Readout is in Tune → Interests, where you can change or undo it."),
       el("div", { class: "link-row" },
         el("button", { class: "act", onclick: closeSheet }, "Done"),
@@ -412,7 +443,7 @@ function wideToday() {
   if (!I?.wide?.length || !I.papers) return null;
   const d = localDay();
   const mute = mutedRe();
-  const ok = (p) => I.papers[p] && !hiddenByTaste({ ...I.papers[p], type: "paper" }) && !isCleared(p) && !(mute && mute.test(I.papers[p].title));
+  const ok = (p) => I.papers[p] && !hiddenByTaste({ ...I.papers[p], type: "paper" }) && !isCleared(p) && !mutedHit(I.papers[p], mute);
   const card = (p) => ({ ...I.papers[p], type: "paper", _wide: true });
   const wd = store.get("wideDay", null);
   if (wd?.d === d) return I.papers[wd.pmid] && ok(wd.pmid) ? card(wd.pmid) : null;    // one a day: clearing it doesn't bring another
@@ -646,7 +677,7 @@ function meetingChips() {
 function meetingStories(id, mute = mutedRe()) {
   const mutedSrc = new Set(T.mutedSources || []);
   return (S.news?.items || []).filter((n) => (n.meetings || []).includes(id) && !mutedSrc.has(n.source)
-    && !(mute && mute.test(n.title)) && !hiddenByTaste({ ...n, type: "news" }))
+    && !mutedHit(n, mute) && !hiddenByTaste({ ...n, type: "news" }))
     .map((n) => ({ ...n, type: "news", kind: kindOf(n) }));
 }
 const meetingList = (id, mute) => meetingStories(id, mute);

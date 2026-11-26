@@ -153,12 +153,14 @@ function hzRowEl(e, showDay = true) {
       hzSub(e) ? el("span", { class: "hz-s" }, hzSub(e)) : null)));
 }
 function hzCardEl(it) {
-  const evs = hzEvents(7);
+  const days = T.brief.hzDays || 7, show = days > 7 ? 10 : 7;
+  const evs = hzEvents(days);
+  const span = days === 7 ? "this week" : `in ${days} days`;
   return el("article", { class: "card brief-card hz-card", "data-key": "brief:horizon" },
-    el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Coming up"), el("span", {}, "the next 7 days")),
-    evs.length ? el("ol", { class: "hz-list" }, evs.slice(0, 7).map((e) => hzRowEl(e))) : el("p", { class: "nothing" }, "Nothing scheduled this week."),
+    el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Coming up"), el("span", {}, `the next ${days} days`)),
+    evs.length ? el("ol", { class: "hz-list" }, evs.slice(0, show).map((e) => hzRowEl(e))) : el("p", { class: "nothing" }, `Nothing scheduled ${days === 7 ? "this week" : `in the next ${days} days`}.`),
     el("div", { class: "link-row", style: "margin-top:2px" },
-      el("button", { class: "act", onclick: openHorizon }, icon(ICONS.calendar), evs.length > 7 ? `All ${evs.length} this week, and the next 90 days` : "The next 90 days")));
+      el("button", { class: "act", onclick: openHorizon }, icon(ICONS.calendar), evs.length > show ? `All ${evs.length} ${span}, and the next 90 days` : "The next 90 days")));
 }
 function hzEntryEl() {
   if (!S.horizon && !store.get("avKey", "")) return null;

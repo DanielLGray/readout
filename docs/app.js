@@ -147,6 +147,10 @@ const TUNE_DEFAULTS = {
   library: "",          // your library's off-campus link prefix (EZproxy, OpenAthens), for Journal links
   cap: 2,               // most stories per outlet per day in Everything (industry news exempt); 0 = no limit
   topCard: true,        // open the feed with stories several outlets covered
+  topPer: 0,            // top stories per kind in that card: 0 = 3, or 2 when there are three kinds or more
+  topAgain: 36,         // hours before a top story you were shown leads the card again (12, 36 or 72)
+  bylines: true,        // the writers' names under news stories, when the outlet's feed gives them
+  muteIn: "text",       // muted words: "title" (headlines only) or "text" (headlines and the text on the card)
   order: "newest",      // papers: "newest" or "ranked"
   rank: { fresh: 7, evidence: 1, size: 0.5, concl: 0.5, systems: 1 },   // half-life in days; weights
   fav: [],              // your organ systems (a ranking boost)
@@ -156,14 +160,14 @@ const TUNE_DEFAULTS = {
   swipe: true,          // swipe a card left to save it, right to clear it
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
-  radar: { level: "early", hidden: [], hiddenSpots: [] },   // the Radar: what counts as a development; topics and phrases you hid
+  radar: { level: "early", hidden: [], hiddenSpots: [], heat: 2 },   // the Radar: what counts as a development; topics and phrases you hid; Heating up at this many times the usual
   obits: "wide",        // death notices: "wide" (only those many outlets ran, or high office), "all" or "none"
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true },   // what Today holds
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true, hzDays: 7 },   // what Today holds
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
@@ -171,6 +175,8 @@ const TUNE_DEFAULTS = {
   learned: {},          // what 👍, 👎, Not for me, and what you open and save taught, a little at a time (−1.5 … 1.5)
   learnedAt: "",        // the day learned leanings last faded (they halve over about four months)
   learnImplicit: true,  // learn a little from what you open, save and listen to (never from what you skip)
+  learnRate: 1,         // how much: 1 a little, 2 twice that
+  fade: 120,            // learned leanings halve over this many days (30, 120 or 365); 0: they don't fade
   reacts: {},           // card → 1 (more like this) or -1 (less like this)
   v: 2,
 };
@@ -198,6 +204,10 @@ function loadTune() {
     mix, rank, areas, follow: strs(t.follow), hiddenSystems: strs(t.hiddenSystems),
     cap: Math.max(0, Math.round(num(t.cap, TUNE_DEFAULTS.cap))),
     topCard: typeof t.topCard === "boolean" ? t.topCard : TUNE_DEFAULTS.topCard,
+    topPer: [0, 2, 3, 5].includes(t.topPer) ? t.topPer : 0,
+    topAgain: [12, 36, 72].includes(t.topAgain) ? t.topAgain : 36,
+    bylines: t.bylines !== false,
+    muteIn: t.muteIn === "title" ? "title" : "text",
     order: t.order === "ranked" ? "ranked" : "newest",
     fav: strs(t.fav), hidePending: typeof t.hidePending === "boolean" ? t.hidePending : TUNE_DEFAULTS.hidePending,
     readLast: t.readLast !== false,
@@ -206,7 +216,8 @@ function loadTune() {
     cardLayout: t.cardLayout === "paged" ? "paged" : "compact",
     obits: ["wide", "all", "none"].includes(t.obits) ? t.obits : "wide",
     radar: { level: ["early", "confirmed", "mainstream"].includes(t.radar?.level) ? t.radar.level : "early",
-      hidden: strs(t.radar?.hidden).slice(0, 200), hiddenSpots: strs(t.radar?.hiddenSpots).slice(-200) },
+      hidden: strs(t.radar?.hidden).slice(0, 200), hiddenSpots: strs(t.radar?.hiddenSpots).slice(-200),
+      heat: [1.5, 2, 3].includes(t.radar?.heat) ? t.radar.heat : 2 },
     alerts: Object.fromEntries(Object.keys(ALERT_GROUPS).map((k) => [k, (t.alerts || {})[k] !== false])),
     horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
@@ -220,7 +231,7 @@ function loadTune() {
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
     brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
       classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false, radar: b.radar !== false,
-      wide: b.wide !== false },
+      wide: b.wide !== false, hzDays: [3, 7, 14].includes(b.hzDays) ? b.hzDays : 7 },
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
     pictures: t.pictures !== false,
     meetings: Object.fromEntries(Object.entries(obj(t.meetings)).filter(([, v]) => typeof v === "boolean")),
@@ -229,6 +240,8 @@ function loadTune() {
     reacts: weights(t.reacts, (x) => x === 1 || x === -1),
     learnedAt: /^\d{4}-\d{2}-\d{2}$/.test(t.learnedAt || "") ? t.learnedAt : "",
     learnImplicit: t.learnImplicit !== false,
+    learnRate: t.learnRate === 2 ? 2 : 1,
+    fade: [0, 30, 120, 365].includes(t.fade) ? t.fade : 120,
     v: 2,
   };
 }
@@ -402,7 +415,7 @@ function followingList(mute) {
     .map((p) => ({ ...p, type: "paper", _when: (p.epub || p.added || "") }));
   const news = (S.news?.items || []).filter((n) => followHit(n, re) && !(T.mutedSources || []).includes(n.source) && !hiddenByTaste({ ...n, type: "news" }))
     .map((n) => ({ ...n, type: "news", kind: kindOf(n), _when: (n.date || "").slice(0, 10) }));
-  return papers.concat(news).filter((i) => !(mute && mute.test(i.title))).sort((a, b) => (a._when < b._when ? 1 : -1));
+  return papers.concat(news).filter((i) => !mutedHit(i, mute)).sort((a, b) => (a._when < b._when ? 1 : -1));
 }
 
 // ── most important papers: ranked weekly by citations against same-quarter papers ──
@@ -437,7 +450,7 @@ function importantList(system = "all", strong = false, mute = null) {
   });
   if (system !== "all") list = list.filter((i) => (i.systems || []).includes(system));
   if (strong) list = list.filter((i) => (i.design?.strength || 0) >= 3);
-  if (mute) list = list.filter((i) => !mute.test(i.title));
+  if (mute) list = list.filter((i) => !mutedHit(i, mute));
   return list.filter((i) => !hiddenByTaste(i));
 }
 const topPct = (p) => (p >= 99.5 ? "top 1%" : `top ${Math.max(1, Math.round(100 - p))}%`);
@@ -455,6 +468,10 @@ function impactEl(it) {
 }
 
 function mutedRe() { return wordRe(T.mutedWords); }
+// the text a card shows under its headline: a paper's conclusion, a story's summary
+const shownText = (it) => it?.conclusion?.text || it?.summary || "";
+// a muted word in the headline, or (Tune → Rules → Mute, the default) in the text on the card too
+const mutedHit = (it, re = mutedRe()) => !!re && !!it && re.test(T.muteIn === "title" ? it.title || "" : `${it.title || ""} ${shownText(it)}`);
 
 const sampleN = (s) => { const m = String(s || "").replace(/(\d),(?=\d{3})/g, "$1").match(/\d+/); return m ? +m[0] : 0; };
 // score = freshness × (1 + evidence + size + conclusion + your systems); each factor 0–1 times its weight
@@ -598,7 +615,7 @@ function buildList(f = {}, report = null) {
   // papers
   let papers = (S.feed?.items || []).map((i) => ({ ...i, type: "paper" }));
   if (T.hidePending) papers = papers.filter((i) => (i.conclusion?.kind || "none") !== "none" || (drop("pending"), false));
-  if (mute) papers = papers.filter((i) => !mute.test(i.title) || (drop("muted"), false));
+  if (mute) papers = papers.filter((i) => !mutedHit(i, mute) || (drop("muted"), false));
   if (taste) papers = papers.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false));
   if (system !== "all") papers = papers.filter((i) => (i.systems || []).includes(system));
   if (strong) papers = papers.filter((i) => (i.design?.strength || 0) >= 3);
@@ -618,7 +635,7 @@ function buildList(f = {}, report = null) {
   if (topic || strong || kind === "papers") return papers;
   // news
   let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
-  news = news.filter((i) => (!mutedSrc.has(i.source) && !(mute && mute.test(i.title))) || (drop("muted"), false));
+  news = news.filter((i) => (!mutedSrc.has(i.source) && !mutedHit(i, mute)) || (drop("muted"), false));
   news = news.filter((i) => !obitHidden(i) || (drop("obits"), false));
   if (taste) news = byTaste(news.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false)),
     (n) => Date.parse(n.date) || 0, 6 * 36e5);                       // an outlet you like: its stories a few hours higher
@@ -864,6 +881,11 @@ function newsImgEl(it) {
   box.append(img);
   return box;
 }
+const bylineText = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0] || "");
+function bylineEl(it) {
+  const by = Array.isArray(it.by) ? it.by.filter((x) => typeof x === "string") : [];
+  return T.bylines && by.length ? el("p", { class: "news-by" }, `By ${bylineText(by)}`) : null;
+}
 function newsCardEl(it) {
   const isNew = S.newsNew.has(it.id);
   const cats = (it.categories || []).map((c) => S.news?.categories?.[c]).filter(Boolean);
@@ -884,7 +906,8 @@ function newsCardEl(it) {
     newsImgEl(it),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
       el("h2", { class: "news-headline" }, el("a", { class: "head-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, it.title)),
-      it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
+      it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null,
+      bylineEl(it))),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
     el("div", { class: "actions" + (it.audio ? " five" : "") },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
@@ -952,7 +975,8 @@ function topStoryLists(only) {
   const mute = mutedRe();
   const mutedSrc = new Set(T.mutedSources || []);
   const byId = new Map((S.news?.items || []).map((i) => [i.id, i]));
-  const keep = (l) => l.filter((st) => !(mute && mute.test(st.title)) && st.sources.some((x) => !mutedSrc.has(x))
+  const keep = (l) => l.filter((st) => !mutedHit({ title: st.title, summary: byId.get(st.items?.[st.items.length - 1])?.summary }, mute)
+    && st.sources.some((x) => !mutedSrc.has(x))
     && !obitHidden(byId.get(st.items?.[0])));
   if (Array.isArray(t)) return keep(t).length ? [["Industry news", keep(t)]] : [];
   return Object.entries(newsKinds()).filter(([k]) => !only || k === only)
@@ -960,8 +984,8 @@ function topStoryLists(only) {
 }
 
 // The Top stories card shows a few stories per kind. Each fresh start (opening the app, a refresh,
-// a chip) leads with ones you haven't been shown in the last day and a half; ones you have move
-// down, unless at least two more outlets have picked them up since.
+// a chip) leads with ones you haven't been shown in the last day and a half (Tune: 12 hours to 3
+// days); ones you have move down, unless at least two more outlets have picked them up since.
 let topSeen = store.get("topSeen", null);
 if (!topSeen || typeof topSeen !== "object" || Array.isArray(topSeen)) topSeen = {};
 const storyKey = (st) => st.items?.[st.items.length - 1] || st.title;       // its first headline: the key stays as outlets join
@@ -969,9 +993,9 @@ function topPicks(only) {
   const slot = only || "";
   if (!S.topPick || S.topPick.at !== S.topFresh) S.topPick = { at: S.topFresh, lists: {} };
   if (S.topPick.lists[slot]) return S.topPick.lists[slot];
-  const now = Date.now(), recent = now - 36 * 36e5;
+  const now = Date.now(), recent = now - (T.topAgain || 36) * 36e5;
   const lists = topStoryLists(only);
-  const per = lists.length > 2 ? 2 : 3;
+  const per = T.topPer || (lists.length > 2 ? 2 : 3);
   const picked = lists.map(([label, list, k]) => {
     const fresh = [], shown = [];
     for (const st of list) {
@@ -1502,11 +1526,11 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline, the outlet’s own short summary and, when its feed says, who wrote it (Tune → Reading → Bylines); Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Radar"),
-    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two outlets do; Tune can ask for 2+ or 3+ outlets instead. Each topic shows headlines this month against the usual (Heating up at twice the usual) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
+    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two outlets do; Tune can ask for 2+ or 3+ outlets instead. Each topic shows headlines this month against the usual (Heating up at twice the usual, or what you set in Tune → Interests → Radar) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
     el("h3", {}, "Death notices"),
     el("p", {}, "Obituaries show only when at least 3 news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice), so a head of state's death always shows and a less-known person's doesn't. Tune → Rules → Death notices can show all or none. Industry and society news always keep theirs."),
     el("h3", {}, "Alerts"),
@@ -1524,7 +1548,7 @@ function openInfo() {
     el("h3", {}, "Pictures"),
     el("p", {}, "News and light-reading cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
     el("h3", {}, "Telling Readout what you like"),
-    el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it. “More like this” and “Less like this” nudge all of them a little. Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
+    el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it; the same for the story’s writers or the paper’s first listed authors. “More like this” and “Less like this” nudge all of them a little, but not names. Below that, words from the headline and from the summary or conclusion can be followed (their own chip) or muted (by default a muted word hides cards with it in the headline or the text; Tune → Rules → Mute can limit that to headlines). Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
     el("h3", {}, "Meetings"),
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Weather"),

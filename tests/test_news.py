@@ -441,3 +441,16 @@ def test_death_notices_and_how_widely_they_were_covered():
     assert items[0]["obit"] == {"n": 2}                         # NYT and NPR: two publishers
     assert items[3]["obit"]["n"] == 4 and items[3]["obit"]["hi"]   # everyone, and high office
     assert "obit" not in items[2]
+
+
+def test_bylines():
+    feed = """<?xml version="1.0"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>T</title>
+    <item><title>One</title><link>https://a.test/1</link><dc:creator>By Jane Doe and John Roe</dc:creator></item>
+    <item><title>Two</title><link>https://a.test/2</link><author>desk@a.test (Beth Mole)</author></item>
+    <item><title>Three</title><link>https://a.test/3</link><dc:creator>Wire Staff</dc:creator></item>
+    <item><title>Four</title><link>https://a.test/4</link></item></channel></rss>"""
+    got = {i["title"]: i.get("by") for i in news.parse_feed(feed, "Wire", NOW)}
+    assert got == {"One": ["Jane Doe", "John Roe"], "Two": ["Beth Mole"], "Three": None, "Four": None}
+    assert news.byline({"author": "Ingrid Fadelli, Phys.org"}, "Phys.org") == ["Ingrid Fadelli"]
+    assert news.byline({"author": "The Associated Press"}, "AP") == []
+    assert news.byline({"authors": [{"name": f"Ann Person{c}"} for c in "abcd"]}, "X") == ["Ann Persona", "Ann Personb", "Ann Personc"]

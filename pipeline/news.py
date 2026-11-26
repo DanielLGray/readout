@@ -217,6 +217,36 @@ def entry_image(e, summary_html: str = "") -> str:
     return ""
 
 
+_NOT_A_PERSON = re.compile(r"\b(?:staff|editors?|editorial|desk|team|newsroom|press|admin|news|wire|reuters|associated|AFP|bloomberg|"
+                           r"contributors?|guest|correspondents?|feed|webmaster|no-?reply|unknown|anonymous|board|report|reporters?|"
+                           r"service|magazine|journal|podcast|science|health|media|office|university|institute|society|nasa|npr|bbc)\b", re.I)
+_CREDENTIAL = re.compile(r"(?:,\s*|\s+)(?:MD|M\.D\.|PhD|Ph\.D\.|DO|RN|MPH|MS|MBA|FACR|FACC|Jr\.?|Sr\.?|II|III)\b\.?", re.I)
+
+
+def byline(e, source: str) -> list[str]:
+    """The people who wrote a story, from its feed (author, dc:creator or Atom authors): at most
+    three names of two to five words. Outlets, desks, wires and emails are left out."""
+    raw = [a.get("name", "") for a in (e.get("authors") or []) if isinstance(a, dict)]
+    if not any(raw):
+        raw = [(e.get("author_detail") or {}).get("name") or e.get("author") or ""]
+    out = []
+    for r in raw:
+        s = clean_text(r)
+        s = re.sub(r"\S+@\S+\s*\(([^)]*)\)", r"\1", s)            # "news@site.com (Jane Doe)"
+        s = re.sub(r"\S+@\S+", " ", s)
+        s = _CREDENTIAL.sub("", s)
+        s = re.sub(r"^\s*by\s+", "", s, flags=re.I)
+        for part in re.split(r"\s*(?:,|;|\||&|\band\b)\s*", s):
+            part = " ".join(part.strip(" .()-–—").split())
+            words = part.split()
+            if not (2 <= len(words) <= 5 and len(part) <= 60) or _NOT_A_PERSON.search(part):
+                continue
+            if not all(re.match(r"[^\W\d_]", w) for w in words) or part.lower() in source.lower() or part in out:
+                continue
+            out.append(part)
+    return out[:3]
+
+
 def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, style: str = "") -> list[dict]:
     """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}].
     verbatim: the outlet's terms say not to edit headlines, text or links (ScienceDaily, Medical
@@ -247,6 +277,9 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
             title, link, summary = got
         item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
                 "date": _utc(min(when, now)), "summary": clean_text(summary) if verbatim else teaser(summary)}
+        by = byline(e, source)
+        if by:
+            item["by"] = by
         audio = _audio(e)                          # podcast episode: playable in the app
         if img and not (audio and "brightspotcdn.com" not in img):     # episode art is mostly the show's, at full size
             item["img"] = img

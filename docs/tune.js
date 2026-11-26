@@ -218,7 +218,8 @@ function todaySection() {
     switchRow("Outside your areas", "One paper a day from NEJM, The Lancet, JAMA, BMJ and other big general journals that your areas wouldn’t find: recent, and already being cited. Chosen weekly with the Most important lists.", b.wide, (on) => setB("wide", on)),
     switchRow("Something lighter", "One Light reading story a day: Wikipedia’s featured article, NASA’s image of the day, Atlas Obscura, Smithsonian and the like.", b.light, (on) => setB("light", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
-    switchRow("Coming up", "The next 7 days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.", b.horizon, (on) => setB("horizon", on)),
+    switchRow("Coming up", `The next ${b.hzDays} days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.`, b.horizon, (on) => setB("horizon", on)),
+    b.horizon ? segPick("Coming up covers", [[3, "3 days"], [7, "7 days"], [14, "14 days"]], b.hzDays, (v) => setB("hzDays", Number(v))) : null,
     segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
@@ -226,7 +227,9 @@ function todaySection() {
     el("div", { id: "tune-weather" }, switchRow("Weather for Reno, NV", "Today’s and tomorrow’s highs, lows and forecast under the chips, from the National Weather Service (NOAA). Your phone asks api.weather.gov directly.", T.weather,
       (on) => { setTune({ weather: on }); if (on) wxRefresh(0); else renderWx(); rerender(); })),
     switchRow("Pictures", "A figure from each open-access paper whose license allows it, credited, and the picture each news outlet puts in its feed. Off: no pictures, less data.", T.pictures,
-      (on) => { setTune({ pictures: on }); rerender(); }));
+      (on) => { setTune({ pictures: on }); rerender(); }),
+    switchRow("Bylines", "Who wrote each news story, under its summary, when the outlet’s feed says. Rate on a story can hide or favor a writer either way.", T.bylines,
+      (on) => { setTune({ bylines: on }); rerender(); }));
 }
 
 // ── your reading ───────────────────────────────────────────────────────────
@@ -451,7 +454,7 @@ function interestsPane() {
 }
 
 // what you've told Readout you like (learn.js), every rating in one place
-const FEATURE_ORDER = ["sys", "tp", "jr", "ds", "src", "fl"];
+const FEATURE_ORDER = ["sys", "tp", "jr", "ds", "src", "fl", "cat", "by"];
 const byFeature = (a, b) => FEATURE_ORDER.indexOf(a.split(":")[0]) - FEATURE_ORDER.indexOf(b.split(":")[0])
   || featureName(a)[0].localeCompare(featureName(b)[0]);
 function tasteRow(f, extra) {
@@ -475,14 +478,18 @@ function tasteSection() {
   } }, "Forget what Readout learned");
   const subjects = Object.keys(FLAVORS).map((k) => `fl:${k}`).filter((f) => T.taste[f] == null);
   return el("section", { class: "sect", id: "tune-taste" }, el("h2", {}, "What you like"),
-    el("p", { class: "sub" }, "Tap Rate on any card to say what you think of its organ system, topic, journal, kind of study, outlet or subject. More moves those cards up, Less moves them down, Hide takes them out of every list."),
+    el("p", { class: "sub" }, "Tap Rate on any card to say what you think of its organ system, topic, journal, kind of study, outlet, subject, writer or authors. More moves those cards up, Less moves them down, Hide takes them out of every list."),
     rated.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, `You chose (${rated.length})`), rated.map((f) => tasteRow(f)))
       : el("p", { class: "nothing" }, "Nothing rated yet."),
     learned.length ? el("div", { class: "taste-list" }, el("div", { class: "ctl-label" }, "Learned from what you rated, opened and saved"),
       el("p", { class: "fine", style: "margin:2px 0 8px" }, "More like this, Less like this and Not for me nudge these; opening, saving or listening nudges them a little toward more. Choose one to make it exact."),
       learned.map((f) => tasteRow(f, forget(f)))) : null,
-    switchRow("Learn from what you open and save", "Each card you open, save or listen to nudges its organ system, topic, journal, outlet and subjects a little toward more. Nothing you skip or clear counts against anything; only Less like this and Not for me do. Learned leanings fade by half over about four months; your own choices above don’t.",
-      T.learnImplicit, (on) => { setTune({ learnImplicit: on }); rerender(); }),
+    segPick("Learn from what you open and save", [["off", "Off"], [1, "A little"], [2, "More"]], T.learnImplicit ? T.learnRate : "off",
+      (v) => { setTune(v === "off" ? { learnImplicit: false } : { learnImplicit: true, learnRate: Number(v) }); rerender(); },
+      "Each card you open, save or listen to nudges its organ system, topic, journal, outlet and subjects toward more: a tenth of a More like this (a quarter for a save), or twice that. Nothing you skip or clear counts against anything; only Less like this and Not for me do. Names in bylines are never learned."),
+    segPick("What Readout learned fades", [[30, "In a month"], [120, "In 4 months"], [365, "In a year"], [0, "Never"]], T.fade,
+      (v) => { setTune({ fade: Number(v) }); rerender(); },
+      "How long until a learned leaning is down by half, so an old phase or a one-off rating doesn’t steer the feed for good. Your own choices above never fade."),
     el("details", { class: "outlets" },
       el("summary", {}, "Subjects you can rate", el("span", { class: "fine" }, `${subjects.length}`)),
       el("p", { class: "fine", style: "margin:0 0 6px" }, "Found by words in the title and conclusion, in papers and news alike."),
@@ -538,7 +545,7 @@ function algoPane() {
       el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
         const keep = { mutedSources: [], mutedWords: [] };
-        const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "meetings", "taste", "learned", "reacts"].map((k) => [k, T[k]]));
+        const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "bylines", "meetings", "taste", "learned", "reacts", "learnedAt", "learnImplicit", "learnRate", "fade"].map((k) => [k, T[k]]));
         T = { ...TUNE_DEFAULTS, ...keep, ...mine }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
         toast("Feed rules reset"); rerender();
       })))];
@@ -585,6 +592,12 @@ function mixSection() {
       `Widely covered: at least ${OBIT_MIN} news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice). Industry and society news always keep theirs.`),
     switchRow("Top stories card", "Opens the feed with stories that several outlets covered this week.", T.topCard,
       (on) => { setTune({ topCard: on }); rerender(); }),
+    T.topCard ? segPick("Top stories per kind", [[0, "Auto"], [2, "2"], [3, "3"], [5, "5"]], T.topPer,
+      (v) => { setTune({ topPer: Number(v) }); S.topPick = null; rerender(); },
+      "Auto: 3, or 2 each when the card has three kinds of news or more.") : null,
+    T.topCard ? segPick("A top story you’ve seen leads again after", [[12, "12 hours"], [36, "1½ days"], [72, "3 days"]], T.topAgain,
+      (v) => { setTune({ topAgain: Number(v) }); S.topPick = null; rerender(); },
+      "Until then, stories you haven’t been shown come first; one that two more outlets have picked up since comes back sooner.") : null,
     switchRow("Cards you’ve seen go to the end", "Each list starts with what you haven’t seen; the rest follow, marked Seen. Takes effect when a list starts fresh: opening the app, a chip, or a refresh.", T.readLast,
       (on) => { setTune({ readLast: on }); rerender(); }),
     switchRow("Swipe cards sideways", "Left saves a card; right clears it, and the next one takes its place.", T.swipe,
@@ -670,11 +683,13 @@ function muteSection() {
   (S.news?.items || []).forEach((i) => { counts[i.source] = (counts[i.source] || 0) + 1; });
   const sources = S.news?.sources || [];
   return el("section", { class: "sect", id: "tune-mute" }, el("h2", {}, "Mute"),
-    el("p", { class: "sub" }, "Hide words or whole outlets everywhere in the feed. Whole words, so AI doesn’t hide “air”; end one with * for any ending."),
+    el("p", { class: "sub" }, "Hide words or whole outlets everywhere in the feed. Whole words, so AI doesn’t hide “air”; end one with * for any ending. To hide a writer or an author, tap Rate on one of their cards."),
     el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: add }, "Mute")),
     words.length ? el("div", { class: "chips wrap" }, words.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Unmute ${w}`,
       onclick: () => { setTune({ mutedWords: words.filter((x) => x !== w) }); rerender(); } }, `${w}  ✕`))) : null,
-    el("p", { class: "fine" }, "Matches the start of words in titles, so “Marvel” also hides “Marvel’s”."),
+    segPick("Muted words match", [["title", "Headlines"], ["text", "Headlines and text"]], T.muteIn,
+      (v) => { setTune({ muteIn: v }); rerender(); },
+      "Text: what a card shows under its headline, a paper’s conclusion or a story’s summary. Words match from the start, so “Marvel” also hides “Marvel’s”."),
     Object.entries(newsKinds()).map(([k, label]) => {
       const list = sources.filter((x) => (x.kind || "industry") === k);
       if (!list.length) return null;

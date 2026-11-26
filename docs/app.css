@@ -897,3 +897,9 @@ a { color: inherit; }
 .rd-dev { width: 100%; text-align: left; display: grid; gap: 3px; padding: 10px 0; }
 .rd-card .rows { margin: 0; }
 .rd-added { margin: 0; font-size: 15px; }
+/* bylines and words from the text (Rate) */
+.news-by { margin: 6px 0 0; font: 500 calc(13px * var(--ts, 1))/1.35 var(--sans); color: var(--muted); overflow-wrap: anywhere; }
+.fb-by { padding-top: 10px; }
+.fb-by .fine { margin-bottom: 0; }
+.fb-from { margin-top: 12px; }
+.fb-from .chips { margin-top: 6px; }

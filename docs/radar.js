@@ -27,14 +27,22 @@ function radarNews(days = 7) {
   const today = localDay();      // shown before today: done; shown today: the card keeps it until tomorrow
   for (const t of radarTopics()) for (const d of t.devs) if ((d.updated || d.date) >= since && (!radarSeen[d.id] || radarSeen[d.id] === today)) out.push({ t, d });
   const rank = { heating: 0, steady: 1, quiet: 2 };
-  return out.sort((a, b) => (rank[a.t.momentum?.status] ?? 3) - (rank[b.t.momentum?.status] ?? 3) || (a.d.updated < b.d.updated ? 1 : -1));
+  return out.sort((a, b) => (rank[rdStatus(a.t)] ?? 3) - (rank[rdStatus(b.t)] ?? 3) || (a.d.updated < b.d.updated ? 1 : -1));
 }
 function radarJustAdded(days = 7) {
   const since = localDay(daysAgo(days));
   return radarTopics().filter((t) => t.origin === "spotted" && t.added && t.added >= since);
 }
+// Heating up: at least 3 headlines in 30 days and Tune's multiple of the usual (6 if there's no usual
+// yet). Quiet (none in 60 days) comes from the daily job.
+function rdStatus(t) {
+  const m = t?.momentum;
+  if (!m || m.status === "quiet") return m?.status || "steady";
+  const k = T.radar.heat || 2;
+  return m.month >= 3 && (m.usual == null ? m.month >= 6 : m.month >= k * Math.max(m.usual, 1)) ? "heating" : "steady";
+}
 function statusChip(t) {
-  const s = t.momentum?.status || "steady";
+  const s = rdStatus(t);
   return el("span", { class: `rd-status rd-${s}` }, RADAR_STATUS[s] || s);
 }
 function momentumText(m) {
@@ -54,7 +62,7 @@ function radarEntryEl() {
   if (!R) return null;
   const topics = radarTopics();
   const fresh = radarNews(7).length;
-  const hot = topics.filter((t) => t.momentum?.status === "heating");
+  const hot = topics.filter((t) => rdStatus(t) === "heating");
   return el("button", { class: "fd-entry rd-entry", onclick: openRadar },
     el("span", { class: "fd-entry-h" }, el("b", {}, "Radar"),
       el("span", {}, fresh ? `${plural(fresh, "new development")} this week` : `${plural(topics.length, "topic")}`)),
@@ -212,6 +220,8 @@ function radarSection() {
     el("p", { class: "sub" }, "Emerging topics in Explore → Radar, and a Today card when something new counts. Topics you chose stay; ones the Radar spots join after a few weeks of headlines and retire if they don’t pick up within a year and a half."),
     segPick("What counts as a development", RADAR_LEVELS, T.radar.level, (v) => { setTune({ radar: { ...T.radar, level: v } }); rerender(); },
       "Early: one credible source is enough (research news, a preprint, a journal’s news desk or a major newsroom); anything else needs two outlets. 2+ or 3+ outlets: quieter, but by then it’s rarely early."),
+    segPick("Heating up at", [[1.5, "1.5× usual"], [2, "2× usual"], [3, "3× usual"]], T.radar.heat, (v) => { setTune({ radar: { ...T.radar, heat: Number(v) } }); rerender(); },
+      "Headlines in the last 30 days against the usual month, and at least 3. Heating topics lead the Radar and its Today card."),
     switchRow("Radar card in Today", "New developments and newly added topics, once each.", T.brief.radar, (on) => { setTune({ brief: { ...T.brief, radar: on } }); rerender(); }),
     hidden.length ? el("div", { class: "chips wrap" }, hidden.map((t) => el("button", { class: "chip", "aria-pressed": "true",
       onclick: () => { setTune({ radar: { ...T.radar, hidden: T.radar.hidden.filter((x) => x !== t.id) } }); rerender(); } }, `${t.name}  ✕`))) : null,
