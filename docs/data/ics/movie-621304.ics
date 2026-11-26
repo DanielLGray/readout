@@ -6,13 +6,16 @@ X-WR-CALNAME:Children of Blood and Bone
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
-UID:children-blood-bone@readout
+UID:movie-621304@readout
 DTSTAMP:20270115T000000Z
 DTSTART;VALUE=DATE:20270115
 DTEND;VALUE=DATE:20270116
 SUMMARY:Children of Blood and Bone
-DESCRIPTION:Fantasy\, from Tomi Adeyemi's novel Source: Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+DESCRIPTION:Fantasy\, Adventure In the world of Orïsha\, a young woman go
+ es on a quest to reclaim the magic that was violently stolen from her peo
+ ple. She and her brother ally with the daughter and son of the king to fi
+ ght back against his brutal rule. Source: TMDB.
+URL:https://www.imdb.com/title/tt6779038/
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

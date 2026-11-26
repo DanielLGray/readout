@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Project Hail Mary
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-687163@readout
+DTSTAMP:20261211T000000Z
+DTSTART;VALUE=DATE:20261211
+DTEND;VALUE=DATE:20261212
+SUMMARY:Project Hail Mary
+DESCRIPTION:Science Fiction\, Adventure Science teacher Ryland Grace wakes
+  up on a spaceship light years from home with no recollection of who he i
+ s or how he got there. As his memory returns\, he begins to uncover his m
+ ission: solve the riddle of the mysterious substance causing the sun to d
+ ie out. He must call on his scientific knowledge and unorthodox ideas to 
+ save everything on Earth from… Source: TMDB.
+URL:https://www.imdb.com/title/tt12042730/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

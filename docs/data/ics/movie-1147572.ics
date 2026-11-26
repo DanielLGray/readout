@@ -6,14 +6,16 @@ X-WR-CALNAME:Narnia: The Magician's Nephew
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
-UID:narnia-magicians-nephew@readout
+UID:movie-1147572@readout
 DTSTAMP:20270212T000000Z
 DTSTART;VALUE=DATE:20270212
 DTEND;VALUE=DATE:20270213
 SUMMARY:Narnia: The Magician's Nephew
-DESCRIPTION:Greta Gerwig's film\; IMAX previews from Feb 10\, on Netflix A
- pril 2 Source: Netflix.
-URL:https://www.netflix.com/tudum/articles/narnia-release-date
+DESCRIPTION:Fantasy\, Adventure\, Family Two children discover a wood full
+  of pools leading to other worlds. One takes them to a dead city beneath 
+ a dying sun\, where they wake a queen who exterminated its population and
+  accidentally bring her back to London. Source: TMDB.
+URL:https://www.imdb.com/title/tt9077514/
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

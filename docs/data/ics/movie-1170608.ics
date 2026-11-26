@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Dune: Part Three
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1170608@readout
+DTSTAMP:20261218T000000Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261219
+SUMMARY:Dune: Part Three
+DESCRIPTION:Science Fiction\, Adventure Nearly two decades after he seized
+  control of the Imperium\, Paul Atreides is now a ruthless Emperor\, and 
+ must face the consequences of his reign as old allies return\, terrifying
+  new threats emerge\, and betrayal lurks in every shadow. Haunted by visi
+ ons of Imperial collapse and the reappearance of his long-lost love\, Pau
+ l is drawn into a sweeping… Source: TMDB.
+URL:https://www.imdb.com/title/tt31378509/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

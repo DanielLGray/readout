@@ -6,14 +6,15 @@ X-WR-CALNAME:Avengers: Doomsday
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
-UID:avengers-doomsday@readout
+UID:movie-1003596@readout
 DTSTAMP:20261218T000000Z
 DTSTART;VALUE=DATE:20261218
 DTEND;VALUE=DATE:20261219
 SUMMARY:Avengers: Doomsday
-DESCRIPTION:Marvel\; Robert Downey Jr. returns as Doctor Doom Source: Box 
- Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+DESCRIPTION:Science Fiction\, Action\, Adventure Beloved heroes from three
+  distinct universes are set on a deadly collision course and face an exis
+ tential threat unlike anything they've ever encountered. Source: TMDB.
+URL:https://www.imdb.com/title/tt21357150/
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

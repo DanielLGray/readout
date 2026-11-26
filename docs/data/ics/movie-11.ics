@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Star Wars
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-11@readout
+DTSTAMP:20270219T000000Z
+DTSTART;VALUE=DATE:20270219
+DTEND;VALUE=DATE:20270220
+SUMMARY:Star Wars
+DESCRIPTION:Adventure\, Action\, Science Fiction Princess Leia is captured
+  and held hostage by the evil Imperial forces in their effort to take ove
+ r the galactic Empire. Venturesome Luke Skywalker and dashing captain Han
+  Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue
+  the beautiful princess and restore peace and justice in the Empire. Sour
+ ce: TMDB.
+URL:https://www.imdb.com/title/tt0076759/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

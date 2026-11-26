@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Lilo & Scratch
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1720486@readout
+DTSTAMP:20261125T000000Z
+DTSTART;VALUE=DATE:20261125
+DTEND;VALUE=DATE:20261126
+SUMMARY:Lilo & Scratch
+DESCRIPTION:Animation\, Comedy\, Family Stitch is tasked with looking afte
+ r Scratch\, a cat Lilo has found\, but Scratch has more similarities with
+  Stitch than meets the eye. Source: TMDB.
+URL:https://www.imdb.com/title/tt43621069/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

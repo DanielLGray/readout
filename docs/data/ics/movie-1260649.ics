@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Jumanji: Open World
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1260649@readout
+DTSTAMP:20261225T000000Z
+DTSTART;VALUE=DATE:20261225
+DTEND;VALUE=DATE:20261226
+SUMMARY:Jumanji: Open World
+DESCRIPTION:Adventure\, Comedy\, Fantasy Our heroes have escaped the ever-
+ changing jungles of Jumanji before\, but this time the game comes to us
+ —as Jumanji breaks free of its console\, unleashing its chaos into our 
+ world. Source: TMDB.
+URL:https://www.imdb.com/title/tt26735127/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

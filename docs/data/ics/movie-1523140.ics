@@ -6,12 +6,16 @@ X-WR-CALNAME:Man of Tomorrow
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
-UID:man-of-tomorrow@readout
+UID:movie-1523140@readout
 DTSTAMP:20270709T000000Z
 DTSTART;VALUE=DATE:20270709
 DTEND;VALUE=DATE:20270710
 SUMMARY:Man of Tomorrow
-DESCRIPTION:James Gunn's next Superman film Source: Warner Bros..
+DESCRIPTION:Action\, Science Fiction\, Adventure Superman and Lex Luthor f
+ ind themselves forced to work together—to a certain degree—against a 
+ much\, much bigger threat when Brainiac sets his sights on Earth. Source:
+  TMDB.
+URL:https://www.imdb.com/title/tt37833661/
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

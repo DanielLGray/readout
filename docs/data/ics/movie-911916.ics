@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Spider-Man: Beyond the Spider-Verse
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-911916@readout
+DTSTAMP:20270618T000000Z
+DTSTART;VALUE=DATE:20270618
+DTEND;VALUE=DATE:20270619
+SUMMARY:Spider-Man: Beyond the Spider-Verse
+DESCRIPTION:Animation\, Action\, Adventure Hunted by Miguel O'Hara's Spide
+ r Society and betrayed by his friends\, Miles finds himself in the darkes
+ t corners of the Spider-Verse in search of a way home. Knowing that his f
+ amily has been not only fractured but endangered by his calling\, it's a 
+ race against the clock for Miles to travel across the wildest reaches of 
+ time and space to fight for and… Source: TMDB.
+URL:https://www.imdb.com/title/tt16360004/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Godzilla x Kong: Supernova
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1288438@readout
+DTSTAMP:20270326T000000Z
+DTSTART;VALUE=DATE:20270326
+DTEND;VALUE=DATE:20270327
+SUMMARY:Godzilla x Kong: Supernova
+DESCRIPTION:Science Fiction\, Action\, Adventure Godzilla and Kong return 
+ in an all-new adventure as Earth's greatest titans face an unthinkable th
+ reat from beyond the stars. When an Apex cosmic predator sets its sights 
+ on Earth\, only the combined might of monsters and humanity can avert tot
+ al extinction. Source: TMDB.
+URL:https://www.imdb.com/title/tt32561550/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Puella Magi Madoka Magica the Movie -Walpurgisnacht: Rising-
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-822653@readout
+DTSTAMP:20270116T000000Z
+DTSTART;VALUE=DATE:20270116
+DTEND;VALUE=DATE:20270117
+SUMMARY:Puella Magi Madoka Magica the Movie -Walpurgisnacht: Rising-
+DESCRIPTION:Animation\, Drama\, Mystery After the events of Rebellion\, th
+ e world appears to be in balance—but that peace is fragile. As a new th
+ reat connected to Walpurgisnacht emerges\, Homura Akemi is forced to face
+  the consequences of her choices and question how far she is willing to g
+ o to protect Madoka. Source: TMDB.
+URL:https://www.imdb.com/title/tt14523706/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

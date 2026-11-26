@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Ray Gunn
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-940009@readout
+DTSTAMP:20261204T000000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:Ray Gunn
+DESCRIPTION:Animation\, Science Fiction\, Crime In Metropia\, a gigantic c
+ ity in an alternate future as seen from 1939\, private eye Raymond Gunn i
+ s drawn into a case involving aliens\, murder and a multimedia star named
+  Venus Nova. Source: TMDB.
+URL:https://www.imdb.com/title/tt18270542/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Spider-Man: Brand New Day
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-969681@readout
+DTSTAMP:20261204T000000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:Spider-Man: Brand New Day
+DESCRIPTION:Science Fiction\, Action\, Adventure Fighting crime full-time 
+ as Spider-Man in a world that doesn't remember him—and the pressure of 
+ seeing his old friends move on without him—sparks a change in Peter Par
+ ker he may not have the power to control. But that transformation might a
+ lso be the only thing that can stop a shocking new threat to the city and
+  those he loves - a powerful villain no one… Source: TMDB.
+URL:https://www.imdb.com/title/tt22084616/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

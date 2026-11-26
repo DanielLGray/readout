@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Shrek 5
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-421892@readout
+DTSTAMP:20270630T000000Z
+DTSTART;VALUE=DATE:20270630
+DTEND;VALUE=DATE:20270701
+SUMMARY:Shrek 5
+DESCRIPTION:Comedy\, Animation\, Fantasy Shrek\, Donkey and Fiona team up 
+ for another whirlwind\, big-city adventure—this time\, along with their
+  sons Fergus and Farkle\, they travel to the magical city of Further\, Fu
+ rther Away to rescue Felicia\, who has left the swamp to learn magic. Sou
+ rce: TMDB.
+URL:https://www.imdb.com/title/tt6113186/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

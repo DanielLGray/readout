@@ -6,6 +6,33 @@ X-WR-CALNAME:Readout: Coming up
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
+UID:movie-1538497@readout
+DTSTAMP:20261125T000000Z
+DTSTART;VALUE=DATE:20261125
+DTEND;VALUE=DATE:20261126
+SUMMARY:Hexed
+DESCRIPTION:Adventure\, Animation\, Family An impulsive and unconventional
+  teenage girl named Billie discovers secret magical abilities which\, onc
+ e unleashed\, hurtle her into a spectacle-filled journey out of suburbia 
+ and into a vast witch realm called Hexe. Forced to team up with her cauti
+ ous mother\, Alice\, they uncover family mysteries that could change the 
+ world of witches forever. Source: TMDB.
+URL:https://www.imdb.com/title/tt38077943/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1720486@readout
+DTSTAMP:20261125T000000Z
+DTSTART;VALUE=DATE:20261125
+DTEND;VALUE=DATE:20261126
+SUMMARY:Lilo & Scratch
+DESCRIPTION:Animation\, Comedy\, Family Stitch is tasked with looking afte
+ r Scratch\, a cat Lilo has found\, but Scratch has more similarities with
+  Stitch than meets the eye. Source: TMDB.
+URL:https://www.imdb.com/title/tt43621069/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bea-gdp-report-2026-11-25@readout
 DTSTAMP:20261125T133000Z
 DTSTART:20261125T133000Z
@@ -93,6 +120,46 @@ DESCRIPTION:Cars\, as dealers push to hit year-end targets\; after Christm
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-940009@readout
+DTSTAMP:20261204T000000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:Ray Gunn
+DESCRIPTION:Animation\, Science Fiction\, Crime In Metropia\, a gigantic c
+ ity in an alternate future as seen from 1939\, private eye Raymond Gunn i
+ s drawn into a case involving aliens\, murder and a multimedia star named
+  Venus Nova. Source: TMDB.
+URL:https://www.imdb.com/title/tt18270542/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-969681@readout
+DTSTAMP:20261204T000000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:Spider-Man: Brand New Day
+DESCRIPTION:Science Fiction\, Action\, Adventure Fighting crime full-time 
+ as Spider-Man in a world that doesn't remember him—and the pressure of 
+ seeing his old friends move on without him—sparks a change in Peter Par
+ ker he may not have the power to control. But that transformation might a
+ lso be the only thing that can stop a shocking new threat to the city and
+  those he loves - a powerful villain no one… Source: TMDB.
+URL:https://www.imdb.com/title/tt22084616/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1045968@readout
+DTSTAMP:20261204T000000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:The Fox
+DESCRIPTION:Comedy\, Fantasy An affable foxhunter encounters a talking Fox
+  who offers him an opportunity to transform his fiancée into the perfect
+  woman. Source: TMDB.
+URL:https://www.imdb.com/title/tt12525406/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-jobs-report-2026-12-04@readout
 DTSTAMP:20261204T133000Z
 DTSTART:20261204T133000Z
@@ -137,6 +204,21 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-687163@readout
+DTSTAMP:20261211T000000Z
+DTSTART;VALUE=DATE:20261211
+DTEND;VALUE=DATE:20261212
+SUMMARY:Project Hail Mary
+DESCRIPTION:Science Fiction\, Adventure Science teacher Ryland Grace wakes
+  up on a spaceship light years from home with no recollection of who he i
+ s or how he got there. As his memory returns\, he begins to uncover his m
+ ission: solve the riddle of the mysterious substance causing the sun to d
+ ie out. He must call on his scientific knowledge and unorthodox ideas to 
+ save everything on Earth from… Source: TMDB.
+URL:https://www.imdb.com/title/tt12042730/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:oscar-shortlists-2026@readout
 DTSTAMP:20261215T000000Z
 DTSTART;VALUE=DATE:20261215
@@ -148,25 +230,30 @@ URL:https://press.oscars.org/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:avengers-doomsday@readout
+UID:movie-1003596@readout
 DTSTAMP:20261218T000000Z
 DTSTART;VALUE=DATE:20261218
 DTEND;VALUE=DATE:20261219
 SUMMARY:Avengers: Doomsday
-DESCRIPTION:Marvel\; Robert Downey Jr. returns as Doctor Doom Source: Box 
- Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+DESCRIPTION:Science Fiction\, Action\, Adventure Beloved heroes from three
+  distinct universes are set on a deadly collision course and face an exis
+ tential threat unlike anything they've ever encountered. Source: TMDB.
+URL:https://www.imdb.com/title/tt21357150/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:dune-3@readout
+UID:movie-1170608@readout
 DTSTAMP:20261218T000000Z
 DTSTART;VALUE=DATE:20261218
 DTEND;VALUE=DATE:20261219
 SUMMARY:Dune: Part Three
-DESCRIPTION:Denis Villeneuve's adaptation of Dune Messiah\, in IMAX Source
- : Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+DESCRIPTION:Science Fiction\, Adventure Nearly two decades after he seized
+  control of the Imperium\, Paul Atreides is now a ruthless Emperor\, and 
+ must face the consequences of his reign as old allies return\, terrifying
+  new threats emerge\, and betrayal lurks in every shadow. Haunted by visi
+ ons of Imperial collapse and the reappearance of his long-lost love\, Pau
+ l is drawn into a sweeping… Source: TMDB.
+URL:https://www.imdb.com/title/tt31378509/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -202,6 +289,19 @@ URL:https://www.nyse.com/markets/hours-calendars
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-1260649@readout
+DTSTAMP:20261225T000000Z
+DTSTART;VALUE=DATE:20261225
+DTEND;VALUE=DATE:20261226
+SUMMARY:Jumanji: Open World
+DESCRIPTION:Adventure\, Comedy\, Fantasy Our heroes have escaped the ever-
+ changing jungles of Jumanji before\, but this time the game comes to us
+ —as Jumanji breaks free of its console\, unleashing its chaos into our 
+ world. Source: TMDB.
+URL:https://www.imdb.com/title/tt26735127/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:nyse-2026-12-25@readout
 DTSTAMP:20261225T000000Z
 DTSTART;VALUE=DATE:20261225
@@ -209,6 +309,17 @@ DTEND;VALUE=DATE:20261226
 SUMMARY:Stock market closed
 DESCRIPTION:Christmas Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1421903@readout
+DTSTAMP:20261225T000000Z
+DTSTART;VALUE=DATE:20261225
+DTEND;VALUE=DATE:20261226
+SUMMARY:Werwulf
+DESCRIPTION:Horror\, Fantasy A harrowing tale of devotion\, damnation and 
+ the devil within. Source: TMDB.
+URL:https://www.imdb.com/title/tt35514120/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -314,6 +425,19 @@ URL:https://www.ces.tech/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-1151265@readout
+DTSTAMP:20270108T000000Z
+DTSTART;VALUE=DATE:20270108
+DTEND;VALUE=DATE:20270109
+SUMMARY:Cloud Girl
+DESCRIPTION:Animation\, Adventure\, Fantasy The adventures of a young girl
+  named Providence\, who is entrusted with a magic quill that makes everyt
+ hing she writes come true. Faced with this incredible power\, she has to 
+ choose between living her dreams and saving the world. Source: TMDB.
+URL:https://www.imdb.com/title/tt20259240/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-jobs-report-2027-01-08@readout
 DTSTAMP:20270108T133000Z
 DTSTART:20270108T133000Z
@@ -391,13 +515,16 @@ STATUS:TENTATIVE
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:children-blood-bone@readout
+UID:movie-621304@readout
 DTSTAMP:20270115T000000Z
 DTSTART;VALUE=DATE:20270115
 DTEND;VALUE=DATE:20270116
 SUMMARY:Children of Blood and Bone
-DESCRIPTION:Fantasy\, from Tomi Adeyemi's novel Source: Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+DESCRIPTION:Fantasy\, Adventure In the world of Orïsha\, a young woman go
+ es on a quest to reclaim the magic that was violently stolen from her peo
+ ple. She and her brother ally with the daughter and son of the king to fi
+ ght back against his brutal rule. Source: TMDB.
+URL:https://www.imdb.com/title/tt6779038/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -410,6 +537,20 @@ DESCRIPTION:4th-quarter payment for 2026 For income without enough withhol
  ding: self-employment\, investments\, side work. Source: IRS deadline rul
  es.
 URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-822653@readout
+DTSTAMP:20270116T000000Z
+DTSTART;VALUE=DATE:20270116
+DTEND;VALUE=DATE:20270117
+SUMMARY:Puella Magi Madoka Magica the Movie -Walpurgisnacht: Rising-
+DESCRIPTION:Animation\, Drama\, Mystery After the events of Rebellion\, th
+ e world appears to be in balance—but that peace is fragile. As a new th
+ reat connected to Walpurgisnacht emerges\, Homura Akemi is forced to face
+  the consequences of her choices and question how far she is willing to g
+ o to protect Madoka. Source: TMDB.
+URL:https://www.imdb.com/title/tt14523706/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -493,6 +634,34 @@ SUMMARY:PCE inflation report
 DESCRIPTION:December 2026 numbers Personal income and spending\, with the 
  PCE price index the Fed watches most closely. Source: BEA.
 URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1124@readout
+DTSTAMP:20270129T000000Z
+DTSTART;VALUE=DATE:20270129
+DTEND;VALUE=DATE:20270130
+SUMMARY:The Prestige
+DESCRIPTION:Drama\, Mystery\, Science Fiction · IMAX A mysterious story o
+ f two magicians whose intense rivalry leads them on a life-long battle fo
+ r supremacy -- full of obsession\, deceit and jealousy with dangerous and
+  deadly consequences. Source: TMDB.
+URL:https://www.imdb.com/title/tt0482571/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-920167@readout
+DTSTAMP:20270129T000000Z
+DTSTART;VALUE=DATE:20270129
+DTEND;VALUE=DATE:20270130
+SUMMARY:Witch on the Holy Night
+DESCRIPTION:Animation\, Fantasy\, Drama Near the end of the Showa era in t
+ he late 1980s\, in Misaki town\, an old mansion is rumored to be the home
+  of a witch. After moving into the mansion\, Aoko Aozaki begins to learn 
+ sorcery from a young mage\, Alice Kuonji\, the rumored witch of the mansi
+ on. The Aozaki family oversees the land on which Misaki is built and the 
+ heir (Aoko) is tasked with… Source: TMDB.
+URL:https://www.imdb.com/title/tt31970593/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -584,14 +753,16 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:narnia-magicians-nephew@readout
+UID:movie-1147572@readout
 DTSTAMP:20270212T000000Z
 DTSTART;VALUE=DATE:20270212
 DTEND;VALUE=DATE:20270213
 SUMMARY:Narnia: The Magician's Nephew
-DESCRIPTION:Greta Gerwig's film\; IMAX previews from Feb 10\, on Netflix A
- pril 2 Source: Netflix.
-URL:https://www.netflix.com/tudum/articles/narnia-release-date
+DESCRIPTION:Fantasy\, Adventure\, Family Two children discover a wood full
+  of pools leading to other worlds. One takes them to a dead city beneath 
+ a dying sun\, where they wake a queen who exterminated its population and
+  accidentally bring her back to London. Source: TMDB.
+URL:https://www.imdb.com/title/tt9077514/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -621,6 +792,21 @@ DTEND;VALUE=DATE:20270216
 SUMMARY:Stock market closed
 DESCRIPTION:Washington's Birthday Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-11@readout
+DTSTAMP:20270219T000000Z
+DTSTART;VALUE=DATE:20270219
+DTEND;VALUE=DATE:20270220
+SUMMARY:Star Wars
+DESCRIPTION:Adventure\, Action\, Science Fiction Princess Leia is captured
+  and held hostage by the evil Imperial forces in their effort to take ove
+ r the galactic Empire. Venturesome Luke Skywalker and dashing captain Han
+  Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue
+  the beautiful princess and restore peace and justice in the Empire. Sour
+ ce: TMDB.
+URL:https://www.imdb.com/title/tt0076759/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -737,12 +923,28 @@ URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:godzilla-kong-supernova@readout
+UID:movie-1401586@readout
+DTSTAMP:20270319T000000Z
+DTSTART;VALUE=DATE:20270319
+DTEND;VALUE=DATE:20270320
+SUMMARY:Sonic the Hedgehog 4
+DESCRIPTION:Comedy\, Action\, Family The fourth installment in the Sonic t
+ he Hedgehog film franchise. Plot TBA. Source: TMDB.
+URL:https://www.imdb.com/title/tt16744566/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1288438@readout
 DTSTAMP:20270326T000000Z
 DTSTART;VALUE=DATE:20270326
 DTEND;VALUE=DATE:20270327
 SUMMARY:Godzilla x Kong: Supernova
-DESCRIPTION:The next MonsterVerse film Source: Warner Bros..
+DESCRIPTION:Science Fiction\, Action\, Adventure Godzilla and Kong return 
+ in an all-new adventure as Earth's greatest titans face an unthinkable th
+ reat from beyond the stars. When an Apex cosmic predator sets its sights 
+ on Earth\, only the combined might of monsters and humanity can avert tot
+ al extinction. Source: TMDB.
+URL:https://www.imdb.com/title/tt32561550/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -989,6 +1191,17 @@ URL:https://www.bea.gov/news/schedule
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-1177369@readout
+DTSTAMP:20270430T000000Z
+DTSTART;VALUE=DATE:20270430
+DTEND;VALUE=DATE:20270501
+SUMMARY:The Legend of Zelda
+DESCRIPTION:Action\, Adventure\, Fantasy A live-action adaptation of Ninte
+ ndo's Legend of Zelda video game series. Source: TMDB.
+URL:https://www.imdb.com/title/tt29873948/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:buys-2027-05@readout
 DTSTAMP:20270501T000000Z
 DTSTART;VALUE=DATE:20270501
@@ -1010,16 +1223,6 @@ DESCRIPTION:American Roentgen Ray Society Annual Meeting Source: Your meet
  ings.
 LOCATION:Sheraton Denver Downtown\, Denver
 URL:https://www.arrs.org/am27/
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:zelda-2027@readout
-DTSTAMP:20270507T000000Z
-DTSTART;VALUE=DATE:20270507
-DTEND;VALUE=DATE:20270508
-SUMMARY:The Legend of Zelda
-DESCRIPTION:Live-action\, from Nintendo and Sony Source: Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2027-05-07/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1057,16 +1260,6 @@ URL:https://www.bea.gov/news/schedule
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:starfighter@readout
-DTSTAMP:20270528T000000Z
-DTSTART;VALUE=DATE:20270528
-DTEND;VALUE=DATE:20270529
-SUMMARY:Star Wars: Starfighter
-DESCRIPTION:Ryan Gosling stars Source: Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2027-05-28
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:sale-memorial-2027@readout
 DTSTAMP:20270529T000000Z
 DTSTART;VALUE=DATE:20270529
@@ -1099,16 +1292,6 @@ DESCRIPTION:Tools around Father's Day\; summer electronics deals begin The
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:beyond-spider-verse@readout
-DTSTAMP:20270604T000000Z
-DTSTART;VALUE=DATE:20270604
-DTEND;VALUE=DATE:20270605
-SUMMARY:Spider-Man: Beyond the Spider-Verse
-DESCRIPTION:Animated Source: Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2027-05-07/
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:meeting-snmmi2027@readout
 DTSTAMP:20270605T000000Z
 DTSTART;VALUE=DATE:20270605
@@ -1133,16 +1316,6 @@ URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:httyd-2@readout
-DTSTAMP:20270611T000000Z
-DTSTART;VALUE=DATE:20270611
-DTEND;VALUE=DATE:20270612
-SUMMARY:How to Train Your Dragon 2
-DESCRIPTION:Live-action Source: Box Office Mojo.
-URL:https://www.boxofficemojo.com/calendar/2027-05-07/
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:meeting-esgar2027@readout
 DTSTAMP:20270615T000000Z
 DTSTART;VALUE=DATE:20270615
@@ -1162,6 +1335,21 @@ DTEND;VALUE=DATE:20270616
 SUMMARY:Estimated tax payment due
 DESCRIPTION:2nd-quarter payment for 2027 Source: IRS deadline rules.
 URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-911916@readout
+DTSTAMP:20270618T000000Z
+DTSTART;VALUE=DATE:20270618
+DTEND;VALUE=DATE:20270619
+SUMMARY:Spider-Man: Beyond the Spider-Verse
+DESCRIPTION:Animation\, Action\, Adventure Hunted by Miguel O'Hara's Spide
+ r Society and betrayed by his friends\, Miles finds himself in the darkes
+ t corners of the Spider-Verse in search of a way home. Knowing that his f
+ amily has been not only fractured but endangered by his calling\, it's a 
+ race against the clock for Miles to travel across the wildest reaches of 
+ time and space to fight for and… Source: TMDB.
+URL:https://www.imdb.com/title/tt16360004/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1194,6 +1382,20 @@ SUMMARY:PCE inflation report
 DESCRIPTION:May 2027 numbers Personal income and spending\, with the PCE p
  rice index the Fed watches most closely. Source: BEA.
 URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-421892@readout
+DTSTAMP:20270630T000000Z
+DTSTART;VALUE=DATE:20270630
+DTEND;VALUE=DATE:20270701
+SUMMARY:Shrek 5
+DESCRIPTION:Comedy\, Animation\, Fantasy Shrek\, Donkey and Fiona team up 
+ for another whirlwind\, big-city adventure—this time\, along with their
+  sons Fergus and Farkle\, they travel to the magical city of Further\, Fu
+ rther Away to rescue Felicia\, who has left the swamp to learn magic. Sou
+ rce: TMDB.
+URL:https://www.imdb.com/title/tt6113186/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1241,12 +1443,16 @@ URL:https://scct.org/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:man-of-tomorrow@readout
+UID:movie-1523140@readout
 DTSTAMP:20270709T000000Z
 DTSTART;VALUE=DATE:20270709
 DTEND;VALUE=DATE:20270710
 SUMMARY:Man of Tomorrow
-DESCRIPTION:James Gunn's next Superman film Source: Warner Bros..
+DESCRIPTION:Action\, Science Fiction\, Adventure Superman and Lex Luthor f
+ ind themselves forced to work together—to a certain degree—against a 
+ much\, much bigger threat when Brainiac sets his sights on Earth. Source:
+  TMDB.
+URL:https://www.imdb.com/title/tt37833661/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1282,6 +1488,17 @@ DESCRIPTION:Preview night July 21\; the big studio panels for sci-fi and f
  antasy Source: Comic-Con International.
 LOCATION:San Diego Convention Center
 URL:https://www.comic-con.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1461519@readout
+DTSTAMP:20270723T000000Z
+DTSTART;VALUE=DATE:20270723
+DTEND;VALUE=DATE:20270724
+SUMMARY:A Minecraft Movie Squared
+DESCRIPTION:Family\, Fantasy\, Comedy The second installment in the franch
+ ise. Plot TBA. Source: TMDB.
+URL:https://www.imdb.com/title/tt37788431/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1567,6 +1784,17 @@ DESCRIPTION:FOMC meeting Nov 16–17. Statement at 2:00 pm ET\, press conf
  erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
  eral Reserve.
 URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1024604@readout
+DTSTAMP:20271124T000000Z
+DTSTART;VALUE=DATE:20271124
+DTEND;VALUE=DATE:20271125
+SUMMARY:Frozen III
+DESCRIPTION:Adventure\, Animation\, Family Third installment in the Disney
+  animated franchise. Plot TBA. Source: TMDB.
+URL:https://www.imdb.com/title/tt26680923/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
