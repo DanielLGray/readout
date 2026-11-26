@@ -61,6 +61,7 @@ def build(http: Http, cfg: dict, news_data: dict, news_archive: dict, state: dic
     credible = set(cfg.get("credible") or [])
     ncfg = load_yaml("news.yaml")
     group_of = {s["name"]: s.get("group", s["name"]) for s in (ncfg.get("sources") or []) + (cfg.get("sources") or [])}
+    releases = frozenset(ncfg.get("releases") or [])
     statuses = []
 
     # 1 — the Radar's own feeds; every headline goes in the archive (for spotting and momentum)
@@ -144,7 +145,7 @@ def build(http: Http, cfg: dict, news_data: dict, news_archive: dict, state: dic
             "momentum": mom, "research": trend, "research_at": (rs or {}).get("at"),
             "papers": (rs or {}).get("papers") or [],
             "preprints": [{k: p[k] for k in ("title", "date", "link", "authors") if p.get(k)} for p in pre.get(t["id"], [])[:6]],
-            "developments": R.developments(mine, now, days, credible, group_of),
+            "developments": R.developments(mine, now, days, credible, group_of, releases=releases),
         })
 
     # 6 — spotting, and adding or retiring topics

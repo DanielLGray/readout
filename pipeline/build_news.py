@@ -234,6 +234,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
 
     # one copy per headline per publisher (sister sites syndicate): keep the one with a summary
     group_of = {src["name"]: src.get("group", src["name"]) for src in cfg.get("sources", [])}
+    releases = frozenset(cfg.get("releases") or [])          # copies of one press release count once
     best: dict[tuple, dict] = {}
     for it in sorted(items.values(), key=lambda i: i["date"]):
         key = (group_of.get(it["source"], it["source"]), it["title"].lower())
@@ -294,7 +295,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         "kinds": cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"},
         "meetings": [{k: v for k, v in m.items() if not k.startswith("_")} for m in meetings],
         "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now,
-                                            group_of=group_of, **top_cfg)
+                                            group_of=group_of, releases=releases, **top_cfg)
                         for k in kinds},
         "trending": {k: {span: news.trending([a for a in arch if a["kind"] == k], now, d, p,
                                              top_n=n_terms, group_of=group_of)
@@ -303,7 +304,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         "items": kept,
     }
     try:
-        out["alerts"] = alerts.news_alerts(kept, cfg, now, group_of)
+        out["alerts"] = alerts.news_alerts(kept, cfg, now, group_of, releases)
     except Exception as exc:          # alerts are a bonus; the news still goes out
         log(f"Alerts: failed ({exc})")
         out["alerts"] = []

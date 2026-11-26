@@ -42,9 +42,10 @@ def rule_for(item: dict, rules: list[dict]) -> Optional[dict]:
     return None
 
 
-def news_alerts(items: list[dict], cfg: dict, now: datetime, group_of: Optional[dict] = None) -> list[dict]:
-    """Stories from the last week that match a rule and that enough outlets (or a primary
-    source) carry. One alert per story, keyed by its first headline so it keeps its id as more
+def news_alerts(items: list[dict], cfg: dict, now: datetime, group_of: Optional[dict] = None,
+                releases: frozenset = frozenset()) -> list[dict]:
+    """Stories from the last week that match a rule and that enough independent sources (or a
+    primary source) carry: sister outlets, copies of one press release and wire copies count once. One alert per story, keyed by its first headline so it keeps its id as more
     outlets pick it up."""
     a = cfg.get("alerts") or {}
     rules = compile_rules(a)
@@ -59,15 +60,14 @@ def news_alerts(items: list[dict], cfg: dict, now: datetime, group_of: Optional[
     hits = [(i, r) for i in recent for r in [rule_for(i, rules)] if r]
     if not hits:
         return []
-    clusters = news.top_stories(recent, now, days=days, limit=10 ** 6, group_of=group_of, min_outlets=1)
+    clusters = news.top_stories(recent, now, days=days, limit=10 ** 6, group_of=group_of, min_outlets=1, releases=releases)
     where = {iid: c for c in clusters for iid in c["items"]}
     by_id = {i["id"]: i for i in recent}
     out: dict[str, dict] = {}
     for it, r in sorted(hits, key=lambda h: h[0]["date"]):
         c = where.get(it["id"]) or {"sources": [it["source"]], "items": [it["id"]], "date": it["date"]}
         srcs = sorted(set(c["sources"]))
-        groups = {group_of.get(s, s) for s in srcs}
-        if len(groups) < need and not (primary & set(srcs)):
+        if c.get("n", 1) < need and not (primary & set(srcs)):
             continue
         members = [by_id[x] for x in c["items"] if x in by_id]
         first = min(members, key=lambda i: i["date"]) if members else it
@@ -77,7 +77,7 @@ def news_alerts(items: list[dict], cfg: dict, now: datetime, group_of: Optional[
         # the headline that names the agency or the guideline, from the primary source if there is one
         lead = next((m for m in members if m["source"] in primary and rule_for(m, rules)), it)
         out[key] = {"id": key, "rule": r["id"], "group": r["group"], "label": r["label"], "title": lead["title"],
-                    "date": first["date"], "updated": c.get("date", it["date"]), "sources": srcs,
+                    "date": first["date"], "updated": c.get("date", it["date"]), "sources": srcs, "n": c.get("n", 1),
                     "items": c["items"], "link": lead.get("link", ""), "via": "news"}
     alerts = sorted(out.values(), key=lambda x: x["date"], reverse=True)
     return alerts[: int(a.get("max", 3))]

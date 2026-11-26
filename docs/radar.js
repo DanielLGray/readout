@@ -5,7 +5,7 @@
 // ── what counts ────────────────────────────────────────────────────────────
 // Early: one credible source (research news, a preprint, a journal's news desk, a major newsroom),
 // or any two publishers. Confirmed: two publishers. Mainstream: three.
-const RADAR_LEVELS = [["early", "Early"], ["confirmed", "2+ outlets"], ["mainstream", "3+ outlets"]];
+const RADAR_LEVELS = [["early", "Early"], ["confirmed", "2+ sources"], ["mainstream", "3+ sources"]];       // independent sources
 const devCounts = (d) => (T.radar.level === "mainstream" ? d.n >= 3 : T.radar.level === "confirmed" ? d.n >= 2 : d.credible || d.n >= 2);
 const RADAR_STATUS = { heating: "Heating up", steady: "Steady", quiet: "Quiet" };
 const RADAR_LABEL = { preprint: "Preprint, not yet peer reviewed", research: "Research news", newsroom: "Newsroom", other: "" };
@@ -139,12 +139,12 @@ function openSpotted(c) {
 function devEl(d) {
   const lab = RADAR_LABEL[d.label] || "";
   const first = d.items?.[0];
-  const open = () => (d.items?.length > 1 ? openStory({ title: d.title, sources: d.sources, date: d.updated, items: d.items.map((_, i) => `${d.id}:${i}`) },
+  const open = () => (d.items?.length > 1 ? openStory({ title: d.title, sources: d.sources, n: d.n, copies: d.copies, date: d.updated, items: d.items.map((_, i) => `${d.id}:${i}`) },
     Object.fromEntries(d.items.map((it, i) => [`${d.id}:${i}`, it]))) : first?.link && window.open(safeUrl(first.link), "_blank", "noopener"));
   return el("li", { class: "news-item" }, el("button", { class: "rd-dev", onclick: open },
-    el("span", { class: "news-src" }, el("b", {}, d.n > 1 ? `${d.n} outlets` : d.sources[0]), lab ? el("span", {}, lab) : null, el("span", {}, agoShort(d.updated || d.date))),
+    el("span", { class: "news-src" }, el("b", {}, d.sources.length > 1 ? coverageText(d) : d.sources[0]), lab ? el("span", {}, lab) : null, el("span", {}, agoShort(d.updated || d.date))),
     el("span", { class: "news-title" }, d.title),
-    d.n > 1 ? el("span", { class: "fine" }, d.sources.join(", ")) : null));
+    d.sources.length > 1 ? el("span", { class: "fine" }, d.sources.join(", ")) : null));
 }
 function drawRadarTopic(id) {
   const t = radarTopics().find((x) => x.id === id) || (S.radar?.topics || []).find((x) => x.id === id);
@@ -199,7 +199,7 @@ function radarCardEl(it) {
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "On your radar"), el("span", {}, "new this week")),
     it.added.map((t) => el("p", { class: "rd-added" }, el("b", {}, "New topic: "), t.name, t.why ? el("span", { class: "fine" }, ` · ${t.why}`) : null)),
     el("ul", { class: "rows" }, it.fresh.map(({ t, d }) => el("li", { class: "news-item" }, el("button", { class: "rd-dev", onclick: () => openRadar(t.id) },
-      el("span", { class: "news-src" }, el("b", {}, t.name), statusChip(t), el("span", {}, d.n > 1 ? `${d.n} outlets` : d.sources[0])),
+      el("span", { class: "news-src" }, el("b", {}, t.name), statusChip(t), el("span", {}, d.sources.length > 1 ? coverageText(d) : d.sources[0])),
       el("span", { class: "news-title" }, d.title))))),
     el("div", { class: "link-row", style: "margin:0" }, el("button", { class: "act", onclick: () => openRadar() }, "Open the Radar")));
   // shown once: marked when it's on screen, so tomorrow brings only what's new
@@ -219,7 +219,7 @@ function radarSection() {
   return el("section", { class: "sect", id: "tune-radar" }, el("h2", {}, "Radar"),
     el("p", { class: "sub" }, "Emerging topics in Explore → Radar, and a Today card when something new counts. Topics you chose stay; ones the Radar spots join after a few weeks of headlines and retire if they don’t pick up within a year and a half."),
     segPick("What counts as a development", RADAR_LEVELS, T.radar.level, (v) => { setTune({ radar: { ...T.radar, level: v } }); rerender(); },
-      "Early: one credible source is enough (research news, a preprint, a journal’s news desk or a major newsroom); anything else needs two outlets. 2+ or 3+ outlets: quieter, but by then it’s rarely early."),
+      "Early: one credible source is enough (research news, a preprint, a journal’s news desk or a major newsroom); anything else needs two independent sources. 2+ or 3+ sources: quieter, but by then it’s rarely early. Independent: sister outlets, copies of one press release and wire copies count once."),
     segPick("Heating up at", [[1.5, "1.5× usual"], [2, "2× usual"], [3, "3× usual"]], T.radar.heat, (v) => { setTune({ radar: { ...T.radar, heat: Number(v) } }); rerender(); },
       "Headlines in the last 30 days against the usual month, and at least 3. Heating topics lead the Radar and its Today card."),
     switchRow("Radar card in Today", "New developments and newly added topics, once each.", T.brief.radar, (on) => { setTune({ brief: { ...T.brief, radar: on } }); rerender(); }),

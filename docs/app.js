@@ -651,7 +651,9 @@ function buildList(f = {}, report = null) {
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
   const only = kind === "all" ? null : kind;
   const tops = T.topCard && system === "all" && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
-  if (kind !== "all") return tops.concat(news.filter((i) => i.kind === kind || (i.also || []).includes(kind)));
+  const sameTitle = new Set();               // one press release (or wire story) under two names: one card
+  const once = (i) => { const k = i.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); if (sameTitle.has(k)) { drop("dupes"); return false; } sameTitle.add(k); return true; };
+  if (kind !== "all") return tops.concat(news.filter((i) => (i.kind === kind || (i.also || []).includes(kind)) && once(i)));
   // Everything: take turns by weight, each stream newest first (or ranked, for papers), so the
   // newest papers sit at the top even though news arrives hours sooner than PubMed records
   const perSource = new Map();
@@ -1010,12 +1012,12 @@ function topPicks(only) {
     const fresh = [], shown = [];
     for (const st of list) {
       const s = topSeen[storyKey(st)];
-      (s && s.t > recent && st.sources.length < (s.n || 0) + 2 ? shown : fresh).push(st);
+      (s && s.t > recent && indepOf(st) < (s.n || 0) + 2 ? shown : fresh).push(st);
     }
     shown.sort((a, b) => topSeen[storyKey(a)].t - topSeen[storyKey(b)].t);   // the longest ago first
     return [label, fresh.concat(shown).slice(0, per), k];
   });
-  for (const [, l] of picked) for (const st of l) topSeen[storyKey(st)] = { t: now, n: st.sources.length };
+  for (const [, l] of picked) for (const st of l) topSeen[storyKey(st)] = { t: now, n: indepOf(st) };
   for (const [key, s] of Object.entries(topSeen)) if (!s || s.t < now - 7 * 864e5) delete topSeen[key];
   store.set("topSeen", topSeen);
   return (S.topPick.lists[slot] = picked);
@@ -1027,21 +1029,35 @@ function topCardEl(only) {
   const span = !ts.days || ts.days === 7 ? "this week" : `in the last ${ts.days} days`;
   return el("article", { class: "card top-card", "data-key": "top" },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Top stories"),
-      el("span", {}, `covered by ${(ts.min_outlets || 2) > 2 ? `${ts.min_outlets} or more outlets` : "more than one outlet"} ${span}`)),
+      el("span", {}, `covered by ${(ts.min_outlets || 2) > 2 ? `${ts.min_outlets} or more independent sources` : "more than one independent source"} ${span}`)),
     el("div", { class: "top-lists" },
       lists.map(([label, list]) => el("section", {},
         el("h3", { class: "top-h" }, label),
         el("ol", { class: "top-list" }, list.map((st) =>
           el("li", {}, el("button", { onclick: () => openStory(st, byId) },
             el("span", { class: "top-title" }, st.title),
-            el("span", { class: "top-meta" }, `${st.sources.length} outlets: ${st.sources.join(", ")}`)))))))),
+            el("span", { class: "top-meta" }, coverageText(st, true))))))))),
     el("p", { class: "fine swipe-hint", style: "margin:0" }, "Swipe up for the latest papers and news."));
 }
 
+// Independent sources (the news job works them out): sister outlets of one publisher, copies of one
+// press release, wire copies and articles republished from another outlet count once.
+const indepOf = (st) => { const all = (st?.sources || []).length; return Number.isInteger(st?.n) && st.n > 0 ? Math.min(st.n, all || st.n) : all; };
+function coverageText(st, names = false) {
+  const all = (st.sources || []).length, n = indepOf(st);
+  const head = n < all ? `${all} outlets, ${n} independent` : plural(all, "outlet");
+  return names ? `${head}: ${st.sources.join(", ")}` : head;
+}
+const andList = (l) => (l.length <= 2 ? l.join(" and ") : `${l.slice(0, -1).join(", ")} and ${l[l.length - 1]}`);
+function copiesNote(st) {
+  const c = (st.copies || []).filter((g) => (g.sources || []).length > 1);
+  return c.length ? el("p", { class: "fine" }, "Counted once: ", c.map((g) => `${andList(g.sources)} (${(g.why || []).join("; ")})`).join("; "), ".") : null;
+}
 function openStory(st, byId) {
   openSheet(
     el("h2", { id: "sheet-title" }, st.title),
-    el("p", { class: "sheet-meta" }, el("span", {}, `${st.sources.length} outlets`), el("span", {}, agoShort(st.date))),
+    el("p", { class: "sheet-meta" }, el("span", {}, coverageText(st)), el("span", {}, agoShort(st.date))),
+    copiesNote(st),
     el("ul", { class: "rows" }, st.items.map((id) => byId[id]).filter(Boolean).map((it) =>
       el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
         el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date))),
@@ -1537,11 +1553,11 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline, the outlet’s own short summary and, when its feed says, who wrote it (Tune → Reading → Bylines); Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline, the outlet’s own short summary and, when its feed says, who wrote it (Tune → Reading → Bylines); Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week: sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Radar"),
-    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two outlets do; Tune can ask for 2+ or 3+ outlets instead. Each topic shows headlines this month against the usual (Heating up at twice the usual, or what you set in Tune → Interests → Radar) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
+    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two independent sources do; Tune can ask for 2+ or 3+ independent sources instead. Each topic shows headlines this month against the usual (Heating up at twice the usual, or what you set in Tune → Interests → Radar) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
     el("h3", {}, "Watch"),
     el("p", {}, "Explore → Watch lists what changed in the public records: trials on ClinicalTrials.gov in your topics (radioligand therapy, PET and SPECT tracers, TAVR, cardiac CT, screening, AI) that registered, changed status, posted results, or reached or moved their primary completion; the FDA’s radiology-panel device clearances (AI software marked) and new heart-valve approvals; new radiopharmaceuticals and contrast agents and new indications for them; and Medicare payment, NRC Part 35 and FDA radiology rules and guidance. A card in Today shows what’s new once. Major changes are alerts. Phase 3 readouts ahead and rule deadlines appear in Coming up. Follow a trial from its page to see every change to it."),
     el("h3", {}, "Death notices"),

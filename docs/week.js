@@ -21,7 +21,7 @@ function weekSummary() {
     && !hiddenByTaste({ ...I.papers[m.pmid], type: "paper" }) && homeArea(I.papers[m.pmid]));
   const seen = new Set();
   const stories = topStoryLists(null).flatMap(([, l]) => l).filter((st) => !seen.has(storyKey(st)) && seen.add(storyKey(st)))
-    .sort((a, b) => b.sources.length - a.sources.length).slice(0, 5);
+    .sort((a, b) => indepOf(b) - indepOf(a) || b.sources.length - a.sources.length).slice(0, 5);
   const st = statsFor(7);
   const reading = [0, 1, 2, 4].map((i) => Object.values(st.k).reduce((a, v) => a + (v[i] || 0), 0));
   const ahead = typeof hzEvents === "function" ? hzEvents(7) : [];
@@ -51,7 +51,7 @@ function weekLines(w) {
     const m = w.miles[0];
     out.push(["Citations", `${plural(w.miles.length, "paper")} from your areas passed a citation milestone, the biggest ${m.mark} (${S.important.papers[m.pmid].journal})`]);
   }
-  if (w.stories.length) out.push(["Biggest story", `${w.stories[0].title} (${w.stories[0].sources.length} outlets)`]);
+  if (w.stories.length) out.push(["Biggest story", `${w.stories[0].title} (${coverageText(w.stories[0])})`]);
   if (w.reading[0]) out.push(["You", `saw ${plural(w.reading[0], "card")}, opened ${w.reading[1]} and saved ${w.reading[2]}`]);
   return out;
 }
@@ -113,16 +113,16 @@ function drawWeek() {
       w.watch.length ? el("button", { class: "inline-link", onclick: () => openWatch("all") }, "All of Watch") : null),
     sec("Radar", [w.heating.length ? `Heating up: ${w.heating.map((t) => t.name).join(", ")}.` : "", w.added.length ? `New topic: ${w.added.map((t) => t.name).join(", ")}.` : "",
       w.retired.length ? `Retired: ${w.retired.map((r) => r.name).join(", ")}.` : ""].filter(Boolean).join(" ") || null,
-      w.devs.slice(0, 6).map(({ t, d }) => item(() => openRadar(t.id), [el("b", {}, t.name), statusChip(t), el("span", {}, d.n > 1 ? `${d.n} outlets` : d.sources[0])], d.title))),
+      w.devs.slice(0, 6).map(({ t, d }) => item(() => openRadar(t.id), [el("b", {}, t.name), statusChip(t), el("span", {}, d.sources.length > 1 ? coverageText(d) : d.sources[0])], d.title))),
     sec("Citation milestones", "Papers from your areas whose citations passed a round number this week (NIH iCite, counted every Tuesday).",
       w.miles.slice(0, 6).map((m) => {
         const p = I.papers[m.pmid];
         return item(() => openAbstract({ ...p, type: "paper" }), [el("b", {}, p.journal), el("span", {}, `passed ${m.mark} citations`)], p.title,
           `${m.cites.toLocaleString()} now, ${m.was.toLocaleString()} a week before`);
       })),
-    sec("The week’s biggest stories", "By how many outlets covered them.", w.stories.map((st) => {
+    sec("The week’s biggest stories", "By how many independent sources covered them.", w.stories.map((st) => {
       const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));
-      return item(() => openStory(st, byId), [el("b", {}, `${st.sources.length} outlets`), el("span", {}, agoShort(st.date))], st.title);
+      return item(() => openStory(st, byId), [el("b", {}, coverageText(st)), el("span", {}, agoShort(st.date))], st.title);
     })),
     sec("Next 7 days", null, w.ahead.slice(0, 6).map((e) => item(() => openHzEvent(e), [el("b", {}, hzSpan(e) || dayWord(hzStart(e)))], e.title, hzSub(e))),
       w.ahead.length > 6 ? el("button", { class: "inline-link", onclick: openHorizon }, `All ${w.ahead.length} in Coming up`) : null),

@@ -473,7 +473,9 @@ function alertWhen(a) {
 }
 function alertSrc(a) {
   if (a.via === "watch") return [a.ev.what, a.ev.sub].filter(Boolean).join(" · ");
-  return a.via === "pubmed" ? `${a.journal} · from PubMed` : outletsText(a.sources);
+  if (a.via === "pubmed") return `${a.journal} · from PubMed`;
+  const n = indepOf(a);
+  return outletsText(a.sources) + (n < (a.sources || []).length ? ` (${n} independent)` : "");
 }
 function alertOpen(a) {
   if (a.via === "watch") { openWatchEvent(a.ev); return; }
@@ -1048,13 +1050,13 @@ function pickStories(n) {
   const tops = topStoryLists(null).flatMap(([label, list, k]) => ((T.mix[k] ?? 1) > 0 ? list.map((st) => ({ st, k, label })) : []))
     .filter(({ st }) => !hiddenByTaste({ type: "news", source: st.sources[0], title: st.title }))
     .map((x) => { const lead = newsById.get(x.st.items?.[0]); return { ...x, t: lead ? Math.max(-2, tasteOf({ ...lead, type: "news" })) : 0 }; })
-    .sort((a, b) => (b.st.sources.length + b.t) - (a.st.sources.length + a.t) || (a.st.date < b.st.date ? 1 : -1));
+    .sort((a, b) => (indepOf(b.st) + b.t) - (indepOf(a.st) + a.t) || (a.st.date < b.st.date ? 1 : -1));
   const out = [];
   for (const pass of [1, 2]) {               // one story per kind first, so one busy kind can't take every slot
     for (const { st, label } of tops) {
       if (out.length >= n) break;
       if (out.some((o) => o.title === st.title) || (pass === 1 && out.some((o) => o.label === label))) continue;
-      out.push({ title: st.title, items: st.items, sources: st.sources, date: st.date, label });
+      out.push({ title: st.title, items: st.items, sources: st.sources, n: indepOf(st), copies: st.copies, date: st.date, label });
     }
   }
   if (out.length < n) {                      // a quiet week: the newest industry stories instead
@@ -1137,11 +1139,11 @@ function briefStoriesEl(it) {
   const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));
   return el("article", { class: "card brief-card top-card", "data-key": "brief:stories" },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, it.stories.length === 1 ? "Today’s story" : "Today’s stories"),
-      el("span", {}, "the ones most outlets covered")),
+      el("span", {}, "the ones the most independent sources covered")),
     el("div", { class: "top-lists" }, el("ol", { class: "top-list brief-stories" }, it.stories.map((st) => {
       const first = byId[st.items[0]];
       return el("li", {}, el("button", { onclick: () => (st.items.length > 1 ? openStory(st, byId) : first && window.open(safeUrl(first.link), "_blank", "noopener")) },
-        el("span", { class: "top-meta" }, `${st.label} · ${st.sources.length > 1 ? `${st.sources.length} outlets` : st.sources[0]}`),
+        el("span", { class: "top-meta" }, `${st.label} · ${st.sources.length > 1 ? coverageText(st) : st.sources[0]}`),
         el("span", { class: "top-title" }, st.title),
         first?.summary ? el("span", { class: "news-teaser clamp2" }, first.summary) : null));
     }))),

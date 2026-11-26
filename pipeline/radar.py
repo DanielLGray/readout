@@ -68,14 +68,14 @@ def label_for(sources: set, credible: set) -> str:
 
 
 def developments(items: list[dict], now: datetime, days: int, credible: set, group_of: Optional[dict] = None,
-                 limit: int = 30) -> list[dict]:
+                 limit: int = 30, releases: frozenset = frozenset()) -> list[dict]:
     """Group a topic's items into developments. Each keeps its first headline's id, so it keeps
     its identity as more outlets pick it up."""
     group_of = group_of or {}
     cutoff = news._utc(now - timedelta(days=days))
     recent = [i for i in items if i.get("date", "") >= cutoff]
     by_id = {i["id"]: i for i in recent}
-    clusters = news.top_stories(recent, now, days=days, limit=10 ** 6, group_of=group_of, min_outlets=1)
+    clusters = news.top_stories(recent, now, days=days, limit=10 ** 6, group_of=group_of, min_outlets=1, releases=releases)
     seen, out = set(), []
     groups = [[by_id[x] for x in c["items"] if x in by_id] for c in clusters]
     groups += [[i] for i in recent if not any(i["id"] in c["items"] for c in clusters)]     # too short to cluster
@@ -88,9 +88,10 @@ def developments(items: list[dict], now: datetime, days: int, credible: set, gro
         first, last = members[0], members[-1]
         sources = {m["source"] for m in members}
         lead = next((m for m in members if m["source"] in credible), first)
+        lin = news.lineage(members, group_of, releases) if len(sources) > 1 else [{"sources": sorted(sources), "why": []}]
         out.append({
             "id": f"d:{first['id']}", "title": lead["title"], "date": first["date"], "updated": last["date"],
-            "sources": sorted(sources), "n": len({group_of.get(s, s) for s in sources}),
+            "sources": sorted(sources), "n": len(lin), **({"copies": [g for g in lin if g["why"]]} if any(g["why"] for g in lin) else {}),
             "credible": bool(sources & credible), "label": label_for(sources, credible),
             "items": [{k: m[k] for k in ("title", "source", "date", "link") if m.get(k)}
                       for m in sorted(members, key=lambda m: m["date"], reverse=True)[:6]],

@@ -538,7 +538,7 @@ function mixPreview(n) {
 function alertsSection() {
   const n = activeAlerts().length;
   return el("section", { class: "sect", id: "tune-alerts" }, el("h2", {}, "Alerts"),
-    el("p", { class: "sub" }, "Rare, and pinned at the top of Everything and Today for a week. A news story counts only when two outlets carry it, or the FDA or a society says it itself; new guidelines also come straight from PubMed."),
+    el("p", { class: "sub" }, "Rare, and pinned at the top of Everything and Today for a week. A news story counts only when two independent sources carry it (copies of one press release or wire story count once), or the FDA or a society says it itself; new guidelines also come straight from PubMed."),
     Object.entries(ALERT_GROUPS).map(([k, [name, what]]) => switchRow(name, what, T.alerts[k] !== false,
       (on) => { setTune({ alerts: { ...T.alerts, [k]: on } }); S.feedDirty = true; rerender(); })),
     el("div", { class: "link-row" }, el("button", { class: "act", onclick: openAlerts }, n ? `This week’s alerts (${n})` : "This week’s alerts")));

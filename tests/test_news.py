@@ -454,3 +454,44 @@ def test_bylines():
     assert news.byline({"author": "Ingrid Fadelli, Phys.org"}, "Phys.org") == ["Ingrid Fadelli"]
     assert news.byline({"author": "The Associated Press"}, "AP") == [] == news.byline({"author": "WNYC Studios"}, "Science Friday")
     assert news.byline({"authors": [{"name": f"Ann Person{c}"} for c in "abcd"]}, "X") == ["Ann Persona", "Ann Personb", "Ann Personc"]
+
+
+def test_independent_sources():
+    def it(i, source, title="Gut microbes tied to faster healing after knee surgery", summary="", via=""):
+        x = {"id": f"s{i}", "title": title, "source": source, "date": "2026-11-22T10:00:00Z", "summary": summary, "link": f"https://x.test/{i}"}
+        if via:
+            x["via"] = via
+        return x
+    group_of = {"NPR News": "npr", "NPR Health": "npr", "Medical Xpress Radiology": "sciencex", "Phys.org": "sciencex"}
+    releases = frozenset({"sciencex", "ScienceDaily"})
+    release = "Researchers at the University of Somewhere found that patients whose gut bacteria were more varied healed faster after knee replacement surgery."
+    items = [it(1, "ScienceDaily", summary=release), it(2, "Medical Xpress Radiology", summary=release + " More."),
+             it(3, "NPR Health", "Your gut bacteria may speed healing after knee surgery"), it(4, "NPR News", "Knee surgery healing linked to gut microbes"),
+             it(5, "STAT", "Microbiome diversity and knee surgery healing: a new study"),
+             it(6, "Live Science", "Why gut microbes might help knees heal after surgery", via="The Conversation"),
+             it(7, "The Conversation", "How gut microbes help knees heal after surgery")]
+    lin = news.lineage(items, group_of, releases)
+    by = {tuple(g["sources"]): g["why"] for g in lin}
+    assert len(lin) == 4
+    assert by[("Medical Xpress Radiology", "ScienceDaily")] == ["the same press release"]
+    assert by[("NPR Health", "NPR News")] == ["one newsroom"]
+    assert by[("Live Science", "The Conversation")] == ["republished from The Conversation"] and by[("STAT",)] == []
+    # two wire copies under different mastheads are one story; the same words without the marker too
+    wire = [it(1, "NPR News", "Senate passes the budget", via="Associated Press"), it(2, "BBC News", "US Senate passes budget bill", via="Associated Press"),
+            it(3, "WSJ Markets", "Budget passes Senate; markets shrug")]
+    assert len(news.lineage(wire, group_of)) == 2
+    same = [it(1, "KFF Health News", summary="A long story about hospital prices " * 4), it(2, "CBS", summary="A long story about hospital prices " * 4)]
+    assert news.lineage(same)[0]["why"] == ["the same text"]
+    # top stories count independent sources: two copies of one release aren't two outlets
+    stories = news.top_stories(items[:2], NOW, group_of=group_of, releases=releases)
+    assert stories == []
+    stories = news.top_stories(items, NOW, group_of=group_of, releases=releases)
+    assert stories[0]["n"] == 4 and len(stories[0]["sources"]) == 7 and len(stories[0]["copies"]) == 3
+
+
+def test_origin_in():
+    assert news.origin_in({"author": "Associated Press"}, "") == "Associated Press"
+    assert news.origin_in({}, "WASHINGTON (AP) — The Senate voted on Tuesday") == "Associated Press"
+    assert news.origin_in({}, "<p>Text.</p><p>This article is republished from <a href='x'>The Conversation</a> under a Creative Commons license.</p>") == "The Conversation"
+    assert news.origin_in({}, "This story was originally published by KFF Health News.") == "KFF Health News"
+    assert news.origin_in({"author": "Jane Doe"}, "A plain summary about AP courses (AP Biology).") == ""

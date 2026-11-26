@@ -248,6 +248,31 @@ def byline(e, source: str) -> list[str]:
     return out[:3]
 
 
+# ── where a story came from ──────────────────────────────────────────────────
+ORIGINS = {"conversation": "The Conversation", "the conversation": "The Conversation", "kaiser health news": "KFF Health News",
+           "kff health news": "KFF Health News", "associated press": "Associated Press", "the associated press": "Associated Press",
+           "ap": "Associated Press", "reuters": "Reuters", "afp": "AFP", "agence france-presse": "AFP", "bloomberg": "Bloomberg",
+           "propublica": "ProPublica", "undark": "Undark", "knowable magazine": "Knowable Magazine", "grist": "Grist",
+           "inside climate news": "Inside Climate News", "calmatters": "CalMatters", "stateline": "Stateline"}
+WIRES = {"Associated Press", "Reuters", "AFP", "Bloomberg"}
+_REPUB = re.compile(r"\b(?:re-?published|reprinted|syndicated|originally (?:published|appeared|ran)|first (?:published|appeared))\s+"
+                    r"(?:here\s+)?(?:from|in|on|by|at|with)\s+(?:the\s+)?(Conversation|KFF Health News|Kaiser Health News|ProPublica|Undark|"
+                    r"Knowable Magazine|Grist|Inside Climate News|CalMatters|Stateline|Associated Press|Reuters|Bloomberg)\b", re.I)
+_WIRE_LEAD = re.compile(r"^\s*(?:[A-Z][A-Za-z .,'-]{1,40}\s*)?\((AP|Reuters|AFP|Bloomberg)\)\s*(?:--|—|–|-)", re.M)
+
+
+def origin_in(e, raw: str) -> str:
+    """The wire or outlet a story is a copy of, if its feed says so: an AP or Reuters byline, a
+    "(AP) —" dateline, or "This article is republished from The Conversation"."""
+    name = str((e.get("author_detail") or {}).get("name") or e.get("author") or "").strip()
+    key = re.sub(r"^by\s+", "", name, flags=re.I).strip(" .").lower()
+    if key in ORIGINS and ORIGINS[key] in WIRES | {"KFF Health News", "The Conversation"}:
+        return ORIGINS[key]
+    text = clean_text(raw)
+    m = _WIRE_LEAD.search(html.unescape(re.sub(r"<[^>]+>", " ", raw or ""))[:300]) or _REPUB.search(text)
+    return ORIGINS.get(m.group(1).lower(), "") if m else ""
+
+
 def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, style: str = "") -> list[dict]:
     """RSS, Atom or a Google News sitemap → [{id, title, link, source, date, summary}].
     verbatim: the outlet's terms say not to edit headlines, text or links (ScienceDaily, Medical
@@ -281,6 +306,9 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
         by = byline(e, source)
         if by:
             item["by"] = by
+        via = origin_in(e, summary + " " + ((e.get("content") or [{}])[0].get("value", "") or ""))
+        if via and via.lower() != source.lower():
+            item["via"] = via                      # a wire story, or republished from another outlet
         audio = _audio(e)                          # podcast episode: playable in the app
         if img and not (audio and "brightspotcdn.com" not in img):     # episode art is mostly the show's, at full size
             item["img"] = img
@@ -391,10 +419,90 @@ def _core(cluster: dict) -> set:
     return {x for x, k in seen.items() if k >= (1 if n == 1 else max(2, math.ceil(n / 2)))}
 
 
+# ── independent sources ──────────────────────────────────────────────────────
+# Many headlines can rest on one origin: sister sites of one publisher, copies of one press release
+# (ScienceDaily, Medical Xpress and Phys.org mostly carry institutions' releases), a wire story, an
+# article republished from The Conversation or KFF Health News, or the same text under two mastheads.
+# A story's independent sources are what's left when each of those counts once.
+WHY = {"publisher": "one newsroom", "release": "the same press release", "text": "the same text"}
+
+
+def publisher_of(item: dict, group_of: Optional[dict] = None) -> str:
+    """The publisher behind an outlet: its group in the config (NPR's feeds are one newsroom)."""
+    return (group_of or {}).get(item["source"], item["source"])
+
+
+def _shingles(text: str) -> set:
+    w = re.findall(r"[a-z0-9]+", (text or "").lower())
+    return {" ".join(w[i:i + 4]) for i in range(len(w) - 3)}
+
+
+def lineage(items: list[dict], group_of: Optional[dict] = None, releases: frozenset = frozenset()) -> list[dict]:
+    """One story's items grouped by origin: [{"sources": [...], "why": [...]}], one entry per
+    independent source; `why` says what tied a group's outlets together."""
+    group_of = group_of or {}
+    n = len(items)
+    parent = list(range(n))
+    why: list[set] = [set() for _ in range(n)]
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def join(a: int, b: int, reason: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+            why[ra] |= why[rb]
+        if items[a]["source"] != items[b]["source"]:
+            why[ra].add(reason)
+
+    pubs = [publisher_of(i, group_of) for i in items]
+    first: dict = {}
+    for k, p in enumerate(pubs):
+        if p in first:
+            join(first[p], k, WHY["publisher"])
+        else:
+            first[p] = k
+    rel = [k for k, i in enumerate(items) if i["source"] in releases or group_of.get(i["source"]) in releases]
+    for k in rel[1:]:
+        join(rel[0], k, WHY["release"])
+    for k, i in enumerate(items):
+        o = i.get("via")
+        if not o:
+            continue
+        for j, other in enumerate(items):
+            if j != k and (other.get("via") == o or o in (other["source"], pubs[j], group_of.get(other["source"]))):
+                join(j, k, f"the same {o} story" if o in WIRES else f"republished from {o}")
+    sh = [_shingles(i.get("summary")) if len(i.get("summary") or "") >= 80 else set() for i in items]
+    norm = [re.sub(r"[^a-z0-9]+", " ", i["title"].lower()).strip() for i in items]
+    for a in range(n):
+        for b in range(a + 1, n):
+            if pubs[a] == pubs[b] or find(a) == find(b):
+                continue
+            same = len(norm[a]) > 25 and norm[a] == norm[b]
+            if not same and sh[a] and sh[b]:
+                same = len(sh[a] & sh[b]) / len(sh[a] | sh[b]) >= 0.5
+            if same:
+                join(a, b, WHY["text"])
+    groups: dict = {}
+    for k in range(n):
+        groups.setdefault(find(k), []).append(k)
+    out = []
+    for root, ks in groups.items():
+        srcs = sorted({items[k]["source"] for k in ks})
+        out.append({"sources": srcs, "why": sorted(why[root]) if len(srcs) > 1 else []})
+    return out
+
+
 def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
-                group_of: Optional[dict] = None, min_outlets: int = 2, match: float = 0.5) -> list[dict]:
-    """Stories several publishers covered in the last `days` days, most-covered first.
-    `group_of` maps sister outlets to one publisher so syndicated copies count once."""
+                group_of: Optional[dict] = None, min_outlets: int = 2, match: float = 0.5,
+                releases: frozenset = frozenset()) -> list[dict]:
+    """Stories several independent sources covered in the last `days` days, most-covered first.
+    `group_of` maps sister outlets to one publisher; `releases` names the outlets that mostly carry
+    press releases, so copies of one count once (see lineage)."""
     group_of = group_of or {}
     cutoff = _utc(now - timedelta(days=days))
     recent = sorted((i for i in items if i["date"] >= cutoff), key=lambda i: i["date"])
@@ -436,12 +544,17 @@ def top_stories(items: list[dict], now: datetime, days: int = 7, limit: int = 8,
     out = []
     for c in clusters:
         sources = sorted({i["source"] for i in c["items"]})
-        if len({group_of.get(i["source"], i["source"]) for i in c["items"]}) < min_outlets:
+        lin = lineage(c["items"], group_of, releases) if len(sources) > 1 else [{"sources": sources, "why": []}]
+        if len(lin) < min_outlets:
             continue
         lead = max(c["items"], key=lambda i: (len(i.get("summary", "")), i["date"]))
-        out.append({"title": lead["title"], "date": max(i["date"] for i in c["items"]),
-                    "sources": sources, "items": [i["id"] for i in sorted(c["items"], key=lambda i: i["date"], reverse=True)]})
-    out.sort(key=lambda c: (len({group_of.get(x, x) for x in c["sources"]}), c["date"]), reverse=True)
+        story = {"title": lead["title"], "date": max(i["date"] for i in c["items"]), "sources": sources, "n": len(lin),
+                 "items": [i["id"] for i in sorted(c["items"], key=lambda i: i["date"], reverse=True)]}
+        copies = [g for g in lin if g["why"]]
+        if copies:
+            story["copies"] = copies
+        out.append(story)
+    out.sort(key=lambda c: (c["n"], len(c["sources"]), c["date"]), reverse=True)
     return out[:limit]
 
 
