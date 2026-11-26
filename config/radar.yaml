@@ -1,0 +1,133 @@
+# Radar: emerging ideas, before they're mainstream (pipeline/build_radar.py, daily).
+#
+# Each topic gathers developments from research news (Science X: Phys.org and Tech Xplore, which
+# allow their feeds to be shown with credit and unchanged text), new preprints (arXiv, whose metadata
+# is CC0) and the outlets the news job reads. A development counts at the app's "Early" setting
+# when one credible source reported it (a research news service, a preprint, a journal's news desk
+# or a major newsroom); anything from other outlets needs two publishers. The app can be stricter
+# (two or three outlets). Research momentum comes from OpenAlex (CC0), with a free key in the
+# OPENALEX_API_KEY secret; without one only a few topics refresh each day.
+#
+# Topics you list here stay until you remove them. The job also spots new phrases rising across
+# science and business headlines; one that keeps rising for a few weeks becomes a Radar topic by
+# itself, and one of those that hasn't picked up within `retire_months` is retired.
+
+settings:
+  days: 120                # developments listed per topic
+  max_auto: 8              # topics the job may add by itself at once
+  retire_months: 18        # an added topic that never heats up in this long is retired
+  quiet_retire_months: 6   # ...or one with no headlines at all for this long
+  archive_days: 760        # headlines kept for momentum and spotting new topics
+  heating: 2.0             # a month with this many times the usual headlines (and at least 3) is "heating up"
+
+# One of these is enough at the Early setting. Others need a second publisher.
+credible:
+  - Phys.org
+  - Phys.org research
+  - Tech Xplore
+  - arXiv
+  - Nature
+  - Science
+  - Science News
+  - Quanta Magazine
+  - New York Times Science
+  - New York Times
+  - New York Times Business
+  - Wall Street Journal
+  - WSJ Markets
+  - WSJ Business
+  - NPR Science
+  - NPR News
+  - NPR Short Wave
+  - BBC News
+  - Ars Technica
+  - STAT
+  - The Conversation
+  - Scientific American
+  - NASA
+  - Knowable Magazine
+
+# Feeds read only for the Radar (all Science X: credit kept, headlines and links unchanged).
+sources:
+  - name: Phys.org research
+    group: sciencex
+    verbatim: true
+    merge: true
+    home: https://phys.org
+    stale_days: 60
+    urls:
+      - https://phys.org/rss-feed/breaking/physics-news/plasma/
+      - https://phys.org/rss-feed/physics-news/plasma/
+      - https://phys.org/rss-feed/breaking/physics-news/quantum-physics/
+      - https://phys.org/rss-feed/physics-news/quantum-physics/
+      - https://phys.org/rss-feed/breaking/space-news/space-exploration/
+      - https://phys.org/rss-feed/space-news/space-exploration/
+      - https://phys.org/rss-feed/breaking/nanotech-news/nano-materials/
+      - https://phys.org/rss-feed/nanotech-news/nano-materials/
+      - https://phys.org/rss-feed/partners/us-department-of-energy/
+      - https://phys.org/rss-feed/physics-news/
+      - https://phys.org/rss-feed/technology-news/
+  - name: Tech Xplore
+    group: sciencex
+    verbatim: true
+    merge: true
+    home: https://techxplore.com
+    stale_days: 60
+    urls:
+      - https://techxplore.com/rss-feed/energy-green-tech-news/
+      - https://techxplore.com/rss-feed/hi-tech-news/
+      - https://techxplore.com/rss-feed/
+
+# Topics you chose. words: any of these in a headline or summary (case doesn't matter; whole words).
+# require: optional, must also match (for short words with other meanings). exclude: never these.
+# arxiv: the preprint search. openalex: the research search (title and abstract).
+topics:
+  - id: fusion
+    name: Fusion energy
+    words: [nuclear fusion, fusion energy, fusion power, fusion reactor, fusion reactors, fusion plant, fusion power plant,
+            fusion startup, tokamak, tokamaks, stellarator, stellarators, inertial confinement, inertial fusion, laser fusion,
+            fusion ignition, Commonwealth Fusion, Helion, TAE Technologies, Zap Energy, General Fusion, Tokamak Energy,
+            ITER, National Ignition Facility, Wendelstein, SPARC, JT-60SA, magnetic confinement]
+    exclude: '\b(?:spinal|image|data|sensor|protein|gene|cell|membrane|vesicle|mitochondrial|cuisine|jazz)\s+fusion\b|\bfusion (?:protein|gene|cuisine)\b'
+    arxiv: 'abs:tokamak OR abs:stellarator OR abs:"fusion reactor" OR abs:"fusion energy" OR abs:"inertial confinement fusion"'
+    openalex: '"nuclear fusion" OR tokamak OR stellarator OR "fusion energy" OR "inertial confinement fusion"'
+  - id: space-elevator
+    name: Space elevators and tethers
+    words: [space elevator, space elevators, lunar elevator, space tether, space tethers, orbital tether, skyhook,
+            electrodynamic tether, momentum exchange tether, orbital ring, carbon nanotube fiber, carbon nanotube fibers,
+            graphene fiber, graphene fibers, strongest material, ultra-strong fiber]
+    arxiv: 'abs:"space elevator" OR abs:"space tether" OR abs:"electrodynamic tether" OR abs:"orbital tether" OR abs:skyhook'
+    openalex: '"space elevator" OR "space tether" OR "electrodynamic tether" OR "orbital tether" OR skyhook'
+  - id: smr
+    name: Advanced nuclear (SMRs)
+    words: [small modular reactor, small modular reactors, SMR, SMRs, microreactor, microreactors, advanced reactor,
+            advanced reactors, advanced nuclear, NuScale, X-energy, TerraPower, Kairos Power, Oklo, molten salt reactor,
+            molten-salt reactor, HALEU, fast reactor, Natrium, BWRX-300, Rolls-Royce SMR, nuclear startup]
+    require: '\b(?:nuclear|reactor|reactors|fission|uranium|NuScale|TerraPower|Oklo|Kairos|X-energy|HALEU|microreactor\w*)\b'
+    arxiv: 'abs:"small modular reactor" OR abs:microreactor OR abs:"molten salt reactor" OR abs:"advanced reactor"'
+    openalex: '"small modular reactor" OR microreactor OR "molten salt reactor" OR "advanced nuclear reactor"'
+  - id: quantum
+    name: Quantum computing
+    words: [quantum computer, quantum computers, quantum computing, qubit, qubits, logical qubit, logical qubits,
+            quantum error correction, quantum advantage, quantum supremacy, topological qubit, trapped-ion, trapped ion,
+            neutral-atom quantum, superconducting qubit, IonQ, Rigetti, Quantinuum, PsiQuantum, D-Wave, Pasqal,
+            IBM Quantum, Google Quantum AI, quantum processor, quantum chip]
+    arxiv: 'abs:"logical qubit" OR abs:"quantum error correction" OR abs:"fault-tolerant quantum" OR abs:"quantum advantage"'
+    openalex: '"quantum computing" OR "quantum computer" OR "quantum error correction" OR "logical qubits"'
+
+# Spotting new topics: phrases in science and business headlines (and Radar feeds) that are new
+# or rising. A phrase needs `min_headlines` headlines from `min_publishers` publishers in the last
+# `window_days` days, and at most `max_prior` in the `prior_days` before. It becomes a Radar topic
+# once it has kept showing up in `weeks_to_watch` different weeks within `watch_within_weeks`.
+spot:
+  window_days: 30
+  prior_days: 120
+  min_headlines: 3
+  min_publishers: 2
+  max_prior: 1
+  weeks_to_watch: 3
+  watch_within_weeks: 8
+  kinds: [science, business, health]
+  max_candidates: 12
+  # never topics: seasons, holidays, people's titles, the obvious
+  skip: '^(?:black friday|cyber monday|thanksgiving|christmas|new year|super bowl|wall street|stock market|interest rates?|fed|ceo|ipo|nasa|spacex|elon musk|trump|biden|harris|white house|congress|supreme court|earnings|holiday shopping|year in review|best of|this week|sci-fi|tv)$'

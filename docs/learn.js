@@ -968,6 +968,8 @@ function briefList() {
   const out = [...alertCards(), { type: "brief-cover", key: "brief:cover", sig, plan, classic, wide, fd, stories, light }];
   const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(7) : [];
   if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
+  const rd = typeof radarCardItem === "function" ? radarCardItem() : null;
+  if (rd) out.push(rd);
   papers.forEach((p, i) => {
     out.push(p);
     if (i === 1 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
@@ -985,6 +987,7 @@ function briefList() {
 function briefCardEl(it) {
   if (it.type === "alert") return alertCardEl(it);
   if (it.type === "brief-horizon") return hzCardEl(it);
+  if (it.type === "brief-radar") return radarCardEl(it);
   if (it.type === "brief-cover") return briefCoverEl(it);
   if (it.type === "brief-stories") return briefStoriesEl(it);
   if (it.type === "fd-next") return fdNextEl(it);

@@ -156,13 +156,14 @@ const TUNE_DEFAULTS = {
   swipe: true,          // swipe a card left to save it, right to clear it
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
+  radar: { level: "early", hidden: [], hiddenSpots: [] },   // the Radar: what counts as a development; topics and phrases you hid
   obits: "wide",        // death notices: "wide" (only those many outlets ran, or high office), "all" or "none"
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true },   // what Today holds
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true },   // what Today holds
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
@@ -204,6 +205,8 @@ function loadTune() {
     swipe: t.swipe !== false,
     cardLayout: t.cardLayout === "paged" ? "paged" : "compact",
     obits: ["wide", "all", "none"].includes(t.obits) ? t.obits : "wide",
+    radar: { level: ["early", "confirmed", "mainstream"].includes(t.radar?.level) ? t.radar.level : "early",
+      hidden: strs(t.radar?.hidden).slice(0, 200), hiddenSpots: strs(t.radar?.hiddenSpots).slice(-200) },
     alerts: Object.fromEntries(Object.keys(ALERT_GROUPS).map((k) => [k, (t.alerts || {})[k] !== false])),
     horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
@@ -216,7 +219,7 @@ function loadTune() {
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
     brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
-      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false,
+      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false, radar: b.radar !== false,
       wide: b.wide !== false },
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
     pictures: t.pictures !== false,
@@ -250,7 +253,7 @@ const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
 let seenRecent = store.get("seenRecent", null);
 if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
-const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "alert"]);
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "alert"]);
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
@@ -1502,6 +1505,8 @@ function openInfo() {
     el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
+    el("h3", {}, "Radar"),
+    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two outlets do; Tune can ask for 2+ or 3+ outlets instead. Each topic shows headlines this month against the usual (Heating up at twice the usual) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
     el("h3", {}, "Death notices"),
     el("p", {}, "Obituaries show only when at least 3 news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice), so a head of state's death always shows and a less-known person's doesn't. Tune → Rules → Death notices can show all or none. Industry and society news always keep theirs."),
     el("h3", {}, "Alerts"),
@@ -1690,6 +1695,7 @@ function renderExplore(force) {
   const wrap = el("div", { class: "explore" },
     fdEntryEl(),
     typeof hzEntryEl === "function" ? hzEntryEl() : null,
+    typeof radarEntryEl === "function" ? radarEntryEl() : null,
     segEl(() => renderExplore(true)),
     el("p", { class: "ex-note" }, `Papers in the last ${yrs} compared with the ${yrs} before, adjusted for how fast imaging research grew overall. Updated ${ago(x.generated)}.`,
       TR.custom ? [" ", el("button", { class: "inline-link", onclick: () => { switchTab("tune"); setPane("algorithms", "tune-trends"); } }, "Using your trend rules.")] : null),
@@ -1862,6 +1868,7 @@ function closeTopic() {
   refocus(topicOpener);
   const wasFd = S.overlay === "fd";
   if (S.overlay === "hz") S.hzFilter = null;
+  if (S.overlay === "radar") S.radarTopic = null;
   S.overlay = null;
   if (S.tab === "explore") renderExplore(wasFd);   // no-op unless something changed on the page
   if (wasFd && S.tab === "feed") updateFeedQuietly(1e9);     // Today's Foundations card shows your progress
@@ -1950,14 +1957,16 @@ async function reload(announce) {
   S.offline = false;
   const wasImp = S.important?.generated, wasLib = S.library?.generated;
   const wasHz = S.horizon?.generated;
-  const [feed, newsData, important, library, hz] = await Promise.all([
+  const [feed, newsData, important, library, hz, rd] = await Promise.all([
     loadJSON("data/feed.json").catch(() => null),
     loadJSON("data/news.json").catch(() => null),
     loadJSON("data/important.json").catch(() => null),
     loadJSON("data/library.json").catch(() => null),
     loadJSON("data/horizon.json").catch(() => null),
+    loadJSON("data/radar.json").catch(() => null),
   ]);
   if (hz) S.horizon = hz;
+  if (rd) S.radar = rd;
   const hzChanged = !!S.horizon && S.horizon.generated !== wasHz;
   if (typeof earnRefresh === "function") earnRefresh(false);      // earnings dates, with your key, at most once a day
   if (library) S.library = library;
@@ -2009,11 +2018,12 @@ async function reload(announce) {
 
 // open at once from what's on the phone; reload() then brings it up to date
 async function showKept() {
-  const [feed, newsData, important, library, hz] = await Promise.all(["feed", "news", "important", "library", "horizon"].map((f) => keptJSON(`data/${f}.json`)));
+  const [feed, newsData, important, library, hz, rd] = await Promise.all(["feed", "news", "important", "library", "horizon", "radar"].map((f) => keptJSON(`data/${f}.json`)));
   if (!feed && !newsData) return;
   if (S.feed || S.news) return;             // the network won the race
   S.feed = feed; S.news = newsData; S.important = important; S.library = library;
   if (hz && !S.horizon) S.horizon = hz;
+  if (rd && !S.radar) S.radar = rd;
   renderBanner();
   S.loadedAt = Date.now();
   markNewsNew(); markNew();

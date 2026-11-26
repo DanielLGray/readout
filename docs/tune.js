@@ -429,6 +429,7 @@ function interestsPane() {
     tasteSection(),
     meetingsSection(),
     typeof horizonSection === "function" ? horizonSection() : null,
+    typeof radarSection === "function" ? radarSection() : null,
     el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
@@ -726,6 +727,7 @@ const JOBS = {
   important: { wf: "important.yml", cfg: "feeds.yaml", every: 8 * 24, title: "Most important papers", sub: "PubMed and NIH iCite, every Tuesday" },
   library: { wf: "library.yml", cfg: "foundations.yaml", every: 32 * 24, title: "Foundations and classics", sub: "PubMed and NIH iCite, on the 3rd of each month" },
   horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, Federal Register (FDA) and launch calendars, every morning" },
+  radar: { wf: "radar.yml", cfg: "radar.yaml", every: 30, title: "Radar", sub: "Research news, arXiv preprints and OpenAlex research counts, every day" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;
@@ -796,7 +798,7 @@ function setupSection() {
     btns.length ? el("div", { class: "link-row", style: "margin-top:8px" }, btns) : null);
   const ext = (href, label) => el("a", { class: "act", href, target: "_blank", rel: "noopener" }, label);
   return el("section", { class: "sect", id: "tune-setup" }, el("h2", {}, "Set up"),
-    el("p", { class: "sub" }, "Everything Readout can use. The first three are secrets on GitHub (Settings → Secrets and variables → Actions → New repository secret: type the name exactly as shown, paste the value). The last two stay on this phone."),
+    el("p", { class: "sub" }, "Everything Readout can use. The first four are secrets on GitHub (Settings → Secrets and variables → Actions → New repository secret: type the name exactly as shown, paste the value). The last two stay on this phone."),
     row("Contact email (NCBI_EMAIL)",
       f.ncbi_contact === true ? state(true, "Set") : f.ncbi_contact === false ? state(false, "Not set") : state(null, "Shows after the next papers update"),
       "Your email address. PubMed asks automated tools to include one so NCBI can contact you instead of blocking the job. The Coming up job sends it to the Bureau of Labor Statistics too.",
@@ -811,6 +813,12 @@ function setupSection() {
       "Sci-fi and fantasy release dates from TMDB, checked every day and linked to IMDb. Free for personal, non-commercial use.",
       "Make a free TMDB account, then Settings → API → Create (choose Developer, personal use). Copy the API Read Access Token (or the API key). Name: TMDB_TOKEN. Then run Coming up below, or wait for tomorrow’s update.",
       ext("https://www.themoviedb.org/settings/api", "Get a token"), ext(secret, "Add on GitHub")),
+    row("Research counts (OPENALEX_API_KEY)",
+      S.radar?.settings?.openalex_key ? ((S.radar.sources || []).find((x) => x.name === "OpenAlex")?.ok === false ? state(false, "OpenAlex refused it") : state(true, "Set"))
+        : S.radar ? state(false, "Not set") : state(null, "Shows after the first Radar update"),
+      "Lets the Radar track research momentum for every topic each week, and tell a new field from an old one that’s in the news. Without it, a couple of topics refresh a day. Free; the data is open (CC0).",
+      "Make a free account at openalex.org, then copy your key from openalex.org/settings/api. Name: OPENALEX_API_KEY. Then run Radar below, or wait for tomorrow’s update.",
+      ext("https://openalex.org/settings/api", "Get a key"), ext(secret, "Add on GitHub")),
     row("Earnings dates (Alpha Vantage key)",
       store.get("avKey", "") ? (earn?.err && (!earn.at || earn.errAt > earn.at) ? state(false, "Not working") : state(true, "On this phone")) : state(false, "Not set"),
       "Exact earnings dates for the companies you watch, fetched by this phone once a day.",
