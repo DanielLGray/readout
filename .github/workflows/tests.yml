@@ -27,6 +27,7 @@ jobs:
           cache: pip
       - run: pip install --require-hashes -r requirements.txt        # exact versions, checked against their published hashes
       - run: pip install --require-hashes -r requirements-test.txt   # pytest and zizmor, the same way
+      - run: pip install --require-hashes -r requirements-notify.txt # the notify job's push and sealing library, for its tests
       - run: python -m pytest -q
       - name: App scripts parse
         run: for f in docs/*.js; do node --check "$f"; done

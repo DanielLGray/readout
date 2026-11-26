@@ -114,6 +114,10 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
             if e["id"] not in events:
                 events[e["id"]] = {**e, "seen": today.isoformat()}     # the day Watch first saw it (FDA data arrive weeks late)
                 n += 1
+            else:
+                for k, v in e.items():                                 # fields added since it was first seen (company, device type…)
+                    events[e["id"]].setdefault(k, v)
+                events[e["id"]]["title"] = e["title"]                 # and the name as the record has it now
         return n
 
     def handle(study: dict, topic: dict) -> int:

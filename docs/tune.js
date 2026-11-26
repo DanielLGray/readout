@@ -460,7 +460,7 @@ function interestsPane() {
 }
 
 // what you've told Readout you like (learn.js), every rating in one place
-const FEATURE_ORDER = ["sys", "tp", "jr", "ds", "src", "fl", "cat", "by"];
+const FEATURE_ORDER = ["sys", "tp", "jr", "ds", "src", "fl", "cat", "by", "wk", "wt", "wc", "wp", "wa", "wo", "wph"];
 const byFeature = (a, b) => FEATURE_ORDER.indexOf(a.split(":")[0]) - FEATURE_ORDER.indexOf(b.split(":")[0])
   || featureName(a)[0].localeCompare(featureName(b)[0]);
 function tasteRow(f, extra) {
@@ -586,20 +586,38 @@ function hiddenReport(days = 7) {
     if (!isNews && T.hidePending && (it.conclusion?.kind || "none") === "none") { add("pending", "Papers waiting for an abstract", "pending", it, () => setTune({ hidePending: false })); continue; }
     if (isNews && (T.mix[it.kind] ?? 1) <= 0) add(`kind:${it.kind}`, `${kindLabel(it.kind)}, turned off in Everything`, "kind", it, () => setTune({ mix: { ...T.mix, [it.kind]: 1 } }));
   }
+  // Watch: changes hidden by a word or a rating (followed trials always show)
+  const wcut = localDay(daysAgo(days));
+  for (const e of typeof wFeatures === "function" ? S.watch?.events || [] : []) {
+    if (!e?.id || !e.title || (e.seen || e.date || "") < wcut || wFollowing(e.nct)) continue;
+    total++;
+    const it = wItem(e);
+    if (wMuted(e)) {
+      const w = T.watch.mute.find((x) => wordRe([x])?.test(wName(e)));
+      add(`ww:${w}`, `Hidden from Watch: “${w}”`, "word", it, () => setTune({ watch: { ...T.watch, mute: T.watch.mute.filter((x) => x !== w) } }));
+      continue;
+    }
+    if (taste && wTaste(e) === -Infinity) {
+      const f = wFeatures(e).find((x) => T.taste[x] === HIDE);
+      if (f) { const [name, kind] = featureName(f); add(`t:${f}`, `Hidden ${kind.toLowerCase()}: ${name}`, "rating", it, () => setTaste(f, 0)); }
+    }
+  }
   const list = [...groups.values()].sort((a, b) => b.items.length - a.items.length);
   list.forEach((g) => { g.lot = (g.kind === "word" || g.kind === "rating" || g.kind === "outlet") && (g.items.length >= 25 || g.items.length >= total * 0.05); });
   return { list, total, hidden: list.reduce((a, g) => a + g.items.length, 0), days };
 }
 const UNDO_LABEL = { word: "Unmute", outlet: "Unmute", rating: "Show again", obit: "Show all", pending: "Show them", kind: "Turn back on" };
 function openHidden(g) {
-  const row = (it) => el("li", { class: "news-item" }, el("button", { class: "w-row", onclick: () => (it.type === "paper" ? openAbstract(it) : window.open(safeUrl(it.link), "_blank", "noopener")) },
-    el("span", { class: "news-src" }, el("b", {}, it.type === "paper" ? it.journal : it.source), el("span", {}, fmtDate(dayOf(it)))),
+  const day = (it) => (it.type === "watch" ? String(it.date || "").slice(0, 10) : dayOf(it));
+  const row = (it) => el("li", { class: "news-item" }, el("button", { class: "w-row",
+    onclick: () => (it.type === "watch" ? openWatchEvent(it.ev) : it.type === "paper" ? openAbstract(it) : window.open(safeUrl(it.link), "_blank", "noopener")) },
+    el("span", { class: "news-src" }, el("b", {}, it.type === "watch" ? WATCH_SHORT[it.ev.kind] || "Watch" : it.type === "paper" ? it.journal : it.source), el("span", {}, fmtDate(day(it)))),
     el("span", { class: "news-title" }, it.title)));
   openSheet(
     el("h2", { id: "sheet-title" }, g.label),
-    el("p", { class: "sheet-meta" }, el("span", {}, `${plural(g.items.length, "card")} kept out in the last 7 days`)),
+    el("p", { class: "sheet-meta" }, el("span", {}, `${plural(g.items.length, g.items[0]?.type === "watch" ? "Watch change" : "card")} kept out in the last 7 days`)),
     g.lot ? el("p", { class: "fine warn-text" }, "That’s a lot for one filter: check the list for cards you’d have wanted.") : null,
-    el("ul", { class: "rows" }, g.items.sort((a, b) => (dayOf(a) < dayOf(b) ? 1 : -1)).slice(0, 100).map(row)),
+    el("ul", { class: "rows" }, g.items.sort((a, b) => (day(a) < day(b) ? 1 : -1)).slice(0, 100).map(row)),
     g.items.length > 100 ? el("p", { class: "fine" }, `And ${g.items.length - 100} more.`) : null,
     el("div", { class: "link-row" },
       g.undo ? el("button", { class: "act", onclick: () => { g.undo(); closeSheet(); toast("Done: they’re back"); if (S.tab === "tune") rerender(); } }, UNDO_LABEL[g.kind] || "Undo")
@@ -608,7 +626,7 @@ function openHidden(g) {
 function hiddenSection() {
   const r = hiddenReport(7);
   return el("section", { class: "sect", id: "tune-hidden" }, el("h2", {}, "What your filters hid"),
-    el("p", { class: "sub" }, r.hidden ? `In the last 7 days your filters kept ${plural(r.hidden, "card")} of ${r.total.toLocaleString()} out of Everything. Each counts under the first filter that caught it. Kind chips and search still show them.`
+    el("p", { class: "sub" }, r.hidden ? `In the last 7 days your filters kept ${plural(r.hidden, "item")} of ${r.total.toLocaleString()} out of Everything and Watch. Each counts under the first filter that caught it. Kind chips and search still show papers and stories.`
       : "Nothing in the last 7 days. Mutes, ratings set to Hide, death notices and areas you turn off show here with what they kept out."),
     r.list.length ? el("ul", { class: "rows" }, r.list.map((g) => el("li", { class: "row hid-row" },
       el("button", { class: "hid-b", onclick: () => openHidden(g) },

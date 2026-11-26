@@ -182,7 +182,7 @@ const TUNE_DEFAULTS = {
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
   radar: { level: "early", hidden: [], hiddenSpots: [], heat: 2 },
-  watch: { kinds: { trial: true, device: true, drug: true, rule: true }, aiOnly: false, follow: [], hidden: [], dates: true },   // Watch: which kinds, AI-only devices, trials you follow, topics off, dates in Coming up   // the Radar: what counts as a development; topics and phrases you hid; Heating up at this many times the usual
+  watch: { kinds: { trial: true, device: true, drug: true, rule: true }, aiOnly: false, follow: [], hidden: [], dates: true, mute: [] },   // Watch: which kinds, AI-only devices, trials you follow, topics off, dates in Coming up, words hidden from Watch and alerts   // the Radar: what counts as a development; topics and phrases you hid; Heating up at this many times the usual
   obits: "wide",        // death notices: "wide" (only those many outlets ran, or high office), "all" or "none"
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
@@ -244,7 +244,8 @@ function loadTune() {
       heat: [1.5, 2, 3].includes(t.radar?.heat) ? t.radar.heat : 2 },
     watch: { kinds: Object.fromEntries(["trial", "device", "drug", "rule"].map((k) => [k, obj(obj(t.watch).kinds)[k] !== false])),
       aiOnly: obj(t.watch).aiOnly === true, dates: obj(t.watch).dates !== false,
-      follow: [...new Set(strs(obj(t.watch).follow).filter((s) => /^NCT\d{8}$/.test(s)))].slice(-100), hidden: strs(obj(t.watch).hidden).slice(0, 100) },
+      follow: [...new Set(strs(obj(t.watch).follow).filter((s) => /^NCT\d{8}$/.test(s)))].slice(-100), hidden: strs(obj(t.watch).hidden).slice(0, 100),
+      mute: [...new Set(strs(obj(t.watch).mute).map((s) => s.trim()).filter((s) => s && s.length <= 60))].slice(0, 200) },
     alerts: Object.fromEntries(Object.keys(ALERT_GROUPS).map((k) => [k, (t.alerts || {})[k] !== false])),
     horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
@@ -280,6 +281,7 @@ function setTune(patch) {
   S.feedDirty = true;
   S.lastKey = null;          // new rules: start the feed from the top
   S.exploreKey = null;
+  if (typeof choicesChanged === "function") choicesChanged();     // notifications follow the alert choices (push.js)
 }
 
 // ── reading metrics, counted on this phone ─────────────────────────────────
@@ -1585,7 +1587,7 @@ function openInfo() {
     el("h3", {}, "Radar"),
     el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two independent sources do; Tune can ask for 2+ or 3+ independent sources instead. Each topic shows headlines this month against the usual (Heating up at twice the usual, or what you set in Tune → Interests → Radar) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
     el("h3", {}, "Watch"),
-    el("p", {}, "Explore → Watch lists what changed in the public records: trials on ClinicalTrials.gov in your topics (radioligand therapy, PET and SPECT tracers, TAVR, cardiac CT, screening, AI) that registered, changed status, posted results, or reached or moved their primary completion; the FDA’s radiology-panel device clearances (AI software marked) and new heart-valve approvals; new radiopharmaceuticals and contrast agents and new indications for them; and Medicare payment, NRC Part 35 and FDA radiology rules and guidance. A card in Today shows what’s new once. Major changes are alerts. Phase 3 readouts ahead and rule deadlines appear in Coming up. Follow a trial from its page to see every change to it."),
+    el("p", {}, "Explore → Watch lists what changed in the public records: trials on ClinicalTrials.gov in your topics (radioligand therapy, PET and SPECT tracers, TAVR, cardiac CT, screening, AI) that registered, changed status, posted results, or reached or moved their primary completion; the FDA’s radiology-panel device clearances (AI software marked) and new heart-valve approvals; new radiopharmaceuticals and contrast agents and new indications for them; and Medicare payment, NRC Part 35 and FDA radiology rules and guidance. A card in Today shows what’s new once. Major changes are alerts. Phase 3 readouts ahead and rule deadlines appear in Coming up. Follow a trial from its page to see every change to it. Rate on a change’s page, or on any alert, hides or moves down ones like it (a device type, a company, 510(k) clearances, a topic, words in the name) or moves them up; Less keeps them out of Today’s card and alerts, and notifications follow the same choices."),
     el("h3", {}, "Death notices"),
     el("p", {}, "Obituaries show only when at least 3 news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice), so a head of state's death always shows and a less-known person's doesn't. Tune → Rules → Death notices can show all or none. Industry and society news always keep theirs."),
     el("h3", {}, "Alerts"),

@@ -54,10 +54,14 @@ def parse_date(s: str) -> Optional[datetime]:
     return None
 
 
+_C1 = re.compile("[\x80-\x9f]")
+
+
 def clean_text(s: str) -> str:
     s = html.unescape(s or "")                 # some feeds escape their HTML twice ("&lt;p&gt;")
     s = re.sub(r"<[^>]+>", " ", s)
     s = html.unescape(s)
+    s = _C1.sub(lambda m: bytes([ord(m[0])]).decode("cp1252", "ignore"), s)   # ™ and – sent as Windows-1252 bytes (FDA records)
     s = " ".join(s.split())                   # first, so line breaks inside the HTML don't hide the rules below
     s = re.sub(r"\bThe post .{3,200}? (?:appeared first|first appeared) on .{2,80}?\.?$", "", s)
     s = re.sub(r"\b(Continue reading|Read more|READ MORE)\b.*$", "", s, flags=re.I)

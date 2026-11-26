@@ -28,6 +28,7 @@ function designOf(it) {
   return (it.design?.badges || []).filter((b) => b.strength > 0).sort((a, b) => b.strength - a.strength)[0]?.label || null;
 }
 function featuresOf(it) {
+  if (it.type === "watch") return typeof wFeatures === "function" ? wFeatures(it.ev) : [];      // a Watch change: its own features (watch.js)
   const f = [];
   if (isNewsItem(it)) {
     if (it.source) f.push(`src:${it.source}`);
@@ -79,6 +80,13 @@ function featureName(f) {
     case "src": return [v, "Outlet"];
     case "cat": return [S.news?.categories?.[v] || v, "News category"];
     case "by": return [v, "Byline"];
+    case "wk": return [WATCH_KINDS[v] || v, "Watch section"];
+    case "wt": return [S.watch?.topics?.[v] || v, "Watch topic"];
+    case "wc": return [W_CHANGE[v] || v, "Kind of change"];
+    case "wp": return [wCodeName(v), "Device type"];
+    case "wa": return ["AI software", "Kind of device"];
+    case "wo": return [v, "Company or sponsor"];
+    case "wph": return [v, "Trial phase"];
     default: return [v, k];
   }
 }
@@ -172,6 +180,17 @@ function phrasesOf(title, prose = false) {
   return out.filter((p) => { const k = p.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 10);
 }
 
+// one thing about a card, with Hide, Less, Same and More (the Rate sheets for cards, Watch and alerts)
+function rateRow(f, redraw) {
+  const [name, kind] = featureName(f);
+  const lw = T.learned[f] || 0;
+  return el("div", { class: "fb-row" },
+    el("div", { class: "fb-name" }, el("b", {}, name), el("span", {}, kind),
+      T.taste[f] == null && lw ? el("span", { class: "fb-learned" }, lw > 0 ? "leaning more" : "leaning less") : null),
+    el("div", { class: "seg fb-seg", role: "group", "aria-label": name },
+      [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([x, l]) => el("button", { "aria-pressed": String(tastePressed(f, x)),
+        onclick: () => { setTaste(f, x); if (x === HIDE) toast(`${name} hidden. Undo here or in Tune → Interests.`); redraw(); } }, l))));
+}
 function openFeedback(it, picked = null) {
   const news = isNewsItem(it);
   const key = saveKey(it);
@@ -183,16 +202,7 @@ function openFeedback(it, picked = null) {
     const feats = featuresOf(it);
     const order = ["sys", "tp", "jr", "ds", "src", "fl"];
     feats.sort((a, b) => order.indexOf(a.split(":")[0]) - order.indexOf(b.split(":")[0]));
-    const row = (f) => {
-      const [name, kind] = featureName(f);
-      const lw = T.learned[f] || 0;
-      return el("div", { class: "fb-row" },
-        el("div", { class: "fb-name" }, el("b", {}, name), el("span", {}, kind),
-          T.taste[f] == null && lw ? el("span", { class: "fb-learned" }, lw > 0 ? "leaning more" : "leaning less") : null),
-        el("div", { class: "seg fb-seg", role: "group", "aria-label": name },
-          [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([x, l]) => el("button", { "aria-pressed": String(tastePressed(f, x)),
-            onclick: () => { setTaste(f, x); if (x === HIDE) toast(`${name} hidden. Undo here or in Tune → Interests.`); redraw(); } }, l))));
-    };
+    const row = (f) => rateRow(f, redraw);
     const area = !news ? homeArea(it) : null;
     const kind = news ? kindOf(it) : null;
     const followed = (T.follow || []).filter((w) => wordRe([w])?.test(`${it.title} ${shownText(it)}`));
@@ -445,7 +455,8 @@ function activeAlerts() {
   const cut = Date.now() - 7.5 * 864e5;
   const seen = new Set();
   return [...(S.feed?.alerts || []), ...(S.news?.alerts || []), ...(typeof watchAlerts === "function" ? watchAlerts() : [])]
-    .filter((a) => a?.id && a.title && !seen.has(a.id) && seen.add(a.id) && T.alerts?.[a.group] !== false && Date.parse(a.date) >= cut)
+    .filter((a) => a?.id && a.title && !seen.has(a.id) && seen.add(a.id) && T.alerts?.[a.group] !== false && Date.parse(a.date) >= cut
+      && !(typeof alertMuted === "function" && alertMuted(a)))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 function alertCards() {
@@ -500,6 +511,7 @@ function alertCardEl(it) {
     el("p", { class: "alert-src" }, alertSrc(a)),
     el("div", { class: "alert-acts" },
       el("button", { class: "act", onclick: () => alertOpen(a) }, a.via === "watch" ? "Details" : a.via === "pubmed" ? "Abstract" : (a.items || []).length > 1 ? `All ${a.sources.length} outlets` : "Read"),
+      el("button", { class: "act", "aria-label": "Tell Readout what you think of alerts like this", onclick: () => rateAlert(a) }, icon(ICONS.react), "Rate"),
       el("button", { class: "act", onclick: (e) => clearCard(e.currentTarget.closest(".card"), it) }, "Dismiss"),
       it.more ? el("button", { class: "act", onclick: openAlerts }, `${it.more} more`) : null));
 }
@@ -514,7 +526,7 @@ function openAlerts() {
         el("span", { class: "news-title" }, a.title),
         el("span", { class: "alert-src" }, alertSrc(a))))))
       : el("p", { class: "fine" }, "None this week. Most weeks have none: they’re meant to be rare."),
-    el("p", { class: "fine" }, "Choose which kinds in Tune → Rules → Alerts."));
+    el("p", { class: "fine" }, "Tap Rate on an alert to hide alerts like it, or choose which kinds in Tune → Rules → Alerts."));
 }
 
 // ── Outside your areas: one paper a day from the big general journals ─────

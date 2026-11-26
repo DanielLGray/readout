@@ -21,6 +21,7 @@ STATUS = {"NOT_YET_RECRUITING": "Not yet recruiting", "RECRUITING": "Recruiting"
 ACTIVE = {"NOT_YET_RECRUITING", "RECRUITING", "ENROLLING_BY_INVITATION", "ACTIVE_NOT_RECRUITING"}
 STOPPED = {"SUSPENDED", "TERMINATED", "WITHDRAWN"}
 _NCT = re.compile(r"^NCT\d{8}$")
+_PC = re.compile(r"^[A-Z0-9]{3}$")
 
 
 def ymd(s) -> Optional[date]:
@@ -94,7 +95,7 @@ def trial_sub(t: dict) -> str:
 def trial_event(t: dict, topic: dict, code: str, what: str, day: date, level: str = "update") -> dict:
     return {"id": f"trial:{t['nct']}:{code}", "kind": "trial", "topic": topic["id"], "date": day.isoformat(),
             "title": t["title"], "acr": t.get("acr", ""), "what": what, "sub": trial_sub(t), "nct": t["nct"],
-            "link": CT_STUDY.format(t["nct"]), "level": level}
+            "link": CT_STUDY.format(t["nct"]), "level": level, "org": t.get("sponsor") or "", "ph": phase_text(t["phases"])}
 
 
 def trial_events(old: Optional[dict], t: dict, topic: dict, today: date, since: date, shift_days: int) -> list[dict]:
@@ -150,6 +151,19 @@ def readout_date(nct: str, c: dict, topic_name: str) -> Optional[dict]:
 
 
 # ── FDA ────────────────────────────────────────────────────────────────────
+def device_type(r: dict) -> dict:
+    """The FDA's name for the product code, in plain order: "System, Imaging, Pulsed Doppler, Ultrasonic"
+    → "Ultrasonic pulsed doppler imaging system". {} when the record has none."""
+    names = (r.get("openfda") or {}).get("device_name")
+    raw = clean_text(str(names[0] if isinstance(names, list) and names else names or ""))
+    if not raw or len(raw) > 160:
+        return {}
+    words = " ".join(p.strip() for p in reversed(raw.split(",")) if p.strip()).split()
+    keep = lambda w: w if (w.isupper() and 1 < len(w) <= 5) or re.search(r"[A-Z].*[A-Z]", w[1:]) else w.lower()
+    out = " ".join([words[0] if words[0].isupper() and len(words[0]) > 1 else words[0].capitalize()] + [keep(w) for w in words[1:]])
+    return {"pcn": out[:120]}
+
+
 def clearance_event(r: dict, ai_codes: set, ai_re: "re.Pattern") -> Optional[dict]:
     """A 510(k) or De Novo record from openFDA → an event, if it was cleared or granted."""
     k = str(r.get("k_number") or "").strip().upper()
@@ -170,7 +184,8 @@ def clearance_event(r: dict, ai_codes: set, ai_re: "re.Pattern") -> Optional[dic
     return {"id": f"device:{k}", "kind": "device", "topic": "devices", "date": day.isoformat(), "title": name,
             "what": ("Granted De Novo" if denovo else "Cleared, 510(k)") + (" · AI" if ai else ""),
             "sub": " · ".join(x for x in [who, f"product code {pc}" if pc else ""] if x),
-            "link": (DENOVO if denovo else PMN).format(k), "level": "update", "ai": ai}
+            "link": (DENOVO if denovo else PMN).format(k), "level": "update", "ai": ai,
+            "org": who, **({"pc": pc} if _PC.match(pc) else {}), **device_type(r)}
 
 
 def pma_event(r: dict) -> Optional[dict]:
@@ -189,10 +204,12 @@ def pma_event(r: dict) -> Optional[dict]:
     if not name:
         return None
     who = clean_text(str(r.get("applicant") or ""))[:100]
+    pc = str(r.get("product_code") or "").upper()
     return {"id": f"pma:{num}{'' if original else sup}", "kind": "device", "topic": "pma", "date": day.isoformat(), "title": name,
             "what": "New device approved (PMA)" if original else "New indication approved (PMA supplement)",
             "sub": " · ".join(x for x in [who, stype if not original else ""] if x),
-            "link": PMA.format(num + ("" if original else sup)), "level": "alert"}
+            "link": PMA.format(num + ("" if original else sup)), "level": "alert",
+            "org": who, **({"pc": pc} if _PC.match(pc) else {}), **device_type(r)}
 
 
 def isotope_re(isotopes: list) -> "re.Pattern":
@@ -238,7 +255,7 @@ def drug_events(app: dict, iso_re: "re.Pattern", agents_re: "re.Pattern", skip_r
         out.append({"id": f"drug:{num}:{typ}{s.get('submission_number') or ''}", "kind": "drug", "topic": "drugs",
                     "date": day.isoformat(), "title": title[:200], "what": what,
                     "sub": clean_text(str(app.get("sponsor_name") or "")).title()[:100], "link": DAF.format(num[3:]),
-                    "level": "alert" if major else "update"})
+                    "level": "alert" if major else "update", "org": clean_text(str(app.get("sponsor_name") or "")).title()[:100]})
     return out
 
 

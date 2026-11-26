@@ -1,14 +1,18 @@
 name: Send notifications
 
 # Sends new alerts to your phone (Tune → Rules → Alerts → Notifications). The news, papers and
-# watch jobs call this after they save new data; run it by hand to send a test. Without the
-# PUSH_SETUP secret it does nothing.
+# watch jobs call this after they save new data; run it by hand to send a test. The app runs it
+# with your latest choices (sealed: only this job, with PUSH_SETUP, can open them) so notifications
+# leave out what the app does. Without the PUSH_SETUP secret it does nothing.
 on:
   workflow_call:
     inputs:
       test:
         type: boolean
         default: false
+      choices:
+        type: string
+        default: ""
     secrets:
       PUSH_SETUP:
         required: false
@@ -18,6 +22,11 @@ on:
         description: "Also send a test notification"
         type: boolean
         default: true
+      choices:
+        description: "Your choices (optional: copied in the app, Tune → Rules → Alerts → Notifications)"
+        type: string
+        required: false
+        default: ""
 
 permissions: {}                 # each job below asks for only what it needs
 
@@ -58,13 +67,14 @@ jobs:
         env:
           PUSH_SETUP: ${{ secrets.PUSH_SETUP }}   # the phone's push address and signing key; sent nowhere but that push service
           NOTIFY_TEST: ${{ inputs.test }}
+          CHOICES: ${{ inputs.choices }}          # sealed text from the app; checked and opened by pipeline/notify.py, never run
         run: python -m pipeline.notify
       - name: Pack what changed           # the files only; the save job checks every one before using it
         id: pack
         if: steps.setup.outputs.on == 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/out"
-          git add -A -- docs/data/notify.json cache/notified.json
+          git add -A -- docs/data/notify.json cache/notified.json cache/alert-rules.json
           git diff --cached --name-only --no-renames --diff-filter=AMT -z > "$RUNNER_TEMP/out/changed.list"
           git diff --cached --name-only --no-renames --diff-filter=D -z > "$RUNNER_TEMP/out/deleted.list"
           if [ ! -s "$RUNNER_TEMP/out/changed.list" ] && [ ! -s "$RUNNER_TEMP/out/deleted.list" ]; then
@@ -103,7 +113,7 @@ jobs:
           path: ${{ runner.temp }}/in
       - name: Check and apply the results
         env:
-          ALLOW: '^(?:docs/data/notify\.json|cache/notified\.json)$'
+          ALLOW: '^(?:docs/data/notify\.json|cache/notified\.json|cache/alert-rules\.json)$'
           IN: ${{ runner.temp }}/in
         run: |
           python3 -I - <<'PY'
@@ -143,7 +153,7 @@ jobs:
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git config user.name "readout-bot"
           git config user.email "readout-bot@users.noreply.github.com"
-          git add -A -- docs/data/notify.json cache/notified.json
+          git add -A -- docs/data/notify.json cache/notified.json cache/alert-rules.json
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git commit -m "Notifications $(date -u +%F)"
           for i in 1 2 3 4 5; do              # another job may have pushed meanwhile
