@@ -129,11 +129,12 @@ def trial_events(old: Optional[dict], t: dict, topic: dict, today: date, since: 
 
 
 def is_readout(c: dict, topic: Optional[dict]) -> bool:
-    """A trial whose estimated primary completion is worth a date in Coming up: Phase 3, or a large
-    device trial with no phase, still under way."""
+    """A trial whose estimated primary completion is worth a date in Coming up: Phase 3 with at
+    least 100 patients, or a large device trial with no phase where the topic asks for those."""
     ph = c.get("ph") or []
-    big_device = (not ph or ph == ["NA"]) and (c.get("n") or 0) >= 300 and "NA" in ((topic or {}).get("phases") or [])
-    return c.get("s") in ACTIVE and c.get("pt") == "ESTIMATED" and ("PHASE3" in ph or big_device)
+    n = c.get("n") or 0
+    big_device = (not ph or ph == ["NA"]) and n >= 300 and bool((topic or {}).get("device_readouts"))
+    return c.get("s") in ACTIVE and c.get("pt") == "ESTIMATED" and (("PHASE3" in ph and n >= 100) or big_device)
 
 
 def readout_date(nct: str, c: dict, topic_name: str) -> Optional[dict]:
@@ -226,15 +227,18 @@ def drug_events(app: dict, iso_re: "re.Pattern", agents_re: "re.Pattern", skip_r
         if not day or not since <= day <= until:
             continue
         typ, cls = str(s.get("submission_type") or "").upper(), str(s.get("submission_class_code") or "").upper()
+        major = cls.startswith(("TYPE 1", "TYPE 2")) or typ == "SUPPL"      # a new agent or a new use; a new form of an old one isn't
         if typ == "ORIG":
-            what = "New drug approved" + (" (new molecular entity)" if cls.startswith("TYPE 1") else "")
+            what = "New drug approved" + (" (new molecular entity)" if cls.startswith("TYPE 1") else " (new active ingredient)" if cls.startswith("TYPE 2")
+                                          else " (new form of an approved drug)" if cls.startswith(("TYPE 3", "TYPE 5")) else "")
         elif typ == "SUPPL" and cls == "EFFICACY":
             what = "New indication or use approved"
         else:
             continue
         out.append({"id": f"drug:{num}:{typ}{s.get('submission_number') or ''}", "kind": "drug", "topic": "drugs",
                     "date": day.isoformat(), "title": title[:200], "what": what,
-                    "sub": clean_text(str(app.get("sponsor_name") or "")).title()[:100], "link": DAF.format(num[3:]), "level": "alert"})
+                    "sub": clean_text(str(app.get("sponsor_name") or "")).title()[:100], "link": DAF.format(num[3:]),
+                    "level": "alert" if major else "update"})
     return out
 
 

@@ -23,35 +23,41 @@ settings:
   readouts_every_days: 7   # how often the full list of active trials is read again
 
 trials:
-  # term: ClinicalTrials.gov search syntax (quotes for phrases, AND, OR, NOT).
+  # ClinicalTrials.gov search syntax (quotes for phrases, AND, OR, NOT), in one or more of:
+  #   intr: the trial's interventions (what's given or done), the most precise
+  #   cond: its conditions; term: anywhere in the record, eligibility criteria included
+  # (more than one: a trial must match each)
   # phases: which trials count (PHASE1, PHASE2, PHASE3, PHASE4; NA for device trials with no phase).
-  # min_n: smallest enrollment that counts.
+  # min_n: smallest enrollment that counts. device_readouts: large trials with no phase get a
+  # Coming up date too (otherwise only Phase 3 do).
   - id: rlt
     name: Radioligand therapy
-    term: '"radioligand" OR "177Lu" OR "Lu-177" OR "lutetium" OR "225Ac" OR "Ac-225" OR "actinium" OR "radiopharmaceutical therapy" OR "PRRT" OR "radioembolization"'
+    intr: '"177Lu" OR "Lu-177" OR "Lu 177" OR "lutetium" OR "225Ac" OR "Ac-225" OR "actinium" OR "212Pb" OR "Pb-212" OR "radioligand therapy" OR "PRRT" OR "radioembolization" OR "90Y" OR "Y-90" OR "radium-223"'
     phases: [PHASE1, PHASE2, PHASE3]
   - id: tracers
     name: PET and SPECT tracers
-    term: '("PET" OR "positron" OR "SPECT") AND ("18F" OR "F-18" OR "68Ga" OR "Ga-68" OR "64Cu" OR "Cu-64" OR "89Zr" OR "Zr-89" OR "PSMA" OR "FAPI" OR "fluoroestradiol" OR "tracer" OR "radiotracer")'
+    intr: '"18F" OR "F-18" OR "68Ga" OR "Ga-68" OR "64Cu" OR "Cu-64" OR "89Zr" OR "Zr-89" OR "99mTc" OR "Tc-99m" OR "PET/CT" OR "PET/MRI" OR "PET imaging" OR "PET scan" OR "radiotracer" OR "FAPI" OR "fluoroestradiol"'
     phases: [PHASE2, PHASE3]
   - id: tavr
     name: TAVR and aortic stenosis
     term: '"transcatheter aortic valve" OR "TAVR" OR "TAVI"'
     phases: [PHASE2, PHASE3, PHASE4, NA]
-    min_n: 100
+    min_n: 200
+    device_readouts: true
   - id: cardiac-ct
     name: Cardiac CT
-    term: '"coronary CT angiography" OR "coronary computed tomography" OR "CCTA" OR "CT-FFR" OR "FFRct" OR "coronary artery calcium"'
+    intr: '"coronary CT angiography" OR "coronary computed tomography" OR "CCTA" OR "CT-FFR" OR "FFRct" OR "FFR-CT" OR "coronary artery calcium" OR "calcium score" OR "cardiac CT"'
     phases: [PHASE2, PHASE3, PHASE4, NA]
     min_n: 200
   - id: screening
     name: Cancer screening with imaging
-    term: '"lung cancer screening" OR "low-dose CT" OR "breast cancer screening" OR "abbreviated MRI" OR "contrast-enhanced mammography" OR "prostate MRI"'
+    intr: '"low-dose CT" OR "LDCT" OR "lung cancer screening" OR "mammography" OR "breast MRI" OR "abbreviated MRI" OR "contrast-enhanced mammography" OR "prostate MRI" OR "biparametric MRI"'
     phases: [PHASE2, PHASE3, PHASE4, NA]
     min_n: 500
   - id: ai
     name: AI in imaging
-    term: '("artificial intelligence" OR "deep learning" OR "machine learning") AND ("radiology" OR "CT" OR "MRI" OR "mammography" OR "PET" OR "imaging")'
+    intr: '"artificial intelligence" OR "deep learning" OR "machine learning" OR "AI-assisted" OR "AI model" OR "AI software" OR "AI algorithm"'
+    term: '"radiology" OR "CT" OR "MRI" OR "mammography" OR "PET" OR "imaging" OR "radiograph"'
     phases: [PHASE2, PHASE3, PHASE4, NA]
     min_n: 500
 

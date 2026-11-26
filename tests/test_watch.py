@@ -7,7 +7,7 @@ from pipeline.http import HttpError
 
 TODAY = date(2026, 11, 26)
 NOW = datetime(2026, 11, 26, 13, 0, tzinfo=timezone.utc)
-TOPIC = {"id": "rlt", "name": "Radioligand therapy", "term": "lutetium", "phases": ["PHASE2", "PHASE3"]}
+TOPIC = {"id": "rlt", "name": "Radioligand therapy", "intr": "lutetium", "phases": ["PHASE2", "PHASE3"]}
 
 
 def study(nct="NCT01234567", status="RECRUITING", pcd="2027-03-31", pcd_type="ESTIMATED", results="", phases=("PHASE3",),
@@ -60,7 +60,8 @@ def test_readout_dates():
     assert not W.is_readout(W.compact(W.trial_of(study(phases=("PHASE2",))), "rlt"), TOPIC)
     assert not W.is_readout(W.compact(W.trial_of(study(status="COMPLETED")), "rlt"), TOPIC)
     dev = W.compact(W.trial_of(study(phases=("NA",), n=900)), "tavr")
-    assert W.is_readout(dev, {"phases": ["NA", "PHASE3"]}) and not W.is_readout(dev, {"phases": ["PHASE3"]})
+    assert W.is_readout(dev, {"phases": ["NA", "PHASE3"], "device_readouts": True}) and not W.is_readout(dev, {"phases": ["NA"]})
+    assert not W.is_readout(W.compact(W.trial_of(study(n=40)), "rlt"), TOPIC)
 
 
 def test_fda_events():
@@ -89,6 +90,10 @@ def test_fda_events():
                             "submission_status_date": "20261101", "submission_class_code": "LABELING"}]}
     ev = W.drug_events(app, iso, agents, skip, date(2026, 10, 1), TODAY)
     assert [e["what"] for e in ev] == ["New drug approved (new molecular entity)"] and ev[0]["title"] == "Newscan (flurpiridaz f-18)"
+    assert ev[0]["level"] == "alert"
+    new_form = {**app, "submissions": [{**app["submissions"][0], "submission_class_code": "TYPE 5"}]}
+    assert [(e["what"], e["level"]) for e in W.drug_events(new_form, iso, agents, skip, date(2026, 10, 1), TODAY)] == \
+        [("New drug approved (new form of an approved drug)", "update")]
     assert ev[0]["link"].endswith("ApplNo=219999")
     fdg = {**app, "products": [{"brand_name": "FDG", "active_ingredients": [{"name": "FLUDEOXYGLUCOSE F-18"}]}]}
     assert W.drug_events(fdg, iso, agents, skip, date(2026, 10, 1), TODAY) == []
@@ -142,7 +147,7 @@ def test_build_end_to_end():
     assert "trial:NCT07654321:new" in ids and "device:K250001" in ids and len(ids) == 2
     assert [d["title"] for d in data["dates"]][:1] == ["SPLASH-2: primary completion (estimated)"]
     ct = [p for u, p in http.calls if "clinicaltrials" in u]
-    assert any("filter.overallStatus" in p for p in ct) and all("fields" in p for p in ct)
+    assert any("filter.overallStatus" in p for p in ct) and all("fields" in p and p.get("query.intr") == "lutetium" for p in ct)
     # next day: the first trial terminates; the list of trials under way isn't read again yet
     http2 = FakeHttp([study(status="TERMINATED", why="Futility"), study(nct="NCT07654321", first="2026-11-10", acronym="")])
     data2, state2 = build_watch.build(http2, cfg, state, datetime(2026, 11, 27, 13, 0, tzinfo=timezone.utc))

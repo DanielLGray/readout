@@ -50,6 +50,14 @@ def ct_query(http: Http, params: dict, max_pages: int) -> list[dict]:
         return pages(params)
 
 
+def ct_search(topic: dict) -> dict:
+    """A topic's search: in the interventions, the conditions, anywhere, or more than one (all must match)."""
+    out = {f"query.{k}": topic[k] for k in ("intr", "cond", "term") if topic.get(k)}
+    if not out:
+        raise ValueError(f"trial topic {topic.get('id')} has no intr, cond or term")
+    return out
+
+
 def fda_query(http: Http, url: str, search: str, sort: str = "", max_pages: int = 3) -> list[dict]:
     """openFDA results for a search; none found is an empty list, not an error."""
     out: list[dict] = []
@@ -114,8 +122,9 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
             return 0
         old = trials.get(t["nct"])
         tp = follow_topic if t["nct"] in follow else topic
-        n = add(W.trial_events(W.expand(t["nct"], old) if old else None, t, tp, today, since, shift)) \
-            if t["nct"] in follow or W.qualifies(t, topic) else 0
+        if t["nct"] not in follow and not W.qualifies(t, topic):
+            return 0                                   # only trials that count are kept to compare
+        n = add(W.trial_events(W.expand(t["nct"], old) if old else None, t, tp, today, since, shift))
         if old and old.get("tp") in topics and old["tp"] != topic["id"] and t["nct"] not in follow:
             tp = topics[old["tp"]]                      # keep the topic it was first found under
         trials[t["nct"]] = W.compact(t, tp["id"])
@@ -135,7 +144,7 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
         return n
 
     def ct_recent() -> int:
-        n = per_topic(lambda tp: {"query.term": tp["term"], "pageSize": 200, "sort": "LastUpdatePostDate:desc",
+        n = per_topic(lambda tp: {**ct_search(tp), "pageSize": 200, "sort": "LastUpdatePostDate:desc",
                                   "filter.advanced": f"AREA[StudyType]INTERVENTIONAL AND AREA[LastUpdatePostDate]RANGE[{since.isoformat()},MAX]"}, 3)
         if follow:
             got = ct_query(http, {"filter.ids": ",".join(follow), "pageSize": 100}, max_pages=1)
@@ -143,7 +152,7 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
         return n
 
     def ct_active() -> int:                    # every trial under way, weekly: the readouts ahead, and a baseline to compare
-        n = per_topic(lambda tp: {"query.term": tp["term"], "filter.overallStatus": ACTIVE_FILTER, "pageSize": 1000,
+        n = per_topic(lambda tp: {**ct_search(tp), "filter.overallStatus": ACTIVE_FILTER, "pageSize": 1000,
                                   "filter.advanced": "AREA[StudyType]INTERVENTIONAL"}, 2)
         state["readouts_at"] = today.isoformat()
         return n
