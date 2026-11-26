@@ -867,6 +867,8 @@ function tokenSection() {
   const save = async () => {
     const t = input.value.trim();
     if (!TOKEN_RE.test(t)) { toast("That doesn’t look like a GitHub token. Fine-grained tokens start with github_pat_."); return; }
+    // a classic token (ghp_) reaches every repository you have: only a fine-grained one can be limited to this one's jobs
+    if (!t.startsWith("github_pat_")) { toast("That’s a classic token, which can reach all your repositories. Make a fine-grained one (github_pat_…) with the steps above."); return; }
     const r = await ghFetch(`/actions/workflows/${JOBS.news.wf}`, {}, t).catch(() => null);
     if (!r) { toast("Couldn’t reach GitHub. Try again when you’re online."); return; }
     if (!r.ok) { toast(ghProblem(r.status)); return; }
@@ -880,14 +882,15 @@ function tokenSection() {
     el("p", { class: "sub" }, has
       ? "On. Pulling the feed down also updates the news on GitHub (about 2 minutes, unless it was updated in the last 15), and Run now starts a job directly."
       : "Optional. With a GitHub token, pulling the feed down also updates the news on GitHub (about 2 minutes), and Run now starts a job directly. Without one, pulling down shows what the last scheduled update brought."),
-    has ? null : [
+    has && ghToken().startsWith("ghp_") ? el("p", { class: "warn" }, "This is a classic token, which can reach every repository you have, not just this one’s jobs. Make a fine-grained token with the steps below, then remove this one here and on GitHub.") : null,
+    has && !ghToken().startsWith("ghp_") ? null : [
       el("ol", { class: "settings-list" },
         el("li", {}, "On github.com, open Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (the button below goes there)."),
         el("li", {}, "Repository access: Only select repositories → readout."),
         el("li", {}, "Repository permissions: Actions → Read and write. Nothing else."),
         el("li", {}, "Expiration: up to a year. Generate it, copy it, and paste it here.")),
       el("div", { class: "word-add", style: "margin-top:12px" }, input, el("button", { class: "act", onclick: save }, "Save"))],
-    el("p", { class: "fine" }, "The token is kept only on this phone: it isn’t part of your settings or backups, and it’s sent only to GitHub. It can start, stop and read this repository’s jobs, nothing else; delete it on GitHub any time."),
+    el("p", { class: "fine" }, "The token is kept only on this phone: it isn’t part of your settings or backups, and it’s sent only to GitHub. A fine-grained token made this way can start, stop and read this repository’s jobs, nothing else; delete it on GitHub any time."),
     el("div", { class: "link-row" },
       has ? twoTap("token", "Remove the token", "Tap again to remove", () => { store.set("ghToken", ""); toast("Token removed from this phone"); rerender(); }) : null,
       linkBtn("https://github.com/settings/personal-access-tokens/new", has ? "Manage tokens on GitHub" : "Make a token on GitHub")));

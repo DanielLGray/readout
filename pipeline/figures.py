@@ -108,14 +108,20 @@ def pick(figs: list[dict]) -> Optional[dict]:
     return max(scored, key=lambda x: (x[0], -x[1]))[2] if scored else None
 
 
+PICTURE_FORMATS = ("JPEG", "PNG", "GIF", "WEBP", "TIFF")
+
+
 def shrink(data: bytes) -> "tuple[bytes, int, int]":
     """Any image PMC ships → a WebP no larger than MAX_SIDE on its long side."""
+    import warnings
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = 60_000_000          # anything bigger is refused, not decoded
-    im = Image.open(io.BytesIO(data))
-    if im.format not in ("JPEG", "PNG", "GIF", "WEBP", "TIFF"):
-        raise ValueError(f"not a picture format: {im.format}")
-    im.load()
+    with warnings.catch_warnings():
+        # Pillow only warns between 1x and 2x the limit; make that a refusal too
+        warnings.simplefilter("error", Image.DecompressionBombWarning)
+        # only these decoders are tried: a file can't steer Pillow into a rarely used one
+        im = Image.open(io.BytesIO(data), formats=PICTURE_FORMATS)
+        im.load()
     if im.width < 160 or im.height < 120:
         raise ValueError("too small to be useful")
     if im.mode not in ("RGB", "L"):

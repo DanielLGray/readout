@@ -1,6 +1,14 @@
 /* Readout — body imaging literature, led by each paper's own conclusion. */
 "use strict";
 
+// Readout never runs inside another site's frame: a page that framed it could trick taps on
+// Run now or the key boxes. (GitHub Pages can't send the header that forbids framing.)
+const FRAMED = (() => { try { return window.top !== window.self; } catch { return true; } })();
+if (FRAMED) {
+  document.documentElement.replaceChildren();
+  throw new Error("Readout won't run inside another page");
+}
+
 // ── tiny helpers ───────────────────────────────────────────────────────────
 const $ = (sel, root = document) => root.querySelector(sel);
 function el(tag, props, ...kids) {

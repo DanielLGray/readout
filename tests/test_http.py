@@ -41,3 +41,33 @@ def test_redirects_and_size(server, monkeypatch):
     status, text = H._requests_transport("GET", f"{server}/big", {})
     assert status == 400 and "refused" in text
     assert not H.public_host("localhost") and not H.public_host("10.0.0.5") and not H.public_host("169.254.169.254")
+
+
+def test_a_host_token_never_follows_a_redirect_elsewhere(monkeypatch):
+    from pipeline import http as H
+    monkeypatch.setitem(H.HOST_HEADERS, "api.themoviedb.org", {"Authorization": "Bearer secret"})
+    assert H.headers_for("https://api.themoviedb.org/4/x")["Authorization"] == "Bearer secret"
+    assert "Authorization" not in H.headers_for("https://evil.example.com/x")      # a redirect elsewhere
+    assert "Authorization" not in H.headers_for("http://api.themoviedb.org/4/x")    # or to plain http
+
+    sent = []
+
+    class R:
+        def __init__(self, status, location=None):
+            self.status_code, self.headers = status, {"location": location} if location else {}
+            self.is_redirect = location is not None
+        def close(self): pass
+        def iter_content(self, n): yield b"{}"
+        text = "{}"
+
+    class S:
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+        def request(self, method, url, headers=None, **kw):
+            sent.append((url, dict(headers)))
+            return R(302, "https://cdn.example.net/next") if "themoviedb" in url else R(200)
+
+    monkeypatch.setattr(H.requests, "Session", S)
+    monkeypatch.setattr(H, "public_host", lambda h: True)
+    H._send("GET", "https://api.themoviedb.org/4/list", {}, raw=False)
+    assert "Authorization" in sent[0][1] and "Authorization" not in sent[1][1]

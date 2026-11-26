@@ -1,4 +1,4 @@
 requests>=2.31,<3
 PyYAML>=6.0,<7
 feedparser>=6.0,<7
-Pillow>=12,<13          # resizing open-access figures for the cards
+Pillow>=13,<14          # resizing open-access figures for the cards

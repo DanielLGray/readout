@@ -55,13 +55,20 @@ def _requests_bytes(method: str, url: str, params: dict) -> "tuple[int, bytes]":
     return _send(method, url, params, raw=True)
 
 
+def headers_for(url: str, raw: bool = False) -> dict:
+    """Headers for one request. A host's own headers (an API token) go only to that host, and
+    only over https: worked out again for every redirect, so a token never follows one elsewhere."""
+    u = urlparse(url)
+    host = u.hostname or ""
+    own = HOST_HEADERS.get(host, {}) if u.scheme == "https" else {}
+    return {"User-Agent": HOST_AGENTS.get(host, USER_AGENT), "Accept": "image/*, */*;q=0.5" if raw else ACCEPT, **own}
+
+
 def _send(method: str, url: str, params: dict, raw: bool):
-    host = urlparse(url).hostname or ""
-    headers = {"User-Agent": HOST_AGENTS.get(host, USER_AGENT), "Accept": "image/*, */*;q=0.5" if raw else ACCEPT, **HOST_HEADERS.get(host, {})}
     fail = (lambda msg: (400, msg.encode())) if raw else (lambda msg: (400, msg))
     with requests.Session() as s:
         for _ in range(MAX_REDIRECTS + 1):
-            r = s.request(method, url, headers=headers, timeout=60, allow_redirects=False, stream=True,
+            r = s.request(method, url, headers=headers_for(url, raw), timeout=60, allow_redirects=False, stream=True,
                           data=params if method == "POST" else None, params=params if method == "GET" else None)
             if r.is_redirect:
                 nxt = urljoin(url, r.headers.get("location", ""))

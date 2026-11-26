@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main                  # the newest data, not the commit the run was queued at (a run waiting behind another of the same job would start from stale files)
+          persist-credentials: false # the steps that read outside feeds, PubMed and pictures never hold the push token
       - name: Already up to date?          # a backup run skips when the data is fresh
         id: due
         run: python3 -m pipeline.due docs/data/news.json 5
@@ -36,7 +37,12 @@ jobs:
         run: python -m pipeline.build_news
       - name: Save to the repository
         if: steps.due.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}      # only this step can push
         run: |
+          # the token for github.com, given here and nowhere earlier; git hooks a build step might have left are ignored
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git config --local core.hooksPath /dev/null
           git config user.name "readout-bot"
           git config user.email "readout-bot@users.noreply.github.com"
           git add docs/data cache

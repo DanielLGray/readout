@@ -538,6 +538,10 @@ def config_events(items: list[dict], start: date, stop: date, kind: str = "news"
 # ── iCalendar out ────────────────────────────────────────────────────────────
 
 def _esc(s: str) -> str:
+    """Text for a calendar line. Every line break becomes a literal \\n and other control characters
+    go, so text from a source can't start a line (a property) of its own."""
+    s = re.sub(r"\r\n?|\n", "\n", s)
+    s = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", "", s)
     return s.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
 
@@ -570,7 +574,7 @@ def vevent(ev: dict) -> list[str]:
         lines.append(f"DESCRIPTION:{_esc(desc)}")
     if ev.get("place"):
         lines.append(f"LOCATION:{_esc(ev['place'])}")
-    if ev.get("url"):
+    if re.fullmatch(r"https?://[!-~]{1,500}", ev.get("url") or ""):     # a web address, nothing else, on one line
         lines.append(f"URL:{ev['url']}")
     if ev.get("approx"):
         lines.append("STATUS:TENTATIVE")

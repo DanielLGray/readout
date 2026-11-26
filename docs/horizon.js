@@ -246,7 +246,8 @@ function tmdbCredit() {
 
 // ── one event ──────────────────────────────────────────────────────────────
 function icsFor(e) {
-  const esc = (s) => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const esc = (s) => String(s || "").replace(/\r\n?|\n/g, "\n").replace(/[\x00-\x08\x0b-\x1f\x7f]/g, "")
+    .replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
   const d = (iso) => iso.slice(0, 10).replace(/-/g, "");
   const next = hzDate(e.end || e.start); next.setDate(next.getDate() + 1);
   const nd = `${next.getFullYear()}${String(next.getMonth() + 1).padStart(2, "0")}${String(next.getDate()).padStart(2, "0")}`;

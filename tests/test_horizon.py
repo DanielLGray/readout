@@ -281,3 +281,12 @@ def test_build_uses_tmdb_with_a_token_and_the_config_without():
     assert out["sources"]["movies"] == {"ok": True, "n": 1, "fallback": True, "via": "config"}
     out = build(TmdbHttp(fail=True), cfg, [], {}, now, tmdb_token="bad")   # a bad token: the list, and the error shows
     assert [e["id"] for e in out["events"] if e["kind"] == "movies"] == ["dune-3"] and not out["sources"]["movies"]["ok"]
+
+
+def test_calendar_text_cannot_start_a_line_of_its_own():
+    ev = {"id": "x", "allDay": True, "start": "2026-12-18", "title": "Bad\r\nATTACH:http://e", "place": "A\rB",
+          "url": "https://ok.example/a\r\nX:1"}
+    lines = H.vevent(ev)
+    assert all("\r" not in ln and "\n" not in ln for ln in lines)
+    assert "SUMMARY:Bad\\nATTACH:http://e" in lines and not any(ln.startswith("URL:") for ln in lines)
+    assert "URL:https://imdb.com/title/tt1" in H.vevent({**ev, "url": "https://imdb.com/title/tt1"})
