@@ -42,6 +42,39 @@ settings:
 # industry and health stories that mention these also show under "ACR & societies"
 society_mentions: '\b(?:ACR|SNMMI|RSNA|SCCT|ASNC|EANM|ARRS|SIIM|SCMR)\b|(?i:American College of Radiology|Society of Nuclear Medicine|Radiological Society of North America|Society of Cardiovascular Computed Tomography|American Society of Nuclear Cardiology|European Association of Nuclear Medicine|European Society of Radiology|Society of Interventional Radiology|Society of Abdominal Radiology|Appropriateness Criteria|American Roentgen Ray Society)'
 
+# Alerts: rare and high-bar, pinned at the top of Everything and Today for a week (each can be
+# dismissed). A story makes one when its headline matches every `title` pattern of a rule (and its
+# headline or summary every `text` pattern), and at least `outlets` outlets carry it (sister
+# outlets count once) or a primary source does. Guidelines published in PubMed come from the
+# papers job (config/feeds.yaml → alerts).
+alerts:
+  days: 7
+  outlets: 2
+  max: 3
+  primary: [FDA press releases, FDA safety alerts, ACR (via Medical Xpress), SNMMI (via Medical Xpress), RSNA (via Medical Xpress), SCCT]
+  agents: '\bradiopharm\w*|radioligand|radiotracer|\btracers?\b|imaging agent|diagnostic agent|contrast (?:agent|media|medium)|gadolin\w*|\bGBCAs?\b|gadopiclenol|gadoterate|gadobutrol|gadoxetate|Gadavist|Dotarem|Clariscan|Elucirem|Vueway|Eovist|iodinated|Omnipaque|Visipaque|Isovue|\bPSMA\b|lutetium|Lu-?177|177Lu|gallium|Ga-?68|68Ga|\bF-?18\b|18F|fluorine-18|flurpiridaz|Flyrcado|Pluvicto|Locametz|Illuccix|Gozellix|Pylarify|Posluma|Lutathera|Netspot|Detectnet|Axumin|Cerianna|Amyvid|Vizamyl|Neuraceq|Tauvid|technetium|Tc-?99m|99mTc|Mo-?99|molybdenum|iodine-131|I-131|radium-223|Xofigo|actinium|Ac-?225|copper-64|Cu-?64|zirconium|theranostic\w*|microbubble|Lumason|Definity|Optison|PET (?:agent|tracer|imaging agent)'
+  societies: '\b(?:ACR|SNMMI|EANM|SCCT|SAR|ASNC|SCMR|AASLD|NCCN|ESC)\b|American College of Radiology|Society of Nuclear Medicine|European Association of Nuclear Medicine|Society of Cardiovascular Computed Tomography|Society of Abdominal Radiology|Fleischner|American Heart Association|American College of Cardiology|ACC/AHA|AHA/ACC|European Society of Cardiology|American Society of Nuclear Cardiology|American Urological Association|American Association for the Study of Liver'
+  rules:
+    - id: fda
+      group: fda
+      label: FDA
+      title: ['\bFDA\b|Food and Drug Administration', '\b(?:approv\w*|clears|cleared|clearance|authoriz\w*|warn\w*|warning|boxed|safety|recall\w*|label\w*|withdr\w*|shortage\w*|restrict\w*)\b']
+      text: ['{agents}']
+    - id: uspstf
+      group: uspstf
+      label: USPSTF
+      title: ['USPSTF|Preventive Services Task Force', '\b(?:recommend\w*|guideline\w*|screen\w*|draft|final\w*|propos\w*|lower\w*|expand\w*)\b']
+    - id: acs
+      group: acs
+      label: American Cancer Society
+      title: ['American Cancer Society', '\b(?:guideline\w*|recommend\w*|screen\w*)\b']
+      text: ['\b(?:new|updat\w*|chang\w*|revis\w*|now|lower\w*|expand\w*|first|issu\w*|releas\w*)\b']
+    - id: society
+      group: societies
+      label: Guideline
+      title: ['{societies}', '\b(?:guideline\w*|guidance|appropriate use|appropriateness criteria|consensus|white paper|position statement|recommendation\w*|\w*-?RADS)\b']
+      text: ['\b(?:new|updat\w*|chang\w*|revis\w*|releas\w*|issu\w*|publish\w*|first|now)\b']
+
 kinds:
   industry: Industry news
   societies: ACR & societies
@@ -146,6 +179,22 @@ sources:
     urls:
       - https://scct.org/news/news_rss.asp?cat=11632
       - https://scct.org/news/news_rss.asp
+
+  # The FDA's own feeds (U.S. government works, free to use): only what touches imaging, contrast
+  # or radiopharmaceuticals. They're the primary source for FDA alerts.
+  - name: FDA press releases
+    home: https://www.fda.gov
+    stale_days: 3650             # weeks can pass with nothing about imaging
+    require: "radiopharm|radioligand|radiotracer|\\btracer|imaging|contrast (?:agent|media)|gadolin|iodinated|\\bPET\\b|positron|SPECT|PSMA|lutetium|gallium|technetium|theranostic|nuclear medicine|mammogra|\\bMRI\\b|\\bCT\\b|computed tomography|ultrasound|radiolog|isotope|Mo-99"
+    urls:
+      - https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml
+
+  - name: FDA safety alerts
+    home: https://www.fda.gov
+    stale_days: 3650
+    require: "radiopharm|radioligand|radiotracer|\\btracer|imaging agent|contrast (?:agent|media)|gadolin|iodinated|\\bPET\\b|SPECT|PSMA|lutetium|gallium|technetium|theranostic|nuclear medicine|\\bMRI\\b|\\bCT\\b|computed tomography|ultrasound|isotope"
+    urls:
+      - https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/medwatch/rss.xml
 
   - name: Imaging Technology News
     home: https://www.itnonline.com

@@ -199,12 +199,13 @@ function todaySection() {
   const setB = (k, v) => { setTune({ brief: { ...T.brief, [k]: v } }); rerender(); };
   const q = quizTotals(30), tried = q.r + q.p + q.w;
   return el("section", { class: "sect", id: "tune-today" }, el("h2", {}, "Today"),
-    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day, something lighter and your next Foundations paper, then “You’re caught up.”"),
+    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day, one paper from outside your areas, something lighter and your next Foundations paper, then “You’re caught up.”"),
     segPick("Open the app on", [["today", "Today"], ["all", "Everything"], ["papers", "Papers"], ["important", "Most important"]], T.startOn,
       (v) => { setTune({ startOn: v }); rerender(); }),
     segPick("New papers in Today", [[3, "3"], [5, "5"], [8, "8"]], b.papers, (v) => setB("papers", Number(v))),
     segPick("Stories in Today", [[0, "None"], [2, "2"], [3, "3"]], b.stories, (v) => setB("stories", Number(v))),
     switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
+    switchRow("Outside your areas", "One paper a day from NEJM, The Lancet, JAMA, BMJ and other big general journals that your areas wouldn’t find: recent, and already being cited. Chosen weekly with the Most important lists.", b.wide, (on) => setB("wide", on)),
     switchRow("Something lighter", "One Light reading story a day: Wikipedia’s featured article, NASA’s image of the day, Atlas Obscura, Smithsonian and the like.", b.light, (on) => setB("light", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
     switchRow("Coming up", "The next 7 days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.", b.horizon, (on) => setB("horizon", on)),
@@ -468,8 +469,17 @@ function mixPreview(n) {
   return interleave(q, T.mix).slice(0, n);
 }
 
+function alertsSection() {
+  const n = activeAlerts().length;
+  return el("section", { class: "sect", id: "tune-alerts" }, el("h2", {}, "Alerts"),
+    el("p", { class: "sub" }, "Rare, and pinned at the top of Everything and Today for a week. A news story counts only when two outlets carry it, or the FDA or a society says it itself; new guidelines also come straight from PubMed."),
+    Object.entries(ALERT_GROUPS).map(([k, [name, what]]) => switchRow(name, what, T.alerts[k] !== false,
+      (on) => { setTune({ alerts: { ...T.alerts, [k]: on } }); S.feedDirty = true; rerender(); })),
+    el("div", { class: "link-row" }, el("button", { class: "act", onclick: openAlerts }, n ? `This week’s alerts (${n})` : "This week’s alerts")));
+}
+
 function algoPane() {
-  return [importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
+  return [alertsSection(), importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
     el("section", { class: "sect" }, el("h2", {}, "Start over"),
       el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
@@ -522,10 +532,21 @@ function mixSection() {
       (on) => { setTune({ readLast: on }); rerender(); }),
     switchRow("Swipe cards sideways", "Left saves a card; right clears it, and the next one takes its place.", T.swipe,
       (on) => { setTune({ swipe: on }); rerender(); }),
-    Object.keys(cleared).length ? el("div", { class: "switch-row" },
-      el("div", {}, el("div", { class: "ctl-label", style: "margin:0" }, `${plural(Object.keys(cleared).length, "card")} cleared`),
-        el("p", { class: "fine", style: "margin:2px 0 0" }, "Cleared cards stay out of every list for 90 days.")),
-      el("button", { class: "act", onclick: () => { cleared = {}; store.set("cleared", cleared); S.feedDirty = true; toast("Cleared cards are back"); rerender(); } }, "Bring back")) : null);
+    clearedCount() ? el("div", { class: "switch-row" },
+      el("div", {}, el("div", { class: "ctl-label", style: "margin:0" }, `${plural(clearedCount(), "card")} cleared`),
+        el("p", { class: "fine", style: "margin:2px 0 0" }, "Cleared cards stay out of every list for 90 days; Not now brings one back after 3.")),
+      el("button", { class: "act", onclick: () => { cleared = {}; store.set("cleared", cleared); S.feedDirty = true; toast("Cleared cards are back"); rerender(); } }, "Bring back")) : null,
+    whyLine());
+}
+// the reasons you gave when clearing (Why? in the toast after a clear)
+function whyLine() {
+  const parts = [["know", "already known"], ["notme", "not for me"], ["weak", "weak study", "weak studies"], ["later", "put off for later"]]
+    .filter(([k]) => whyTally[k]).map(([k, one, many]) => `${whyTally[k]} ${whyTally[k] > 1 && many ? many : one}`);
+  if (!parts.length) return null;
+  return el("div", { class: "switch-row" },
+    el("div", {}, el("div", { class: "ctl-label", style: "margin:0" }, "Why you cleared cards"),
+      el("p", { class: "fine", style: "margin:2px 0 0" }, `${parts.join(", ")}. Only “Not for me” teaches the feed.`)),
+    twoTap("whyClear", "Reset", "Tap again", () => { whyTally = {}; store.set("whyTally", whyTally); toast("Tally reset"); rerender(); }));
 }
 
 const WEIGHTS = [[0, "Off"], [0.5, "Low"], [1, "Medium"], [2, "High"]];

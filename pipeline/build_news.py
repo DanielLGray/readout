@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
-from . import news
+from . import alerts, news
 from .abstracts import compile_systems, tag_systems
 from .common import CACHE, DATA, load_yaml, now_iso, read_json, write_json
 from .http import Http, HttpError, log
@@ -300,6 +300,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
                      for k in kinds},
         "items": kept,
     }
+    try:
+        out["alerts"] = alerts.news_alerts(kept, cfg, now, group_of)
+    except Exception as exc:          # alerts are a bonus; the news still goes out
+        log(f"Alerts: failed ({exc})")
+        out["alerts"] = []
     write_json(path, out)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
@@ -311,7 +316,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             f.write("### Readout news feeds\n\n" + "\n".join(rows) + "\n")
     ok = sum(1 for s in statuses if s["ok"] and not s.get("stale"))
     log(f"News: {len(kept)} stories from {ok}/{len(statuses)} outlets, "
-        f"{sum(len(v) for v in out['top_stories'].values())} top stories")
+        f"{sum(len(v) for v in out['top_stories'].values())} top stories, {len(out['alerts'])} alerts")
     return out
 
 

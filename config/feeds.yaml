@@ -114,6 +114,73 @@ general_journals:
   - '"Eur Urol"[ta]'
   - '"Ann Intern Med"[ta]'
 
+# Alerts: new guidelines and recommendation statements, pinned at the top of Everything and Today
+# for a week from the day PubMed lists them (news-based alerts: config/news.yaml → alerts).
+# group: which switch in Tune → Rules → Alerts turns it off (uspstf, acs or societies).
+alerts:
+  days: 7
+  lookback: 14
+  max: 4
+  rules:
+    - id: uspstf
+      group: uspstf
+      label: USPSTF
+      query: '"US Preventive Services Task Force"[cn] AND recommendation[ti] AND statement[ti]'
+    - id: acs
+      group: acs
+      label: American Cancer Society
+      query: '"CA Cancer J Clin"[ta] AND (guideline[ti] OR guidelines[ti]) NOT (Comment[pt] OR Erratum[pt])'
+    - id: fleischner
+      group: societies
+      label: Fleischner Society
+      query: 'Fleischner[ti] AND (guideline[ti] OR guidelines[ti] OR statement[ti] OR recommendation[ti] OR recommendations[ti] OR "white paper"[ti] OR position[ti])'
+    - id: snmmi
+      group: societies
+      label: SNMMI / EANM
+      query: '(SNMMI[ti] OR EANM[ti] OR "Society of Nuclear Medicine"[ti] OR "European Association of Nuclear Medicine"[ti]) AND (guideline[ti] OR guidelines[ti] OR "procedure standard"[ti] OR "appropriate use"[ti] OR consensus[ti]) NOT (Comment[pt] OR Erratum[pt] OR Letter[pt])'
+    - id: scct
+      group: societies
+      label: SCCT
+      query: '(SCCT[ti] OR "Society of Cardiovascular Computed Tomography"[ti]) AND (guideline[ti] OR guidelines[ti] OR consensus[ti] OR "appropriate use"[ti] OR statement[ti]) NOT (Comment[pt] OR Erratum[pt] OR Letter[pt])'
+    - id: acr
+      group: societies
+      label: ACR / SAR
+      query: '("white paper"[ti] OR "consensus guideline"[ti] OR "consensus statement"[ti] OR "practice parameter"[ti]) AND (ACR[ti] OR "American College of Radiology"[ti] OR "Society of Abdominal Radiology"[ti] OR SAR[ti]) NOT (Comment[pt] OR Erratum[pt] OR Letter[pt])'
+    - id: acc_aha
+      group: societies
+      label: ACC/AHA
+      query: '("Circulation"[ta] OR "J Am Coll Cardiol"[ta]) AND ACC[ti] AND AHA[ti] AND guideline[ti] NOT (Comment[pt] OR Erratum[pt] OR "Published Erratum"[pt])'
+    - id: esc
+      group: societies
+      label: ESC
+      query: '"Eur Heart J"[ta] AND ESC[ti] AND guidelines[ti] NOT (Comment[pt] OR Erratum[pt] OR "Published Erratum"[pt])'
+    - id: aasld
+      group: societies
+      label: AASLD
+      query: '"Hepatology"[ta] AND AASLD[ti] AND (guidance[ti] OR guideline[ti]) NOT (Comment[pt] OR Erratum[pt])'
+
+# Outside your areas: one paper a day in Today from the big general and specialty journals, from
+# the last few months, that none of your area searches found, ranked by early citations (NIH iCite)
+# and study design. Built by the weekly Most important job.
+wide:
+  months: 6
+  keep: 40
+  query: '({wide_journals}) AND (Journal Article[pt] OR Randomized Controlled Trial[pt] OR Meta-Analysis[pt]) NOT ({exclude} OR "Case Reports"[pt]) NOT ({imaging_title})'
+wide_journals:
+  - '"N Engl J Med"[ta]'
+  - '"Lancet"[ta]'
+  - '"JAMA"[ta]'
+  - '"BMJ"[ta]'
+  - '"Nat Med"[ta]'
+  - '"Ann Intern Med"[ta]'
+  - '"JAMA Intern Med"[ta]'
+  - '"Lancet Oncol"[ta]'
+  - '"J Clin Oncol"[ta]'
+  - '"JAMA Oncol"[ta]'
+  - '"Circulation"[ta]'
+  - '"Eur Heart J"[ta]'
+  - '"J Am Coll Cardiol"[ta]'
+
 # Abdomen & pelvis vocabulary (title/abstract words). Keeps neuro/MSK/breast
 # papers out of the radiology-journal stream.
 body_filter: >-

@@ -32,6 +32,21 @@ def main(http=None) -> str:
             kept = pm.esearch(f"({j}) AND ({body})", datetype="edat", reldate=45)[0]
             rows.append(("journal", j.split('"')[1] if '"' in j else j,
                          f"{kept} of {total} kept (45 days)", ""))
+    # alerts should be rare: how many each guideline search found in the last two years
+    for r in (cfg.get("alerts") or {}).get("rules", []):
+        q = " ".join(r["query"].split())
+        try:
+            n = pm.count(q, t - timedelta(days=730), t, datetype="edat")
+        except Exception as exc:       # a search PubMed rejects shows here instead of stopping the check
+            rows.append(("alert", r["id"], "rejected", str(exc)[:120]))
+            continue
+        flag = " ⚠ too many for an alert" if n > 60 else " ⚠ none" if n == 0 else ""
+        rows.append(("alert", r["id"], f"{n} in 2 years{flag}", "; ".join(pm.warnings.get(q, []))))
+    w = cfg.get("wide") or {}
+    if w.get("query"):
+        q = fill(w["query"], cfg)
+        n = pm.count(q, t - timedelta(days=round(30.44 * float(w.get("months", 6)))), t)
+        rows.append(("wide", "outside your areas", f"{n} in {w.get('months', 6)} months", "; ".join(pm.warnings.get(q, []))))
     for tp in tcfg["topics"]:
         q = " ".join(tp["query"].split())
         n = pm.count(q, t - timedelta(days=1825), t)

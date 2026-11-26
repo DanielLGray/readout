@@ -261,6 +261,102 @@ function classicToday() {
   return card(pick);
 }
 
+// ── Alerts: rare, pinned at the top of Everything and Today for a week ─────
+// FDA actions on radiopharmaceuticals and imaging agents and guideline changes (news job: two
+// outlets or a primary source), and new guidelines straight from PubMed (papers job).
+function activeAlerts() {
+  const cut = Date.now() - 7.5 * 864e5;
+  const seen = new Set();
+  return [...(S.feed?.alerts || []), ...(S.news?.alerts || [])]
+    .filter((a) => a?.id && a.title && !seen.has(a.id) && seen.add(a.id) && T.alerts?.[a.group] !== false && Date.parse(a.date) >= cut)
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+function alertCards() {
+  const live = activeAlerts().filter((a) => !isCleared(`alert:${a.id}`));
+  const rules = new Set(), shown = [];
+  for (const a of live) {                      // at most two, and not two of one kind
+    if (rules.has(a.rule)) continue;
+    rules.add(a.rule);
+    shown.push(a);
+    if (shown.length === 2) break;
+  }
+  const more = live.length - shown.length;
+  return shown.map((a, i) => {
+    const m = i === shown.length - 1 ? more : 0;
+    return { type: "alert", key: `alert:${a.id}`, sig: `${a.id}|${(a.sources || []).length}|${m}`, a, more: m };
+  });
+}
+const outletsText = (s = []) => (s.length <= 2 ? s.join(" and ") : `${s.slice(0, 2).join(", ")} and ${plural(s.length - 2, "more outlet")}`);
+function alertSrc(a) { return a.via === "pubmed" ? `${a.journal} · from PubMed` : outletsText(a.sources); }
+function alertOpen(a) {
+  if (a.via === "pubmed") {
+    const p = (S.feed?.items || []).find((x) => x.pmid === a.pmid) || a.card;
+    if (p) openAbstract({ ...p, type: "paper" });
+    return;
+  }
+  const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));
+  const items = (a.items || []).filter((id) => byId[id]);
+  if (items.length > 1) openStory({ title: a.title, sources: a.sources, date: a.updated || a.date, items }, byId);
+  else { const u = safeUrl(a.link || byId[items[0]]?.link || ""); if (u && u !== "#") window.open(u, "_blank", "noopener"); }
+}
+function alertCardEl(it) {
+  const a = it.a;
+  const what = a.via === "pubmed" ? "New guideline" : a.rule === "fda" ? "FDA action" : "Guideline change";
+  return el("article", { class: "card brief-card alert-card", "data-key": it.key, "data-group": a.group },
+    el("div", { class: "card-meta" }, el("span", { class: "card-journal alert-label" }, a.label), el("span", {}, what),
+      el("span", { class: "spacer" }), el("span", {}, agoShort(a.date))),
+    el("h2", { class: "card-title" }, el("a", { class: "head-link", href: a.via === "pubmed" ? pubmedUrl(a.pmid) : safeUrl(a.link || ""),
+      onclick: (e) => { e.preventDefault(); alertOpen(a); } }, a.title)),
+    el("p", { class: "alert-src" }, alertSrc(a)),
+    el("div", { class: "alert-acts" },
+      el("button", { class: "act", onclick: () => alertOpen(a) }, a.via === "pubmed" ? "Abstract" : (a.items || []).length > 1 ? `All ${a.sources.length} outlets` : "Read"),
+      el("button", { class: "act", onclick: (e) => clearCard(e.currentTarget.closest(".card"), it) }, "Dismiss"),
+      it.more ? el("button", { class: "act", onclick: openAlerts }, `${it.more} more`) : null));
+}
+function openAlerts() {
+  const all = activeAlerts();
+  openSheet(
+    el("h2", { id: "sheet-title" }, "This week’s alerts"),
+    el("p", { class: "sheet-meta" }, el("span", {}, "FDA actions on imaging agents and radiopharmaceuticals, and guideline changes. Each stays a week.")),
+    all.length ? el("ul", { class: "rows" }, all.map((a) => el("li", { class: "news-item" },
+      el("button", { class: "alert-row", onclick: () => alertOpen(a) },
+        el("span", { class: "news-src" }, el("b", {}, a.label), el("span", {}, agoShort(a.date)), isCleared(`alert:${a.id}`) ? el("span", {}, "dismissed") : null),
+        el("span", { class: "news-title" }, a.title),
+        el("span", { class: "alert-src" }, alertSrc(a))))))
+      : el("p", { class: "fine" }, "None this week. Most weeks have none: they’re meant to be rare."),
+    el("p", { class: "fine" }, "Choose which kinds in Tune → Rules → Alerts."));
+}
+
+// ── Outside your areas: one paper a day from the big general journals ─────
+// The weekly Most important job keeps the recent papers in NEJM, Lancet, JAMA, BMJ and the like
+// that your area searches didn't find, ranked by early citations and design. Each shows once.
+function wideToday() {
+  const I = S.important;
+  if (!I?.wide?.length || !I.papers) return null;
+  const d = localDay();
+  const mute = mutedRe();
+  const ok = (p) => I.papers[p] && !hiddenByTaste({ ...I.papers[p], type: "paper" }) && !isCleared(p) && !(mute && mute.test(I.papers[p].title));
+  const card = (p) => ({ ...I.papers[p], type: "paper", _wide: true });
+  const wd = store.get("wideDay", null);
+  if (wd?.d === d && ok(wd.pmid)) return card(wd.pmid);
+  let hist = store.get("wideHist", {});
+  if (!hist || typeof hist !== "object" || Array.isArray(hist)) hist = {};
+  const cut = localDay(daysAgo(365));
+  for (const [p, day] of Object.entries(hist)) if (typeof day !== "string" || day < cut) delete hist[p];
+  const pick = I.wide.find((p) => ok(p) && !hist[p] && !S.saved[p]);
+  if (!pick) return null;                     // all shown: next week's list brings new ones
+  hist[pick] = d;
+  store.set("wideHist", hist);
+  store.set("wideDay", { d, pmid: pick });
+  return card(pick);
+}
+function wideLine(it) {
+  const w = it.wide || {};
+  const age = Math.max(1, Math.round(w.age || 1));
+  return el("div", { class: "impact" }, el("b", {}, w.cites ? `Cited ${plural(w.cites, "time")}` : "Just out"),
+    ` in ${plural(age, "month")}`, w.clin ? `, ${w.clin} by clinical papers` : null, " · NIH iCite");
+}
+
 // ── Foundations ────────────────────────────────────────────────────────────
 let fdRead = store.get("fdRead", null);
 if (!fdRead || typeof fdRead !== "object" || Array.isArray(fdRead)) fdRead = {};
@@ -784,27 +880,31 @@ function briefList() {
   const byId = new Map((S.feed?.items || []).map((p) => [p.pmid, p]));
   const papers = plan.papers.map((p) => ({ ...byId.get(p), type: "paper", _guess: plan.guess.includes(p) }));
   const classic = T.brief.classic ? classicToday() : null;
+  const wide = T.brief.wide ? wideToday() : null;
   const fd = T.brief.foundations ? fdState() : null;
   const stories = (plan.stories || []).filter((s) => s.items?.length);
   const lightItem = T.brief.light && plan.light ? (S.news?.items || []).find((i) => i.id === plan.light) : null;
   const light = lightItem ? { ...lightItem, type: "news", kind: kindOf(lightItem), _light: true } : null;
-  const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, fd?.read, fd?.next, light?.id].join("|");
-  const out = [{ type: "brief-cover", key: "brief:cover", sig, plan, classic, fd, stories, light }];
+  const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, wide?.pmid, fd?.read, fd?.next, light?.id].join("|");
+  const out = [...alertCards(), { type: "brief-cover", key: "brief:cover", sig, plan, classic, wide, fd, stories, light }];
   const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(7) : [];
   if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
   papers.forEach((p, i) => {
     out.push(p);
     if (i === 1 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
     if (i === 2 && classic) out.push(classic);
+    if (i === 3 && wide) out.push(wide);
   });
   if (papers.length < 2 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
   if (papers.length < 3 && classic) out.push(classic);
+  if (papers.length < 4 && wide) out.push(wide);
   if (light) out.push(light);
   if (fd?.next) out.push({ type: "fd-next", key: "fd:next", sig: `${fd.next}|${fd.read}`, fd });
   out.push({ type: "brief-end", key: "brief:end", sig, plan });
   return out;
 }
 function briefCardEl(it) {
+  if (it.type === "alert") return alertCardEl(it);
   if (it.type === "brief-horizon") return hzCardEl(it);
   if (it.type === "brief-cover") return briefCoverEl(it);
   if (it.type === "brief-stories") return briefStoriesEl(it);
@@ -815,8 +915,8 @@ function briefCoverEl(it) {
   const now = new Date();
   const n = it.plan.papers.length, g = it.plan.guess.length;
   const parts = [n ? plural(n, "new paper") : null, it.stories.length ? plural(it.stories.length, "story", "stories") : null,
-    it.classic ? "a classic" : null, it.light ? "something lighter" : null, it.fd?.next ? "your next Foundations paper" : null].filter(Boolean);
-  const mins = Math.max(2, Math.round(n * 1.2 + it.stories.length * 0.6 + (it.classic ? 1.5 : 0) + (it.light ? 1 : 0) + (it.fd?.next ? 1 : 0)));
+    it.classic ? "a classic" : null, it.wide ? "one from outside your areas" : null, it.light ? "something lighter" : null, it.fd?.next ? "your next Foundations paper" : null].filter(Boolean);
+  const mins = Math.max(2, Math.round(n * 1.2 + it.stories.length * 0.6 + (it.classic ? 1.5 : 0) + (it.wide ? 1.5 : 0) + (it.light ? 1 : 0) + (it.fd?.next ? 1 : 0)));
   const m = bannerMeeting() ? null : meetingChips()[0];          // the banner already says it
   const hour = now.getHours();
   return el("article", { class: "card brief-card brief-cover", "data-key": "brief:cover" },

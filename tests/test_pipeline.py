@@ -227,3 +227,37 @@ def test_important_labels_only_shown_areas(env, monkeypatch):
     out = build_important.run(http)
     for p in out["papers"].values():
         assert set(p["impact"]["pcts"]) <= set(p["areas"]) and p["impact"]["pct"] == max(p["impact"]["pcts"].values())
+
+
+def test_outside_your_areas_pool(monkeypatch):
+    """Recent general-journal papers none of the area searches found, ranked by early citations
+    per month and design; notices, plain reviews and papers without a stated conclusion stay out."""
+    from pipeline import build_important
+    t = date(2026, 11, 1)
+
+    class PM:
+        def ids(self, term, start, end, datetype="pdat"):
+            assert '"N Engl J Med"[ta]' in term and "NOT (" in term
+            return 6, ["1", "2", "3", "4", "5", "6"]
+
+        def summaries(self, ids):
+            rows = {"1": ["Randomized Controlled Trial", "Journal Article"], "2": ["Journal Article"],
+                    "3": ["Review", "Journal Article"], "4": ["Journal Article"], "5": ["Editorial"],
+                    "6": ["Journal Article"]}
+            return [{"pmid": p, "types": rows[p], "first": "2026-08-01", "date": "2026-08-01"} for p in ids]
+
+        def fetch(self, ids):
+            return [{"pmid": p} for p in ids]
+
+    cites = {"1": {"cites": 30, "clin": 1, "research": True}, "2": {"cites": 40, "clin": 0, "research": True},
+             "3": {"cites": 90, "research": False}, "4": {"cites": 5, "research": True},
+             "6": {"cites": 70, "research": True}}
+    monkeypatch.setattr(build_important.icite, "metrics", lambda http, ids: {p: cites[p] for p in ids if p in cites})
+    monkeypatch.setattr(build_important, "to_card", lambda rec, comp: {
+        "pmid": rec["pmid"], "conclusion": {"kind": "none" if rec["pmid"] == "6" else "structured"}})
+    cfg = {"wide": {"query": "({wide_journals}) NOT (x)", "months": 6, "keep": 5},
+           "wide_journals": ['"N Engl J Med"[ta]', '"Lancet"[ta]']}
+    order, cards = build_important.wide_pool(PM(), None, cfg, t, {"4": []}, {})
+    assert order == ["1", "2"]                    # the trial outranks a bigger plain count; 3 review, 4 in an area, 5 editorial, 6 no conclusion
+    assert cards["1"]["wide"]["cites"] == 30 and cards["1"]["areas"] == []
+    assert build_important.wide_score(["Randomized Controlled Trial"], 30, 1, 3) > build_important.wide_score(["Journal Article"], 40, 0, 3)

@@ -89,14 +89,15 @@ function toast(msg) {
 }
 
 // a toast with one button (Undo), up a little longer
-function toastAction(msg, label, fn) {
+function toastAction(msg, label, fn) { toastActions(msg, [[label, fn]]); }
+function toastActions(msg, acts) {
   const t = $("#toast");
-  t.replaceChildren(el("span", {}, msg), el("button", { class: "toast-act", onclick: () => {
+  t.replaceChildren(el("span", {}, msg), ...acts.map(([label, fn]) => el("button", { class: "toast-act", onclick: () => {
     clearTimeout(toastTimer); t.classList.remove("show", "act"); fn();
-  } }, label));
+  } }, label)));
   t.classList.add("show", "act");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show", "act"), 5000);
+  toastTimer = setTimeout(() => t.classList.remove("show", "act"), acts.length > 1 ? 6500 : 5000);
 }
 
 // ── state ──────────────────────────────────────────────────────────────────
@@ -120,6 +121,13 @@ const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "A
   SMMNY: "Siemens Healthineers", PHG: "Philips", EW: "Edwards Lifesciences", MDT: "Medtronic", LNTH: "Lantheus", RDNT: "RadNet" };
 const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
   movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
+// alerts: which switch in Tune → Rules turns each kind off
+const ALERT_GROUPS = {
+  fda: ["FDA", "Approvals and safety warnings for radiopharmaceuticals and imaging agents: contrast, PET and SPECT tracers, radioligand therapy."],
+  uspstf: ["USPSTF", "New and draft recommendations from the U.S. Preventive Services Task Force."],
+  acs: ["American Cancer Society", "Changes to its screening and other guidelines."],
+  societies: ["Societies", "Guidelines and consensus statements: ACR, SAR, SNMMI, EANM, SCCT, Fleischner, ACC/AHA, ESC, AASLD."],
+};
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
@@ -139,12 +147,13 @@ const TUNE_DEFAULTS = {
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
   swipe: true,          // swipe a card left to save it, right to clear it
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
+  alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true },   // what Today holds
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true },   // what Today holds
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
@@ -183,6 +192,7 @@ function loadTune() {
     weather: t.weather !== false,
     swipe: t.swipe !== false,
     cardLayout: t.cardLayout === "paged" ? "paged" : "compact",
+    alerts: Object.fromEntries(Object.keys(ALERT_GROUPS).map((k) => [k, (t.alerts || {})[k] !== false])),
     horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
         : WATCH_DEFAULT.slice() },
@@ -194,7 +204,8 @@ function loadTune() {
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
     brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
-      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false },
+      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false,
+      wide: b.wide !== false },
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
     pictures: t.pictures !== false,
     meetings: Object.fromEntries(Object.entries(obj(t.meetings)).filter(([, v]) => typeof v === "boolean")),
@@ -225,7 +236,7 @@ const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
 let seenRecent = store.get("seenRecent", null);
 if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
-const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon"]);
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "alert"]);
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
@@ -504,20 +515,39 @@ function renderChips() {
 const dayOf = (it) => (it.type === "news" ? it.date : it.added || it.epub || "").slice(0, 10);
 
 // The feed for the current chips. `f` overrides the chips; `report` (optional) counts what was left out.
-// cards you swiped away (key → day), kept 90 days; Tune → Rules can bring them back
+// cards you swiped away (key → day), kept 90 days; Tune → Rules can bring them back.
+// A card put off with "Not now" is stored as "z:" + the day it comes back.
 let cleared = store.get("cleared", null);
 if (!cleared || typeof cleared !== "object" || Array.isArray(cleared)) cleared = {};
-function setCleared(key, on) {
-  if (on) cleared[key] = localDay(); else delete cleared[key];
-  const cut = localDay(daysAgo(90));
-  for (const [k, d] of Object.entries(cleared)) if (typeof d !== "string" || d < cut) delete cleared[k];
+const isCleared = (key) => { const v = cleared[key]; return !!v && (!v.startsWith("z:") || v.slice(2) > localDay()); };
+function setCleared(key, on, until = null) {
+  if (on) cleared[key] = until ? `z:${until}` : localDay(); else delete cleared[key];
+  const cut = localDay(daysAgo(90)), today = localDay();
+  for (const [k, d] of Object.entries(cleared)) {
+    if (typeof d !== "string" || (d.startsWith("z:") ? d.slice(2) <= today : d < cut)) delete cleared[k];
+  }
   store.set("cleared", cleared);
+}
+const clearedCount = () => Object.keys(cleared).filter(isCleared).length;
+// why you cleared cards: a tally for Tune. Only "Not for me" teaches the feed (like Less in Rate).
+const WHY = {
+  know: ["Already know it", "Nothing changes in what you see."],
+  notme: ["Not for me", "Fewer cards like this, the same as Less like this in Rate."],
+  weak: ["Weak study", "Counted in Tune; the topic isn’t marked down."],
+  later: ["Not now", "It comes back in 3 days."],
+};
+let whyTally = store.get("whyTally", null);
+if (!whyTally || typeof whyTally !== "object" || Array.isArray(whyTally)) whyTally = {};
+function tallyWhy(why, d) {
+  whyTally[why] = Math.max(0, (whyTally[why] || 0) + d);
+  if (!whyTally[why]) delete whyTally[why];
+  store.set("whyTally", whyTally);
 }
 // cards you've seen go to the end. Which cards count as seen is fixed when a list is started fresh
 // (opening the app, a chip, refresh), so nothing moves while you're reading.
 const isRead = (it) => !!(T.readLast && S.readSet && it && it.type !== "top" && !SPECIAL.has(it.type) && S.readSet.has(listKey(it)));
 function filtered(f = {}, report = null) {
-  const list = buildList(f, report).filter((it) => it.type === "top" || SPECIAL.has(it.type) || !cleared[listKey(it)]);
+  const list = buildList(f, report).filter((it) => it.type === "top" || SPECIAL.has(it.type) || !isCleared(listKey(it)));
   if (!T.readLast || (f.kind ?? S.kind) === "today" || !S.readSet?.size) return list;
   const fresh = [], read = [];
   for (const it of list) (isRead(it) ? read : fresh).push(it);
@@ -594,7 +624,7 @@ function buildList(f = {}, report = null) {
   });
   const classic = system === "all" && T.brief.classic ? classicToday() : null;   // today's classic, a few cards in
   if (classic) mixed.splice(Math.min(2, mixed.length), 0, classic);
-  return tops.concat(mixed);
+  return (system === "all" ? alertCards() : []).concat(tops, mixed);
 }
 
 let feedObserver, seenObserver;
@@ -940,9 +970,10 @@ function paperCardEl(it) {
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
       isRead(it) ? el("span", { class: "lang seen" }, "Seen") : null,
       it.classic ? el("span", { class: "lang classic" }, "Classic of the day") : null,
+      it._wide ? el("span", { class: "lang wide" }, "Outside your areas") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
-    it.classic ? classicLine(it) : impactEl(it),
+    it.classic ? classicLine(it) : it._wide ? wideLine(it) : impactEl(it),
     it.retracted ? el("div", { class: "warn" }, "Retracted. See the notice on PubMed before using this.") : null,
     it.concern ? el("div", { class: "warn" }, "Expression of concern published for this paper.") : null,
     el("h2", { class: "card-title clamp" }, el("a", { class: "head-link", href: pubmedUrl(it.pmid),
@@ -1414,6 +1445,10 @@ function openInfo() {
     el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline and the outlet’s own short summary; Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one publisher covered this week."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
+    el("h3", {}, "Alerts"),
+    el("p", {}, "Rare cards pinned at the top of Everything and Today for a week: FDA approvals and safety warnings for radiopharmaceuticals and imaging agents, and guideline changes from the USPSTF, the American Cancer Society and the imaging and cardiac societies. A news story makes one only when two different publishers carry it, or when the FDA or the society says it itself; new guidelines also come straight from PubMed (USPSTF statements in JAMA, American Cancer Society guidelines in CA, and the ACR, SAR, SNMMI, EANM, SCCT, Fleischner, ACC/AHA, ESC and AASLD). Dismiss one and it’s gone; Tune → Rules → Alerts turns each kind off."),
+    el("h3", {}, "Outside your areas"),
+    el("p", {}, "One paper a day in Today from NEJM, The Lancet, JAMA, BMJ, Nature Medicine, Annals and the big oncology and cardiology journals: papers from the last six months that none of your area searches found, ranked weekly by early citations (NIH iCite) and study design, so a large trial beats a cohort study cited as often. Imaging papers are left out because your areas already have them. Each paper shows once."),
     el("h3", {}, "Most important"),
     el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),
@@ -1438,7 +1473,7 @@ function openInfo() {
     el("p", {}, "Earnings dates come from Alpha Vantage, straight to your phone, with your own free key (Tune → Interests → Coming up). The key stays on this phone, out of backups, and goes only to alphavantage.co about once a day. Until you add one, each earnings season’s start is estimated. Tap any event for details and Add to Calendar; Subscribe in Calendar adds them all (not earnings) as a calendar that keeps itself up to date."),
     el("h3", {}, "Moving around"),
     el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
-    el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
+    el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back. Why? after a clear lets you say why: Already know it, Not for me (fewer like this, the same as Less in Rate), Weak study, or Not now (back in 3 days); only Not for me changes what you see (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
@@ -2022,7 +2057,12 @@ function clearCard(card, it) {
   view.scrollTop = Math.min(keep, top);     // the next card where this one was (the browser would snap back a card)
   updateHeadNote();
   const listNow = S.list;
-  toastAction("Cleared", "Undo", () => {
+  if (it.type === "alert") {          // an alert isn't a story to learn from: dismiss it, nothing more
+    const undo = () => { setCleared(key, false); S.feedDirty = true; if (S.tab === "feed" && S.list === listNow) refreshFeed(); };
+    toastAction("Alert dismissed", "Undo", undo);
+    return;
+  }
+  const undo = () => {
     setCleared(key, false);
     if (S.list !== listNow || S.tab !== "feed") { S.feedDirty = true; toast("It’s back in your lists"); return; }   // the list has changed since
     const cards = [...view.children].filter((n) => n._it);
@@ -2036,7 +2076,31 @@ function clearCard(card, it) {
     gridRO?.observe(c);
     if (isFlow()) requestAnimationFrame(() => { fitCard(c); const r = c.getBoundingClientRect(), vr = view.getBoundingClientRect(); if (r.top < vr.top || r.bottom > vr.bottom) view.scrollTop = c.offsetTop - 8; });
     else { view.scrollTop = c.offsetTop; requestAnimationFrame(() => fitCard(c)); }
-  });
+  };
+  toastActions("Cleared", [["Why?", () => openClearWhy(it, key, undo)], ["Undo", undo]]);
+}
+// the reasons sheet after a clear: what each choice does is said on the button
+function openClearWhy(it, key, undo) {
+  const paper = !isNewsItem(it);
+  const pick = (why) => {
+    closeSheet();
+    let reacted = false;
+    if (why === "notme" && (T.reacts[saveKey(it)] || 0) !== -1) { react(it, -1); reacted = true; }
+    if (why === "later") setCleared(key, true, localDay(daysAgo(-3)));
+    tallyWhy(why, 1);
+    const msg = { know: "Noted: already known", notme: "Got it: fewer like this", weak: "Noted: weak study", later: "Back in 3 days" }[why];
+    toastAction(msg, "Undo", () => {
+      tallyWhy(why, -1);
+      if (reacted && T.reacts[saveKey(it)] === -1) react(it, -1);
+      undo();
+    });
+  };
+  openSheet(
+    el("h2", { id: "sheet-title" }, "Why clear it?"),
+    el("p", { class: "sheet-meta fb-title" }, el("span", {}, it.title)),
+    el("div", { class: "why-list" }, Object.entries(WHY).filter(([k]) => paper || k !== "weak").map(([k, [label, what]]) =>
+      el("button", { class: "why-btn", onclick: () => pick(k) }, el("b", {}, label), el("span", {}, what)))),
+    el("p", { class: "fine" }, "Only “Not for me” changes what Readout shows you. The tally is in Tune → Rules."));
 }
 
 // pull the feed down from its first card to check for new papers and news

@@ -144,6 +144,63 @@ def build_corpus(pm: PubMed, cfg: dict, t: date, s: dict) -> "tuple[dict[str, li
     return cache, areas_of
 
 
+DESIGN_WEIGHT = {"Randomized Controlled Trial": 2.0, "Meta-Analysis": 1.7, "Systematic Review": 1.4, "Practice Guideline": 1.4,
+                 "Guideline": 1.4, "Clinical Trial, Phase III": 1.8, "Multicenter Study": 1.2}
+
+
+def wide_score(types: list[str], cites: int, clin: int, age_months: float) -> float:
+    """Early attention, per month since it appeared, weighted by study design: a big trial that's
+    already being cited beats an observational study with the same count."""
+    w = max([DESIGN_WEIGHT.get(t, 1.0) for t in types] or [1.0])
+    return round((cites + 2 * clin + 1) / max(1.0, age_months) * w, 3)
+
+
+def wide_pool(pm: PubMed, http: Http, cfg: dict, t: date, corpus: dict, compiled) -> "tuple[list[str], dict]":
+    """Outside your areas: recent papers from the big general journals that none of your area searches
+    found, ranked by early citations (NIH iCite) and design. One a day goes into Today."""
+    w = cfg.get("wide") or {}
+    if not w.get("query"):
+        return [], {}
+    start = t - timedelta(days=round(30.44 * float(w.get("months", 6))))
+    n, ids = pm.ids(fill(w["query"], cfg), start, t, datetype="pdat")
+    ids = [p for p in ids if p not in corpus]
+    log(f"Outside your areas: {n} papers in the general journals, {len(ids)} outside your areas' searches")
+    rows = {}
+    for r in pm.summaries(ids):
+        types = r.get("types") or []
+        if set(types) & SKIP_TYPES or ("Review" in types and not {"Meta-Analysis", "Systematic Review"} & set(types)):
+            continue
+        try:
+            when = date.fromisoformat(r.get("first") or r.get("date") or "")
+        except ValueError:
+            continue
+        rows[r["pmid"]] = {"types": types, "date": when}
+    cites = icite.metrics(http, rows.keys())
+    for p, r in rows.items():
+        m = cites.get(p, {})
+        if m and m.get("research") is False and not {"Meta-Analysis", "Systematic Review", "Practice Guideline", "Guideline"} & set(r["types"]):
+            r["score"] = -1
+            continue
+        r.update(cites=m.get("cites", 0), clin=m.get("clin", 0), age=round(months(r["date"], t), 1))
+        r["score"] = wide_score(r["types"], r["cites"], r["clin"], r["age"])
+    ranked = [p for p in sorted(rows, key=lambda p: -rows[p]["score"]) if rows[p]["score"] > 0]
+    keep = int(w.get("keep", 40))
+    cards = {}
+    for rec in pm.fetch(ranked[: keep * 2]):
+        card = to_card(rec, compiled)
+        if is_notice(card) or (card.get("conclusion") or {}).get("kind") in ("none", "opening"):
+            continue                                   # a stated conclusion, or it isn't worth a card here
+        r = rows[rec["pmid"]]
+        card["areas"] = []
+        card["wide"] = {"cites": r["cites"], "clin": r["clin"], "age": r["age"], "score": r["score"]}
+        cards[rec["pmid"]] = card
+        if len(cards) >= keep:
+            break
+    order = [p for p in ranked if p in cards]
+    log(f"Outside your areas: kept {len(order)}")
+    return order, cards
+
+
 def run(http: Optional[Http] = None) -> dict:
     cfg = load_yaml("feeds.yaml")
     s = settings_from(cfg)
@@ -196,6 +253,15 @@ def run(http: Optional[Http] = None) -> dict:
     windows = {w: {a: {k: [p for p in lst if p in papers and a in papers[p]["areas"]][:cap[k](w)] for k, lst in per.items()}
                    for a, per in v.items()}
                for w, v in windows.items()}
+    try:
+        wide, wide_cards = wide_pool(pm, http, cfg, t, corpus, compiled)
+    except Exception as exc:          # the main lists matter more; keep last week's pool
+        log(f"Outside your areas: failed ({exc}); keeping last week's")
+        prev = read_json(DATA / "important.json", {}) or {}
+        wide = prev.get("wide") or []
+        wide_cards = {p: prev["papers"][p] for p in wide if p in (prev.get("papers") or {})}
+    for p, card in wide_cards.items():
+        papers.setdefault(p, card)
     figures.attach(http, papers.values(), data=DATA, cache_dir=CACHE, budget=150, job="important")
     abstract_store.save(DATA / "abstracts", "i", abstract_store.split_out(list(papers.values()), "i"))
 
@@ -214,6 +280,7 @@ def run(http: Optional[Http] = None) -> dict:
         },
         "systems": {k: v["label"] for k, v in cfg["systems"].items()},
         "windows": windows,
+        "wide": wide,
         "papers": papers,
     }
     write_json(DATA / "important.json", out)

@@ -10,7 +10,7 @@ import os
 from datetime import date, timedelta
 from typing import Optional
 
-from . import abstract_store, figures
+from . import abstract_store, alerts, figures
 from .abstracts import area_require, compile_systems, is_notice, passes, refresh, to_card
 
 NO_ABSTRACT_DAYS = 21      # PubMed adds late abstracts within days; after three weeks none is coming
@@ -133,8 +133,18 @@ def run(http: Optional[Http] = None) -> dict:
                      and _age_days(it.get("added") or it.get("seen"), t) > NO_ABSTRACT_DAYS)]
     kept.sort(key=lambda it: (it.get("added") or "", it.get("seen") or "", int(it["pmid"])), reverse=True)
     kept = kept[: int(settings.get("max_items", 2500))]
+    # 6 — guideline alerts: new USPSTF, American Cancer Society and society guidelines in PubMed
+    try:
+        found_alerts = alerts.paper_alerts(pm, cfg, t, old.get("alerts") or [], to_card, compiled, is_notice)
+    except Exception as exc:          # a bonus; the feed still goes out
+        log(f"Alerts: failed ({exc}); keeping yesterday's")
+        found_alerts = [a for a in old.get("alerts") or [] if a.get("card")]
+        for a in found_alerts:
+            if not a["card"].get("sections") and a.get("pmid") in stored:
+                a["card"]["sections"] = stored[a["pmid"]]
+    log(f"Alerts: {len(found_alerts)} guideline papers ({', '.join(a['label'] for a in found_alerts) or 'none'})")
     figures.attach(http, kept, data=DATA, cache_dir=CACHE, budget=int(settings.get("new_figures", 60)))
-    abstract_store.save(DATA / "abstracts", "f", abstract_store.split_out(kept, "f"))
+    abstract_store.save(DATA / "abstracts", "f", abstract_store.split_out(kept + [a["card"] for a in found_alerts], "f"))
 
     out = {
         "generated": now_iso(),
@@ -161,6 +171,7 @@ def run(http: Optional[Http] = None) -> dict:
             "ncbi_key": bool(os.environ.get("NCBI_API_KEY", "").strip()),
         },
         "items": kept,
+        "alerts": found_alerts,
     }
     if failed:
         out["failed_streams"] = failed
