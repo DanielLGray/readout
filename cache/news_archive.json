@@ -6032,8 +6032,8 @@
   "dcdc26f4c1a8": [
     "2026-11-21T01:28:24Z",
     "Marsha Linehan Has Died. She Transformed Treatment for Personality Disorder.",
-    "New York Times Well",
-    "light"
+    "New York Times Health",
+    "health"
   ],
   "61ac49e20bdd": [
     "2026-11-20T22:40:02Z",
@@ -6116,8 +6116,8 @@
   "4b485f74d72a": [
     "2026-11-19T21:08:14Z",
     "Studies Could Pave Way for Blood Test to Detect C.T.E. in Living Patients",
-    "New York Times Science",
-    "science"
+    "New York Times Health",
+    "health"
   ],
   "7dbba5dacb13": [
     "2026-11-19T20:31:15Z",
@@ -11134,5 +11134,59 @@
     "Oldest male orca on record may have been identified thanks to historical atomic bomb testing",
     "Live Science",
     "science"
+  ],
+  "f11c3ce230d3": [
+    "2026-11-26T19:40:18Z",
+    "Dan Carney Has Died. He Co-Founded Pizza Hut and Then Made It Ubiquitous.",
+    "New York Times Business",
+    "business"
+  ],
+  "8a6c5f9c1508": [
+    "2026-11-26T19:28:00Z",
+    "Powerful Storm Hits East Coast, Scrambling Thanksgiving Plans",
+    "Wall Street Journal",
+    "general"
+  ],
+  "f5840036b779": [
+    "2026-11-26T19:00:18Z",
+    "7 Years Later, Hollywood’s Most Notorious Fantasy Flop Deserves Another Shot",
+    "Polygon",
+    "sff"
+  ],
+  "0dec0d503ab0": [
+    "2026-11-26T19:00:15Z",
+    "Wave-like displays in animal groups may have evolved to deceive predators",
+    "Phys.org",
+    "science"
+  ],
+  "f96240213b33": [
+    "2026-11-26T19:00:00Z",
+    "In a fertility advance, engineered molecular glue stabilizes chromosomes in aging eggs",
+    "STAT",
+    "health"
+  ],
+  "7286802ab5d3": [
+    "2026-11-26T18:50:02Z",
+    "Runaway pulsar escapes the remnant of its own supernova",
+    "Phys.org",
+    "science"
+  ],
+  "2864edcc0a7b": [
+    "2026-11-26T18:44:26Z",
+    "Chief medical officer Gregor Smith resigns on mental health grounds",
+    "BBC Health",
+    "health"
+  ],
+  "7a47b5d7af84": [
+    "2026-11-26T00:00:00Z",
+    "Has AI just cracked Internet encryption? Rumoured ‘bombshell’ stuns scientists",
+    "Nature",
+    "science"
+  ],
+  "be5ed5840fd2": [
+    "2026-11-25T19:52:54Z",
+    "Sept. 11 Defendants Get New Opening to Challenge Death Penalty",
+    "New York Times",
+    "general"
   ]
 }
