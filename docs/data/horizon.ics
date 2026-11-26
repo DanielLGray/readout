@@ -1,0 +1,408 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Readout: Coming up
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bea-gdp-report-2026-11-25@readout
+DTSTAMP:20261125T133000Z
+DTSTART:20261125T133000Z
+DTEND:20261125T143000Z
+SUMMARY:GDP report
+DESCRIPTION:Second estimate for Q3 2026 Gross domestic product\, from the 
+ Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2026-11-25@readout
+DTSTAMP:20261125T133000Z
+DTSTART:20261125T133000Z
+DTEND:20261125T143000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:October 2026 numbers Personal income and spending\, with the P
+ CE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2026-11-26@readout
+DTSTAMP:20261126T000000Z
+DTSTART;VALUE=DATE:20261126
+DTEND;VALUE=DATE:20261127
+SUMMARY:Stock market closed
+DESCRIPTION:Thanksgiving Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2026-11-27@readout
+DTSTAMP:20261127T000000Z
+DTSTART;VALUE=DATE:20261127
+DTEND;VALUE=DATE:20261128
+SUMMARY:Stock market closes early
+DESCRIPTION:1:00 pm ET\, the day after Thanksgiving Source: NYSE holiday r
+ ules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-rsna2026@readout
+DTSTAMP:20261129T000000Z
+DTSTART;VALUE=DATE:20261129
+DTEND;VALUE=DATE:20261204
+SUMMARY:RSNA 2026
+DESCRIPTION:Radiological Society of North America\, 112th Scientific Assem
+ bly and Annual Meeting Source: Your meetings.
+LOCATION:McCormick Place\, Chicago
+URL:https://www.rsna.org/annual-meeting
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2026-12-09@readout
+DTSTAMP:20261209T190000Z
+DTSTART:20261209T190000Z
+DTEND:20261209T200000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Dec 8–9. Statement at 2:00 pm ET\, press confer
+ ence at 2:30\, with new economic projections. The Federal Reserve's inter
+ est-rate decision. Source: Federal Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2026-12-23@readout
+DTSTAMP:20261223T133000Z
+DTSTART:20261223T133000Z
+DTEND:20261223T143000Z
+SUMMARY:GDP report
+DESCRIPTION:Third estimate for Q3 2026 Gross domestic product\, from the B
+ ureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2026-12-23@readout
+DTSTAMP:20261223T133000Z
+DTSTART:20261223T133000Z
+DTEND:20261223T143000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:November 2026 numbers Personal income and spending\, with the 
+ PCE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2026-12-24@readout
+DTSTAMP:20261224T000000Z
+DTSTART;VALUE=DATE:20261224
+DTEND;VALUE=DATE:20261225
+SUMMARY:Stock market closes early
+DESCRIPTION:1:00 pm ET\, Christmas Eve Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2026-12-25@readout
+DTSTAMP:20261225T000000Z
+DTSTART;VALUE=DATE:20261225
+DTEND;VALUE=DATE:20261226
+SUMMARY:Stock market closed
+DESCRIPTION:Christmas Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-c1bd775a-2fff-45bb-9726-765b69817c19@readout
+DTSTAMP:20261230T000000Z
+DTSTART;VALUE=DATE:20261230
+DTEND;VALUE=DATE:20261231
+SUMMARY:Launch: USSF-75
+DESCRIPTION:Falcon Heavy · SpaceX Classified payload for the United State
+ s Space Force (no earlier than this date) Source: Launch Library 2 (The S
+ pace Devs).
+LOCATION:Kennedy Space Center\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/c1bd775a-2fff-45bb-9726-765
+ b69817c19/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-01-01@readout
+DTSTAMP:20270101T000000Z
+DTSTART;VALUE=DATE:20270101
+DTEND;VALUE=DATE:20270102
+SUMMARY:Stock market closed
+DESCRIPTION:New Year's Day Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-d3bd7fb2-fac6-49fc-ae52-cee07d2fde67@readout
+DTSTAMP:20270105T000000Z
+DTSTART;VALUE=DATE:20270105
+DTEND;VALUE=DATE:20270106
+SUMMARY:Launch: Griffin Mission One
+DESCRIPTION:Falcon Heavy · SpaceX Demonstration flight of the Astrobotic 
+ Griffin lander and its engines\, initially contracted for the NASA VIPER 
+ (Volatiles Investigating Polar Exploration Rover) mission. The vacated pa
+ yload spot will now host the FLIP (FLEX Lunar Innovation Platform) lunar 
+ rover from Astrolab. Source: Launch Library 2 (The Space Devs).
+LOCATION:Kennedy Space Center\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/d3bd7fb2-fac6-49fc-ae52-cee
+ 07d2fde67/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:ces2027@readout
+DTSTAMP:20270106T000000Z
+DTSTART;VALUE=DATE:20270106
+DTEND;VALUE=DATE:20270110
+SUMMARY:CES 2027
+DESCRIPTION:The consumer technology show\, where AI\, health tech and car 
+ makers show what's next. Source: Checked by hand.
+LOCATION:Las Vegas
+URL:https://www.ces.tech/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:jpm2027@readout
+DTSTAMP:20270111T000000Z
+DTSTART;VALUE=DATE:20270111
+DTEND;VALUE=DATE:20270115
+SUMMARY:J.P. Morgan Healthcare Conference
+DESCRIPTION:The year's biggest healthcare investor week. Imaging\, medtech
+  and radiopharma companies give their outlooks\, and deals get announced.
+  Source: Checked by hand.
+LOCATION:Westin St. Francis\, San Francisco
+URL:https://www.biopharmadive.com/news/top-biotech-pharma-medical-conferen
+ ces-2027/832075/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-07e945c1-2ec6-4d29-a500-1afbe920440f@readout
+DTSTAMP:20270113T000000Z
+DTSTART;VALUE=DATE:20270113
+DTEND;VALUE=DATE:20270114
+SUMMARY:Launch: Starliner-1
+DESCRIPTION:Atlas V N22 · United Launch Alliance Starliner-1 is the first
+  operational flight of a Starliner spacecraft to the International Space 
+ Station as part of NASA's Commercial Crew Program. Due to problems with t
+ he Starliner spacecraft's RCS attitude control system during the Crew Fli
+ ght Test mission in 2024\, this mission has been re-scoped to not carry a
+  crew by NASA. It will instead deliver necessary cargo to the orbital lab
+ oratory and  Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/07e945c1-2ec6-4d29-a500-1af
+ be920440f/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:season-2027-01@readout
+DTSTAMP:20270114T000000Z
+DTSTART;VALUE=DATE:20270114
+DTEND;VALUE=DATE:20270115
+SUMMARY:Q4 earnings season begins
+DESCRIPTION:The big banks report first\; the largest tech companies follow
+  in the last week of the month. (about this date) Source: Readout estimat
+ e.
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-01-18@readout
+DTSTAMP:20270118T000000Z
+DTSTART;VALUE=DATE:20270118
+DTEND;VALUE=DATE:20270119
+SUMMARY:Stock market closed
+DESCRIPTION:Martin Luther King Jr. Day Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-01-26@readout
+DTSTAMP:20270126T190000Z
+DTSTART:20270126T190000Z
+DTEND:20270126T200000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Jan 25–26. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-01-27@readout
+DTSTAMP:20270127T190000Z
+DTSTART:20270127T190000Z
+DTEND:20270127T200000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Jan 26–27. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-0d6ad64c-3aed-4041-b095-e1d951bc6d29@readout
+DTSTAMP:20270128T000000Z
+DTSTART;VALUE=DATE:20270128
+DTEND;VALUE=DATE:20270129
+SUMMARY:Launch: Aspera
+DESCRIPTION:Electron · Rocket Lab Aspera houses an ultraviolet telescope 
+ and will examine hot gas in the intergalactic medium\, thought to be cont
+ ributing to the birth of stars and planets. Aspera will be the first NASA
+  astrophysics mission to gather and map these ultraviolet light signature
+ s\, potentially unlocking a deeper understanding of the origins of stars\
+ , planets\, and life in the universe. Source: Launch Library 2 (The Space
+  Devs).
+LOCATION:Rocket Lab Launch Complex 1\, Mahia Peninsula\, New Zealand
+URL:https://ll.thespacedevs.com/2.3.0/launches/0d6ad64c-3aed-4041-b095-e1d
+ 951bc6d29/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-01-28@readout
+DTSTAMP:20270128T133000Z
+DTSTART:20270128T133000Z
+DTEND:20270128T143000Z
+SUMMARY:GDP report
+DESCRIPTION:Advance estimate for Q4 2026 Gross domestic product\, from the
+  Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-01-28@readout
+DTSTAMP:20270128T133000Z
+DTSTART:20270128T133000Z
+DTEND:20270128T143000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:December 2026 numbers Personal income and spending\, with the 
+ PCE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-a5e81552-ecdd-4d89-b6bd-b594e22ca891@readout
+DTSTAMP:20270130T000000Z
+DTSTART;VALUE=DATE:20270130
+DTEND;VALUE=DATE:20270131
+SUMMARY:Launch: Blue Ring-1
+DESCRIPTION:New Glenn · Blue Origin The first mission of Blue Ring\, Blue
+  Origin's all-in-one\, high-powered hybrid solar electric and chemical pr
+ opelled spacecraft\, will test the spacecraft's operations in Geostationa
+ ry Transfer Orbit (GTO)\, as well as subsequent operations after reaching
+  Geostationary Orbit (GEO). It will carry one of Scout Space's flagship n
+ ext-generation space domain awareness (SDA) Owl sensors\, which is design
+ ed  (no earlier than this date) Source: Launch Library 2 (The Space Devs)
+ .
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/a5e81552-ecdd-4d89-b6bd-b59
+ 4e22ca891/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:eclipse-2027-02-06@readout
+DTSTAMP:20270206T000000Z
+DTSTART;VALUE=DATE:20270206
+DTEND;VALUE=DATE:20270207
+SUMMARY:Annular solar eclipse
+DESCRIPTION:A "ring of fire" eclipse\, annular in southern Chile and Argen
+ tina\, partial across South America and western Africa. Not visible from 
+ North America. Source: Checked by hand.
+URL:https://science.nasa.gov/eclipses/future-eclipses/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-02-15@readout
+DTSTAMP:20270215T000000Z
+DTSTART;VALUE=DATE:20270215
+DTEND;VALUE=DATE:20270216
+SUMMARY:Stock market closed
+DESCRIPTION:Washington's Birthday Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:eclipse-2027-02-20@readout
+DTSTAMP:20270220T000000Z
+DTSTART;VALUE=DATE:20270220
+DTEND;VALUE=DATE:20270221
+SUMMARY:Penumbral lunar eclipse
+DESCRIPTION:The Moon dims slightly in Earth's outer shadow\, a subtle one.
+  Source: Checked by hand.
+URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-02-25@readout
+DTSTAMP:20270225T133000Z
+DTSTART:20270225T133000Z
+DTEND:20270225T143000Z
+SUMMARY:GDP report
+DESCRIPTION:Second estimate for Q4 2026 Gross domestic product\, from the 
+ Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-02-25@readout
+DTSTAMP:20270225T133000Z
+DTSTART:20270225T133000Z
+DTEND:20270225T143000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:January 2027 numbers Personal income and spending\, with the P
+ CE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-sar2027@readout
+DTSTAMP:20270228T000000Z
+DTSTART;VALUE=DATE:20270228
+DTEND;VALUE=DATE:20270306
+SUMMARY:SAR 2027
+DESCRIPTION:Society of Abdominal Radiology Annual Meeting Source: Your mee
+ tings.
+LOCATION:Omni La Costa\, Carlsbad\, California
+URL:https://abdominalradiology.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-ecr2027@readout
+DTSTAMP:20270303T000000Z
+DTSTART;VALUE=DATE:20270303
+DTEND;VALUE=DATE:20270308
+SUMMARY:ECR 2027
+DESCRIPTION:European Congress of Radiology Source: Your meetings.
+LOCATION:Austria Center Vienna
+URL:https://www.myesr.org/congress/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-03-17@readout
+DTSTAMP:20270317T180000Z
+DTSTART:20270317T180000Z
+DTEND:20270317T190000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Mar 16–17. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-03-26@readout
+DTSTAMP:20270326T000000Z
+DTSTART;VALUE=DATE:20270326
+DTEND;VALUE=DATE:20270327
+SUMMARY:Stock market closed
+DESCRIPTION:Good Friday Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Annular solar eclipse
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:eclipse-2027-02-06@readout
+DTSTAMP:20270206T000000Z
+DTSTART;VALUE=DATE:20270206
+DTEND;VALUE=DATE:20270207
+SUMMARY:Annular solar eclipse
+DESCRIPTION:A "ring of fire" eclipse\, annular in southern Chile and Argen
+ tina\, partial across South America and western Africa. Not visible from 
+ North America. Source: Checked by hand.
+URL:https://science.nasa.gov/eclipses/future-eclipses/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

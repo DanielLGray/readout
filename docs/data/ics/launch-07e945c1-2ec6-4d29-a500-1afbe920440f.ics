@@ -1,0 +1,26 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Starliner-1
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-07e945c1-2ec6-4d29-a500-1afbe920440f@readout
+DTSTAMP:20270113T000000Z
+DTSTART;VALUE=DATE:20270113
+DTEND;VALUE=DATE:20270114
+SUMMARY:Launch: Starliner-1
+DESCRIPTION:Atlas V N22 · United Launch Alliance Starliner-1 is the first
+  operational flight of a Starliner spacecraft to the International Space 
+ Station as part of NASA's Commercial Crew Program. Due to problems with t
+ he Starliner spacecraft's RCS attitude control system during the Crew Fli
+ ght Test mission in 2024\, this mission has been re-scoped to not carry a
+  crew by NASA. It will instead deliver necessary cargo to the orbital lab
+ oratory and  Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/07e945c1-2ec6-4d29-a500-1af
+ be920440f/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

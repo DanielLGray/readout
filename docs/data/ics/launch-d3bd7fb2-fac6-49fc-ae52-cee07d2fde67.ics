@@ -1,0 +1,24 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Griffin Mission One
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-d3bd7fb2-fac6-49fc-ae52-cee07d2fde67@readout
+DTSTAMP:20270105T000000Z
+DTSTART;VALUE=DATE:20270105
+DTEND;VALUE=DATE:20270106
+SUMMARY:Launch: Griffin Mission One
+DESCRIPTION:Falcon Heavy · SpaceX Demonstration flight of the Astrobotic 
+ Griffin lander and its engines\, initially contracted for the NASA VIPER 
+ (Volatiles Investigating Polar Exploration Rover) mission. The vacated pa
+ yload spot will now host the FLIP (FLEX Lunar Innovation Platform) lunar 
+ rover from Astrolab. Source: Launch Library 2 (The Space Devs).
+LOCATION:Kennedy Space Center\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/d3bd7fb2-fac6-49fc-ae52-cee
+ 07d2fde67/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

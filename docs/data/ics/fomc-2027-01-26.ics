@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Fed rate decision
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:fomc-2027-01-26@readout
+DTSTAMP:20270126T190000Z
+DTSTART:20270126T190000Z
+DTEND:20270126T200000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Jan 25–26. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

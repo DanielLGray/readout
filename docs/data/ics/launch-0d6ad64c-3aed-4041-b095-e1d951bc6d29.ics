@@ -1,0 +1,26 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Aspera
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-0d6ad64c-3aed-4041-b095-e1d951bc6d29@readout
+DTSTAMP:20270128T000000Z
+DTSTART;VALUE=DATE:20270128
+DTEND;VALUE=DATE:20270129
+SUMMARY:Launch: Aspera
+DESCRIPTION:Electron · Rocket Lab Aspera houses an ultraviolet telescope 
+ and will examine hot gas in the intergalactic medium\, thought to be cont
+ ributing to the birth of stars and planets. Aspera will be the first NASA
+  astrophysics mission to gather and map these ultraviolet light signature
+ s\, potentially unlocking a deeper understanding of the origins of stars\
+ , planets\, and life in the universe. Source: Launch Library 2 (The Space
+  Devs).
+LOCATION:Rocket Lab Launch Complex 1\, Mahia Peninsula\, New Zealand
+URL:https://ll.thespacedevs.com/2.3.0/launches/0d6ad64c-3aed-4041-b095-e1d
+ 951bc6d29/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

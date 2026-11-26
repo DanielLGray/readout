@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Fed rate decision
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:fomc-2026-12-09@readout
+DTSTAMP:20261209T190000Z
+DTSTART:20261209T190000Z
+DTEND:20261209T200000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Dec 8–9. Statement at 2:00 pm ET\, press confer
+ ence at 2:30\, with new economic projections. The Federal Reserve's inter
+ est-rate decision. Source: Federal Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

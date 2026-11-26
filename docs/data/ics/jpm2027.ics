@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:J.P. Morgan Healthcare Conference
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:jpm2027@readout
+DTSTAMP:20270111T000000Z
+DTSTART;VALUE=DATE:20270111
+DTEND;VALUE=DATE:20270115
+SUMMARY:J.P. Morgan Healthcare Conference
+DESCRIPTION:The year's biggest healthcare investor week. Imaging\, medtech
+  and radiopharma companies give their outlooks\, and deals get announced.
+  Source: Checked by hand.
+LOCATION:Westin St. Francis\, San Francisco
+URL:https://www.biopharmadive.com/news/top-biotech-pharma-medical-conferen
+ ces-2027/832075/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

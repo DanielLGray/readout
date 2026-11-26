@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:PCE inflation report
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-02-25@readout
+DTSTAMP:20270225T133000Z
+DTSTART:20270225T133000Z
+DTEND:20270225T143000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:January 2027 numbers Personal income and spending\, with the P
+ CE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

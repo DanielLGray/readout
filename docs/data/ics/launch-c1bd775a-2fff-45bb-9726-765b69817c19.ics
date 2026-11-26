@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: USSF-75
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-c1bd775a-2fff-45bb-9726-765b69817c19@readout
+DTSTAMP:20261230T000000Z
+DTSTART;VALUE=DATE:20261230
+DTEND;VALUE=DATE:20261231
+SUMMARY:Launch: USSF-75
+DESCRIPTION:Falcon Heavy · SpaceX Classified payload for the United State
+ s Space Force (no earlier than this date) Source: Launch Library 2 (The S
+ pace Devs).
+LOCATION:Kennedy Space Center\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/c1bd775a-2fff-45bb-9726-765
+ b69817c19/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
