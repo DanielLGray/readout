@@ -118,7 +118,8 @@ const WATCH_DEFAULT = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", 
 const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "Amazon", GOOGL: "Alphabet", META: "Meta", TSLA: "Tesla",
   JPM: "JPMorgan Chase", BAC: "Bank of America", WFC: "Wells Fargo", C: "Citigroup", GS: "Goldman Sachs", GEHC: "GE HealthCare",
   SMMNY: "Siemens Healthineers", PHG: "Philips", EW: "Edwards Lifesciences", MDT: "Medtronic", LNTH: "Lantheus", RDNT: "RadNet" };
-const HZ_KINDS = { markets: "Markets & economy", medicine: "Medicine & imaging", science: "Science & space", news: "Big scheduled news" };
+const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
+  movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
@@ -137,7 +138,7 @@ const TUNE_DEFAULTS = {
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
   swipe: true,          // swipe a card left to save it, right to clear it
-  horizon: { kinds: { markets: true, medicine: true, science: true, news: true }, watch: WATCH_DEFAULT },   // Coming up
+  horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
@@ -1431,6 +1432,7 @@ function openInfo() {
     el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
     el("h3", {}, "Coming up"),
     el("p", {}, "A card in Today shows the next 7 days of events you follow; Explore → Coming up shows 90 days, by week. Markets and the economy: Fed decisions (Federal Reserve calendar), jobs and CPI reports (Bureau of Labor Statistics), GDP and PCE reports (Bureau of Economic Analysis), stock market holidays (NYSE rules) and earnings for the companies you watch. Medicine: your meetings, FDA advisory panels on imaging and heart devices (from their Federal Register notices), J.P. Morgan Healthcare week. Science: notable launches (Launch Library 2, The Space Devs) and eclipses (NASA). News: CES and other set dates, plus a list of events expected without a date yet. A daily job reads the calendars; times show in your phone’s time zone."),
+    el("p", {}, "Personal finance: IRS deadlines (worked out each year from the IRS’s rules, so a weekend or holiday moves them), each year’s new contribution limits, the big sales weekends, and at the start of each month the things usually discounted then. Culture: awards nights, festivals, Comic-Con and Burning Man, and a list of events expected without a date yet. Sci-fi and fantasy movies: the big theatrical releases, from the studios’ announced dates; Explore → Coming up can show the next 12 months."),
     el("p", {}, "Earnings dates come from Alpha Vantage, straight to your phone, with your own free key (Tune → Interests → Coming up). The key stays on this phone, out of backups, and goes only to alphavantage.co about once a day. Until you add one, each earnings season’s start is estimated. Tap any event for details and Add to Calendar; Subscribe in Calendar adds them all (not earnings) as a calendar that keeps itself up to date."),
     el("h3", {}, "Moving around"),
     el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),

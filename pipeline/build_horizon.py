@@ -111,6 +111,9 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> d
     source("fda", fda)
     source("launches", lambda: H.launch_events(launches(http), cfg.get("launches") or {}, start, stop))
     for name, got in (("markets", H.market_events(start, stop)), ("seasons", H.season_events(start, stop)),
+                      ("money", H.finance_events(start, stop, cfg.get("finance") or {})),
+                      ("culture", H.config_events(cfg.get("culture"), start, stop, kind="culture")),
+                      ("movies", H.config_events(cfg.get("movies"), start, stop, kind="movies")),
                       ("meetings", H.meeting_events(meetings, start, stop)), ("dates", H.config_events(cfg.get("events"), start, stop))):
         status[name] = {"ok": True, "n": len(got)}
         events.extend(got)

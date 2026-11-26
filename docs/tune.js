@@ -207,7 +207,7 @@ function todaySection() {
     switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
     switchRow("Something lighter", "One Light reading story a day: Wikipedia’s featured article, NASA’s image of the day, Atlas Obscura, Smithsonian and the like.", b.light, (on) => setB("light", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
-    switchRow("Coming up", "The next 7 days of events you follow: earnings, the Fed, economic reports, meetings, launches. Choose which in Tune → Interests.", b.horizon, (on) => setB("horizon", on)),
+    switchRow("Coming up", "The next 7 days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.", b.horizon, (on) => setB("horizon", on)),
     segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
@@ -925,7 +925,8 @@ function newsJob() {
 function horizonJob() {
   const H = S.horizon;
   const names = { fed: "Federal Reserve", bls: "BLS (jobs, CPI)", bea: "BEA (GDP, PCE)", fda: "FDA panels", launches: "Launches",
-    markets: "Market holidays", seasons: "Earnings seasons (estimated)", meetings: "Your meetings", dates: "Dates checked by hand" };
+    markets: "Market holidays", seasons: "Earnings seasons (estimated)", meetings: "Your meetings", dates: "Dates checked by hand",
+    money: "Personal finance", culture: "Culture & awards", movies: "Sci-fi & fantasy movies" };
   return el("section", { class: "sect job" }, el("h2", {}, JOBS.horizon.title), el("p", { class: "sub" }, JOBS.horizon.sub),
     jobStatus("horizon", H?.generated),
     !H ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },

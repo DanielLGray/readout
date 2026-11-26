@@ -200,3 +200,30 @@ def test_bls_fallback_when_nothing_kept():
     assert [e["start"] for e in cpi] == ["2026-12-10T08:30:00-05:00", "2027-01-13T08:30:00-05:00"]
     assert [e["sub"] for e in cpi] == ["November 2026 numbers", "December 2026 numbers"]
     assert out["sources"]["bls"]["fallback"] and not out["sources"]["fda"]["ok"]     # an odd answer is a failure, not "no meetings"
+
+
+def test_irs_deadlines_follow_weekends_and_dc_holiday():
+    assert H.irs_due(date(2027, 4, 15)) == date(2027, 4, 15)
+    assert H.irs_due(date(2022, 4, 15)) == date(2022, 4, 18)      # Emancipation Day observed Friday the 15th
+    assert H.irs_due(date(2028, 4, 15)) == date(2028, 4, 18)      # Saturday, then Emancipation Day observed Monday
+    assert H.irs_due(date(2027, 1, 31)) == date(2027, 2, 1)
+    assert H.irs_due(date(2027, 10, 15)) == date(2027, 10, 15)
+
+
+def test_finance_events():
+    cfg = {"buys": {1: "TVs", 11: "TVs and toys", "blackfriday": "TVs"}, "limits": {2027: {"sub": "401(k): $25,500", "src": "IRS"}}}
+    evs = {e["id"]: e for e in H.finance_events(date(2026, 11, 25), date(2027, 12, 31), cfg)}
+    assert evs["sale-blackfriday-2026"]["start"] == "2026-11-27" and evs["sale-cybermonday-2026"]["start"] == "2026-11-30"
+    assert evs["tax-day-2027"]["start"] == "2027-04-15" and "IRA and HSA" in evs["tax-day-2027"]["sub"]
+    assert evs["tax-w2-2027"]["start"] == "2027-02-01"
+    assert evs["sale-presidents-2027"]["start"] == "2027-02-13" and evs["sale-presidents-2027"]["end"] == "2027-02-15"
+    assert evs["limits-2027"]["sub"] == "401(k): $25,500"
+    assert evs["buys-2027-01"]["title"] == "Good buys in January" and "buys-2027-02" not in evs   # only months with text
+    assert all(e["kind"] == "money" for e in evs.values())
+    assert "buys-2026-11" not in evs                                   # November 1 is before the window
+    assert "sale-presidents-2026" not in evs
+
+
+def test_config_events_take_their_section_kind():
+    evs = H.config_events([{"id": "dune-3", "title": "Dune: Part Three", "start": "2026-12-18"}], START, STOP, kind="movies")
+    assert evs[0]["kind"] == "movies" and evs[0]["allDay"]

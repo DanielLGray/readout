@@ -13,7 +13,7 @@
 # announced; past ones drop out by themselves.
 # ─────────────────────────────────────────────────────────────────────────────
 
-days_ahead: 120          # how far ahead the job looks (the app shows 90 days)
+days_ahead: 380          # how far ahead the job looks (the app shows 90 days, or the next 12 months on request)
 
 # BLS and BEA releases worth a line, matched on the calendar entry's title
 bls:
@@ -127,6 +127,187 @@ events:
     about: Total across Australia and New Zealand.
     url: https://science.nasa.gov/eclipses/future-eclipses/
 
+# Personal finance. Tax deadlines and the big sales weekends are worked out each year from the IRS's
+# rules and the holiday calendar; these are the words that go with them.
+finance:
+  limits:                # the IRS announces next year's limits each fall: add a year when it does
+    2027:
+      sub: "401(k), 403(b) and 457: $25,500 (catch-up at 50+: $8,500; at 60–63: $11,750). IRA: $7,500 (catch-up $1,100). HSA: $4,500 self-only, $9,000 family."
+      about: "From IRS news release IR-2026-136 (Nov 12, 2026) and Rev. Proc. 2026-24. Check your own plan's rules too."
+      url: https://www.irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ira-limit-remains-7500
+      src: IRS
+  buys:                  # month by month: the usual pattern consumer sites report, in my words
+    1: "TVs (last year's models, before the Super Bowl), bedding and linens, fitness gear, winter clothing on clearance"
+    2: "TVs ahead of the Super Bowl; mattresses and appliances around Presidents' Day"
+    3: "Luggage, winter coats and gear on clearance"
+    4: "Vacuums, grills and garden gear as spring sales start"
+    5: "Mattresses and appliances around Memorial Day; patio furniture"
+    6: "Tools around Father's Day; summer electronics deals begin"
+    7: "Electronics and appliances during the July sales (Amazon's Prime Day is usually this month)"
+    8: "Laptops and back-to-school tech; patio furniture and summer gear on clearance"
+    9: "Appliances and mattresses around Labor Day; last year's iPhones after Apple's September launch; outgoing car models as new ones arrive"
+    10: "Laptops and electronics in the October sales events; last year's cars still being cleared"
+    11: "TVs, electronics and toys around Black Friday and Cyber Monday"
+    12: "Cars, as dealers push to hit year-end targets; after Christmas, holiday décor and gift sets"
+    presidents: "Mattresses and major appliances"
+    memorial: "Mattresses, major appliances, grills and outdoor furniture"
+    july4: "Summer gear, appliances and electronics"
+    labor: "Appliances, mattresses and the end of summer clearance"
+    blackfriday: "TVs, electronics, toys and small appliances: often the year's lowest prices on TVs"
+    cybermonday: "Online deals on laptops, phones, smart-home gear and more"
+    dec26: "Holiday décor, wrapping and gift sets; returns and exchanges"
+
+# Awards, festivals and big events (each from its organizer's announcement)
+culture:
+  - id: globes-noms-2026
+    title: Golden Globe nominations
+    start: 2026-12-07
+    url: https://goldenglobes.com/
+    src: Golden Globes
+  - id: oscar-shortlists-2026
+    title: Oscar shortlists announced
+    start: 2026-12-15
+    about: The first narrowing of the field in several categories.
+    url: https://press.oscars.org/
+    src: The Academy
+  - id: globes-2027
+    title: Golden Globes
+    start: 2027-01-10
+    sub: 84th Golden Globes, 5 pm PT on CBS and Paramount+, hosted by Nikki Glaser
+    url: https://goldenglobes.com/
+    src: Golden Globes
+  - id: sundance-2027
+    title: Sundance Film Festival
+    start: 2027-01-21
+    end: 2027-01-31
+    place: Boulder, Colorado
+    sub: The first edition in its new home
+    url: https://www.sundance.org/
+    src: Sundance Institute
+  - id: oscar-noms-2027
+    title: Oscar nominations
+    start: 2027-01-21
+    url: https://press.oscars.org/
+    src: The Academy
+  - id: grammys-2027
+    title: Grammy Awards
+    start: 2027-02-07
+    sub: 69th Grammys, now on ABC after more than 50 years on CBS, streaming on Disney+ and Hulu
+    src: Recording Academy and ABC
+  - id: superbowl-2027
+    title: Super Bowl LXI
+    start: 2027-02-14
+    place: SoFi Stadium, Inglewood, California
+    sub: On ABC and ESPN, and on Valentine's Day
+    src: NFL
+  - id: oscars-2027
+    title: The Oscars
+    start: 2027-03-14
+    place: Dolby Theatre, Hollywood
+    sub: 99th Academy Awards, 4 pm PT on ABC
+    url: https://press.oscars.org/
+    src: The Academy
+  - id: comiccon-2027
+    title: San Diego Comic-Con
+    start: 2027-07-22
+    end: 2027-07-25
+    place: San Diego Convention Center
+    sub: Preview night July 21; the big studio panels for sci-fi and fantasy
+    url: https://www.comic-con.org/
+    src: Comic-Con International
+  - id: burningman-2027
+    title: Burning Man
+    start: 2027-08-29
+    end: 2027-09-06
+    place: Black Rock City, Nevada
+    sub: "Theme: Spellbound. Expect heavy traffic on I-80 and through Reno before and after."
+    url: https://burningman.org/
+    src: Burning Man Project
+  - id: oscars-2028
+    title: The 100th Oscars
+    start: 2028-03-05
+    place: Dolby Theatre, Hollywood
+    url: https://press.oscars.org/
+    src: The Academy
+
+# Science fiction and fantasy in theaters (US release dates from the studios, as listed by Box Office Mojo;
+# dates move, so check them when you add or change one)
+movies:
+  - id: avengers-doomsday
+    title: "Avengers: Doomsday"
+    start: 2026-12-18
+    sub: Marvel; Robert Downey Jr. returns as Doctor Doom
+    url: https://www.boxofficemojo.com/calendar/2026-12-18/
+    src: Box Office Mojo
+  - id: dune-3
+    title: "Dune: Part Three"
+    start: 2026-12-18
+    sub: Denis Villeneuve's adaptation of Dune Messiah, in IMAX
+    url: https://www.boxofficemojo.com/calendar/2026-12-18/
+    src: Box Office Mojo
+  - id: children-blood-bone
+    title: Children of Blood and Bone
+    start: 2027-01-15
+    sub: Fantasy, from Tomi Adeyemi's novel
+    url: https://www.boxofficemojo.com/calendar/2026-12-18/
+    src: Box Office Mojo
+  - id: narnia-magicians-nephew
+    title: "Narnia: The Magician's Nephew"
+    start: 2027-02-12
+    sub: Greta Gerwig's film; IMAX previews from Feb 10, on Netflix April 2
+    url: https://www.netflix.com/tudum/articles/narnia-release-date
+    src: Netflix
+  - id: godzilla-kong-supernova
+    title: "Godzilla x Kong: Supernova"
+    start: 2027-03-26
+    sub: The next MonsterVerse film
+    src: Warner Bros.
+  - id: zelda-2027
+    title: The Legend of Zelda
+    start: 2027-05-07
+    sub: Live-action, from Nintendo and Sony
+    url: https://www.boxofficemojo.com/calendar/2027-05-07/
+    src: Box Office Mojo
+  - id: starfighter
+    title: "Star Wars: Starfighter"
+    start: 2027-05-28
+    sub: Ryan Gosling stars
+    url: https://www.boxofficemojo.com/calendar/2027-05-28
+    src: Box Office Mojo
+  - id: beyond-spider-verse
+    title: "Spider-Man: Beyond the Spider-Verse"
+    start: 2027-06-04
+    sub: Animated
+    url: https://www.boxofficemojo.com/calendar/2027-05-07/
+    src: Box Office Mojo
+  - id: httyd-2
+    title: How to Train Your Dragon 2
+    start: 2027-06-11
+    sub: Live-action
+    url: https://www.boxofficemojo.com/calendar/2027-05-07/
+    src: Box Office Mojo
+  - id: man-of-tomorrow
+    title: Man of Tomorrow
+    start: 2027-07-09
+    sub: James Gunn's next Superman film
+    src: Warner Bros.
+  - id: avengers-secret-wars
+    title: "Avengers: Secret Wars"
+    start: 2027-12-17
+    url: https://www.boxofficemojo.com/calendar/2027-12-17/
+    src: Box Office Mojo
+  - id: hunt-for-gollum
+    title: "The Lord of the Rings: The Hunt for Gollum"
+    start: 2027-12-17
+    url: https://www.boxofficemojo.com/calendar/2027-12-17/
+    src: Box Office Mojo
+  - id: new-jedi-order
+    title: "Star Wars: New Jedi Order"
+    start: 2027-12-17
+    sub: Daisy Ridley returns
+    url: https://www.boxofficemojo.com/calendar/2027-12-17/
+    src: Box Office Mojo
+
 # Expected, but no date set yet: listed at the end of Coming up until a date is announced
 # (then move it to events above).
 unscheduled:
@@ -139,3 +320,21 @@ unscheduled:
   - kind: news
     title: End of the Supreme Court term
     when: The biggest decisions usually come in the last two weeks of June.
+  - kind: money
+    title: Amazon Prime Day
+    when: Usually mid-July; Amazon announces it a few weeks ahead. Other big retailers run sales the same week.
+  - kind: culture
+    title: Met Gala
+    when: Usually the first Monday in May.
+  - kind: culture
+    title: Emmy Awards
+    when: Usually mid-September.
+  - kind: culture
+    title: Hugo Awards
+    when: Presented at Worldcon, usually in August.
+  - kind: culture
+    title: Hot August Nights, Reno
+    when: Usually the first full week of August.
+  - kind: culture
+    title: Great Reno Balloon Race
+    when: Usually the weekend after Labor Day, at Rancho San Rafael Park.

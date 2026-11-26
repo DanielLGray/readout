@@ -143,13 +143,14 @@ function hzRedraw() {
 
 // ── pieces ─────────────────────────────────────────────────────────────────
 const hzDot = (k) => el("span", { class: "hz-dot", "data-kind": k, "aria-hidden": "true" });
+const hzSub = (e) => e.lead || (e.kind === "movies" ? ["In theaters", e.sub].filter(Boolean).join(" · ") : e.sub);
 function hzRowEl(e, showDay = true) {
   const s = hzStart(e);
   const day = hzSpan(e) || (showDay ? dayWord(s) : `${s.toLocaleDateString("en-US", { weekday: "short" })} ${s.getDate()}`);
   return el("li", {}, el("button", { class: "hz-row", onclick: () => openHzEvent(e) },
     el("span", { class: "hz-when" }, el("b", {}, e.approx === "about" ? `~${day}` : day), e.allDay ? null : el("span", {}, clockOf(s))),
     el("span", { class: "hz-what" }, el("span", { class: "hz-t" }, hzDot(e.kind), e.title),
-      e.lead || e.sub ? el("span", { class: "hz-s" }, e.lead || e.sub) : null)));
+      hzSub(e) ? el("span", { class: "hz-s" }, hzSub(e)) : null)));
 }
 function hzCardEl(it) {
   const evs = hzEvents(7);
@@ -189,14 +190,17 @@ function weekLabel(d) {
 function drawHorizon() {
   const body = $("#topic-body");
   const keep = body.scrollTop;
-  const all = hzEvents(90);
+  const days = S.hzDays || 90;
+  const all = hzEvents(days);
   const f = S.hzFilter && T.horizon.kinds[S.hzFilter] ? S.hzFilter : "all";
   const evs = f === "all" ? all : all.filter((e) => e.kind === f);
   const counts = {};
   all.forEach((e) => { counts[e.kind] = (counts[e.kind] || 0) + 1; });
   const groups = [];
   for (const e of evs) {
-    const label = weekLabel(hzStart(e) < new Date() ? new Date() : hzStart(e));
+    const d = hzStart(e) < new Date() ? new Date() : hzStart(e);
+    let label = weekLabel(d);
+    if (days > 90 && !/^(This|Next) week$/.test(label)) label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });   // a year: by month
     if (!groups.length || groups[groups.length - 1][0] !== label) groups.push([label, []]);
     groups[groups.length - 1][1].push(e);
   }
@@ -213,7 +217,9 @@ function drawHorizon() {
     !H ? el("p", { class: "nothing" }, "Events arrive with the first daily update.") : null,
     groups.map(([label, list]) => el("section", { class: "hz-week" }, el("h3", { class: "sys-head" }, label),
       el("ol", { class: "hz-list" }, list.map((e) => hzRowEl(e, label === "This week"))))),
-    H && !evs.length ? el("p", { class: "nothing" }, "Nothing in the next 90 days.") : null,
+    H && !evs.length ? el("p", { class: "nothing" }, `Nothing in the next ${days === 90 ? "90 days" : "12 months"}.`) : null,
+    H ? el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => { S.hzDays = days === 90 ? 366 : 90; drawHorizon(); } },
+      days === 90 ? "Show the next 12 months" : "Back to the next 90 days")) : null,
     T.horizon.kinds.markets && (f === "all" || f === "markets") ? el("div", { class: "fd-note" },
       !key ? [el("b", {}, "Earnings dates: "), "add your free Alpha Vantage key in Tune → Interests → Coming up. Until then, the start of each earnings season is estimated. ",
         el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("interests", "tune-horizon"); } }, "Add a key")]
@@ -256,7 +262,7 @@ function openHzEvent(e) {
     el("h2", { id: "sheet-title" }, e.title),
     el("p", { class: "sheet-meta" }, el("span", {}, hzWhen(e, true)), e.place ? el("span", {}, e.place) : null),
     e.lead ? el("p", { class: "hz-lead" }, e.lead) : null,
-    e.sub ? el("p", { class: "hz-sub" }, e.sub) : null,
+    hzSub(e) && !e.lead ? el("p", { class: "hz-sub" }, hzSub(e)) : e.sub ? el("p", { class: "hz-sub" }, e.sub) : null,
     e.about ? el("p", { class: "hz-about" }, e.about) : null,
     e.approx === "about" ? el("p", { class: "fine" }, "An estimate: the exact date isn’t set yet.")
       : e.approx ? el("p", { class: "fine" }, "The earliest it could happen; launch dates often slip.") : null,
@@ -297,6 +303,9 @@ function horizonSection() {
       medicine: "Your meetings (switch them under Meetings), FDA panels on imaging and heart devices, J.P. Morgan Healthcare week.",
       science: "Notable launches (crewed, Starship, probes) and eclipses.",
       news: "CES, the State of the Union, the end of the Supreme Court term, Apple’s WWDC, once their dates are set.",
+      money: "IRS deadlines, new contribution limits, the big sales weekends, and each month’s usual good buys.",
+      culture: "Awards nights, Sundance, the Super Bowl, Comic-Con, Burning Man and Reno’s big events.",
+      movies: "Big theatrical releases: Dune, Marvel, Star Wars, Narnia and more.",
     }[k], kinds[k], (v) => setKinds(k, v))),
     el("h3", { class: "ctl-label" }, "Earnings to watch"),
     el("div", { class: "term-chips", style: "margin-top:8px" }, T.horizon.watch.map((s) => el("button", { class: "term-chip", "aria-label": `Remove ${WATCH_NAMES[s] || s}`,

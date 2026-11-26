@@ -265,6 +265,76 @@ def season_events(start: date, stop: date) -> list[dict]:
     return out
 
 
+# ── personal finance: tax deadlines, sales weekends, the month's good buys ────
+
+def federal_holidays(y: int) -> set:
+    """Federal holidays (observed) and DC's Emancipation Day, which also moves IRS deadlines."""
+    days = {_observed(date(y, 1, 1)), _nth(y, 1, 0, 3), _nth(y, 2, 0, 3), _last(y, 5, 0), _observed(date(y, 6, 19)),
+            _observed(date(y, 7, 4)), _nth(y, 9, 0, 1), _nth(y, 10, 0, 2), _observed(date(y, 11, 11)), _nth(y, 11, 3, 4),
+            _observed(date(y, 12, 25)), _observed(date(y, 4, 16))}
+    days.add(_observed(date(y + 1, 1, 1)))           # New Year's Day on a Saturday is observed on Dec 31
+    return {d for d in days if d}
+
+
+def irs_due(d: date) -> date:
+    """An IRS deadline on a weekend or a legal holiday moves to the next business day."""
+    while d.weekday() > 4 or d in federal_holidays(d.year):
+        d += timedelta(days=1)
+    return d
+
+
+IRS = "https://www.irs.gov/newsroom/tax-calendars"
+
+
+def finance_events(start: date, stop: date, cfg: dict) -> list[dict]:
+    out = []
+    buys = cfg.get("buys") or {}
+    limits = cfg.get("limits") or {}
+
+    def add(id_, title, d, sub, about="", url="", end=None, src="IRS deadline rules"):
+        if start <= (end or d) and d <= stop:
+            out.append(event(id_, "money", title, d, end, sub=sub, about=about, url=url, src=src))
+
+    for y in range(start.year, stop.year + 1):
+        add(f"tax-q4-{y}", "Estimated tax payment due", irs_due(date(y, 1, 15)), f"4th-quarter payment for {y - 1}",
+            "For income without enough withholding: self-employment, investments, side work.", IRS)
+        add(f"tax-w2-{y}", "W-2s and 1099s due to you", irs_due(date(y, 1, 31)), "Employers and payers must send your tax forms by this date",
+            "Brokerage 1099s often come later, by mid-February; corrected ones can follow into March.", IRS)
+        tax_day = irs_due(date(y, 4, 15))
+        add(f"tax-day-{y}", "Tax Day", tax_day, f"{y - 1} federal returns and payments due; last day for {y - 1} IRA and HSA contributions",
+            f"Also the 1st-quarter estimated tax payment for {y}. An extension gives more time to file, not to pay.", IRS)
+        add(f"tax-q2-{y}", "Estimated tax payment due", irs_due(date(y, 6, 15)), f"2nd-quarter payment for {y}", url=IRS)
+        add(f"tax-q3-{y}", "Estimated tax payment due", irs_due(date(y, 9, 15)), f"3rd-quarter payment for {y}", url=IRS)
+        add(f"tax-ext-{y}", "Extended tax returns due", irs_due(date(y, 10, 15)), f"For {y - 1} returns filed with an extension", url=IRS)
+        add(f"yearend-{y}", "Year-end money deadlines", date(y, 12, 31),
+            "Last day for this year's 401(k) and 403(b) payroll contributions, charitable gifts and required minimum distributions",
+            "Deductible gifts have to be made (or mailed) by December 31. Check your FSA's own deadline: some plans give a grace period.", src="Calendar")
+        lim = limits.get(y) or limits.get(str(y))
+        if lim:
+            add(f"limits-{y}", f"New contribution limits for {y}", date(y, 1, 1), lim.get("sub", ""), lim.get("about", ""), lim.get("url", ""),
+                src=lim.get("src", "IRS"))
+        # the big sales weekends
+        pres, mem, labor = _nth(y, 2, 0, 3), _last(y, 5, 0), _nth(y, 9, 0, 1)
+        thanks = _nth(y, 11, 3, 4)
+        sales = [("presidents", "Presidents’ Day sales", pres - timedelta(days=2), pres, buys.get("presidents", "")),
+                 ("memorial", "Memorial Day sales", mem - timedelta(days=2), mem, buys.get("memorial", "")),
+                 ("july4", "Fourth of July sales", date(y, 7, 4) - timedelta(days=3), date(y, 7, 4), buys.get("july4", "")),
+                 ("labor", "Labor Day sales", labor - timedelta(days=2), labor, buys.get("labor", "")),
+                 ("blackfriday", "Black Friday", thanks + timedelta(days=1), None, buys.get("blackfriday", "")),
+                 ("cybermonday", "Cyber Monday", thanks + timedelta(days=4), None, buys.get("cybermonday", "")),
+                 ("dec26", "After-Christmas sales", date(y, 12, 26), None, buys.get("dec26", ""))]
+        for key, title, d, end, what in sales:
+            add(f"sale-{key}-{y}", title, d, what, src="Retail calendar", end=end)
+        for m in range(1, 13):
+            text = buys.get(m) or buys.get(str(m))
+            if text:
+                d = date(y, m, 1)
+                add(f"buys-{y}-{m:02d}", f"Good buys in {d:%B}", d, text,
+                    "The pattern consumer sites (Consumer Reports, NerdWallet and others) report year after year: discounts follow new models, holidays and the seasons.",
+                    src="Consumer price patterns")
+    return out
+
+
 # ── FDA advisory committees ─────────────────────────────────────────────────
 
 FDA_LINK = re.compile(r'<a\b[^>]*href="((?:https://www\.fda\.gov)?/advisory-committees/advisory-committee-calendar/[^"#?]+)"[^>]*>(.*?)</a>', re.S | re.I)
@@ -411,7 +481,7 @@ def meeting_events(meetings: list[dict], start: date, stop: date) -> list[dict]:
     return out
 
 
-def config_events(items: list[dict], start: date, stop: date) -> list[dict]:
+def config_events(items: list[dict], start: date, stop: date, kind: str = "news") -> list[dict]:
     out = []
     for it in items or []:
         try:
@@ -420,7 +490,7 @@ def config_events(items: list[dict], start: date, stop: date) -> list[dict]:
             continue
         if e < start or s > stop:
             continue
-        out.append(event(it.get("id") or f"{slug(it['title'])}-{s}", it.get("kind", "news"), it["title"], s, e,
+        out.append(event(it.get("id") or f"{slug(it['title'])}-{s}", it.get("kind", kind), it["title"], s, e,
                          sub=it.get("sub", ""), about=it.get("about", ""), place=it.get("place", ""), url=it.get("url", ""),
                          src=it.get("src", "Checked by hand"), approx=it.get("approx", "")))
     return out
