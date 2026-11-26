@@ -753,7 +753,7 @@ function setupSection() {
     el("p", { class: "sub" }, "Everything Readout can use. The first three are secrets on GitHub (Settings → Secrets and variables → Actions → New repository secret: type the name exactly as shown, paste the value). The last two stay on this phone."),
     row("Contact email (NCBI_EMAIL)",
       f.ncbi_contact === true ? state(true, "Set") : f.ncbi_contact === false ? state(false, "Not set") : state(null, "Shows after the next papers update"),
-      "Your email address. PubMed asks automated tools to include one so NCBI can contact you instead of blocking the job, and the Bureau of Labor Statistics won’t send its calendar without one (until then, jobs and CPI dates come from a copied schedule).",
+      "Your email address. PubMed asks automated tools to include one so NCBI can contact you instead of blocking the job. The Coming up job sends it to the Bureau of Labor Statistics too.",
       "Name: NCBI_EMAIL. Value: your email address.", ext(secret, "Add on GitHub")),
     row("PubMed API key (NCBI_API_KEY), optional",
       f.ncbi_key === true ? state(true, "Set") : f.ncbi_key === false ? state(false, "Not set") : state(null, "Shows after the next papers update"),
@@ -1013,7 +1013,7 @@ function horizonJob() {
       Object.entries(H.sources || {}).map(([k, v]) => [el("dt", {}, names[k] || k),
         el("dd", { class: v.ok || v.fallback ? "" : "warn-text" }, v.fallback ? "from the published schedule in the config"
           : v.ok ? String(v.n) : "couldn’t read; last run’s dates kept")])),
-    H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS asks for a contact email before its calendar can be read automatically; add your NCBI_EMAIL secret on GitHub and the job uses it. Until then, the jobs and CPI dates come from BLS’s published schedule, copied into the config.") : null,
+    H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS turns away GitHub’s servers even with a contact email, so the jobs and CPI dates come from BLS’s published schedule, copied into the config (through December 2027).") : null,
     el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Interests → Coming up)."),
     jobLinks("horizon", "Edit dates and filters"));
 }
