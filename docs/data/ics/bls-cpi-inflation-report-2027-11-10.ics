@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:CPI inflation report
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-11-10@readout
+DTSTAMP:20271110T133000Z
+DTSTART:20271110T133000Z
+DTEND:20271110T143000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:October 2027 numbers Consumer prices\, from the Bureau of Labo
+ r Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

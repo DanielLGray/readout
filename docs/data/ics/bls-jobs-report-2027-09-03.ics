@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Jobs report
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bls-jobs-report-2027-09-03@readout
+DTSTAMP:20270903T123000Z
+DTSTART:20270903T123000Z
+DTEND:20270903T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:August 2027 numbers Payrolls and the unemployment rate\, from 
+ the Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

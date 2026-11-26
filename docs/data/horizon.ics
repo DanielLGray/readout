@@ -1226,6 +1226,17 @@ URL:https://www.arrs.org/am27/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:bls-jobs-report-2027-05-07@readout
+DTSTAMP:20270507T123000Z
+DTSTART:20270507T123000Z
+DTEND:20270507T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:April 2027 numbers Payrolls and the unemployment rate\, from t
+ he Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:meeting-ismrm2027@readout
 DTSTAMP:20270508T000000Z
 DTSTART;VALUE=DATE:20270508
@@ -1235,6 +1246,17 @@ DESCRIPTION:ISMRM & ISMRT Annual Meeting and Exhibition Source: Your meeti
  ngs.
 LOCATION:Vancouver
 URL:https://www.ismrm.org/27/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-05-12@readout
+DTSTAMP:20270512T123000Z
+DTSTART:20270512T123000Z
+DTEND:20270512T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:April 2027 numbers Consumer prices\, from the Bureau of Labor 
+ Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1292,6 +1314,17 @@ DESCRIPTION:Tools around Father's Day\; summer electronics deals begin The
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:bls-jobs-report-2027-06-04@readout
+DTSTAMP:20270604T123000Z
+DTSTART:20270604T123000Z
+DTEND:20270604T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:May 2027 numbers Payrolls and the unemployment rate\, from the
+  Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:meeting-snmmi2027@readout
 DTSTAMP:20270605T000000Z
 DTSTART;VALUE=DATE:20270605
@@ -1313,6 +1346,17 @@ DESCRIPTION:FOMC meeting Jun 8–9. Statement at 2:00 pm ET\, press confer
  ence at 2:30. The Federal Reserve's interest-rate decision. Source: Feder
  al Reserve.
 URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-06-10@readout
+DTSTAMP:20270610T123000Z
+DTSTART:20270610T123000Z
+DTEND:20270610T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:May 2027 numbers Consumer prices\, from the Bureau of Labor St
+ atistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1421,6 +1465,17 @@ DESCRIPTION:Electronics and appliances during the July sales (Amazon's Pri
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:bls-jobs-report-2027-07-02@readout
+DTSTAMP:20270702T123000Z
+DTSTART:20270702T123000Z
+DTEND:20270702T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:June 2027 numbers Payrolls and the unemployment rate\, from th
+ e Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:nyse-2027-07-05@readout
 DTSTAMP:20270705T000000Z
 DTSTART;VALUE=DATE:20270705
@@ -1465,6 +1520,17 @@ DESCRIPTION:The big banks report first\; the largest tech companies follow
   in the last week of the month. (about this date) Source: Readout estimat
  e.
 STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-07-14@readout
+DTSTAMP:20270714T123000Z
+DTSTART:20270714T123000Z
+DTEND:20270714T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:June 2027 numbers Consumer prices\, from the Bureau of Labor S
+ tatistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1560,6 +1626,28 @@ URL:https://science.nasa.gov/eclipses/future-eclipses/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:bls-jobs-report-2027-08-06@readout
+DTSTAMP:20270806T123000Z
+DTSTART:20270806T123000Z
+DTEND:20270806T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:July 2027 numbers Payrolls and the unemployment rate\, from th
+ e Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-08-11@readout
+DTSTAMP:20270811T123000Z
+DTSTART:20270811T123000Z
+DTEND:20270811T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:July 2027 numbers Consumer prices\, from the Bureau of Labor S
+ tatistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:eclipse-2027-08-17@readout
 DTSTAMP:20270817T000000Z
 DTSTART;VALUE=DATE:20270817
@@ -1618,6 +1706,17 @@ DESCRIPTION:Appliances and mattresses around Labor Day\; last year's iPhon
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:bls-jobs-report-2027-09-03@readout
+DTSTAMP:20270903T123000Z
+DTSTART:20270903T123000Z
+DTEND:20270903T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:August 2027 numbers Payrolls and the unemployment rate\, from 
+ the Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:sale-labor-2027@readout
 DTSTAMP:20270904T000000Z
 DTSTART;VALUE=DATE:20270904
@@ -1635,6 +1734,17 @@ DTEND;VALUE=DATE:20270907
 SUMMARY:Stock market closed
 DESCRIPTION:Labor Day Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-09-14@readout
+DTSTAMP:20270914T123000Z
+DTSTART:20270914T123000Z
+DTEND:20270914T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:August 2027 numbers Consumer prices\, from the Bureau of Labor
+  Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1694,6 +1804,17 @@ DESCRIPTION:Laptops and electronics in the October sales events\; last yea
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:bls-jobs-report-2027-10-08@readout
+DTSTAMP:20271008T123000Z
+DTSTART:20271008T123000Z
+DTEND:20271008T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:September 2027 numbers Payrolls and the unemployment rate\, fr
+ om the Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:season-2027-10@readout
 DTSTAMP:20271014T000000Z
 DTSTART;VALUE=DATE:20271014
@@ -1703,6 +1824,17 @@ DESCRIPTION:The big banks report first\; the largest tech companies follow
   in the last week of the month. (about this date) Source: Readout estimat
  e.
 STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-10-14@readout
+DTSTAMP:20271014T123000Z
+DTSTART:20271014T123000Z
+DTEND:20271014T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:September 2027 numbers Consumer prices\, from the Bureau of La
+ bor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1760,6 +1892,28 @@ DESCRIPTION:TVs\, electronics and toys around Black Friday and Cyber Monda
  y The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
  eport year after year: discounts follow new models\, holidays and the sea
  sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-jobs-report-2027-11-05@readout
+DTSTAMP:20271105T123000Z
+DTSTART:20271105T123000Z
+DTEND:20271105T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:October 2027 numbers Payrolls and the unemployment rate\, from
+  the Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-11-10@readout
+DTSTAMP:20271110T133000Z
+DTSTART:20271110T133000Z
+DTEND:20271110T143000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:October 2027 numbers Consumer prices\, from the Bureau of Labo
+ r Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1870,6 +2024,28 @@ DESCRIPTION:Cars\, as dealers push to hit year-end targets\; after Christm
  as\, holiday décor and gift sets The pattern consumer sites (Consumer Re
  ports\, NerdWallet and others) report year after year: discounts follow n
  ew models\, holidays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-jobs-report-2027-12-03@readout
+DTSTAMP:20271203T133000Z
+DTSTART:20271203T133000Z
+DTEND:20271203T143000Z
+SUMMARY:Jobs report
+DESCRIPTION:November 2027 numbers Payrolls and the unemployment rate\, fro
+ m the Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-12-10@readout
+DTSTAMP:20271210T133000Z
+DTSTART:20271210T133000Z
+DTEND:20271210T143000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:November 2027 numbers Consumer prices\, from the Bureau of Lab
+ or Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR
