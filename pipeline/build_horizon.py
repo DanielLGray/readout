@@ -91,7 +91,8 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> d
             for d in days:
                 when = datetime.combine(H._d(d), datetime.min.time().replace(hour=8, minute=30), tzinfo=H.ET)
                 if start <= when.date() <= stop:
-                    events.append(H.event(f"bls-{H.slug(title)}-{when.date()}", "markets", title, when, sub="From BLS’s published schedule",
+                    prev_month = (when.date().replace(day=1) - timedelta(days=1))      # each report covers the month before
+                    events.append(H.event(f"bls-{H.slug(title)}-{when.date()}", "markets", title, when, sub=f"{prev_month:%B %Y} numbers",
                                           about=rules.get(title, {}).get("about", ""), url=BLS_PAGE, src="BLS"))
         status["bls"]["fallback"] = True
     source("bea", lambda: H.releases(bea_calendar(http), cfg.get("bea") or [], "BEA", BEA_PAGE, start, stop))

@@ -198,4 +198,5 @@ def test_bls_fallback_when_nothing_kept():
     out = build(http, cfg, [], {}, datetime(2026, 11, 26, 15, 0, tzinfo=timezone.utc))
     cpi = [e for e in out["events"] if e["src"] == "BLS"]
     assert [e["start"] for e in cpi] == ["2026-12-10T08:30:00-05:00", "2027-01-13T08:30:00-05:00"]
+    assert [e["sub"] for e in cpi] == ["November 2026 numbers", "December 2026 numbers"]
     assert out["sources"]["bls"]["fallback"] and not out["sources"]["fda"]["ok"]     # an odd answer is a failure, not "no meetings"
