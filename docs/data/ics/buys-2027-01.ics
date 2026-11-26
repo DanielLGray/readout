@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in January
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-01@readout
+DTSTAMP:20270101T000000Z
+DTSTART;VALUE=DATE:20270101
+DTEND;VALUE=DATE:20270102
+SUMMARY:Good buys in January
+DESCRIPTION:TVs (last year's models\, before the Super Bowl)\, bedding and
+  linens\, fitness gear\, winter clothing on clearance The pattern consume
+ r sites (Consumer Reports\, NerdWallet and others) report year after year
+ : discounts follow new models\, holidays and the seasons. Source: Consume
+ r price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

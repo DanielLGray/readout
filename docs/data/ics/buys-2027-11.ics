@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in November
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-11@readout
+DTSTAMP:20271101T000000Z
+DTSTART;VALUE=DATE:20271101
+DTEND;VALUE=DATE:20271102
+SUMMARY:Good buys in November
+DESCRIPTION:TVs\, electronics and toys around Black Friday and Cyber Monda
+ y The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
+ eport year after year: discounts follow new models\, holidays and the sea
+ sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in August
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-08@readout
+DTSTAMP:20270801T000000Z
+DTSTART;VALUE=DATE:20270801
+DTEND;VALUE=DATE:20270802
+SUMMARY:Good buys in August
+DESCRIPTION:Laptops and back-to-school tech\; patio furniture and summer g
+ ear on clearance The pattern consumer sites (Consumer Reports\, NerdWalle
+ t and others) report year after year: discounts follow new models\, holid
+ ays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

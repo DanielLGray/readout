@@ -1,0 +1,24 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Crew-14
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-a5556e79-a01f-48c6-b822-69bbadb4460d@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Crew-14
+DESCRIPTION:Falcon 9 · SpaceX SpaceX Crew-14 is the fourteenth crewed ope
+ rational flight of a Crew Dragon spacecraft to the International Space St
+ ation as part of NASA's Commercial Crew Program. (no earlier than this da
+ te) Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/a5556e79-a01f-48c6-b822-69b
+ badb4460d/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

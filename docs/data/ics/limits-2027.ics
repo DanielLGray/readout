@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:New contribution limits for 2027
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:limits-2027@readout
+DTSTAMP:20270101T000000Z
+DTSTART;VALUE=DATE:20270101
+DTEND;VALUE=DATE:20270102
+SUMMARY:New contribution limits for 2027
+DESCRIPTION:401(k)\, 403(b) and 457: $25\,500 (catch-up at 50+: $8\,500\; 
+ at 60–63: $11\,750). IRA: $7\,500 (catch-up $1\,100). HSA: $4\,500 self
+ -only\, $9\,000 family. From IRS news release IR-2026-136 (Nov 12\, 2026)
+  and Rev. Proc. 2026-24. Check your own plan's rules too. Source: IRS.
+URL:https://www.irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ir
+ a-limit-remains-7500
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:PCE inflation report
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-05-27@readout
+DTSTAMP:20270527T123000Z
+DTSTART:20270527T123000Z
+DTEND:20270527T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:April 2027 numbers Personal income and spending\, with the PCE
+  price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

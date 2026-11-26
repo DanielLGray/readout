@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Penumbral lunar eclipse
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:eclipse-2027-07-18@readout
+DTSTAMP:20270718T000000Z
+DTSTART;VALUE=DATE:20270718
+DTEND;VALUE=DATE:20270719
+SUMMARY:Penumbral lunar eclipse
+DESCRIPTION:The Moon dims slightly in Earth's outer shadow\, a subtle one.
+  Source: Checked by hand.
+URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

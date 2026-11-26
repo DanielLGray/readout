@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Total solar eclipse
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:eclipse-2027-08-02@readout
+DTSTAMP:20270802T000000Z
+DTSTART;VALUE=DATE:20270802
+DTEND;VALUE=DATE:20270803
+SUMMARY:Total solar eclipse
+DESCRIPTION:One of the longest totalities of the century\, over 6 minutes\
+ , across southern Spain\, North Africa (Morocco to Egypt)\, Saudi Arabia 
+ and Yemen. Source: Checked by hand.
+URL:https://science.nasa.gov/eclipses/future-eclipses/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

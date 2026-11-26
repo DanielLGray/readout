@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Blue Moon Pathfinder
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-98ec4234-8c4e-4365-b6c5-6b89da53f8dd@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Blue Moon Pathfinder
+DESCRIPTION:New Glenn · Blue Origin First flight of Blue Origin's Blue Mo
+ on MK1 lunar lander\, MK1-SN001 "Endurance". (no earlier than this date) 
+ Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/98ec4234-8c4e-4365-b6c5-6b8
+ 9da53f8dd/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

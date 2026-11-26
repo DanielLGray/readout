@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Fed strategy meeting
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:fomc-2027-10-27@readout
+DTSTAMP:20271026T000000Z
+DTSTART;VALUE=DATE:20271026
+DTEND;VALUE=DATE:20271028
+SUMMARY:Fed strategy meeting
+DESCRIPTION:FOMC\, Oct 26–27. No rate decision at this one. The Federal 
+ Open Market Committee meets to discuss its longer-run strategy. Source: F
+ ederal Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

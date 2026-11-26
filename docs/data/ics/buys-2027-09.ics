@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in September
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-09@readout
+DTSTAMP:20270901T000000Z
+DTSTART;VALUE=DATE:20270901
+DTEND;VALUE=DATE:20270902
+SUMMARY:Good buys in September
+DESCRIPTION:Appliances and mattresses around Labor Day\; last year's iPhon
+ es after Apple's September launch\; outgoing car models as new ones arriv
+ e The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
+ eport year after year: discounts follow new models\, holidays and the sea
+ sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -38,6 +38,16 @@ URL:https://www.nyse.com/markets/hours-calendars
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:sale-blackfriday-2026@readout
+DTSTAMP:20261127T000000Z
+DTSTART;VALUE=DATE:20261127
+DTEND;VALUE=DATE:20261128
+SUMMARY:Black Friday
+DESCRIPTION:TVs\, electronics\, toys and small appliances: often the year'
+ s lowest prices on TVs Source: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:nyse-2026-11-27@readout
 DTSTAMP:20261127T000000Z
 DTSTART;VALUE=DATE:20261127
@@ -61,6 +71,28 @@ URL:https://www.rsna.org/annual-meeting
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:sale-cybermonday-2026@readout
+DTSTAMP:20261130T000000Z
+DTSTART;VALUE=DATE:20261130
+DTEND;VALUE=DATE:20261201
+SUMMARY:Cyber Monday
+DESCRIPTION:Online deals on laptops\, phones\, smart-home gear and more So
+ urce: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2026-12@readout
+DTSTAMP:20261201T000000Z
+DTSTART;VALUE=DATE:20261201
+DTEND;VALUE=DATE:20261202
+SUMMARY:Good buys in December
+DESCRIPTION:Cars\, as dealers push to hit year-end targets\; after Christm
+ as\, holiday décor and gift sets The pattern consumer sites (Consumer Re
+ ports\, NerdWallet and others) report year after year: discounts follow n
+ ew models\, holidays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-jobs-report-2026-12-04@readout
 DTSTAMP:20261204T133000Z
 DTSTART:20261204T133000Z
@@ -69,6 +101,16 @@ SUMMARY:Jobs report
 DESCRIPTION:November 2026 numbers Payrolls and the unemployment rate\, fro
  m the Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:globes-noms-2026@readout
+DTSTAMP:20261207T000000Z
+DTSTART;VALUE=DATE:20261207
+DTEND;VALUE=DATE:20261208
+SUMMARY:Golden Globe nominations
+DESCRIPTION:Source: Golden Globes.
+URL:https://goldenglobes.com/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -92,6 +134,39 @@ SUMMARY:CPI inflation report
 DESCRIPTION:November 2026 numbers Consumer prices\, from the Bureau of Lab
  or Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:oscar-shortlists-2026@readout
+DTSTAMP:20261215T000000Z
+DTSTART;VALUE=DATE:20261215
+DTEND;VALUE=DATE:20261216
+SUMMARY:Oscar shortlists announced
+DESCRIPTION:The first narrowing of the field in several categories. Source
+ : The Academy.
+URL:https://press.oscars.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:avengers-doomsday@readout
+DTSTAMP:20261218T000000Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261219
+SUMMARY:Avengers: Doomsday
+DESCRIPTION:Marvel\; Robert Downey Jr. returns as Doctor Doom Source: Box 
+ Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:dune-3@readout
+DTSTAMP:20261218T000000Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261219
+SUMMARY:Dune: Part Three
+DESCRIPTION:Denis Villeneuve's adaptation of Dune Messiah\, in IMAX Source
+ : Box Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2026-12-18/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -137,6 +212,16 @@ URL:https://www.nyse.com/markets/hours-calendars
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:sale-dec26-2026@readout
+DTSTAMP:20261226T000000Z
+DTSTART;VALUE=DATE:20261226
+DTEND;VALUE=DATE:20261227
+SUMMARY:After-Christmas sales
+DESCRIPTION:Holiday décor\, wrapping and gift sets\; returns and exchange
+ s Source: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:launch-c1bd775a-2fff-45bb-9726-765b69817c19@readout
 DTSTAMP:20261230T000000Z
 DTSTART;VALUE=DATE:20261230
@@ -149,6 +234,45 @@ LOCATION:Kennedy Space Center\, FL\, USA
 URL:https://ll.thespacedevs.com/2.3.0/launches/c1bd775a-2fff-45bb-9726-765
  b69817c19/
 STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:yearend-2026@readout
+DTSTAMP:20261231T000000Z
+DTSTART;VALUE=DATE:20261231
+DTEND;VALUE=DATE:20270101
+SUMMARY:Year-end money deadlines
+DESCRIPTION:Last day for this year's 401(k) and 403(b) payroll contributio
+ ns\, charitable gifts and required minimum distributions Deductible gifts
+  have to be made (or mailed) by December 31. Check your FSA's own deadlin
+ e: some plans give a grace period. Source: Calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-01@readout
+DTSTAMP:20270101T000000Z
+DTSTART;VALUE=DATE:20270101
+DTEND;VALUE=DATE:20270102
+SUMMARY:Good buys in January
+DESCRIPTION:TVs (last year's models\, before the Super Bowl)\, bedding and
+  linens\, fitness gear\, winter clothing on clearance The pattern consume
+ r sites (Consumer Reports\, NerdWallet and others) report year after year
+ : discounts follow new models\, holidays and the seasons. Source: Consume
+ r price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:limits-2027@readout
+DTSTAMP:20270101T000000Z
+DTSTART;VALUE=DATE:20270101
+DTEND;VALUE=DATE:20270102
+SUMMARY:New contribution limits for 2027
+DESCRIPTION:401(k)\, 403(b) and 457: $25\,500 (catch-up at 50+: $8\,500\; 
+ at 60–63: $11\,750). IRA: $7\,500 (catch-up $1\,100). HSA: $4\,500 self
+ -only\, $9\,000 family. From IRS news release IR-2026-136 (Nov 12\, 2026)
+  and Rev. Proc. 2026-24. Check your own plan's rules too. Source: IRS.
+URL:https://www.irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ir
+ a-limit-remains-7500
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -198,6 +322,17 @@ SUMMARY:Jobs report
 DESCRIPTION:December 2026 numbers Payrolls and the unemployment rate\, fro
  m the Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:globes-2027@readout
+DTSTAMP:20270110T000000Z
+DTSTART;VALUE=DATE:20270110
+DTEND;VALUE=DATE:20270111
+SUMMARY:Golden Globes
+DESCRIPTION:84th Golden Globes\, 5 pm PT on CBS and Paramount+\, hosted by
+  Nikki Glaser Source: Golden Globes.
+URL:https://goldenglobes.com/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -256,6 +391,28 @@ STATUS:TENTATIVE
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:children-blood-bone@readout
+DTSTAMP:20270115T000000Z
+DTSTART;VALUE=DATE:20270115
+DTEND;VALUE=DATE:20270116
+SUMMARY:Children of Blood and Bone
+DESCRIPTION:Fantasy\, from Tomi Adeyemi's novel Source: Box Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2026-12-18/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:tax-q4-2027@readout
+DTSTAMP:20270115T000000Z
+DTSTART;VALUE=DATE:20270115
+DTEND;VALUE=DATE:20270116
+SUMMARY:Estimated tax payment due
+DESCRIPTION:4th-quarter payment for 2026 For income without enough withhol
+ ding: self-employment\, investments\, side work. Source: IRS deadline rul
+ es.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:nyse-2027-01-18@readout
 DTSTAMP:20270118T000000Z
 DTSTART;VALUE=DATE:20270118
@@ -263,6 +420,27 @@ DTEND;VALUE=DATE:20270119
 SUMMARY:Stock market closed
 DESCRIPTION:Martin Luther King Jr. Day Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:oscar-noms-2027@readout
+DTSTAMP:20270121T000000Z
+DTSTART;VALUE=DATE:20270121
+DTEND;VALUE=DATE:20270122
+SUMMARY:Oscar nominations
+DESCRIPTION:Source: The Academy.
+URL:https://press.oscars.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sundance-2027@readout
+DTSTAMP:20270121T000000Z
+DTSTART;VALUE=DATE:20270121
+DTEND;VALUE=DATE:20270201
+SUMMARY:Sundance Film Festival
+DESCRIPTION:The first edition in its new home Source: Sundance Institute.
+LOCATION:Boulder\, Colorado
+URL:https://www.sundance.org/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -338,6 +516,30 @@ STATUS:TENTATIVE
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:buys-2027-02@readout
+DTSTAMP:20270201T000000Z
+DTSTART;VALUE=DATE:20270201
+DTEND;VALUE=DATE:20270202
+SUMMARY:Good buys in February
+DESCRIPTION:TVs ahead of the Super Bowl\; mattresses and appliances around
+  Presidents' Day The pattern consumer sites (Consumer Reports\, NerdWalle
+ t and others) report year after year: discounts follow new models\, holid
+ ays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:tax-w2-2027@readout
+DTSTAMP:20270201T000000Z
+DTSTART;VALUE=DATE:20270201
+DTEND;VALUE=DATE:20270202
+SUMMARY:W-2s and 1099s due to you
+DESCRIPTION:Employers and payers must send your tax forms by this date Bro
+ kerage 1099s often come later\, by mid-February\; corrected ones can foll
+ ow into March. Source: IRS deadline rules.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-jobs-report-2027-02-05@readout
 DTSTAMP:20270205T133000Z
 DTSTART:20270205T133000Z
@@ -361,6 +563,16 @@ URL:https://science.nasa.gov/eclipses/future-eclipses/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:grammys-2027@readout
+DTSTAMP:20270207T000000Z
+DTSTART;VALUE=DATE:20270207
+DTEND;VALUE=DATE:20270208
+SUMMARY:Grammy Awards
+DESCRIPTION:69th Grammys\, now on ABC after more than 50 years on CBS\, st
+ reaming on Disney+ and Hulu Source: Recording Academy and ABC.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-cpi-inflation-report-2027-02-11@readout
 DTSTAMP:20270211T133000Z
 DTSTART:20270211T133000Z
@@ -369,6 +581,36 @@ SUMMARY:CPI inflation report
 DESCRIPTION:January 2027 numbers Consumer prices\, from the Bureau of Labo
  r Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:narnia-magicians-nephew@readout
+DTSTAMP:20270212T000000Z
+DTSTART;VALUE=DATE:20270212
+DTEND;VALUE=DATE:20270213
+SUMMARY:Narnia: The Magician's Nephew
+DESCRIPTION:Greta Gerwig's film\; IMAX previews from Feb 10\, on Netflix A
+ pril 2 Source: Netflix.
+URL:https://www.netflix.com/tudum/articles/narnia-release-date
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sale-presidents-2027@readout
+DTSTAMP:20270213T000000Z
+DTSTART;VALUE=DATE:20270213
+DTEND;VALUE=DATE:20270216
+SUMMARY:Presidents’ Day sales
+DESCRIPTION:Mattresses and major appliances Source: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:superbowl-2027@readout
+DTSTAMP:20270214T000000Z
+DTSTART;VALUE=DATE:20270214
+DTEND;VALUE=DATE:20270215
+SUMMARY:Super Bowl LXI
+DESCRIPTION:On ABC and ESPN\, and on Valentine's Day Source: NFL.
+LOCATION:SoFi Stadium\, Inglewood\, California
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -427,6 +669,18 @@ URL:https://abdominalradiology.org/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:buys-2027-03@readout
+DTSTAMP:20270301T000000Z
+DTSTART;VALUE=DATE:20270301
+DTEND;VALUE=DATE:20270302
+SUMMARY:Good buys in March
+DESCRIPTION:Luggage\, winter coats and gear on clearance The pattern consu
+ mer sites (Consumer Reports\, NerdWallet and others) report year after ye
+ ar: discounts follow new models\, holidays and the seasons. Source: Consu
+ mer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:meeting-ecr2027@readout
 DTSTAMP:20270303T000000Z
 DTSTART;VALUE=DATE:20270303
@@ -460,6 +714,17 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:oscars-2027@readout
+DTSTAMP:20270314T000000Z
+DTSTART;VALUE=DATE:20270314
+DTEND;VALUE=DATE:20270315
+SUMMARY:The Oscars
+DESCRIPTION:99th Academy Awards\, 4 pm PT on ABC Source: The Academy.
+LOCATION:Dolby Theatre\, Hollywood
+URL:https://press.oscars.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:fomc-2027-03-17@readout
 DTSTAMP:20270317T180000Z
 DTSTART:20270317T180000Z
@@ -472,6 +737,15 @@ URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:godzilla-kong-supernova@readout
+DTSTAMP:20270326T000000Z
+DTSTART;VALUE=DATE:20270326
+DTEND;VALUE=DATE:20270327
+SUMMARY:Godzilla x Kong: Supernova
+DESCRIPTION:The next MonsterVerse film Source: Warner Bros..
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:nyse-2027-03-26@readout
 DTSTAMP:20270326T000000Z
 DTSTART;VALUE=DATE:20270326
@@ -479,6 +753,895 @@ DTEND;VALUE=DATE:20270327
 SUMMARY:Stock market closed
 DESCRIPTION:Good Friday Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-98ec4234-8c4e-4365-b6c5-6b89da53f8dd@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Blue Moon Pathfinder
+DESCRIPTION:New Glenn · Blue Origin First flight of Blue Origin's Blue Mo
+ on MK1 lunar lander\, MK1-SN001 "Endurance". (no earlier than this date) 
+ Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/98ec4234-8c4e-4365-b6c5-6b8
+ 9da53f8dd/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-a5556e79-a01f-48c6-b822-69bbadb4460d@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Crew-14
+DESCRIPTION:Falcon 9 · SpaceX SpaceX Crew-14 is the fourteenth crewed ope
+ rational flight of a Crew Dragon spacecraft to the International Space St
+ ation as part of NASA's Commercial Crew Program. (no earlier than this da
+ te) Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/a5556e79-a01f-48c6-b822-69b
+ badb4460d/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-4cc61288-6f94-41de-8fd5-7fe4d72aedfb@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Haven-1
+DESCRIPTION:Falcon 9 · SpaceX Commercial space station developed by Vast 
+ (no earlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/4cc61288-6f94-41de-8fd5-7fe
+ 4d72aedfb/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-0c26b3d4-43e3-4c1a-8976-592ff319bc51@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Nova-C IM-3
+DESCRIPTION:Falcon 9 · SpaceX This is the third mission to the Moon for I
+ ntuitive Machines with its Nova-C lunar lander. It is to deliver 130 kg o
+ f payloads to the lunar surface. This mission also includes a rideshare p
+ ossibility due to available excess capacity on the launch vehicle. (no ea
+ rlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/0c26b3d4-43e3-4c1a-8976-592
+ ff319bc51/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-526b4a0f-f0c9-4a20-9066-e9fc8c79307b@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: PLATO
+DESCRIPTION:Ariane 62 · Arianespace Plato\, for PLAnetary Transits and Os
+ cillations of stars\, is a European Space Agency (ESA) mission with 26 ca
+ meras to study terrestrial exoplanets in orbits up to the habitable zone 
+ of Sun-like stars. Its goal is to measure the sizes of exoplanets and dis
+ cover exomoons and rings around them\, as well as characterise planets' h
+ ost stars by studying tiny light variations in the starlight it receives.
+  (no earlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Guiana Space Centre\, French Guiana
+URL:https://ll.thespacedevs.com/2.3.0/launches/526b4a0f-f0c9-4a20-9066-e9f
+ c8c79307b/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-0c69c87a-a253-4cdd-b83f-f434ff0f666b@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Soyuz MS-30
+DESCRIPTION:Soyuz 2.1a · Russian Federal Space Agency (ROSCOSMOS) Soyuz M
+ S-30 will carry two cosmonauts and one astronaut to the International Spa
+ ce Station aboard the Soyuz spacecraft from the Baikonur Cosmodrome in Ka
+ zakhstan. The crew consists of Roscosmos cosmonauts Dmitri Petelin and Ko
+ nstantin Borisov\, as well as NASA astronaut Deniz Burnham. (no earlier t
+ han this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Baikonur Cosmodrome\, Republic of Kazakhstan
+URL:https://ll.thespacedevs.com/2.3.0/launches/0c69c87a-a253-4cdd-b83f-f43
+ 4ff0f666b/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:launch-eda0f3bb-3a5e-438f-bdba-9dab2a86c281@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: TSIS-2
+DESCRIPTION:Electron · Rocket Lab The Total and Spectral Solar Irradiance
+  Sensor 2 (TSIS-2) is a satellite designed by NASA to measure the Sun's e
+ nergy input to Earth. TSIS-2 comprises two instruments\, the Total Irradi
+ ance Monitor (TIM)\, and the spectral Irradiance Monitor (SIM). TIM measu
+ res total brightness and SIM measures spectral irradiance over a waveleng
+ th range that includes 96% of the energy in the solar spectrum. Both in (
+ no earlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Rocket Lab Launch Complex 1\, Mahia Peninsula\, New Zealand
+URL:https://ll.thespacedevs.com/2.3.0/launches/eda0f3bb-3a5e-438f-bdba-9da
+ b2a86c281/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-03-31@readout
+DTSTAMP:20270331T123000Z
+DTSTART:20270331T123000Z
+DTEND:20270331T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Third estimate for Q4 2026 Gross domestic product\, from the B
+ ureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-03-31@readout
+DTSTAMP:20270331T123000Z
+DTSTART:20270331T123000Z
+DTEND:20270331T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:February 2027 numbers Personal income and spending\, with the 
+ PCE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-04@readout
+DTSTAMP:20270401T000000Z
+DTSTART;VALUE=DATE:20270401
+DTEND;VALUE=DATE:20270402
+SUMMARY:Good buys in April
+DESCRIPTION:Vacuums\, grills and garden gear as spring sales start The pat
+ tern consumer sites (Consumer Reports\, NerdWallet and others) report yea
+ r after year: discounts follow new models\, holidays and the seasons. Sou
+ rce: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-jobs-report-2027-04-02@readout
+DTSTAMP:20270402T123000Z
+DTSTART:20270402T123000Z
+DTEND:20270402T133000Z
+SUMMARY:Jobs report
+DESCRIPTION:March 2027 numbers Payrolls and the unemployment rate\, from t
+ he Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-04-13@readout
+DTSTAMP:20270413T123000Z
+DTSTART:20270413T123000Z
+DTEND:20270413T133000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:March 2027 numbers Consumer prices\, from the Bureau of Labor 
+ Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:season-2027-04@readout
+DTSTAMP:20270414T000000Z
+DTSTART;VALUE=DATE:20270414
+DTEND;VALUE=DATE:20270415
+SUMMARY:Q1 earnings season begins
+DESCRIPTION:The big banks report first\; the largest tech companies follow
+  in the last week of the month. (about this date) Source: Readout estimat
+ e.
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:tax-day-2027@readout
+DTSTAMP:20270415T000000Z
+DTSTART;VALUE=DATE:20270415
+DTEND;VALUE=DATE:20270416
+SUMMARY:Tax Day
+DESCRIPTION:2026 federal returns and payments due\; last day for 2026 IRA 
+ and HSA contributions Also the 1st-quarter estimated tax payment for 2027
+ . An extension gives more time to file\, not to pay. Source: IRS deadline
+  rules.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-04-28@readout
+DTSTAMP:20270428T180000Z
+DTSTART:20270428T180000Z
+DTEND:20270428T190000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Apr 27–28. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-04-29@readout
+DTSTAMP:20270429T123000Z
+DTSTART:20270429T123000Z
+DTEND:20270429T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Advance estimate for Q1 2027 Gross domestic product\, from the
+  Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-04-29@readout
+DTSTAMP:20270429T123000Z
+DTSTART:20270429T123000Z
+DTEND:20270429T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:March 2027 numbers Personal income and spending\, with the PCE
+  price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-05@readout
+DTSTAMP:20270501T000000Z
+DTSTART;VALUE=DATE:20270501
+DTEND;VALUE=DATE:20270502
+SUMMARY:Good buys in May
+DESCRIPTION:Mattresses and appliances around Memorial Day\; patio furnitur
+ e The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
+ eport year after year: discounts follow new models\, holidays and the sea
+ sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-arrs2027@readout
+DTSTAMP:20270502T000000Z
+DTSTART;VALUE=DATE:20270502
+DTEND;VALUE=DATE:20270506
+SUMMARY:ARRS 2027
+DESCRIPTION:American Roentgen Ray Society Annual Meeting Source: Your meet
+ ings.
+LOCATION:Sheraton Denver Downtown\, Denver
+URL:https://www.arrs.org/am27/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:zelda-2027@readout
+DTSTAMP:20270507T000000Z
+DTSTART;VALUE=DATE:20270507
+DTEND;VALUE=DATE:20270508
+SUMMARY:The Legend of Zelda
+DESCRIPTION:Live-action\, from Nintendo and Sony Source: Box Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2027-05-07/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-ismrm2027@readout
+DTSTAMP:20270508T000000Z
+DTSTART;VALUE=DATE:20270508
+DTEND;VALUE=DATE:20270514
+SUMMARY:ISMRM 2027
+DESCRIPTION:ISMRM & ISMRT Annual Meeting and Exhibition Source: Your meeti
+ ngs.
+LOCATION:Vancouver
+URL:https://www.ismrm.org/27/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-05-27@readout
+DTSTAMP:20270527T123000Z
+DTSTART:20270527T123000Z
+DTEND:20270527T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Second estimate for Q1 2027 Gross domestic product\, from the 
+ Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-05-27@readout
+DTSTAMP:20270527T123000Z
+DTSTART:20270527T123000Z
+DTEND:20270527T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:April 2027 numbers Personal income and spending\, with the PCE
+  price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:starfighter@readout
+DTSTAMP:20270528T000000Z
+DTSTART;VALUE=DATE:20270528
+DTEND;VALUE=DATE:20270529
+SUMMARY:Star Wars: Starfighter
+DESCRIPTION:Ryan Gosling stars Source: Box Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2027-05-28
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sale-memorial-2027@readout
+DTSTAMP:20270529T000000Z
+DTSTART;VALUE=DATE:20270529
+DTEND;VALUE=DATE:20270601
+SUMMARY:Memorial Day sales
+DESCRIPTION:Mattresses\, major appliances\, grills and outdoor furniture S
+ ource: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-05-31@readout
+DTSTAMP:20270531T000000Z
+DTSTART;VALUE=DATE:20270531
+DTEND;VALUE=DATE:20270601
+SUMMARY:Stock market closed
+DESCRIPTION:Memorial Day Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-06@readout
+DTSTAMP:20270601T000000Z
+DTSTART;VALUE=DATE:20270601
+DTEND;VALUE=DATE:20270602
+SUMMARY:Good buys in June
+DESCRIPTION:Tools around Father's Day\; summer electronics deals begin The
+  pattern consumer sites (Consumer Reports\, NerdWallet and others) report
+  year after year: discounts follow new models\, holidays and the seasons.
+  Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:beyond-spider-verse@readout
+DTSTAMP:20270604T000000Z
+DTSTART;VALUE=DATE:20270604
+DTEND;VALUE=DATE:20270605
+SUMMARY:Spider-Man: Beyond the Spider-Verse
+DESCRIPTION:Animated Source: Box Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2027-05-07/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-snmmi2027@readout
+DTSTAMP:20270605T000000Z
+DTSTART;VALUE=DATE:20270605
+DTEND;VALUE=DATE:20270609
+SUMMARY:SNMMI 2027
+DESCRIPTION:Society of Nuclear Medicine and Molecular Imaging Annual Meeti
+ ng Source: Your meetings.
+LOCATION:Walter E. Washington Convention Center\, Washington\, DC
+URL:https://snmmi.org/AM
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-06-09@readout
+DTSTAMP:20270609T180000Z
+DTSTART:20270609T180000Z
+DTEND:20270609T190000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Jun 8–9. Statement at 2:00 pm ET\, press confer
+ ence at 2:30. The Federal Reserve's interest-rate decision. Source: Feder
+ al Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:httyd-2@readout
+DTSTAMP:20270611T000000Z
+DTSTART;VALUE=DATE:20270611
+DTEND;VALUE=DATE:20270612
+SUMMARY:How to Train Your Dragon 2
+DESCRIPTION:Live-action Source: Box Office Mojo.
+URL:https://www.boxofficemojo.com/calendar/2027-05-07/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-esgar2027@readout
+DTSTAMP:20270615T000000Z
+DTSTART;VALUE=DATE:20270615
+DTEND;VALUE=DATE:20270619
+SUMMARY:ESGAR 2027
+DESCRIPTION:European Society of Gastrointestinal and Abdominal Radiology A
+ nnual Meeting Source: Your meetings.
+LOCATION:Edinburgh International Conference Centre
+URL:https://esgar.org/annual-meeting
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:tax-q2-2027@readout
+DTSTAMP:20270615T000000Z
+DTSTART;VALUE=DATE:20270615
+DTEND;VALUE=DATE:20270616
+SUMMARY:Estimated tax payment due
+DESCRIPTION:2nd-quarter payment for 2027 Source: IRS deadline rules.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-06-18@readout
+DTSTAMP:20270618T000000Z
+DTSTART;VALUE=DATE:20270618
+DTEND;VALUE=DATE:20270619
+SUMMARY:Stock market closed
+DESCRIPTION:Juneteenth Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-06-25@readout
+DTSTAMP:20270625T123000Z
+DTSTART:20270625T123000Z
+DTEND:20270625T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Third estimate for Q1 2027 Gross domestic product\, from the B
+ ureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-06-25@readout
+DTSTAMP:20270625T123000Z
+DTSTART:20270625T123000Z
+DTEND:20270625T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:May 2027 numbers Personal income and spending\, with the PCE p
+ rice index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sale-july4-2027@readout
+DTSTAMP:20270701T000000Z
+DTSTART;VALUE=DATE:20270701
+DTEND;VALUE=DATE:20270705
+SUMMARY:Fourth of July sales
+DESCRIPTION:Summer gear\, appliances and electronics Source: Retail calend
+ ar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-07@readout
+DTSTAMP:20270701T000000Z
+DTSTART;VALUE=DATE:20270701
+DTEND;VALUE=DATE:20270702
+SUMMARY:Good buys in July
+DESCRIPTION:Electronics and appliances during the July sales (Amazon's Pri
+ me Day is usually this month) The pattern consumer sites (Consumer Report
+ s\, NerdWallet and others) report year after year: discounts follow new m
+ odels\, holidays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-07-05@readout
+DTSTAMP:20270705T000000Z
+DTSTART;VALUE=DATE:20270705
+DTEND;VALUE=DATE:20270706
+SUMMARY:Stock market closed
+DESCRIPTION:Independence Day Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-scct2027@readout
+DTSTAMP:20270708T000000Z
+DTSTART;VALUE=DATE:20270708
+DTEND;VALUE=DATE:20270712
+SUMMARY:SCCT 2027
+DESCRIPTION:Society of Cardiovascular Computed Tomography Annual Scientifi
+ c Meeting Source: Your meetings.
+LOCATION:Gaylord National Resort\, National Harbor\, Maryland
+URL:https://scct.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:man-of-tomorrow@readout
+DTSTAMP:20270709T000000Z
+DTSTART;VALUE=DATE:20270709
+DTEND;VALUE=DATE:20270710
+SUMMARY:Man of Tomorrow
+DESCRIPTION:James Gunn's next Superman film Source: Warner Bros..
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:season-2027-07@readout
+DTSTAMP:20270714T000000Z
+DTSTART;VALUE=DATE:20270714
+DTEND;VALUE=DATE:20270715
+SUMMARY:Q2 earnings season begins
+DESCRIPTION:The big banks report first\; the largest tech companies follow
+  in the last week of the month. (about this date) Source: Readout estimat
+ e.
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:eclipse-2027-07-18@readout
+DTSTAMP:20270718T000000Z
+DTSTART;VALUE=DATE:20270718
+DTEND;VALUE=DATE:20270719
+SUMMARY:Penumbral lunar eclipse
+DESCRIPTION:The Moon dims slightly in Earth's outer shadow\, a subtle one.
+  Source: Checked by hand.
+URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:comiccon-2027@readout
+DTSTAMP:20270722T000000Z
+DTSTART;VALUE=DATE:20270722
+DTEND;VALUE=DATE:20270726
+SUMMARY:San Diego Comic-Con
+DESCRIPTION:Preview night July 21\; the big studio panels for sci-fi and f
+ antasy Source: Comic-Con International.
+LOCATION:San Diego Convention Center
+URL:https://www.comic-con.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-07-28@readout
+DTSTAMP:20270728T180000Z
+DTSTART:20270728T180000Z
+DTEND:20270728T190000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Jul 27–28. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-07-29@readout
+DTSTAMP:20270729T123000Z
+DTSTART:20270729T123000Z
+DTEND:20270729T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Advance estimate for Q2 2027 Gross domestic product\, from the
+  Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-07-29@readout
+DTSTAMP:20270729T123000Z
+DTSTART:20270729T123000Z
+DTEND:20270729T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:June 2027 numbers Personal income and spending\, with the PCE 
+ price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-08@readout
+DTSTAMP:20270801T000000Z
+DTSTART;VALUE=DATE:20270801
+DTEND;VALUE=DATE:20270802
+SUMMARY:Good buys in August
+DESCRIPTION:Laptops and back-to-school tech\; patio furniture and summer g
+ ear on clearance The pattern consumer sites (Consumer Reports\, NerdWalle
+ t and others) report year after year: discounts follow new models\, holid
+ ays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:eclipse-2027-08-02@readout
+DTSTAMP:20270802T000000Z
+DTSTART;VALUE=DATE:20270802
+DTEND;VALUE=DATE:20270803
+SUMMARY:Total solar eclipse
+DESCRIPTION:One of the longest totalities of the century\, over 6 minutes\
+ , across southern Spain\, North Africa (Morocco to Egypt)\, Saudi Arabia 
+ and Yemen. Source: Checked by hand.
+URL:https://science.nasa.gov/eclipses/future-eclipses/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:eclipse-2027-08-17@readout
+DTSTAMP:20270817T000000Z
+DTSTART;VALUE=DATE:20270817
+DTEND;VALUE=DATE:20270818
+SUMMARY:Penumbral lunar eclipse
+DESCRIPTION:The Moon dims slightly in Earth's outer shadow\, a subtle one.
+  Source: Checked by hand.
+URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-08-25@readout
+DTSTAMP:20270825T123000Z
+DTSTART:20270825T123000Z
+DTEND:20270825T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Second estimate for Q2 2027 Gross domestic product\, from the 
+ Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-08-25@readout
+DTSTAMP:20270825T123000Z
+DTSTART:20270825T123000Z
+DTEND:20270825T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:July 2027 numbers Personal income and spending\, with the PCE 
+ price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:burningman-2027@readout
+DTSTAMP:20270829T000000Z
+DTSTART;VALUE=DATE:20270829
+DTEND;VALUE=DATE:20270907
+SUMMARY:Burning Man
+DESCRIPTION:Theme: Spellbound. Expect heavy traffic on I-80 and through Re
+ no before and after. Source: Burning Man Project.
+LOCATION:Black Rock City\, Nevada
+URL:https://burningman.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-09@readout
+DTSTAMP:20270901T000000Z
+DTSTART;VALUE=DATE:20270901
+DTEND;VALUE=DATE:20270902
+SUMMARY:Good buys in September
+DESCRIPTION:Appliances and mattresses around Labor Day\; last year's iPhon
+ es after Apple's September launch\; outgoing car models as new ones arriv
+ e The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
+ eport year after year: discounts follow new models\, holidays and the sea
+ sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sale-labor-2027@readout
+DTSTAMP:20270904T000000Z
+DTSTART;VALUE=DATE:20270904
+DTEND;VALUE=DATE:20270907
+SUMMARY:Labor Day sales
+DESCRIPTION:Appliances\, mattresses and the end of summer clearance Source
+ : Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-09-06@readout
+DTSTAMP:20270906T000000Z
+DTSTART;VALUE=DATE:20270906
+DTEND;VALUE=DATE:20270907
+SUMMARY:Stock market closed
+DESCRIPTION:Labor Day Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:tax-q3-2027@readout
+DTSTAMP:20270915T000000Z
+DTSTART;VALUE=DATE:20270915
+DTEND;VALUE=DATE:20270916
+SUMMARY:Estimated tax payment due
+DESCRIPTION:3rd-quarter payment for 2027 Source: IRS deadline rules.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-09-15@readout
+DTSTAMP:20270915T180000Z
+DTSTART:20270915T180000Z
+DTEND:20270915T190000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Sep 14–15. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-09-30@readout
+DTSTAMP:20270930T123000Z
+DTSTART:20270930T123000Z
+DTEND:20270930T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Third estimate for Q2 2027 Gross domestic product\, from the B
+ ureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-09-30@readout
+DTSTAMP:20270930T123000Z
+DTSTART:20270930T123000Z
+DTEND:20270930T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:August 2027 numbers Personal income and spending\, with the PC
+ E price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-10@readout
+DTSTAMP:20271001T000000Z
+DTSTART;VALUE=DATE:20271001
+DTEND;VALUE=DATE:20271002
+SUMMARY:Good buys in October
+DESCRIPTION:Laptops and electronics in the October sales events\; last yea
+ r's cars still being cleared The pattern consumer sites (Consumer Reports
+ \, NerdWallet and others) report year after year: discounts follow new mo
+ dels\, holidays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:season-2027-10@readout
+DTSTAMP:20271014T000000Z
+DTSTART;VALUE=DATE:20271014
+DTEND;VALUE=DATE:20271015
+SUMMARY:Q3 earnings season begins
+DESCRIPTION:The big banks report first\; the largest tech companies follow
+  in the last week of the month. (about this date) Source: Readout estimat
+ e.
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:tax-ext-2027@readout
+DTSTAMP:20271015T000000Z
+DTSTART;VALUE=DATE:20271015
+DTEND;VALUE=DATE:20271016
+SUMMARY:Extended tax returns due
+DESCRIPTION:For 2026 returns filed with an extension Source: IRS deadline 
+ rules.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-10-27@readout
+DTSTAMP:20271026T000000Z
+DTSTART;VALUE=DATE:20271026
+DTEND;VALUE=DATE:20271028
+SUMMARY:Fed strategy meeting
+DESCRIPTION:FOMC\, Oct 26–27. No rate decision at this one. The Federal 
+ Open Market Committee meets to discuss its longer-run strategy. Source: F
+ ederal Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-10-28@readout
+DTSTAMP:20271028T123000Z
+DTSTART:20271028T123000Z
+DTEND:20271028T133000Z
+SUMMARY:GDP report
+DESCRIPTION:Advance estimate for Q3 2027 Gross domestic product\, from the
+  Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-10-28@readout
+DTSTAMP:20271028T123000Z
+DTSTART:20271028T123000Z
+DTEND:20271028T133000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:September 2027 numbers Personal income and spending\, with the
+  PCE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-11@readout
+DTSTAMP:20271101T000000Z
+DTSTART;VALUE=DATE:20271101
+DTEND;VALUE=DATE:20271102
+SUMMARY:Good buys in November
+DESCRIPTION:TVs\, electronics and toys around Black Friday and Cyber Monda
+ y The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
+ eport year after year: discounts follow new models\, holidays and the sea
+ sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-rsna2027@readout
+DTSTAMP:20271114T000000Z
+DTSTART;VALUE=DATE:20271114
+DTEND;VALUE=DATE:20271119
+SUMMARY:RSNA 2027
+DESCRIPTION:Radiological Society of North America Annual Meeting Source: Y
+ our meetings.
+LOCATION:McCormick Place\, Chicago
+URL:https://www.rsna.org/annual-meeting
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fomc-2027-11-17@readout
+DTSTAMP:20271117T190000Z
+DTSTART:20271117T190000Z
+DTEND:20271117T200000Z
+SUMMARY:Fed rate decision
+DESCRIPTION:FOMC meeting Nov 16–17. Statement at 2:00 pm ET\, press conf
+ erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
+ eral Reserve.
+URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-gdp-report-2027-11-24@readout
+DTSTAMP:20271124T133000Z
+DTSTART:20271124T133000Z
+DTEND:20271124T143000Z
+SUMMARY:GDP report
+DESCRIPTION:Second estimate for Q3 2027 Gross domestic product\, from the 
+ Bureau of Economic Analysis. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:bea-pce-inflation-report-2027-11-24@readout
+DTSTAMP:20271124T133000Z
+DTSTART:20271124T133000Z
+DTEND:20271124T143000Z
+SUMMARY:PCE inflation report
+DESCRIPTION:October 2027 numbers Personal income and spending\, with the P
+ CE price index the Fed watches most closely. Source: BEA.
+URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-11-25@readout
+DTSTAMP:20271125T000000Z
+DTSTART;VALUE=DATE:20271125
+DTEND;VALUE=DATE:20271126
+SUMMARY:Stock market closed
+DESCRIPTION:Thanksgiving Source: NYSE holiday rules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sale-blackfriday-2027@readout
+DTSTAMP:20271126T000000Z
+DTSTART;VALUE=DATE:20271126
+DTEND;VALUE=DATE:20271127
+SUMMARY:Black Friday
+DESCRIPTION:TVs\, electronics\, toys and small appliances: often the year'
+ s lowest prices on TVs Source: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:nyse-2027-11-26@readout
+DTSTAMP:20271126T000000Z
+DTSTART;VALUE=DATE:20271126
+DTEND;VALUE=DATE:20271127
+SUMMARY:Stock market closes early
+DESCRIPTION:1:00 pm ET\, the day after Thanksgiving Source: NYSE holiday r
+ ules.
+URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:sale-cybermonday-2027@readout
+DTSTAMP:20271129T000000Z
+DTSTART;VALUE=DATE:20271129
+DTEND;VALUE=DATE:20271130
+SUMMARY:Cyber Monday
+DESCRIPTION:Online deals on laptops\, phones\, smart-home gear and more So
+ urce: Retail calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:buys-2027-12@readout
+DTSTAMP:20271201T000000Z
+DTSTART;VALUE=DATE:20271201
+DTEND;VALUE=DATE:20271202
+SUMMARY:Good buys in December
+DESCRIPTION:Cars\, as dealers push to hit year-end targets\; after Christm
+ as\, holiday décor and gift sets The pattern consumer sites (Consumer Re
+ ports\, NerdWallet and others) report year after year: discounts follow n
+ ew models\, holidays and the seasons. Source: Consumer price patterns.
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

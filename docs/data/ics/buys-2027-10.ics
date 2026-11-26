@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in October
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-10@readout
+DTSTAMP:20271001T000000Z
+DTSTART;VALUE=DATE:20271001
+DTEND;VALUE=DATE:20271002
+SUMMARY:Good buys in October
+DESCRIPTION:Laptops and electronics in the October sales events\; last yea
+ r's cars still being cleared The pattern consumer sites (Consumer Reports
+ \, NerdWallet and others) report year after year: discounts follow new mo
+ dels\, holidays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

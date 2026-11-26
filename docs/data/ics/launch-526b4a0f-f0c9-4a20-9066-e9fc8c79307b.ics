@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: PLATO
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-526b4a0f-f0c9-4a20-9066-e9fc8c79307b@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: PLATO
+DESCRIPTION:Ariane 62 · Arianespace Plato\, for PLAnetary Transits and Os
+ cillations of stars\, is a European Space Agency (ESA) mission with 26 ca
+ meras to study terrestrial exoplanets in orbits up to the habitable zone 
+ of Sun-like stars. Its goal is to measure the sizes of exoplanets and dis
+ cover exomoons and rings around them\, as well as characterise planets' h
+ ost stars by studying tiny light variations in the starlight it receives.
+  (no earlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Guiana Space Centre\, French Guiana
+URL:https://ll.thespacedevs.com/2.3.0/launches/526b4a0f-f0c9-4a20-9066-e9f
+ c8c79307b/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

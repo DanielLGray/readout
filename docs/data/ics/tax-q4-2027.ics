@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Estimated tax payment due
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:tax-q4-2027@readout
+DTSTAMP:20270115T000000Z
+DTSTART;VALUE=DATE:20270115
+DTEND;VALUE=DATE:20270116
+SUMMARY:Estimated tax payment due
+DESCRIPTION:4th-quarter payment for 2026 For income without enough withhol
+ ding: self-employment\, investments\, side work. Source: IRS deadline rul
+ es.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

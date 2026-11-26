@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: TSIS-2
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-eda0f3bb-3a5e-438f-bdba-9dab2a86c281@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: TSIS-2
+DESCRIPTION:Electron · Rocket Lab The Total and Spectral Solar Irradiance
+  Sensor 2 (TSIS-2) is a satellite designed by NASA to measure the Sun's e
+ nergy input to Earth. TSIS-2 comprises two instruments\, the Total Irradi
+ ance Monitor (TIM)\, and the spectral Irradiance Monitor (SIM). TIM measu
+ res total brightness and SIM measures spectral irradiance over a waveleng
+ th range that includes 96% of the energy in the solar spectrum. Both in (
+ no earlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Rocket Lab Launch Complex 1\, Mahia Peninsula\, New Zealand
+URL:https://ll.thespacedevs.com/2.3.0/launches/eda0f3bb-3a5e-438f-bdba-9da
+ b2a86c281/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

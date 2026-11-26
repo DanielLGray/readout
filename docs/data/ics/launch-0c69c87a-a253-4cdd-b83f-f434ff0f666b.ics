@@ -1,0 +1,26 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Soyuz MS-30
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-0c69c87a-a253-4cdd-b83f-f434ff0f666b@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Soyuz MS-30
+DESCRIPTION:Soyuz 2.1a · Russian Federal Space Agency (ROSCOSMOS) Soyuz M
+ S-30 will carry two cosmonauts and one astronaut to the International Spa
+ ce Station aboard the Soyuz spacecraft from the Baikonur Cosmodrome in Ka
+ zakhstan. The crew consists of Roscosmos cosmonauts Dmitri Petelin and Ko
+ nstantin Borisov\, as well as NASA astronaut Deniz Burnham. (no earlier t
+ han this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Baikonur Cosmodrome\, Republic of Kazakhstan
+URL:https://ll.thespacedevs.com/2.3.0/launches/0c69c87a-a253-4cdd-b83f-f43
+ 4ff0f666b/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

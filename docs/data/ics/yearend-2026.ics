@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Year-end money deadlines
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:yearend-2026@readout
+DTSTAMP:20261231T000000Z
+DTSTART;VALUE=DATE:20261231
+DTEND;VALUE=DATE:20270101
+SUMMARY:Year-end money deadlines
+DESCRIPTION:Last day for this year's 401(k) and 403(b) payroll contributio
+ ns\, charitable gifts and required minimum distributions Deductible gifts
+  have to be made (or mailed) by December 31. Check your FSA's own deadlin
+ e: some plans give a grace period. Source: Calendar.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

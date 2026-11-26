@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in March
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-03@readout
+DTSTAMP:20270301T000000Z
+DTSTART;VALUE=DATE:20270301
+DTEND;VALUE=DATE:20270302
+SUMMARY:Good buys in March
+DESCRIPTION:Luggage\, winter coats and gear on clearance The pattern consu
+ mer sites (Consumer Reports\, NerdWallet and others) report year after ye
+ ar: discounts follow new models\, holidays and the seasons. Source: Consu
+ mer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

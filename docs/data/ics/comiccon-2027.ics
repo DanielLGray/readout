@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:San Diego Comic-Con
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:comiccon-2027@readout
+DTSTAMP:20270722T000000Z
+DTSTART;VALUE=DATE:20270722
+DTEND;VALUE=DATE:20270726
+SUMMARY:San Diego Comic-Con
+DESCRIPTION:Preview night July 21\; the big studio panels for sci-fi and f
+ antasy Source: Comic-Con International.
+LOCATION:San Diego Convention Center
+URL:https://www.comic-con.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

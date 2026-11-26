@@ -1,0 +1,25 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Launch: Nova-C IM-3
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:launch-0c26b3d4-43e3-4c1a-8976-592ff319bc51@readout
+DTSTAMP:20270330T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Launch: Nova-C IM-3
+DESCRIPTION:Falcon 9 · SpaceX This is the third mission to the Moon for I
+ ntuitive Machines with its Nova-C lunar lander. It is to deliver 130 kg o
+ f payloads to the lunar surface. This mission also includes a rideshare p
+ ossibility due to available excess capacity on the launch vehicle. (no ea
+ rlier than this date) Source: Launch Library 2 (The Space Devs).
+LOCATION:Cape Canaveral SFS\, FL\, USA
+URL:https://ll.thespacedevs.com/2.3.0/launches/0c26b3d4-43e3-4c1a-8976-592
+ ff319bc51/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

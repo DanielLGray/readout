@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Narnia: The Magician's Nephew
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:narnia-magicians-nephew@readout
+DTSTAMP:20270212T000000Z
+DTSTART;VALUE=DATE:20270212
+DTEND;VALUE=DATE:20270213
+SUMMARY:Narnia: The Magician's Nephew
+DESCRIPTION:Greta Gerwig's film\; IMAX previews from Feb 10\, on Netflix A
+ pril 2 Source: Netflix.
+URL:https://www.netflix.com/tudum/articles/narnia-release-date
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

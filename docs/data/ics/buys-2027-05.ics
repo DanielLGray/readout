@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in May
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-05@readout
+DTSTAMP:20270501T000000Z
+DTSTART;VALUE=DATE:20270501
+DTEND;VALUE=DATE:20270502
+SUMMARY:Good buys in May
+DESCRIPTION:Mattresses and appliances around Memorial Day\; patio furnitur
+ e The pattern consumer sites (Consumer Reports\, NerdWallet and others) r
+ eport year after year: discounts follow new models\, holidays and the sea
+ sons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

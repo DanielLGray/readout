@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Good buys in December
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:buys-2027-12@readout
+DTSTAMP:20271201T000000Z
+DTSTART;VALUE=DATE:20271201
+DTEND;VALUE=DATE:20271202
+SUMMARY:Good buys in December
+DESCRIPTION:Cars\, as dealers push to hit year-end targets\; after Christm
+ as\, holiday décor and gift sets The pattern consumer sites (Consumer Re
+ ports\, NerdWallet and others) report year after year: discounts follow n
+ ew models\, holidays and the seasons. Source: Consumer price patterns.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

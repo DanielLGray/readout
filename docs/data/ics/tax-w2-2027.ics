@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:W-2s and 1099s due to you
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:tax-w2-2027@readout
+DTSTAMP:20270201T000000Z
+DTSTART;VALUE=DATE:20270201
+DTEND;VALUE=DATE:20270202
+SUMMARY:W-2s and 1099s due to you
+DESCRIPTION:Employers and payers must send your tax forms by this date Bro
+ kerage 1099s often come later\, by mid-February\; corrected ones can foll
+ ow into March. Source: IRS deadline rules.
+URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

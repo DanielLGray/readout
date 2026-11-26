@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Oscar shortlists announced
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:oscar-shortlists-2026@readout
+DTSTAMP:20261215T000000Z
+DTSTART;VALUE=DATE:20261215
+DTEND;VALUE=DATE:20261216
+SUMMARY:Oscar shortlists announced
+DESCRIPTION:The first narrowing of the field in several categories. Source
+ : The Academy.
+URL:https://press.oscars.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
