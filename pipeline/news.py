@@ -219,7 +219,8 @@ def entry_image(e, summary_html: str = "") -> str:
 
 _NOT_A_PERSON = re.compile(r"\b(?:staff|editors?|editorial|desk|team|newsroom|press|admin|news|wire|reuters|associated|AFP|bloomberg|"
                            r"contributors?|guest|correspondents?|feed|webmaster|no-?reply|unknown|anonymous|board|report|reporters?|"
-                           r"service|magazine|journal|podcast|science|health|media|office|university|institute|society|nasa|npr|bbc)\b", re.I)
+                           r"service|magazine|journal|podcast|science|health|media|office|university|institute|society|nasa|npr|bbc|"
+                           r"studios?|productions?|network|radio|channel)\b", re.I)
 _CREDENTIAL = re.compile(r"(?:,\s*|\s+)(?:MD|M\.D\.|PhD|Ph\.D\.|DO|RN|MPH|MS|MBA|FACR|FACC|Jr\.?|Sr\.?|II|III)\b\.?", re.I)
 
 

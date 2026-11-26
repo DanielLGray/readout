@@ -452,5 +452,5 @@ def test_bylines():
     got = {i["title"]: i.get("by") for i in news.parse_feed(feed, "Wire", NOW)}
     assert got == {"One": ["Jane Doe", "John Roe"], "Two": ["Beth Mole"], "Three": None, "Four": None}
     assert news.byline({"author": "Ingrid Fadelli, Phys.org"}, "Phys.org") == ["Ingrid Fadelli"]
-    assert news.byline({"author": "The Associated Press"}, "AP") == []
+    assert news.byline({"author": "The Associated Press"}, "AP") == [] == news.byline({"author": "WNYC Studios"}, "Science Friday")
     assert news.byline({"authors": [{"name": f"Ann Person{c}"} for c in "abcd"]}, "X") == ["Ann Persona", "Ann Personb", "Ann Personc"]
