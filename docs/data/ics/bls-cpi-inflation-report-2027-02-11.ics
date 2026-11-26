@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:CPI inflation report
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bls-cpi-inflation-report-2027-02-11@readout
+DTSTAMP:20270211T133000Z
+DTSTART:20270211T133000Z
+DTEND:20270211T143000Z
+SUMMARY:CPI inflation report
+DESCRIPTION:From BLS’s published schedule Consumer prices\, from the Bur
+ eau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

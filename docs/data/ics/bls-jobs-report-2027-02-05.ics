@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Jobs report
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:bls-jobs-report-2027-02-05@readout
+DTSTAMP:20270205T133000Z
+DTSTART:20270205T133000Z
+DTEND:20270205T143000Z
+SUMMARY:Jobs report
+DESCRIPTION:From BLS’s published schedule Payrolls and the unemployment 
+ rate\, from the Bureau of Labor Statistics. Source: BLS.
+URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
