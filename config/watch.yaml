@@ -36,7 +36,8 @@ trials:
     phases: [PHASE1, PHASE2, PHASE3]
   - id: tracers
     name: PET and SPECT tracers
-    intr: '"18F" OR "F-18" OR "68Ga" OR "Ga-68" OR "64Cu" OR "Cu-64" OR "89Zr" OR "Zr-89" OR "99mTc" OR "Tc-99m" OR "PET/CT" OR "PET/MRI" OR "PET imaging" OR "PET scan" OR "radiotracer" OR "FAPI" OR "fluoroestradiol"'
+    # the tracer itself, not "PET/CT" or FDG: cancer trials list those as procedures for staging
+    intr: '("18F" OR "F-18" OR "68Ga" OR "Ga-68" OR "64Cu" OR "Cu-64" OR "89Zr" OR "Zr-89" OR "15O" OR "O-15" OR "PSMA" OR "FAPI" OR "fluoroestradiol" OR "radiotracer") NOT "fludeoxyglucose" NOT "FDG"'
     phases: [PHASE2, PHASE3]
   - id: tavr
     name: TAVR and aortic stenosis
