@@ -120,6 +120,20 @@ DESCRIPTION:Cars\, as dealers push to hit year-end targets\; after Christm
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-1198746@readout
+DTSTAMP:20261204T000000Z
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+SUMMARY:Above the Below
+DESCRIPTION:Action\, Thriller\, Science Fiction Three astronauts survive a
+  violently destructive re-entry\, only to discover their landing capsule 
+ is sinking into the uncharted depths of the ocean. Completely cut off fro
+ m the world\, they must battle both the sea and their isolation to surviv
+ e. Source: TMDB.
+URL:https://www.imdb.com/title/tt29634374/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:movie-940009@readout
 DTSTAMP:20261204T000000Z
 DTSTART;VALUE=DATE:20261204
@@ -130,21 +144,6 @@ DESCRIPTION:Animation\, Science Fiction\, Crime In Metropia\, a gigantic c
  s drawn into a case involving aliens\, murder and a multimedia star named
   Venus Nova. Source: TMDB.
 URL:https://www.imdb.com/title/tt18270542/
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-969681@readout
-DTSTAMP:20261204T000000Z
-DTSTART;VALUE=DATE:20261204
-DTEND;VALUE=DATE:20261205
-SUMMARY:Spider-Man: Brand New Day
-DESCRIPTION:Science Fiction\, Action\, Adventure Fighting crime full-time 
- as Spider-Man in a world that doesn't remember him—and the pressure of 
- seeing his old friends move on without him—sparks a change in Peter Par
- ker he may not have the power to control. But that transformation might a
- lso be the only thing that can stop a shocking new threat to the city and
-  those he loves - a powerful villain no one… Source: TMDB.
-URL:https://www.imdb.com/title/tt22084616/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -201,21 +200,6 @@ SUMMARY:CPI inflation report
 DESCRIPTION:November 2026 numbers Consumer prices\, from the Bureau of Lab
  or Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-687163@readout
-DTSTAMP:20261211T000000Z
-DTSTART;VALUE=DATE:20261211
-DTEND;VALUE=DATE:20261212
-SUMMARY:Project Hail Mary
-DESCRIPTION:Science Fiction\, Adventure Science teacher Ryland Grace wakes
-  up on a spaceship light years from home with no recollection of who he i
- s or how he got there. As his memory returns\, he begins to uncover his m
- ission: solve the riddle of the mysterious substance causing the sun to d
- ie out. He must call on his scientific knowledge and unorthodox ideas to 
- save everything on Earth from… Source: TMDB.
-URL:https://www.imdb.com/title/tt12042730/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -637,19 +621,6 @@ URL:https://www.bea.gov/news/schedule
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1124@readout
-DTSTAMP:20270129T000000Z
-DTSTART;VALUE=DATE:20270129
-DTEND;VALUE=DATE:20270130
-SUMMARY:The Prestige
-DESCRIPTION:Drama\, Mystery\, Science Fiction · IMAX A mysterious story o
- f two magicians whose intense rivalry leads them on a life-long battle fo
- r supremacy -- full of obsession\, deceit and jealousy with dangerous and
-  deadly consequences. Source: TMDB.
-URL:https://www.imdb.com/title/tt0482571/
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:movie-920167@readout
 DTSTAMP:20270129T000000Z
 DTSTART;VALUE=DATE:20270129
@@ -792,21 +763,6 @@ DTEND;VALUE=DATE:20270216
 SUMMARY:Stock market closed
 DESCRIPTION:Washington's Birthday Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-11@readout
-DTSTAMP:20270219T000000Z
-DTSTART;VALUE=DATE:20270219
-DTEND;VALUE=DATE:20270220
-SUMMARY:Star Wars
-DESCRIPTION:Adventure\, Action\, Science Fiction Princess Leia is captured
-  and held hostage by the evil Imperial forces in their effort to take ove
- r the galactic Empire. Venturesome Luke Skywalker and dashing captain Han
-  Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue
-  the beautiful princess and restore peace and justice in the Empire. Sour
- ce: TMDB.
-URL:https://www.imdb.com/title/tt0076759/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1282,6 +1238,19 @@ URL:https://www.bea.gov/news/schedule
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-1417668@readout
+DTSTAMP:20270528T000000Z
+DTSTART;VALUE=DATE:20270528
+DTEND;VALUE=DATE:20270529
+SUMMARY:Star Wars: Starfighter
+DESCRIPTION:Science Fiction\, Adventure\, Action When a cynical rogue is c
+ onfronted by his mysterious past\, he is hurled into a dangerous adventur
+ e across the galaxy that puts him on a crash course with destiny. Source:
+  TMDB.
+URL:https://www.imdb.com/title/tt28069611/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:sale-memorial-2027@readout
 DTSTAMP:20270529T000000Z
 DTSTART;VALUE=DATE:20270529
@@ -1602,6 +1571,17 @@ URL:https://www.bea.gov/news/schedule
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:movie-1324923@readout
+DTSTAMP:20270730T000000Z
+DTSTART;VALUE=DATE:20270730
+DTEND;VALUE=DATE:20270731
+SUMMARY:A Quiet Place Part III
+DESCRIPTION:Horror\, Science Fiction\, Thriller The third installment in t
+ he franchise. Plot TBA. Source: TMDB.
+URL:https://www.imdb.com/title/tt36495786/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:buys-2027-08@readout
 DTSTAMP:20270801T000000Z
 DTSTART;VALUE=DATE:20270801
@@ -1846,6 +1826,17 @@ SUMMARY:Extended tax returns due
 DESCRIPTION:For 2026 returns filed with an extension Source: IRS deadline 
  rules.
 URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1574840@readout
+DTSTAMP:20271015T000000Z
+DTSTART;VALUE=DATE:20271015
+DTEND;VALUE=DATE:20271016
+SUMMARY:The Mummy: Book of the Dead
+DESCRIPTION:Adventure\, Fantasy\, Action The fourth installment in the fra
+ nchise. Plot TBA. Source: TMDB.
+URL:https://www.imdb.com/title/tt22408968/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT

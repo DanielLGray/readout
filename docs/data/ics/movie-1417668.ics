@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Star Wars: Starfighter
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1417668@readout
+DTSTAMP:20270528T000000Z
+DTSTART;VALUE=DATE:20270528
+DTEND;VALUE=DATE:20270529
+SUMMARY:Star Wars: Starfighter
+DESCRIPTION:Science Fiction\, Adventure\, Action When a cynical rogue is c
+ onfronted by his mysterious past\, he is hurled into a dangerous adventur
+ e across the galaxy that puts him on a crash course with destiny. Source:
+  TMDB.
+URL:https://www.imdb.com/title/tt28069611/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
