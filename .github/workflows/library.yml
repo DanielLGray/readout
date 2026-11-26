@@ -7,8 +7,7 @@ on:
     - cron: "13 6 4 * *"
   workflow_dispatch: {}
 
-permissions:
-  contents: write
+permissions: {}                 # each job below asks for only what it needs
 
 concurrency:
   group: readout-library      # one run of this job at a time; other jobs write other files
@@ -17,12 +16,16 @@ concurrency:
 jobs:
   library:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.pack.outputs.changed }}
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main                  # the newest data, not the commit the run was queued at (a run waiting behind another of the same job would start from stale files)
-          persist-credentials: false # the steps that read outside feeds, PubMed and pictures never hold the push token
+          persist-credentials: false # this job can't push at all; the save job below does
       - name: Already up to date?          # a backup run skips when the data is fresh
         id: due
         run: python3 -m pipeline.due docs/data/library.json 480
@@ -39,21 +42,91 @@ jobs:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
         run: python -m pipeline.build_library
-      - name: Save to the repository
+      - name: Pack what changed           # the files only; the save job checks every one before using it
+        id: pack
         if: steps.due.outputs.run == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}      # only this step can push
         run: |
-          # the token for github.com, given here and nowhere earlier; git hooks a build step might have left are ignored
-          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git config --local core.hooksPath /dev/null
+          mkdir -p "$RUNNER_TEMP/out"
+          git add -A -- docs/data cache
+          git diff --cached --name-only --no-renames --diff-filter=AMT -z > "$RUNNER_TEMP/out/changed.list"
+          git diff --cached --name-only --no-renames --diff-filter=D -z > "$RUNNER_TEMP/out/deleted.list"
+          if [ ! -s "$RUNNER_TEMP/out/changed.list" ] && [ ! -s "$RUNNER_TEMP/out/deleted.list" ]; then
+            echo "No changes"; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          tar -czf "$RUNNER_TEMP/out/files.tgz" --null --no-recursion -T "$RUNNER_TEMP/out/changed.list"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.pack.outputs.changed == 'true'
+        with:
+          name: results
+          path: |
+            ${{ runner.temp }}/out/files.tgz
+            ${{ runner.temp }}/out/deleted.list
+          if-no-files-found: error
+          retention-days: 1
+
+  # Saving is a job of its own, on a fresh machine: it never runs anything the build job made, so
+  # even a build step taken over by a malicious feed or picture couldn't reach the push token or
+  # change the app. It takes only the files this job writes (listed below), as plain files.
+  save:
+    needs: library
+    if: needs.library.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main                  # the newest copy: other jobs may have saved since the build began
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: results
+          path: ${{ runner.temp }}/in
+      - name: Check and apply the results
+        env:
+          ALLOW: '^(?:docs/data/library\.json|docs/data/abstracts/l[0-9]{2}\.json|docs/data/figs/PMC[0-9]{1,10}\.webp|cache/figures-library\.json)$'
+          IN: ${{ runner.temp }}/in
+        run: |
+          python3 -I - <<'PY'
+          import os, re, sys, tarfile
+          allow, root, src = re.compile(os.environ["ALLOW"]), os.environ["GITHUB_WORKSPACE"], os.environ["IN"]
+          def ok(name):
+              return bool(allow.fullmatch(name)) and ".." not in name.split("/")
+          dl = os.path.join(src, "deleted.list")
+          gone = [n for n in (open(dl, "rb").read().decode() if os.path.exists(dl) else "").split("\0") if n]
+          for n in gone:                     # everything is checked before anything changes
+              if not ok(n):
+                  sys.exit(f"Refused to delete {n}: not a file this job writes")
+          names = []
+          with tarfile.open(os.path.join(src, "files.tgz"), "r:gz") as t:
+              members = t.getmembers()
+              for m in members:
+                  if not m.isfile():
+                      sys.exit(f"Refused: {m.name} isn't a plain file")
+                  if not ok(m.name):
+                      sys.exit(f"Refused: {m.name} isn't a file this job writes")
+              if sum(m.size for m in members) > 200 * 2**20:
+                  sys.exit("Refused: more than 200 MB")
+              for m in members:
+                  m.mode = 0o644
+                  t.extract(m, root, filter="data")
+                  names.append(m.name)
+          for n in gone:
+              p = os.path.join(root, n)
+              if os.path.isfile(p) and not os.path.islink(p):
+                  os.remove(p)
+          print(f"{len(names)} files updated, {len(gone)} removed")
+          PY
+      - name: Save to the repository
+        run: |
           git config user.name "readout-bot"
           git config user.email "readout-bot@users.noreply.github.com"
-          git add docs/data cache
+          git add -A -- docs/data cache
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git commit -m "Foundations and classics $(date -u +%F)"
           for i in 1 2 3 4 5; do              # another job may have pushed meanwhile
-            git pull --rebase -X theirs --autostash && git push && exit 0   # a clash in a data file: this run's copy is the newer one
+            git pull --rebase -X theirs && git push && exit 0   # a clash in a data file: this run's copy is the newer one
             git rebase --abort 2>/dev/null || true
             sleep $((i * 5))
           done
