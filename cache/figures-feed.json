@@ -547,6 +547,42 @@
         "lu": "https://creativecommons.org/licenses/by/4.0/"
       },
       "v": 3
+    },
+    "PMC13796680": {
+      "t": "2026-11-26",
+      "fig": {
+        "src": "figs/PMC13796680.webp",
+        "w": 960,
+        "h": 590,
+        "n": "Fig. 2",
+        "cap": "A 78-year-old male patient with a history of bilateral renal lesions (left, 7 × 2.9 cm; right, 3 × 2.5 cm) and a suspected osseous lesion of the left fourth rib. PET/CT scan with low-dose CT acquired on day 5 after intravenous administration of 37 MBq [89Zr]Zr-girentuximab and was performed following left nephrectomy. The scan demonstrated marked CAIX-avid tracer uptake in the right renal lesion and multiple osseous lesions, including the left fourth and sixth ribs and the medial border of the right scapula (blue arrows on corresponding localized images). Two additional CAIX-avid thyroid lesions were identified - collectively indicated by red arrows on the whole-body PET image. Histopathological examination of the rib lesion confirmed metastatic clear-cell renal cell carcinoma. The thyroid lesions were not biopsied and therefore remained of undetermined origin. PET/CT did not result in a direct change in management but confirmed CAIX-avid metastatic osseous disease",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13796610": {
+      "t": "2026-11-26",
+      "fig": {
+        "src": "figs/PMC13796610.webp",
+        "w": 960,
+        "h": 574,
+        "n": "Fig. 2",
+        "cap": "In vivo CD38-targeted PET/CT imaging and biodistribution of [68Ga]Ga-DOTA-CP021. (A) Coronal MIP PET/CT images of MOLP-8, MM.1​S, and U266B1 tumor-bearing mice (n = 3) at indicated time points after intravenous injection of [68Ga]Ga-DOTA-CP021. MOLP-8 blocking mice (n = 3) received co-injection of a 1000-fold molar excess of unlabeled DOTA-CP021. (B) Time-dependent quantification of the radiotracer uptake in the tumor and kidney. (C) Ex vivo biodistribution of [68Ga]Ga-DOTA-CP021 in tumor-bearing mice at 120 min postinjection",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13796716": {
+      "t": "2026-11-26",
+      "why": "no picture among 2 figures",
+      "v": 3
+    },
+    "PMC13796619": {
+      "t": "2026-11-26",
+      "why": "no picture among 6 figures",
+      "v": 3
     }
   },
   "idconv": {
@@ -960,6 +996,36 @@
     "43079060": "2026-11-25",
     "43078996": "2026-11-25",
     "43078994": "2026-11-25",
-    "43078937": "2026-11-25"
+    "43078937": "2026-11-25",
+    "43086523": "2026-11-26",
+    "43086517": "2026-11-26",
+    "43086506": "2026-11-26",
+    "43086483": "2026-11-26",
+    "43086482": "2026-11-26",
+    "43086476": "2026-11-26",
+    "43086471": "2026-11-26",
+    "43086457": "2026-11-26",
+    "43086118": "2026-11-26",
+    "43084433": "2026-11-26",
+    "43084432": "2026-11-26",
+    "43084431": "2026-11-26",
+    "43084270": "2026-11-26",
+    "43084269": "2026-11-26",
+    "43084268": "2026-11-26",
+    "43084267": "2026-11-26",
+    "43084169": "2026-11-26",
+    "43084083": "2026-11-26",
+    "43084073": "2026-11-26",
+    "43084072": "2026-11-26",
+    "43084071": "2026-11-26",
+    "43084070": "2026-11-26",
+    "43084066": "2026-11-26",
+    "43084062": "2026-11-26",
+    "43083961": "2026-11-26",
+    "43083904": "2026-11-26",
+    "43083903": "2026-11-26",
+    "43083897": "2026-11-26",
+    "43083875": "2026-11-26",
+    "43083529": "2026-11-26"
   }
 }
