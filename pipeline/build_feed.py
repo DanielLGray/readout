@@ -158,6 +158,7 @@ def run(http: Optional[Http] = None) -> dict:
             "cardiac_journals": len(cfg.get("cardiac_journals", [])) + len(cfg.get("interventional_journals", [])),
             "topics": len(tcfg.get("topics", [])),
             "ncbi_contact": bool(os.environ.get("NCBI_EMAIL", "").strip()),
+            "ncbi_key": bool(os.environ.get("NCBI_API_KEY", "").strip()),
         },
         "items": kept,
     }

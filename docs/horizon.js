@@ -230,9 +230,18 @@ function drawHorizon() {
       el("ul", { class: "rows plain" }, unsched.map((u) => el("li", { class: "hz-un" }, el("span", { class: "hz-t" }, hzDot(u.kind), u.title), el("span", { class: "hz-s" }, u.when))))) : null,
     H ? el("div", { class: "link-row" }, el("a", { class: "act wide", href: webcal }, icon(ICONS.calendar), "Subscribe in Calendar")) : null,
     H ? el("p", { class: "fine" }, "Subscribing adds these events (not earnings) to your phone’s Calendar app as a calendar of its own, and it keeps itself up to date.") : null,
+    H?.sources?.movies?.via === "tmdb" ? tmdbCredit() : null,
     H ? el("p", { class: "fine" }, `From the Federal Reserve, the Bureau of Labor Statistics, the Bureau of Economic Analysis, FDA notices in the Federal Register, NYSE’s holiday rules, Launch Library 2 (The Space Devs), your meetings and dates checked by hand${key ? ", with earnings from Alpha Vantage" : ""}. Updated ${ago(H.generated)}.`,
       bad.length ? ` Couldn’t read ${bad.join(", ")} on the last update; its dates are from the run before.` : "") : null));
   body.scrollTop = keep;
+}
+
+// TMDB asks for its logo and this notice wherever its data shows
+function tmdbCredit() {
+  return el("p", { class: "fine tmdb-credit" },
+    el("a", { href: "https://www.themoviedb.org/", target: "_blank", rel: "noopener", "aria-label": "TMDB" },
+      el("img", { src: "icons/tmdb.svg", alt: "TMDB", width: "18", height: "18" })),
+    "Movie release dates from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.");
 }
 
 // ── one event ──────────────────────────────────────────────────────────────
@@ -268,8 +277,9 @@ function openHzEvent(e) {
       : e.approx ? el("p", { class: "fine" }, "The earliest it could happen; launch dates often slip.") : null,
     !e.allDay ? el("p", { class: "fine" }, `Times are in your phone’s time zone (${Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ")}).`) : null,
     el("div", { class: "link-row" }, calBtn(e),
-      e.url ? el("a", { class: "act", href: safeUrl(e.url), target: "_blank", rel: "noopener" }, icon(ICONS.read), "Details") : null),
-    e.src ? el("p", { class: "fine" }, `Source: ${e.src}.`) : null);
+      e.url ? el("a", { class: "act", href: safeUrl(e.url), target: "_blank", rel: "noopener" }, icon(ICONS.read),
+        /imdb\.com/.test(e.url) ? "IMDb" : /themoviedb\.org/.test(e.url) ? "TMDB" : "Details") : null),
+    e.src === "TMDB" ? tmdbCredit() : e.src ? el("p", { class: "fine" }, `Source: ${e.src}.`) : null);
 }
 
 // ── Tune → Interests → Coming up ───────────────────────────────────────────
@@ -305,7 +315,7 @@ function horizonSection() {
       news: "CES, the State of the Union, the end of the Supreme Court term, Apple’s WWDC, once their dates are set.",
       money: "IRS deadlines, new contribution limits, the big sales weekends, and each month’s usual good buys.",
       culture: "Awards nights, Sundance, the Super Bowl, Comic-Con, Burning Man and Reno’s big events.",
-      movies: "Big theatrical releases: Dune, Marvel, Star Wars, Narnia and more.",
+      movies: "Big theatrical releases in the next year, from TMDB with your token (see Tune → Updates → Set up), each linked to IMDb.",
     }[k], kinds[k], (v) => setKinds(k, v))),
     el("h3", { class: "ctl-label" }, "Earnings to watch"),
     el("div", { class: "term-chips", style: "margin-top:8px" }, T.horizon.watch.map((s) => el("button", { class: "term-chip", "aria-label": `Remove ${WATCH_NAMES[s] || s}`,

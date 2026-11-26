@@ -415,6 +415,45 @@ def fr_meetings(data: dict, include: str, start: date, stop: date) -> list[dict]
     return out
 
 
+# ── movies (TMDB) ─────────────────────────────────────────────────────────────
+
+def us_release(details: dict, start: date, stop: date) -> Optional[tuple[date, str]]:
+    """The movie's US theatrical date in the window: wide (type 3) first, else limited (type 2)."""
+    best = {}
+    for country in ((details.get("release_dates") or {}).get("results") or []):
+        if country.get("iso_3166_1") != "US":
+            continue
+        for r in country.get("release_dates") or []:
+            t = r.get("type")
+            try:
+                d = date.fromisoformat(str(r.get("release_date") or "")[:10])
+            except ValueError:
+                continue
+            if t in (2, 3) and start <= d <= stop and (t not in best or d < best[t][0]):
+                best[t] = (d, str(r.get("note") or ""))
+    return best.get(3) or best.get(2)
+
+
+def tmdb_movie_event(details: dict, start: date, stop: date) -> Optional[dict]:
+    rel = us_release(details, start, stop)
+    if not rel or not details.get("id"):
+        return None
+    d, note = rel
+    genres = [g.get("name") for g in details.get("genres") or [] if g.get("name")]
+    imdb = (details.get("external_ids") or {}).get("imdb_id") or details.get("imdb_id") or ""
+    url = f"https://www.imdb.com/title/{imdb}/" if re.fullmatch(r"tt\d{5,10}", imdb or "") else f"https://www.themoviedb.org/movie/{details['id']}"
+    sub = ", ".join(genres[:3])
+    if re.search(r"imax", note, re.I):
+        sub = f"{sub} · IMAX" if sub else "IMAX"
+    about = clean(details.get("overview") or "")
+    if len(about) > 360:
+        about = about[:357].rsplit(" ", 1)[0] + "…"
+    ev = event(f"movie-{details['id']}", "movies", clean(details.get("title") or details.get("original_title") or ""), d,
+               sub=sub, about=about, url=url, src="TMDB")
+    ev["pop"] = round(float(details.get("popularity") or 0), 1)
+    return ev
+
+
 # ── launches (Launch Library 2, The Space Devs) ──────────────────────────────
 
 PRECISE = {"second", "minute", "hour", "day"}

@@ -227,3 +227,57 @@ def test_finance_events():
 def test_config_events_take_their_section_kind():
     evs = H.config_events([{"id": "dune-3", "title": "Dune: Part Three", "start": "2026-12-18"}], START, STOP, kind="movies")
     assert evs[0]["kind"] == "movies" and evs[0]["allDay"]
+
+
+DETAILS = {
+    1: {"id": 1, "title": "Dune: Part Three", "popularity": 210.5, "genres": [{"name": "Science Fiction"}, {"name": "Adventure"}],
+        "overview": "Paul Atreides rules as emperor.", "external_ids": {"imdb_id": "tt31378509"},
+        "release_dates": {"results": [{"iso_3166_1": "GB", "release_dates": [{"release_date": "2026-12-16T00:00:00.000Z", "type": 3}]},
+                                      {"iso_3166_1": "US", "release_dates": [{"release_date": "2026-12-16T00:00:00.000Z", "type": 1},
+                                                                             {"release_date": "2026-12-18T00:00:00.000Z", "type": 3, "note": "IMAX"},
+                                                                             {"release_date": "2027-03-01T00:00:00.000Z", "type": 4}]}]}},
+    2: {"id": 2, "title": "Small Fantasy", "popularity": 3.2, "genres": [{"name": "Fantasy"}], "imdb_id": "",
+        "release_dates": {"results": [{"iso_3166_1": "US", "release_dates": [{"release_date": "2027-01-22T00:00:00.000Z", "type": 2}]}]}},
+    3: {"id": 3, "title": "Streaming Only", "popularity": 90, "genres": [{"name": "Science Fiction"}],
+        "release_dates": {"results": [{"iso_3166_1": "US", "release_dates": [{"release_date": "2027-02-01T00:00:00.000Z", "type": 4}]}]}},
+}
+
+
+class TmdbHttp(FakeHttp):
+    def __init__(self, fail=False):
+        super().__init__({"federalreserve.gov": FED_PAGE, "bls.gov": RuntimeError("403"), "bea.gov": RuntimeError("x"), "federalregister": {"results": []}})
+        self.fail = fail
+        self.calls = []
+
+    def get_json(self, url, params):
+        if "themoviedb" in url:
+            self.calls.append((url, dict(params)))
+            if self.fail:
+                raise RuntimeError("401 Unauthorized")
+            if url.endswith("/discover/movie"):
+                return {"results": [{"id": 1}, {"id": 2}, {"id": 3}], "total_pages": 1}
+            return DETAILS[int(url.rsplit("/", 1)[1])]
+        return super().get_json(url, params)
+
+
+def test_tmdb_movie_event_picks_the_us_theatrical_date_and_imdb_link():
+    ev = H.tmdb_movie_event(DETAILS[1], START, STOP)
+    assert ev["start"] == "2026-12-18" and ev["title"] == "Dune: Part Three" and ev["kind"] == "movies"
+    assert ev["url"] == "https://www.imdb.com/title/tt31378509/" and ev["sub"] == "Science Fiction, Adventure · IMAX"
+    assert H.tmdb_movie_event(DETAILS[2], START, STOP)["url"] == "https://www.themoviedb.org/movie/2"   # limited release, no IMDb id
+    assert H.tmdb_movie_event(DETAILS[3], START, STOP) is None                                         # streaming only
+
+
+def test_build_uses_tmdb_with_a_token_and_the_config_without():
+    cfg = {"movies": [{"id": "dune-3", "title": "Dune: Part Three", "start": "2026-12-18"}], "tmdb": {"max": 5}}
+    now = datetime(2026, 11, 26, 15, 0, tzinfo=timezone.utc)
+    http = TmdbHttp()
+    out = build(http, cfg, [], {}, now, tmdb_token="abc123")
+    movies = [e for e in out["events"] if e["kind"] == "movies"]
+    assert [e["id"] for e in movies] == ["movie-1", "movie-2"] and out["sources"]["movies"]["via"] == "tmdb"
+    assert http.calls[0][1]["api_key"] == "abc123" and http.calls[0][1]["with_release_type"] == "2|3"
+    out = build(TmdbHttp(), cfg, [], {}, now)                              # no token: the hand-checked list
+    assert [e["id"] for e in out["events"] if e["kind"] == "movies"] == ["dune-3"]
+    assert out["sources"]["movies"] == {"ok": True, "n": 1, "fallback": True, "via": "config"}
+    out = build(TmdbHttp(fail=True), cfg, [], {}, now, tmdb_token="bad")   # a bad token: the list, and the error shows
+    assert [e["id"] for e in out["events"] if e["kind"] == "movies"] == ["dune-3"] and not out["sources"]["movies"]["ok"]

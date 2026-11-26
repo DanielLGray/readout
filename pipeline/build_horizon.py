@@ -24,10 +24,11 @@ BLS_PAGE = "https://www.bls.gov/schedule/news_release/"
 BEA_PAGE = "https://www.bea.gov/news/schedule"
 FDA = "https://www.fda.gov/advisory-committees/advisory-committee-calendar"
 FED_REG = "https://www.federalregister.gov/api/v1/documents.json"
+TMDB = "https://api.themoviedb.org/3"
 LL2 = ["https://ll.thespacedevs.com/2.3.0/launches/upcoming/", "https://ll.thespacedevs.com/2.2.0/launch/upcoming/"]
 
 SOURCES = {          # source name → the `src` its events carry, to keep them when it can't be read
-    "fed": "Federal Reserve", "bls": "BLS", "bea": "BEA", "fda": "FDA", "launches": "Launch Library 2 (The Space Devs)",
+    "fed": "Federal Reserve", "bls": "BLS", "bea": "BEA", "fda": "FDA", "launches": "Launch Library 2 (The Space Devs)", "movies": "TMDB",
 }
 
 
@@ -50,7 +51,37 @@ def launches(http: Http) -> dict:
     raise RuntimeError(f"Launch Library 2: {last}")
 
 
-def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> dict:
+def tmdb_movies(http: Http, token: str, mcfg: dict, start: date, stop: date) -> list[dict]:
+    """Science fiction and fantasy with a US theatrical date in the window, the most popular first,
+    each checked for its US date (TMDB's release dates) and linked to its IMDb page."""
+    auth = {} if http_mod.HOST_HEADERS.get("api.themoviedb.org") else {"api_key": token}
+    ids, seen = [], set()
+    for page in range(1, int(mcfg.get("pages", 3)) + 1):
+        data = http.get_json(f"{TMDB}/discover/movie", {**auth, "with_genres": mcfg.get("genres", "878|14"), "without_genres": "99",
+                                                         "region": "US", "with_release_type": "2|3", "release_date.gte": start.isoformat(),
+                                                         "release_date.lte": stop.isoformat(), "sort_by": "popularity.desc",
+                                                         "include_adult": "false", "language": "en-US", "page": page})
+        for r in (data or {}).get("results") or []:
+            if r.get("id") and r["id"] not in seen:
+                seen.add(r["id"])
+                ids.append(r["id"])
+        if page >= int((data or {}).get("total_pages") or 1):
+            break
+    out = []
+    for mid in ids[: int(mcfg.get("candidates", 45))]:
+        try:
+            d = http.get_json(f"{TMDB}/movie/{mid}", {**auth, "append_to_response": "release_dates,external_ids", "language": "en-US"})
+        except Exception as exc:           # one movie's details failing shouldn't cost the rest
+            log(f"  movies: details for {mid} failed ({exc})")
+            continue
+        ev = H.tmdb_movie_event(d, start, stop)
+        if ev and float(d.get("popularity") or 0) >= float(mcfg.get("min_popularity", 0)):
+            out.append(ev)
+    out.sort(key=lambda e: -e.get("pop", 0))
+    return out[: int(mcfg.get("max", 30))]
+
+
+def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime, tmdb_token: str = "") -> dict:
     today = now.astimezone(H.ET).date()
     start, stop = today - timedelta(days=1), today + timedelta(days=int(cfg.get("days_ahead", 120)))
     events: list[dict] = []
@@ -113,10 +144,19 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime) -> d
     for name, got in (("markets", H.market_events(start, stop)), ("seasons", H.season_events(start, stop)),
                       ("money", H.finance_events(start, stop, cfg.get("finance") or {})),
                       ("culture", H.config_events(cfg.get("culture"), start, stop, kind="culture")),
-                      ("movies", H.config_events(cfg.get("movies"), start, stop, kind="movies")),
+
                       ("meetings", H.meeting_events(meetings, start, stop)), ("dates", H.config_events(cfg.get("events"), start, stop))):
         status[name] = {"ok": True, "n": len(got)}
         events.extend(got)
+
+    # movies: TMDB when there's a token; the hand-checked list in the config otherwise
+    if tmdb_token:
+        source("movies", lambda: tmdb_movies(http, tmdb_token, cfg.get("tmdb") or {}, start, stop))
+        status["movies"]["via"] = "tmdb"
+    if not tmdb_token or (not status["movies"]["ok"] and not any(e.get("src") == "TMDB" for e in events)):
+        got = H.config_events(cfg.get("movies"), start, stop, kind="movies")
+        events.extend(got)
+        status["movies"] = {**(status.get("movies") or {"ok": True}), "n": len(got), "fallback": True, "via": "config"}
 
     by_id = {}
     for e in events:
@@ -151,8 +191,12 @@ def main() -> int:
     email = os.environ.get("NCBI_EMAIL", "").strip()
     if "@" in email:            # BLS asks automated requests to carry a contact email
         http_mod.HOST_AGENTS["www.bls.gov"] = f"{http_mod.USER_AGENT} contact: {email}"
-    http = Http(intervals={"ll.thespacedevs.com": 5.0, "www.bls.gov": 2.0, "www.bea.gov": 1.0, "www.federalregister.gov": 1.0}, retries=3)
-    data = build(http, cfg, meetings, prev, datetime.now(timezone.utc))
+    http = Http(intervals={"ll.thespacedevs.com": 5.0, "www.bls.gov": 2.0, "www.bea.gov": 1.0, "www.federalregister.gov": 1.0,
+                           "api.themoviedb.org": 0.1}, retries=3)
+    token = os.environ.get("TMDB_TOKEN", "").strip()
+    if token.count(".") == 2 and len(token) > 100:     # a v4 read-access token goes in a header; a v3 key in the query
+        http_mod.HOST_HEADERS["api.themoviedb.org"] = {"Authorization": f"Bearer {token}"}
+    data = build(http, cfg, meetings, prev, datetime.now(timezone.utc), tmdb_token=token)
     write_json(DATA / "horizon.json", data)
     write_calendars(data)
     bad = [k for k, v in data["sources"].items() if not v.get("ok")]

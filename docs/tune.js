@@ -695,6 +695,45 @@ function jobLinks(key, editLabel) {
   return el("div", { class: "link-row" }, linkBtn(`${GH}/edit/main/config/${j.cfg}`, editLabel), run);
 }
 
+// ── set up: the keys and settings Readout can use, and which are in place ──
+function setupSection() {
+  const f = S.feed?.settings || {};
+  const mv = S.horizon?.sources?.movies;
+  const earn = store.get("earn", null);
+  const secret = `${GH}/settings/secrets/actions/new`;
+  const state = (ok, text) => el("span", { class: "setup-state" + (ok === true ? " on" : ok === false ? " off" : "") }, text);
+  const row = (title, st, what, how, ...btns) => el("div", { class: "setup-row" },
+    el("div", { class: "setup-h" }, el("b", {}, title), st),
+    el("p", { class: "fine", style: "margin:2px 0 0" }, what),
+    how ? el("p", { class: "fine", style: "margin:4px 0 0" }, how) : null,
+    btns.length ? el("div", { class: "link-row", style: "margin-top:8px" }, btns) : null);
+  const ext = (href, label) => el("a", { class: "act", href, target: "_blank", rel: "noopener" }, label);
+  return el("section", { class: "sect", id: "tune-setup" }, el("h2", {}, "Set up"),
+    el("p", { class: "sub" }, "Everything Readout can use. The first three are secrets on GitHub (Settings → Secrets and variables → Actions → New repository secret: type the name exactly as shown, paste the value). The last two stay on this phone."),
+    row("Contact email (NCBI_EMAIL)",
+      f.ncbi_contact === true ? state(true, "Set") : f.ncbi_contact === false ? state(false, "Not set") : state(null, "Shows after the next papers update"),
+      "Your email address. PubMed asks automated tools to include one so NCBI can contact you instead of blocking the job, and the Bureau of Labor Statistics won’t send its calendar without one (until then, jobs and CPI dates come from a copied schedule).",
+      "Name: NCBI_EMAIL. Value: your email address.", ext(secret, "Add on GitHub")),
+    row("PubMed API key (NCBI_API_KEY), optional",
+      f.ncbi_key === true ? state(true, "Set") : f.ncbi_key === false ? state(false, "Not set") : state(null, "Shows after the next papers update"),
+      "Lets the papers jobs ask PubMed 10 times a second instead of 3, so they finish faster. Free with an NCBI account.",
+      "Sign in at NCBI, open Account settings, and under API Key Management choose Create an API Key. Name: NCBI_API_KEY.",
+      ext("https://account.ncbi.nlm.nih.gov/settings/", "Get a key"), ext(secret, "Add on GitHub")),
+    row("Movie releases (TMDB_TOKEN)",
+      mv?.via === "tmdb" && mv.ok ? state(true, "Working") : mv?.via === "tmdb" || (mv && !mv.ok) ? state(false, "TMDB refused it") : state(false, "Not set"),
+      "Sci-fi and fantasy release dates from TMDB, checked every day and linked to IMDb. Free for personal, non-commercial use.",
+      "Make a free TMDB account, then Settings → API → Create (choose Developer, personal use). Copy the API Read Access Token (or the API key). Name: TMDB_TOKEN. Then run Coming up below, or wait for tomorrow’s update.",
+      ext("https://www.themoviedb.org/settings/api", "Get a token"), ext(secret, "Add on GitHub")),
+    row("Earnings dates (Alpha Vantage key)",
+      store.get("avKey", "") ? (earn?.err && (!earn.at || earn.errAt > earn.at) ? state(false, "Not working") : state(true, "On this phone")) : state(false, "Not set"),
+      "Exact earnings dates for the companies you watch, fetched by this phone once a day.",
+      null, el("button", { class: "act", onclick: () => setPane("interests", "tune-horizon") }, "Add it in Interests")),
+    row("GitHub token, optional",
+      ghToken() ? state(true, "On this phone") : state(null, "Not set"),
+      "Lets pull-to-refresh update the news on GitHub, and Run now start any job from here.",
+      null, el("button", { class: "act", onclick: () => document.getElementById("tune-token")?.scrollIntoView({ block: "start" }) }, "Set it up below")));
+}
+
 // ── starting the update jobs from this phone (optional) ────────────────────
 // A fine-grained GitHub token that can only run this repository's jobs. It's kept on this phone
 // (not in Tune's settings, so not in backups) and sent only to api.github.com.
@@ -817,7 +856,7 @@ function pipelinePane() {
   loadRuns();
   return [
     el("p", { class: "lede small" }, "Five jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run."),
-    tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(),
+    setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(),
     el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }

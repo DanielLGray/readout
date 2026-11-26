@@ -230,8 +230,18 @@ culture:
     url: https://press.oscars.org/
     src: The Academy
 
-# Science fiction and fantasy in theaters (US release dates from the studios, as listed by Box Office Mojo;
-# dates move, so check them when you add or change one)
+# Science fiction and fantasy in theaters. With a TMDB token (the TMDB_TOKEN secret on GitHub), the job asks
+# TMDB every day: the most popular sci-fi and fantasy films with a US theatrical date in the next year, each
+# linked to its IMDb page. Without one, the hand-checked list under `movies` is used.
+tmdb:
+  genres: "878|14"       # TMDB genre ids: 878 science fiction, 14 fantasy ("|" means either)
+  pages: 3               # 20 films a page, most popular first
+  candidates: 45         # how many to look up for their US release date
+  max: 25                # how many to show
+  min_popularity: 0      # raise to drop small releases
+
+# The hand-checked list (US release dates from the studios, as listed by Box Office Mojo), used when
+# there's no TMDB token. Dates move, so check them when you add or change one.
 movies:
   - id: avengers-doomsday
     title: "Avengers: Doomsday"

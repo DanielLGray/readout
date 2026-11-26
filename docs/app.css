@@ -844,3 +844,12 @@ a { color: inherit; }
 .hz-sub { margin: 0 0 8px; font: 450 calc(16.5px * var(--ts, 1))/1.45 var(--serif); }
 .hz-about { margin: 0 0 8px; font-size: 15px; color: var(--muted); max-width: 62ch; }
 .feed:not(.flow) .hz-card .hz-list { overflow: hidden; }
+/* Tune → Updates → Set up */
+.setup-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.setup-row:first-of-type { border-top: 1px solid var(--line); }
+.setup-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.setup-state { flex: none; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.setup-state.on { color: var(--k-light); }
+.setup-state.off { color: var(--heat-text); }
+.tmdb-credit { display: flex; align-items: center; gap: 8px; }
+.tmdb-credit img { display: block; flex: none; }
