@@ -66,7 +66,6 @@ sources:
       - https://phys.org/rss-feed/nanotech-news/nano-materials/
       - https://phys.org/rss-feed/partners/us-department-of-energy/
       - https://phys.org/rss-feed/physics-news/
-      - https://phys.org/rss-feed/technology-news/
   - name: Tech Xplore
     group: sciencex
     verbatim: true
@@ -75,7 +74,6 @@ sources:
     stale_days: 60
     urls:
       - https://techxplore.com/rss-feed/energy-green-tech-news/
-      - https://techxplore.com/rss-feed/hi-tech-news/
       - https://techxplore.com/rss-feed/
 
 # Topics you chose. words: any of these in a headline or summary (case doesn't matter; whole words).
@@ -130,4 +128,4 @@ spot:
   kinds: [science, business, health]
   max_candidates: 12
   # never topics: seasons, holidays, people's titles, the obvious
-  skip: '^(?:black friday|cyber monday|thanksgiving|christmas|new year|super bowl|wall street|stock market|interest rates?|fed|ceo|ipo|nasa|spacex|elon musk|trump|biden|harris|white house|congress|supreme court|earnings|holiday shopping|year in review|best of|this week|sci-fi|tv)$'
+  skip: '^(?:black friday|cyber monday|thanksgiving|christmas|new year|super bowl|wall street|stock market|interest rates?|fed|ceo|ipo|nasa|spacex|elon musk|trump|biden|harris|white house|congress|supreme court|earnings|holiday shopping|year in review|best of|this week|sci-fi|tv|star trek|star wars)$'

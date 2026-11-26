@@ -183,7 +183,8 @@ def _looks_like_a_name(key: str) -> bool:
 
 # words that make a phrase about the format, not the subject ("space photo", "this week")
 _FORMAT = set("photo photos picture pictures video videos image images podcast quiz live update updates today tonight "
-              "week weeks year years day days month months watch review guide explainer".split())
+              "week weeks year years day days month months watch review guide explainer "
+              "next-generation next-gen new latest first".split())
 
 
 def established(trend: Optional[dict]) -> bool:
