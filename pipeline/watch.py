@@ -98,11 +98,14 @@ def trial_event(t: dict, topic: dict, code: str, what: str, day: date, level: st
             "link": CT_STUDY.format(t["nct"]), "level": level, "org": t.get("sponsor") or "", "ph": phase_text(t["phases"])}
 
 
-def trial_events(old: Optional[dict], t: dict, topic: dict, today: date, since: date, shift_days: int) -> list[dict]:
+def trial_events(old: Optional[dict], t: dict, topic: dict, today: date, since: date, shift_days: int,
+                 results_alert: str = "phase3") -> list[dict]:
     """What changed since the last run. A trial seen for the first time counts only for what its own
-    dates say is recent: registered, or results posted, since `since`."""
+    dates say is recent: registered, or results posted, since `since`. results_alert: which trials'
+    results are alerts (phase3: Phase 3 and large trials with no phase; phase2: Phase 2 too; none)."""
     out = []
-    p3 = "PHASE3" in t["phases"] or (not t["phases"] or t["phases"] == ["NA"]) and (t.get("n") or 0) >= 500
+    want = {"phase3": {"PHASE3"}, "phase2": {"PHASE2", "PHASE3"}}.get(results_alert, set())
+    p3 = bool(want) and (bool(want & set(t["phases"])) or (not t["phases"] or t["phases"] == ["NA"]) and (t.get("n") or 0) >= 500)
     res_day = ymd(t["results"])
     if old is None:
         first = ymd(t["first"])

@@ -30,6 +30,47 @@ function switchRow(label, sub, on, onchange) {
     el("div", {}, el("div", { class: "ctl-label", style: "margin:0" }, label), sub ? el("p", { class: "fine", style: "margin:2px 0 0" }, sub) : null),
     el("button", { class: "switch", role: "switch", "aria-checked": String(!!on), "aria-label": label, onclick: () => onchange(!on) }));
 }
+// a number with − and +: o { min, max, step, unit, empty (what null means, e.g. "No limit": − from it gives max, + past max gives it) }
+function numStep(value, o, onChange, label) {
+  const step = o.step || 1;
+  if ((o.max - o.min) / step > 40) {             // a wide range: type the number (empty: what null means)
+    const inp = el("input", { type: "number", class: "num-in", min: o.min, max: o.max, step, inputmode: step < 1 ? "decimal" : "numeric",
+      value: value == null ? "" : value, placeholder: o.empty || String(o.min), "aria-label": label });
+    const commit = () => {
+      const t = inp.value.trim();
+      if (!t) { if (o.empty && value != null) onChange(null); else inp.value = value ?? ""; return; }
+      let v = Number(t);
+      if (!isFinite(v)) { inp.value = value ?? ""; return; }
+      v = Math.min(o.max, Math.max(o.min, Math.round(v / step) * step));
+      v = Math.round(v * 1000) / 1000;
+      if (v !== value) onChange(v); else inp.value = v;
+    };
+    inp.addEventListener("change", commit);
+    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
+    return el("label", { class: "num-wrap" }, inp, o.unit && value != null ? el("span", { class: "fine" }, o.unit) : null);
+  }
+  const fix = (v) => Math.round(v * 1000) / 1000;
+  const dec = step < 1 ? (String(step).split(".")[1] || "").length : 0;
+  const show = value == null ? o.empty || "—" : `${String(Number(Number(value).toFixed(dec)))}${o.unit ? ` ${o.unit}` : ""}`;
+  return el("div", { class: "stepper wide", role: "group", "aria-label": label },
+    el("button", { "aria-label": `Less: ${label}`, disabled: value == null ? !o.empty : value - step < o.min - 1e-9,
+      onclick: () => onChange(value == null ? o.max : fix(Math.max(o.min, value - step))) }, "−"),
+    el("output", {}, show),
+    el("button", { "aria-label": `More: ${label}`, disabled: value == null || (value + step > o.max + 1e-9 && !o.empty),
+      onclick: () => onChange(value + step > o.max + 1e-9 ? null : fix(value + step)) }, "+"));
+}
+function stepRow(label, sub, value, o, onChange) {
+  return el("div", { class: "switch-row" },
+    el("div", {}, el("div", { class: "ctl-label", style: "margin:0" }, label), sub ? el("p", { class: "fine", style: "margin:2px 0 0" }, sub) : null),
+    numStep(value, o, onChange, label));
+}
+// the finer controls, folded away under each section
+const ADV_OPEN = new Set();
+function advanced(id, ...kids) {
+  return el("details", { class: "outlets adv", ...(ADV_OPEN.has(id) ? { open: true } : {}),
+    ontoggle: (e) => { if (e.currentTarget.open) ADV_OPEN.add(id); else ADV_OPEN.delete(id); } },
+    el("summary", {}, "Advanced"), kids);
+}
 function swatch(k) { return el("span", { class: "sw" + (k === "sff" ? " round" : ""), style: `background:${kindColor(k)}` }); }
 function hbar(frac, color) {
   const w = Math.max(frac > 0 ? 2 : 0, Math.round(Math.min(1, frac) * 100));
@@ -220,6 +261,12 @@ function todaySection() {
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
     switchRow("Coming up", `The next ${b.hzDays} days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.`, b.horizon, (on) => setB("horizon", on)),
     b.horizon ? segPick("Coming up covers", [[3, "3 days"], [7, "7 days"], [14, "14 days"]], b.hzDays, (v) => setB("hzDays", Number(v))) : null,
+    advanced("today",
+      stepRow("New papers in Today", null, b.papers, { min: 1, max: 12 }, (v) => setB("papers", v)),
+      stepRow("Stories in Today", null, b.stories, { min: 0, max: 8 }, (v) => setB("stories", v)),
+      stepRow("Coming up covers", null, b.hzDays, { min: 1, max: 30, unit: b.hzDays === 1 ? "day" : "days" }, (v) => setB("hzDays", v)),
+      stepRow("Changes on the Watch card", null, b.watchRows, { min: 1, max: 12 }, (v) => setB("watchRows", v)),
+      todayOrderEl()),
     segPick("Your week, as a card", WEEK_DAYS, b.week, (v) => setB("week", Number(v)),
       "A summary of the last seven days on that day: alerts, Watch changes, the Radar, papers passing citation milestones, the biggest stories and your reading. Explore → Your week has it any day."),
     segPick("Guess the result", [["off", "Off"], ["brief", "In Today"], ["all", "Everywhere"]], T.guess,
@@ -234,6 +281,24 @@ function todaySection() {
       (on) => { setTune({ bylines: on }); rerender(); }),
     switchRow("Why this card", "A line on each paper and story saying what put it there: the list, words you follow, what you’ve rated, its area. Tap it for the whole account, with the paper’s score.", T.why,
       (on) => { setTune({ why: on }); rerender(); }));
+}
+
+// the order of Today's parts: up and down, and the parts that have a switch
+function todayOrderEl() {
+  const order = T.brief.order || Object.keys(BRIEF_PARTS);
+  const full = order.concat(Object.keys(BRIEF_PARTS).filter((k) => !order.includes(k)));
+  const move = (i, d) => { const o = full.slice(); [o[i], o[i + d]] = [o[i + d], o[i]]; setTune({ brief: { ...T.brief, order: o } }); rerender(); };
+  const onOf = { horizon: "horizon", radar: "radar", watch: "watch", classic: "classic", wide: "wide", light: "light", foundations: "foundations" };
+  const offNote = (k) => (k === "cites" && !T.citeAlerts ? "off" : k === "stories" && !T.brief.stories ? "none" : onOf[k] && !T.brief[onOf[k]] ? "off" : "");
+  return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Order"),
+    el("p", { class: "fine", style: "margin:2px 0 6px" }, T.brief.order ? "Each part comes whole, in this order, after the alerts and the cover."
+      : "The usual order spreads the stories, the classic and the outside paper between the papers. Move any part to set your own."),
+    el("ul", { class: "rows" }, full.map((k, i) => el("li", { class: "row ord-row" },
+      el("span", { class: "row-name" }, BRIEF_PARTS[k], offNote(k) ? el("span", { class: "fine" }, ` · ${offNote(k)}`) : null),
+      el("div", { class: "ord-btns" },
+        el("button", { class: "act", "aria-label": `Move ${BRIEF_PARTS[k]} up`, disabled: i === 0, onclick: () => move(i, -1) }, "↑"),
+        el("button", { class: "act", "aria-label": `Move ${BRIEF_PARTS[k]} down`, disabled: i === full.length - 1, onclick: () => move(i, 1) }, "↓"))))),
+    T.brief.order ? el("button", { class: "fb-forget", onclick: () => { setTune({ brief: { ...T.brief, order: null } }); rerender(); } }, "Back to the usual order") : null);
 }
 
 // ── your reading ───────────────────────────────────────────────────────────
@@ -539,10 +604,18 @@ function mixPreview(n) {
 function alertsSection() {
   const n = activeAlerts().length;
   return el("section", { class: "sect", id: "tune-alerts" }, el("h2", {}, "Alerts"),
-    el("p", { class: "sub" }, "Rare, and pinned at the top of Everything and Today for a week. A news story counts only when two independent sources carry it (copies of one press release or wire story count once), or the FDA or a society says it itself; new guidelines also come straight from PubMed."),
+    el("p", { class: "sub" }, "Rare, and pinned at the top of Everything and Today for a while (a week, unless you change it below). A news story counts only when two independent sources carry it (copies of one press release or wire story count once), or the FDA or a society says it itself; new guidelines also come straight from PubMed."),
     Object.entries(ALERT_GROUPS).map(([k, [name, what]]) => switchRow(name, what, T.alerts[k] !== false,
       (on) => { setTune({ alerts: { ...T.alerts, [k]: on } }); S.feedDirty = true; rerender(); })),
     el("div", { class: "link-row" }, el("button", { class: "act", onclick: openAlerts }, n ? `This week’s alerts (${n})` : "This week’s alerts")),
+    advanced("alerts",
+      stepRow("Pinned for", "How long an alert stays at the top.", T.alertDays, { min: 1, max: 14, unit: T.alertDays === 1 ? "day" : "days" },
+        (v) => { setTune({ alertDays: v }); rerender(); }),
+      stepRow("At the top at once", "The rest are under “more”. 0 keeps them off the top; This week’s alerts still lists them.", T.alertMax, { min: 0, max: 6 },
+        (v) => { setTune({ alertMax: v }); rerender(); }),
+      switchRow("Two of one kind", "Off: one alert per kind at the top (two FDA actions: the newest, and “1 more”).", T.alertTwo,
+        (on) => { setTune({ alertTwo: on }); rerender(); }),
+      el("p", { class: "fine" }, "How big a story must be to be an alert (independent sources, which agents and societies count, which trial results) is in Tune → Updates → News and Watch → Change settings.")),
     typeof pushSectionEl === "function" ? pushSectionEl() : null,
     typeof citeSettingEl === "function" ? citeSettingEl() : null);
 }
@@ -581,6 +654,7 @@ function hiddenReport(days = 7) {
         continue;
       }
     }
+    if (isNews && tooOld(it)) { add(`age:${it.kind}`, `${kindLabel(it.kind)} older than ${plural(T.maxAge[it.kind], "day")}`, "kind", it, () => { const m = { ...T.maxAge }; delete m[it.kind]; setTune({ maxAge: m }); }); continue; }
     if (isNews && obitHidden(it)) { add("obits", T.obits === "none" ? "Death notices (all)" : "Death notices few outlets ran", "obit", it, () => setTune({ obits: "all" })); continue; }
     if (!isNews && !homeArea(it)) { add("area", "Papers from areas you turned off", "area", it, null); continue; }
     if (!isNews && T.hidePending && (it.conclusion?.kind || "none") === "none") { add("pending", "Papers waiting for an abstract", "pending", it, () => setTune({ hidePending: false })); continue; }
@@ -656,6 +730,40 @@ function importantSection() {
       (on) => { setTune({ impReviews: on }); rerender(); }));
 }
 
+// how old a story of each kind can be, anywhere in the feed
+function ageEl(ks) {
+  return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Oldest story shown"),
+    el("p", { class: "fine", style: "margin:2px 0 6px" }, "Per kind of news, in every list. Past 60 days, it’s whatever the job keeps."),
+    ks.filter((k) => k !== "paper").map((k) => stepRow(kindLabel(k), null, T.maxAge[k] ?? null, { min: 1, max: 60, unit: (T.maxAge[k] ?? 0) === 1 ? "day" : "days", empty: "Any age" },
+      (v) => { const m = { ...T.maxAge }; if (v == null) delete m[k]; else m[k] = v; setTune({ maxAge: m }); rerender(); })));
+}
+// each outlet: stories a day in Everything, and what you think of it (the same as Rate)
+let outletOpen = new Set();
+function outletsEl() {
+  const sources = (S.news?.sources || []).filter((x) => x.name);
+  if (!sources.length) return null;
+  const byKind = {};
+  sources.forEach((x) => { (byKind[x.kind || "industry"] ||= []).push(x); });
+  const setCap = (name, v) => { const c = { ...T.capBy }; if (v == null) delete c[name]; else c[name] = v; setTune({ capBy: c }); rerender(); };
+  const row = (x) => {
+    const own = T.capBy[x.name];
+    const usual = x.kind === "industry" && !T.cap ? null : T.cap ? outletLimit(x.name) : null;
+    const tw = T.taste[`src:${x.name}`] ?? 0;
+    return el("div", { class: "ol-row" + (own != null || tw ? " changed" : "") },
+      el("div", { class: "ol-name" }, el("b", {}, x.name),
+        el("span", { class: "fine" }, own != null ? `your number${usual != null ? ` (usually ${usual})` : ""}` : usual == null ? "no limit" : `usually ${usual} a day`)),
+      numStep(own ?? usual ?? null, { min: 0, max: 20, empty: "No limit", unit: "a day" }, (v) => setCap(x.name, v), `${x.name}, stories a day`),
+      el("select", { class: "ol-taste", "aria-label": `What you think of ${x.name}`, onchange: (e) => { setTaste(`src:${x.name}`, Number(e.currentTarget.value)); rerender(); } },
+        [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([v, l]) => el("option", { value: v, ...(tw === v ? { selected: true } : {}) }, l))),
+      own != null ? el("button", { class: "inline-link", onclick: () => setCap(x.name, null) }, "Usual") : null);
+  };
+  return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Each outlet"),
+    el("p", { class: "fine", style: "margin:2px 0 6px" }, "Stories a day in Everything (0 keeps it to its own chip), and Hide, Less, Same or More, as in Rate. What the job fetches is in Tune → Updates → News → Change settings."),
+    Object.keys(newsKinds()).filter((k) => byKind[k]).map((k) => el("details", { class: "outlets", ...(outletOpen.has(k) ? { open: true } : {}),
+      ontoggle: (e) => { if (e.currentTarget.open) outletOpen.add(k); else outletOpen.delete(k); } },
+      el("summary", {}, swatch(k), kindLabel(k), el("span", { class: "fine" }, String(byKind[k].length))),
+      byKind[k].map(row))));
+}
 function mixSection() {
   const ks = presentKinds();
   const seq = mixPreview(24);
@@ -677,7 +785,7 @@ function mixSection() {
         el("div", { class: "stepper", role: "group", "aria-label": `${kindLabel(k)} turns per round` },
           el("button", { "aria-label": "Fewer", disabled: w <= 0, onclick: () => setW(k, w - 1) }, "−"),
           el("output", {}, w ? `${w}×` : "0"),
-          el("button", { "aria-label": "More", disabled: w >= 4, onclick: () => setW(k, w + 1) }, "+")));
+          el("button", { "aria-label": "More", disabled: w >= 6, onclick: () => setW(k, w + 1) }, "+")));
     })),
     segPick("Most stories from one outlet per day", [[1, "1"], [2, "2"], [3, "3"], [5, "5"], [0, "No limit"]], T.cap,
       (v) => { setTune({ cap: Number(v) }); rerender(); },
@@ -693,6 +801,7 @@ function mixSection() {
     T.topCard ? segPick("A top story you’ve seen leads again after", [[12, "12 hours"], [36, "1½ days"], [72, "3 days"]], T.topAgain,
       (v) => { setTune({ topAgain: Number(v) }); S.topPick = null; rerender(); },
       "Until then, stories you haven’t been shown come first; one that two more outlets have picked up since comes back sooner.") : null,
+    advanced("mix", ageEl(ks), outletsEl()),
     switchRow("Cards you’ve seen go to the end", "Each list starts with what you haven’t seen; the rest follow, marked Seen. Takes effect when a list starts fresh: opening the app, a chip, or a refresh.", T.readLast,
       (on) => { setTune({ readLast: on }); rerender(); }),
     switchRow("Swipe cards sideways", "Left saves a card; right clears it, and the next one takes its place.", T.swipe,
@@ -845,6 +954,7 @@ const JOBS = {
   radar: { wf: "radar.yml", cfg: "radar.yaml", every: 30, title: "Radar", sub: "Research news, arXiv preprints and OpenAlex research counts, every day" },
   watch: { wf: "watch.yml", cfg: "watch.yaml", every: 30, title: "Watch", sub: "ClinicalTrials.gov, openFDA and the Federal Register, every morning" },
   notify: { wf: "notify.yml", cfg: "", every: 24 * 30, title: "Notifications", sub: "New alerts to your phone, after each news, papers and watch update" },
+  settings: { wf: "settings.yml", cfg: "", every: 24 * 365, title: "Settings", sub: "Job settings sent from this phone, checked and saved" },
 };
 async function loadRuns() {
   if (S.runs && Date.now() - S.runs.at < 10 * 60 * 1000) return;
@@ -1070,7 +1180,8 @@ function tokenSection() {
 function pipelinePane() {
   loadRuns();
   return [
-    el("p", { class: "lede small" }, `${["", "", "", "", "", "Five", "Six", "Seven", "Eight", "Nine"][Object.keys(JOBS).length] || Object.keys(JOBS).length} jobs on GitHub build what you read. Their settings live in files you can edit on GitHub; changes apply at the next run.`),
+    el("p", { class: "lede small" }, `${["", "", "", "", "", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"][Object.keys(JOBS).length] || Object.keys(JOBS).length} jobs on GitHub build what you read. Their settings live in files on GitHub; the News, Watch, Radar and Coming up jobs’ main ones can also be changed here (Change settings, in each), and apply at the next run.`),
+    typeof jobPendingTop === "function" ? jobPendingTop() : null,
     setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(), radarJob(), watchJob(),
     el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
@@ -1173,6 +1284,7 @@ function newsJob() {
       st.promo_filter ? "Gift guides, deals and sponsored posts are skipped outside industry news." : null,
       `Headlines are kept ${Math.round(st.archive_days / 365 * 10) / 10} years for trend lines.`,
     ] : []),
+    typeof jobSettingsEl === "function" ? jobSettingsEl("news") : null,
     jobLinks("news", "Edit outlets and settings"));
 }
 
@@ -1189,6 +1301,7 @@ function horizonJob() {
           : v.ok ? String(v.n) : "couldn’t read; last run’s dates kept")])),
     H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS turns away GitHub’s servers even with a contact email, so the jobs and CPI dates come from BLS’s published schedule, copied into the config (through December 2027).") : null,
     el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Interests → Coming up)."),
+    typeof jobSettingsEl === "function" ? jobSettingsEl("horizon") : null,
     jobLinks("horizon", "Edit dates and filters"));
 }
 function radarJob() {
@@ -1198,6 +1311,7 @@ function radarJob() {
     !R ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },
       (R.sources || []).map((x) => [el("dt", {}, x.name), el("dd", { class: x.ok ? "" : "warn-text" }, x.ok ? (x.count != null ? String(x.count) : "read") : "couldn’t read")]),
       el("dt", {}, "Topics"), el("dd", {}, String((R.topics || []).length))),
+    typeof jobSettingsEl === "function" ? jobSettingsEl("radar") : null,
     jobLinks("radar", "Edit topics and sources"));
 }
 function watchJob() {
@@ -1208,6 +1322,7 @@ function watchJob() {
       (W.sources || []).map((x) => [el("dt", {}, x.name), el("dd", { class: x.ok ? "" : "warn-text" }, x.ok ? `${x.count} new` : "couldn’t read; kept the last run’s")]),
       el("dt", {}, "Changes kept"), el("dd", {}, String((W.events || []).length)),
       el("dt", {}, "Trials under way"), el("dd", {}, String(W.tracked || 0))),
+    typeof jobSettingsEl === "function" ? jobSettingsEl("watch") : null,
     jobLinks("watch", "Edit topics and rules"));
 }
 function libraryJob() {

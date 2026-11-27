@@ -146,6 +146,9 @@ const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "A
   SMMNY: "Siemens Healthineers", PHG: "Philips", EW: "Edwards Lifesciences", MDT: "Medtronic", LNTH: "Lantheus", RDNT: "RadNet" };
 const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
   movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
+// Today's parts, in their usual order (Tune → Reading → Today → Advanced can put them in yours)
+const BRIEF_PARTS = { horizon: "Coming up", radar: "Radar", watch: "Watch", cites: "New citations", papers: "New papers", stories: "Stories",
+  classic: "Classic of the day", wide: "Outside your areas", light: "Something lighter", foundations: "Next Foundations paper" };
 // alerts: which switch in Tune → Rules turns each kind off
 const ALERT_GROUPS = {
   fda: ["FDA", "Approvals and safety warnings for radiopharmaceuticals and imaging agents (contrast, PET and SPECT tracers, radioligand therapy), and new heart-valve approvals and indications."],
@@ -179,17 +182,22 @@ const TUNE_DEFAULTS = {
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
   swipe: true,          // swipe a card left to save it, right to clear it
-  horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT },   // Coming up
+  horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT, range: 90 },   // Coming up (range: days Explore shows)
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
   radar: { level: "early", hidden: [], hiddenSpots: [], heat: 2 },
   watch: { kinds: { trial: true, device: true, drug: true, rule: true }, aiOnly: false, follow: [], hidden: [], dates: true, mute: [] },   // Watch: which kinds, AI-only devices, trials you follow, topics off, dates in Coming up, words hidden from Watch and alerts   // the Radar: what counts as a development; topics and phrases you hid; Heating up at this many times the usual
+  alertDays: 7,         // alerts stay pinned this many days
+  alertMax: 2,          // at most this many alert cards at the top (the rest: "N more")
+  alertTwo: false,      // two alerts of one kind can both show
+  maxAge: {},           // kind → oldest story shown, in days (none: any age the job keeps)
+  capBy: {},            // outlet → stories a day in Everything (none: your limit, moved by the outlet's own setting and your rating)
   obits: "wide",        // death notices: "wide" (only those many outlets ran, or high office), "all" or "none"
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true, watch: true, week: 6, hzDays: 7 },   // what Today holds (week: the day of the week brief, 0 Sunday…6 Saturday, -1 off)
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true, watch: true, week: 6, hzDays: 7, watchRows: 4, order: null },   // what Today holds (week: the day of the week brief, 0 Sunday…6 Saturday, -1 off)
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
@@ -209,7 +217,9 @@ function loadTune() {
   const num = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
   const t = obj(store.get("tune", {}));
   const mix = {};
-  for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.mix, ...obj(t.mix) })) mix[k] = Math.max(0, Math.min(4, Math.round(num(v, 1))));
+  for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.mix, ...obj(t.mix) })) mix[k] = Math.max(0, Math.min(6, Math.round(num(v, 1))));
+  const ints = (v, lo, hi) => Object.fromEntries(Object.entries(obj(v)).filter(([k, x]) => typeof k === "string" && k.length <= 120 && Number.isInteger(x) && x >= lo && x <= hi).slice(0, 300));
+  const within = (v, lo, hi, d) => (Number.isInteger(v) && v >= lo && v <= hi ? v : d);
   const areas = {};
   for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.areas, ...obj(t.areas) })) areas[k] = Math.max(0, Math.min(3, Math.round(num(v, 2))));
   const rank = {};
@@ -241,13 +251,13 @@ function loadTune() {
     obits: ["wide", "all", "none"].includes(t.obits) ? t.obits : "wide",
     radar: { level: ["early", "confirmed", "mainstream"].includes(t.radar?.level) ? t.radar.level : "early",
       hidden: strs(t.radar?.hidden).slice(0, 200), hiddenSpots: strs(t.radar?.hiddenSpots).slice(-200),
-      heat: [1.5, 2, 3].includes(t.radar?.heat) ? t.radar.heat : 2 },
+      heat: typeof t.radar?.heat === "number" && t.radar.heat >= 1.25 && t.radar.heat <= 5 ? Math.round(t.radar.heat * 4) / 4 : 2 },
     watch: { kinds: Object.fromEntries(["trial", "device", "drug", "rule"].map((k) => [k, obj(obj(t.watch).kinds)[k] !== false])),
       aiOnly: obj(t.watch).aiOnly === true, dates: obj(t.watch).dates !== false,
       follow: [...new Set(strs(obj(t.watch).follow).filter((s) => /^NCT\d{8}$/.test(s)))].slice(-100), hidden: strs(obj(t.watch).hidden).slice(0, 100),
       mute: [...new Set(strs(obj(t.watch).mute).map((s) => s.trim()).filter((s) => s && s.length <= 60))].slice(0, 200) },
     alerts: Object.fromEntries(Object.keys(ALERT_GROUPS).map((k) => [k, (t.alerts || {})[k] !== false])),
-    horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])),
+    horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, hzk[k] !== false])), range: within(hz.range, 14, 366, 90),
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
         : WATCH_DEFAULT.slice() },
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
@@ -257,10 +267,13 @@ function loadTune() {
     library: typeof t.library === "string" && /^https?:\/\/\S{4,300}$/i.test(t.library.trim()) ? t.library.trim() : "",
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
-    brief: { papers: [3, 5, 8].includes(b.papers) ? b.papers : 5, stories: [0, 2, 3].includes(b.stories) ? b.stories : 2,
+    brief: { papers: within(b.papers, 1, 12, 5), stories: within(b.stories, 0, 8, 2), watchRows: within(b.watchRows, 1, 12, 4),
+      order: Array.isArray(b.order) && b.order.length && b.order.every((x) => BRIEF_PARTS[x]) && new Set(b.order).size === b.order.length ? b.order : null,
       classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false, radar: b.radar !== false, watch: b.watch !== false,
       week: [-1, 0, 1, 5, 6].includes(b.week) ? b.week : 6,
-      wide: b.wide !== false, hzDays: [3, 7, 14].includes(b.hzDays) ? b.hzDays : 7 },
+      wide: b.wide !== false, hzDays: within(b.hzDays, 1, 30, 7) },
+    alertDays: within(t.alertDays, 1, 14, 7), alertMax: within(t.alertMax, 0, 6, 2), alertTwo: t.alertTwo === true,
+    maxAge: ints(t.maxAge, 1, 365), capBy: ints(t.capBy, 0, 20),
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
     pictures: t.pictures !== false,
     meetings: Object.fromEntries(Object.entries(obj(t.meetings)).filter(([, v]) => typeof v === "boolean")),
@@ -667,6 +680,7 @@ function buildList(f = {}, report = null) {
   let news = (S.news?.items || []).map((i) => ({ ...i, type: "news", kind: kindOf(i) }));
   news = news.filter((i) => (!mutedSrc.has(i.source) && !mutedHit(i, mute)) || (drop("muted"), false));
   news = news.filter((i) => !obitHidden(i) || (drop("obits"), false));
+  news = news.filter((i) => !tooOld(i) || (drop("old"), false));
   if (taste) news = byTaste(news.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false)),
     (n) => Date.parse(n.date) || 0, 6 * 36e5);                       // an outlet you like: its stories a few hours higher
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
@@ -682,13 +696,12 @@ function buildList(f = {}, report = null) {
   const byTime = taste ? () => 0 : (a, b) => (a.date < b.date ? 1 : -1);      // already in order, rated outlets shifted
   const queues = { paper: papers };
   for (const n of news.sort(byTime)) {
-    if (T.cap && n.kind !== "industry") {            // busy outlets: a few a day in Everything (more or fewer for outlets you rated)
+    const own = T.capBy[n.source];                  // your own number for this outlet (Tune → Rules → Feed mix → Advanced)
+    if (own != null || (T.cap && n.kind !== "industry")) {   // busy outlets: a few a day in Everything (more or fewer for outlets you rated)
       const k = `${dayOf(n)}|${n.source}`;
       const c = perSource.get(k) || 0;
       perSource.set(k, c + 1);
-      // an outlet's own setting moves it up or down from your limit (NYT Health +1, BBC Health −1 at the default 2)
-      const shift = outletCap.has(n.source) ? outletCap.get(n.source) - 2 : 0;
-      if (c >= Math.max(1, T.cap + shift + Math.round(tasteW(`src:${n.source}`)))) { drop("capped"); continue; }
+      if (c >= (own != null ? own : outletLimit(n.source, outletCap))) { drop("capped"); continue; }
     }
     (queues[n.kind] = queues[n.kind] || []).push(n);
   }
@@ -706,6 +719,13 @@ function buildList(f = {}, report = null) {
   if (classic) mixed.splice(Math.min(2, mixed.length), 0, classic);
   return (system === "all" ? alertCards() : []).concat(tops, mixed);
 }
+
+// an outlet's own setting moves it up or down from your limit (NYT Health +1, BBC Health −1 at the default 2), and so does Rate
+function outletLimit(name, caps = new Map((S.news?.sources || []).filter((s) => Number.isInteger(s.feed_cap)).map((s) => [s.name, s.feed_cap]))) {
+  const shift = caps.has(name) ? caps.get(name) - 2 : 0;
+  return Math.max(1, T.cap + shift + Math.round(tasteW(`src:${name}`)));
+}
+const tooOld = (i) => !!T.maxAge[i.kind] && Date.now() - (Date.parse(i.date) || Date.now()) > T.maxAge[i.kind] * 864e5;
 
 let feedObserver, seenObserver;
 const listKey = (it) => (it.type === "top" ? `top:${it.only || ""}` : it.key && SPECIAL.has(it.type) ? it.key : saveKey(it));
@@ -1619,6 +1639,7 @@ function openInfo() {
     el("h3", {}, "Moving around"),
     el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
     el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back. Why? after a clear lets you say why: Already know it, Not for me (fewer like this, the same as Less in Rate), Weak study, or Not now (back in 3 days); only Not for me changes what you see (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
+    el("p", {}, "Tune has two levels. Each section’s main switches are up front; Advanced, under them, holds exact numbers: how many papers and stories Today holds and the order of its parts, each outlet’s stories a day and rating, the oldest story shown per kind, how long alerts stay pinned, how far Coming up looks. What the jobs on GitHub do (outlets, what counts as a top story or an alert, Watch’s trial topics, the Radar’s topics, including ones of your own) is in Tune → Updates → each job → Change settings; changes are sent to GitHub, checked, and used from each job’s next run."),
     el("h3", {}, "Full text, citations and notifications"),
     el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → Reading), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Rules → Alerts and paste the setup into GitHub once. Tune → Rules → What your filters hid lists what each mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
     el("h3", {}, "Search and citations"),

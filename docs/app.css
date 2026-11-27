@@ -937,3 +937,38 @@ a { color: inherit; }
 .push-steps { margin: 6px 0 8px; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; line-height: 1.4; }
 .cite-new { margin: 4px 0 12px; }
 .cite-line { margin-top: 6px; }
+
+/* finer settings: Advanced folds, wide steppers, job settings sent from the phone */
+.stepper.wide { grid-template-columns: 40px minmax(56px, auto) 40px; }
+.stepper.wide output { padding: 0 6px; white-space: nowrap; font-size: 14px; }
+.adv { margin-top: 10px; }
+.adv > summary { color: var(--muted); }
+.adv .switch-row, .job-set .switch-row { padding-left: 0; }
+.adv .ctl, .job-set .ctl { margin-top: 12px; }
+.jf.changed { border-left: 3px solid var(--heat-text); padding-left: 10px; margin-left: -13px; }
+.jf-reset { display: block; margin: -4px 0 8px; font-size: 13px; }
+.jl-item { border-bottom: 1px solid var(--line); }
+.jl-item.off .ctl-label { color: var(--muted); }
+.jl-item .switch-row { border-bottom: 0; }
+.jl-fields { padding: 0 0 8px 14px; }
+.jl-fields .switch-row { padding: 6px 0; border-bottom: 0; }
+.jl-group { margin-left: 4px; }
+.jl-add-field { display: block; margin-top: 10px; }
+.jl-add-field .ctl-label { display: block; margin-bottom: 4px; }
+.jl-add-field .text-in { width: 100%; }
+.job-bar { margin-top: 12px; }
+.job-bar.pending { padding: 10px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--heat-text); }
+.job-top .job-bar { margin-top: 0; }
+.ol-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "step taste" "reset reset"; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.ol-row.changed { border-left: 3px solid var(--heat-text); padding-left: 10px; }
+.ol-name { grid-area: name; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.ol-row .stepper { grid-area: step; justify-self: start; }
+.ol-taste { grid-area: taste; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 16px; }
+.ol-row .inline-link { grid-area: reset; justify-self: start; font-size: 13px; }
+.ord-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 6px 0; }
+.ord-btns { display: flex; gap: 6px; }
+.ord-btns .act { min-width: 44px; padding: 0 10px; }
+.ord-btns .act:disabled { opacity: .35; }
+.num-wrap { display: flex; align-items: center; gap: 8px; }
+.num-in { width: 92px; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 16px; font-weight: 700; text-align: right; }
+.num-in::placeholder { font-weight: 400; color: var(--muted); }

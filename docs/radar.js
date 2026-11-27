@@ -223,8 +223,10 @@ function radarSection() {
     segPick("Heating up at", [[1.5, "1.5× usual"], [2, "2× usual"], [3, "3× usual"]], T.radar.heat, (v) => { setTune({ radar: { ...T.radar, heat: Number(v) } }); rerender(); },
       "Headlines in the last 30 days against the usual month, and at least 3. Heating topics lead the Radar and its Today card."),
     switchRow("Radar card in Today", "New developments and newly added topics, once each.", T.brief.radar, (on) => { setTune({ brief: { ...T.brief, radar: on } }); rerender(); }),
+    advanced("radar", stepRow("Heating up at", "Any multiple of the usual month, in quarter steps.", T.radar.heat, { min: 1.25, max: 5, step: 0.25, unit: "× usual" },
+      (v) => { setTune({ radar: { ...T.radar, heat: v } }); rerender(); })),
     hidden.length ? el("div", { class: "chips wrap" }, hidden.map((t) => el("button", { class: "chip", "aria-pressed": "true",
       onclick: () => { setTune({ radar: { ...T.radar, hidden: T.radar.hidden.filter((x) => x !== t.id) } }); rerender(); } }, `${t.name}  ✕`))) : null,
     hidden.length ? el("p", { class: "fine" }, "Hidden topics: tap one to bring it back.") : null,
-    el("p", { class: "fine" }, "To add or remove a topic for good, edit config/radar.yaml (Tune → Updates → Radar), or ask for it."));
+    el("p", { class: "fine" }, "To add your own topics, or change how the Radar spots new ones, use Tune → Updates → Radar → Change settings."));
 }

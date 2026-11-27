@@ -128,7 +128,8 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
         tp = follow_topic if t["nct"] in follow else topic
         if t["nct"] not in follow and not W.qualifies(t, topic):
             return 0                                   # only trials that count are kept to compare
-        n = add(W.trial_events(W.expand(t["nct"], old) if old else None, t, tp, today, since, shift))
+        n = add(W.trial_events(W.expand(t["nct"], old) if old else None, t, tp, today, since, shift,
+                               str(st.get("results_alert") or "phase3")))
         if old and old.get("tp") in topics and old["tp"] != topic["id"] and t["nct"] not in follow:
             tp = topics[old["tp"]]                      # keep the topic it was first found under
         trials[t["nct"]] = W.compact(t, tp["id"])

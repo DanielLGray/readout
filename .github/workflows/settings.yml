@@ -1,0 +1,162 @@
+name: Apply settings
+
+# Job settings changed in the app (Tune → Updates → a job → Settings): checked against
+# pipeline/overrides.py, saved to config/overrides.json (laid over the settings files when each job
+# loads them), then the jobs whose settings changed run. Also runs when a settings file changes on
+# GitHub, so the app's list of settings (docs/data/config.json) matches the files.
+on:
+  workflow_dispatch:
+    inputs:
+      changes:
+        description: "Settings from the app (optional: copied in Tune → Updates)"
+        type: string
+        required: false
+        default: ""
+      run_jobs:
+        description: "Run the jobs whose settings changed"
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+    paths: ["config/*.yaml", "pipeline/overrides.py", "pipeline/settings.py"]
+
+permissions: {}                 # each job below asks for only what it needs
+
+concurrency:
+  group: readout-settings
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read               # read the settings files; this job can't push
+    outputs:
+      changed: ${{ steps.pack.outputs.changed }}
+      jobs: ${{ steps.apply.outputs.jobs }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main                  # the newest settings
+          persist-credentials: false # this job can't push at all; the save job below does
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install --require-hashes -r requirements.txt   # exact versions, checked against their published hashes
+      - name: Check and apply the settings
+        id: apply
+        env:
+          CHANGES: ${{ inputs.changes }}         # text from the app; checked by pipeline/settings.py, never run
+        run: python -m pipeline.settings
+      - name: Pack what changed           # the files only; the save job checks every one before using it
+        id: pack
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          paths="docs/data/config.json"
+          if [ -e config/overrides.json ] || git ls-files --error-unmatch config/overrides.json >/dev/null 2>&1; then paths="$paths config/overrides.json"; fi
+          git add -A -- $paths
+          git diff --cached --name-only --no-renames --diff-filter=AMT -z > "$RUNNER_TEMP/out/changed.list"
+          git diff --cached --name-only --no-renames --diff-filter=D -z > "$RUNNER_TEMP/out/deleted.list"
+          if [ ! -s "$RUNNER_TEMP/out/changed.list" ] && [ ! -s "$RUNNER_TEMP/out/deleted.list" ]; then
+            echo "No changes"; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          tar -czf "$RUNNER_TEMP/out/files.tgz" --null --no-recursion -T "$RUNNER_TEMP/out/changed.list"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.pack.outputs.changed == 'true'
+        with:
+          name: results
+          path: |
+            ${{ runner.temp }}/out/files.tgz
+            ${{ runner.temp }}/out/deleted.list
+          if-no-files-found: error
+          retention-days: 1
+
+  # Saving is a job of its own, on a fresh machine: it never runs anything the build job made, so
+  # even a build step taken over by a malicious feed or picture couldn't reach the push token or
+  # change the app. It takes only the files this job writes (listed below), as plain files.
+  save:
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write              # push the checked files
+      actions: write               # then start the jobs whose settings changed
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main                  # the newest copy: other jobs may have saved since the build began
+          persist-credentials: false # the token goes only to the step that pushes
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: results
+          path: ${{ runner.temp }}/in
+      - name: Check and apply the results
+        env:
+          ALLOW: '^(?:docs/data/config\.json|config/overrides\.json)$'
+          IN: ${{ runner.temp }}/in
+        run: |
+          python3 -I - <<'PY'
+          import os, re, sys, tarfile
+          allow, root, src = re.compile(os.environ["ALLOW"]), os.environ["GITHUB_WORKSPACE"], os.environ["IN"]
+          def ok(name):
+              return bool(allow.fullmatch(name)) and ".." not in name.split("/")
+          dl = os.path.join(src, "deleted.list")
+          gone = [n for n in (open(dl, "rb").read().decode() if os.path.exists(dl) else "").split("\0") if n]
+          for n in gone:                     # everything is checked before anything changes
+              if not ok(n):
+                  sys.exit(f"Refused to delete {n}: not a file this job writes")
+          names = []
+          with tarfile.open(os.path.join(src, "files.tgz"), "r:gz") as t:
+              members = t.getmembers()
+              for m in members:
+                  if not m.isfile():
+                      sys.exit(f"Refused: {m.name} isn't a plain file")
+                  if not ok(m.name):
+                      sys.exit(f"Refused: {m.name} isn't a file this job writes")
+              if sum(m.size for m in members) > 200 * 2**20:
+                  sys.exit("Refused: more than 200 MB")
+              for m in members:
+                  m.mode = 0o644
+                  t.extract(m, root, filter="data")
+                  names.append(m.name)
+          for n in gone:
+              p = os.path.join(root, n)
+              if os.path.isfile(p) and not os.path.islink(p):
+                  os.remove(p)
+          print(f"{len(names)} files updated, {len(gone)} removed")
+          PY
+      - name: Save to the repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git config user.name "readout-bot"
+          git config user.email "readout-bot@users.noreply.github.com"
+          paths="docs/data/config.json"
+          if [ -e config/overrides.json ] || git ls-files --error-unmatch config/overrides.json >/dev/null 2>&1; then paths="$paths config/overrides.json"; fi
+          git add -A -- $paths
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Settings from the app $(date -u +%F)"
+          for i in 1 2 3 4 5; do              # another job may have pushed meanwhile
+            git pull --rebase -X theirs && git push && exit 0   # a clash in a data file: this run's copy is the newer one
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          exit 1
+      - name: Run the jobs whose settings changed
+        if: inputs.run_jobs && needs.build.outputs.jobs != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOBS: ${{ needs.build.outputs.jobs }}   # names the settings job wrote; only these four are run
+          REPO: ${{ github.repository }}
+        run: |
+          for j in $JOBS; do
+            case "$j" in
+              news|watch|radar|horizon) gh workflow run "$j.yml" --ref main -R "$REPO" && echo "Started $j" ;;
+              *) echo "Skipped $j: not a job the settings can start" ;;
+            esac
+          done

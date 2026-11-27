@@ -231,7 +231,7 @@ function hideWordsEl(text, redraw) {
   const taken = new Set(mine.map((w) => w.toLowerCase()));
   const offer = phrasesOf(text).filter((w) => !taken.has(w.toLowerCase()) && !/\d/.test(w)).slice(0, 8);     // not model numbers
   const setMute = (list) => setTune({ watch: { ...T.watch, mute: [...new Set(list)].slice(-200) } });
-  const input = el("input", { type: "text", class: "word-input", maxlength: "60", placeholder: "A word or phrase", "aria-label": "Hide a word or phrase" });
+  const input = el("input", { type: "text", class: "text-in", maxlength: "60", placeholder: "A word or phrase", "aria-label": "Hide a word or phrase" });
   const add = () => { const w = input.value.trim(); if (!w) return; setMute([...T.watch.mute, w]); toast(`Hidden from Watch and alerts: ${w}`); redraw(); };
   input.addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); add(); } });
   return [el("div", { class: "ctl-label" }, "Words"),
@@ -312,7 +312,7 @@ function watchCardItem() {
 function watchCardEl(it) {
   const by = {};
   it.fresh.forEach((e) => { by[e.kind] = (by[e.kind] || 0) + 1; });
-  const top = it.fresh.filter((e) => !wRoutine(e) && !wLess(e)).slice(0, 4);
+  const top = it.fresh.filter((e) => !wRoutine(e) && !wLess(e)).slice(0, T.brief.watchRows || 4);
   const rest = it.fresh.length - top.length;
   const card = el("article", { class: "card brief-card w-card", "data-key": "brief:watch" },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Watch"),
@@ -365,5 +365,7 @@ function watchSection() {
     T.watch.follow.length ? el("div", {}, el("div", { class: "ctl-label" }, "Trials you follow"),
       el("div", { class: "chips wrap" }, T.watch.follow.map((n) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Stop following ${n}`,
         onclick: () => setW({ follow: T.watch.follow.filter((x) => x !== n) }) }, `${titles[n] || n}  ✕`)))) : null,
-    el("p", { class: "fine" }, "Follow a trial from its page in Watch. To watch other trial topics or rules, edit config/watch.yaml (Tune → Updates → Watch), or ask for it."));
+    advanced("watch", stepRow("Changes on Today’s card", "The rest are a tap away in Watch.", T.brief.watchRows, { min: 1, max: 12 },
+      (v) => { setTune({ brief: { ...T.brief, watchRows: v } }); rerender(); })),
+    el("p", { class: "fine" }, "Follow a trial from its page in Watch. To add trial topics of your own, or change which results are alerts, use Tune → Updates → Watch → Change settings."));
 }

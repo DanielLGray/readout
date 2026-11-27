@@ -5,6 +5,7 @@ import gzip
 import json
 import re
 import os
+import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -16,9 +17,28 @@ DATA = Path(os.environ.get("READOUT_DATA_DIR", ROOT / "docs" / "data"))
 CACHE = Path(os.environ.get("READOUT_CACHE_DIR", ROOT / "cache"))
 
 
-def load_yaml(name: str) -> dict:
+def load_base(name: str) -> dict:
+    """A settings file as written, without the changes made in the app."""
     with open(CONFIG / name, encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def load_yaml(name: str) -> dict:
+    """A settings file, with the changes made in the app (config/overrides.json, pipeline/overrides.py)
+    laid over it. If they can't be applied the job runs on the file alone, and says so."""
+    cfg = load_base(name)
+    if os.environ.get("READOUT_OVERRIDES", "on") == "off":
+        return cfg
+    from . import overrides as O
+    key = next((k for k, v in O.FILES.items() if v == name), None)
+    part = O.read(CONFIG).get(key) if key else None
+    if not part:
+        return cfg
+    try:
+        return O.apply(key, cfg, part)
+    except Exception as exc:                      # never let a setting stop a job
+        print(f"Settings from the app couldn't be applied to {name} ({type(exc).__name__}: {exc}); using the file alone", file=sys.stderr)
+        return cfg
 
 
 def _or(items: list[str]) -> str:

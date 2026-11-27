@@ -452,7 +452,7 @@ function classicToday() {
 // FDA actions on radiopharmaceuticals and imaging agents and guideline changes (news job: two
 // outlets or a primary source), and new guidelines straight from PubMed (papers job).
 function activeAlerts() {
-  const cut = Date.now() - 7.5 * 864e5;
+  const cut = Date.now() - ((T.alertDays || 7) + 0.5) * 864e5;
   const seen = new Set();
   return [...(S.feed?.alerts || []), ...(S.news?.alerts || []), ...(typeof watchAlerts === "function" ? watchAlerts() : [])]
     .filter((a) => a?.id && a.title && !seen.has(a.id) && seen.add(a.id) && T.alerts?.[a.group] !== false && Date.parse(a.date) >= cut
@@ -462,11 +462,11 @@ function activeAlerts() {
 function alertCards() {
   const live = activeAlerts().filter((a) => !isCleared(`alert:${a.id}`));
   const rules = new Set(), shown = [];
-  for (const a of live) {                      // at most two, and not two of one kind
-    if (rules.has(a.rule)) continue;
+  for (const a of live) {                      // at most two (Tune → Rules → Alerts), and not two of one kind unless you say so
+    if (shown.length >= T.alertMax) break;
+    if (rules.has(a.rule) && !T.alertTwo) continue;
     rules.add(a.rule);
     shown.push(a);
-    if (shown.length === 2) break;
   }
   const more = live.length - shown.length;
   return shown.map((a, i) => {
@@ -1091,16 +1091,27 @@ function briefList() {
   const light = lightItem ? { ...lightItem, type: "news", kind: kindOf(lightItem), _light: true } : null;
   const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, wide?.pmid, fd?.read, fd?.next, light?.id].join("|");
   const out = [...alertCards(), { type: "brief-cover", key: "brief:cover", sig, plan, classic, wide, fd, stories, light }];
-  const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(7) : [];
-  if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
+  const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(T.brief.hzDays || 7) : [];
   const rd = typeof radarCardItem === "function" ? radarCardItem() : null;
-  if (rd) out.push(rd);
   const wt = typeof watchCardItem === "function" ? watchCardItem() : null;
-  if (wt) out.push(wt);
   const ct = typeof citeCardItem === "function" ? citeCardItem() : null;
-  if (ct) out.push(ct);
   const wk = typeof weekCardItem === "function" ? weekCardItem() : null;
-  if (wk) out.splice(out.findIndex((x) => x.type === "brief-cover") + 1, 0, wk);
+  if (wk) out.push(wk);
+  const storiesCard = { type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories };
+  if (T.brief.order) {                       // your order: each part whole, one after another
+    const parts = { horizon: soon.length ? [{ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon }] : [],
+      radar: rd ? [rd] : [], watch: wt ? [wt] : [], cites: ct ? [ct] : [], papers, stories: stories.length ? [storiesCard] : [],
+      classic: classic ? [classic] : [], wide: wide ? [wide] : [], light: light ? [light] : [],
+      foundations: fd?.next ? [{ type: "fd-next", key: "fd:next", sig: `${fd.next}|${fd.read}`, fd }] : [] };
+    const order = T.brief.order.concat(Object.keys(BRIEF_PARTS).filter((k) => !T.brief.order.includes(k)));
+    order.forEach((k) => out.push(...(parts[k] || [])));
+    out.push({ type: "brief-end", key: "brief:end", sig, plan });
+    return out;
+  }
+  if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
+  if (rd) out.push(rd);
+  if (wt) out.push(wt);
+  if (ct) out.push(ct);
   papers.forEach((p, i) => {
     out.push(p);
     if (i === 1 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });

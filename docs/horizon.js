@@ -161,13 +161,14 @@ function hzCardEl(it) {
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Coming up"), el("span", {}, `the next ${days} days`)),
     evs.length ? el("ol", { class: "hz-list" }, evs.slice(0, show).map((e) => hzRowEl(e))) : el("p", { class: "nothing" }, `Nothing scheduled ${days === 7 ? "this week" : `in the next ${days} days`}.`),
     el("div", { class: "link-row", style: "margin-top:2px" },
-      el("button", { class: "act", onclick: openHorizon }, icon(ICONS.calendar), evs.length > show ? `All ${evs.length} ${span}, and the next 90 days` : "The next 90 days")));
+      el("button", { class: "act", onclick: openHorizon }, icon(ICONS.calendar), evs.length > show ? `All ${evs.length} ${span}, and the next ${hzRangeText()}` : `The next ${hzRangeText()}`)));
 }
+const hzRangeText = (d = T.horizon.range) => (d >= 366 ? "12 months" : d % 30 === 0 && d >= 60 ? `${d / 30} months` : `${d} days`);
 function hzEntryEl() {
   if (!S.horizon && !store.get("avKey", "")) return null;
-  const evs = hzEvents(90);
+  const evs = hzEvents(T.horizon.range);
   return el("button", { class: "fd-entry hz-entry", onclick: openHorizon },
-    el("span", { class: "fd-entry-h" }, el("b", {}, "Coming up"), el("span", {}, `${plural(evs.length, "event")} in 90 days`)),
+    el("span", { class: "fd-entry-h" }, el("b", {}, "Coming up"), el("span", {}, `${plural(evs.length, "event")} in the next ${hzRangeText()}`)),
     el("span", { class: "hz-mini" }, evs.slice(0, 3).map((e) => el("span", {}, hzDot(e.kind), `${hzSpan(e) || dayWord(hzStart(e))}: ${e.title}`))));
 }
 
@@ -193,7 +194,7 @@ function weekLabel(d) {
 function drawHorizon() {
   const body = $("#topic-body");
   const keep = body.scrollTop;
-  const days = S.hzDays || 90;
+  const days = S.hzDays || T.horizon.range;
   const all = hzEvents(days);
   const f = S.hzFilter && T.horizon.kinds[S.hzFilter] ? S.hzFilter : "all";
   const evs = f === "all" ? all : all.filter((e) => e.kind === f);
@@ -203,7 +204,7 @@ function drawHorizon() {
   for (const e of evs) {
     const d = hzStart(e) < new Date() ? new Date() : hzStart(e);
     let label = weekLabel(d);
-    if (days > 90 && !/^(This|Next) week$/.test(label)) label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });   // a year: by month
+    if (days > 120 && !/^(This|Next) week$/.test(label)) label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });   // a year: by month
     if (!groups.length || groups[groups.length - 1][0] !== label) groups.push([label, []]);
     groups[groups.length - 1][1].push(e);
   }
@@ -220,9 +221,9 @@ function drawHorizon() {
     !H ? el("p", { class: "nothing" }, "Events arrive with the first daily update.") : null,
     groups.map(([label, list]) => el("section", { class: "hz-week" }, el("h3", { class: "sys-head" }, label),
       el("ol", { class: "hz-list" }, list.map((e) => hzRowEl(e, label === "This week"))))),
-    H && !evs.length ? el("p", { class: "nothing" }, `Nothing in the next ${days === 90 ? "90 days" : "12 months"}.`) : null,
-    H ? el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => { S.hzDays = days === 90 ? 366 : 90; drawHorizon(); } },
-      days === 90 ? "Show the next 12 months" : "Back to the next 90 days")) : null,
+    H && !evs.length ? el("p", { class: "nothing" }, `Nothing in the next ${days >= 366 ? "12 months" : hzRangeText(days)}.`) : null,
+    H && T.horizon.range < 366 ? el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => { S.hzDays = days < 366 ? 366 : T.horizon.range; drawHorizon(); } },
+      days < 366 ? "Show the next 12 months" : `Back to the next ${hzRangeText()}`)) : null,
     T.horizon.kinds.markets && (f === "all" || f === "markets") ? el("div", { class: "fd-note" },
       !key ? [el("b", {}, "Earnings dates: "), "add your free Alpha Vantage key in Tune → Interests → Coming up. Until then, the start of each earnings season is estimated. ",
         el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("interests", "tune-horizon"); } }, "Add a key")]
@@ -311,7 +312,7 @@ function horizonSection() {
   };
   keyIn.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); saveKey(); } });
   return el("section", { class: "sect", id: "tune-horizon" }, el("h2", {}, "Coming up"),
-    el("p", { class: "sub" }, "Events on the horizon: a card in Today for the next 7 days, and Explore → Coming up for the next 90."),
+    el("p", { class: "sub" }, `Events on the horizon: a card in Today for the next ${plural(T.brief.hzDays, "day")}, and Explore → Coming up for the next ${hzRangeText()}.`),
     Object.entries(HZ_KINDS).map(([k, label]) => switchRow(label, {
       markets: "Earnings, Fed decisions, jobs, CPI, GDP and PCE reports, stock market holidays.",
       medicine: "Your meetings (switch them under Meetings), FDA panels on imaging and heart devices, J.P. Morgan Healthcare week.",
@@ -321,6 +322,11 @@ function horizonSection() {
       culture: "Awards nights, Sundance, the Super Bowl, Comic-Con, Burning Man and Reno’s big events.",
       movies: "Big theatrical releases in the next year, from TMDB with your token (see Tune → Updates → Set up), each linked to IMDb.",
     }[k], kinds[k], (v) => setKinds(k, v))),
+    advanced("horizon",
+      segPick("Explore → Coming up shows", [[30, "30 days"], [60, "2 months"], [90, "3 months"], [180, "6 months"], [366, "A year"]], T.horizon.range,
+        (v) => { setTune({ horizon: { ...T.horizon, range: Number(v) } }); S.hzDays = null; rerender(); }),
+      stepRow("Today’s card covers", "The next this many days of events.", T.brief.hzDays, { min: 1, max: 30, unit: T.brief.hzDays === 1 ? "day" : "days" },
+        (v) => { setTune({ brief: { ...T.brief, hzDays: v } }); rerender(); })),
     el("h3", { class: "ctl-label" }, "Earnings to watch"),
     el("div", { class: "term-chips", style: "margin-top:8px" }, T.horizon.watch.map((s) => el("button", { class: "term-chip", "aria-label": `Remove ${WATCH_NAMES[s] || s}`,
       onclick: () => setWatch(T.horizon.watch.filter((x) => x !== s)) }, WATCH_NAMES[s] || s, el("b", {}, "✕")))),
