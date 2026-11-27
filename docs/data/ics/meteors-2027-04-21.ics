@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Lyrids meteor shower peaks
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:meteors-2027-04-21@readout
+DTSTAMP:20270421T000000Z
+DTSTART;VALUE=DATE:20270421
+DTEND;VALUE=DATE:20270422
+SUMMARY:Lyrids meteor shower peaks
+DESCRIPTION:Night of Apr 21–22 · Moon 100% lit: only the brighter meteo
+ rs Up to about 18 an hour under ideal dark skies\; fewer from town. Best 
+ after midnight\, as the radiant in Lyra climbs. (about this date) Source:
+  Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

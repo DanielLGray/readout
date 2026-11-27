@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Orionids meteor shower peaks
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:meteors-2027-10-20@readout
+DTSTAMP:20271020T000000Z
+DTSTART;VALUE=DATE:20271020
+DTEND;VALUE=DATE:20271021
+SUMMARY:Orionids meteor shower peaks
+DESCRIPTION:Night of Oct 20–21 · Moon 60% lit Up to about 20 an hour un
+ der ideal dark skies\; fewer from town. Dust from Halley's Comet\; best i
+ n the hours before dawn. (about this date) Source: Readout (yearly peaks\
+ ; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

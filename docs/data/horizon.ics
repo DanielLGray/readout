@@ -131,6 +131,18 @@ URL:https://goldenglobes.com/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-new-2026-12-08@readout
+DTSTAMP:20261209T005213Z
+DTSTART:20261209T005213Z
+DTEND:20261209T015213Z
+SUMMARY:New moon
+DESCRIPTION:At 4:52 PM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:fomc-2026-12-09@readout
 DTSTAMP:20261209T190000Z
 DTSTART:20261209T190000Z
@@ -151,6 +163,20 @@ SUMMARY:CPI inflation report
 DESCRIPTION:November 2026 numbers Consumer prices\, from the Bureau of Lab
  or Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meteors-2026-12-13@readout
+DTSTAMP:20261213T000000Z
+DTSTART;VALUE=DATE:20261213
+DTEND;VALUE=DATE:20261214
+SUMMARY:Geminids meteor shower peaks
+DESCRIPTION:Night of Dec 13–14 · Moon 29% lit Up to about 150 an hour u
+ nder ideal dark skies\; fewer from town. The year's richest shower\, and 
+ good from mid-evening\, not just before dawn. (about this date) Source: R
+ eadout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -221,6 +247,17 @@ DTEND;VALUE=DATE:20261225
 SUMMARY:Stock market closes early
 DESCRIPTION:1:00 pm ET\, Christmas Eve Source: NYSE holiday rules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2026-12-23@readout
+DTSTAMP:20261224T012838Z
+DTSTART:20261224T012838Z
+DTEND:20261224T022838Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 5:28 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -332,6 +369,20 @@ URL:https://www.nyse.com/markets/hours-calendars
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:meteors-2027-01-03@readout
+DTSTAMP:20270103T000000Z
+DTSTART;VALUE=DATE:20270103
+DTEND;VALUE=DATE:20270104
+SUMMARY:Quadrantids meteor shower peaks
+DESCRIPTION:Night of Jan 3–4 · Moon 11% lit: dark skies Up to about 110
+  an hour under ideal dark skies\; fewer from town. The peak lasts only a 
+ few hours\; best in the dark hours before dawn. (about this date) Source:
+  Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:launch-d3bd7fb2-fac6-49fc-ae52-cee07d2fde67@readout
 DTSTAMP:20270105T000000Z
 DTSTART;VALUE=DATE:20270105
@@ -357,6 +408,18 @@ DESCRIPTION:The consumer technology show\, where AI\, health tech and car
  makers show what's next. Source: Checked by hand.
 LOCATION:Las Vegas
 URL:https://www.ces.tech/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-01-07@readout
+DTSTAMP:20270107T202455Z
+DTSTART:20270107T202455Z
+DTEND:20270107T212455Z
+SUMMARY:New moon
+DESCRIPTION:At 12:24 PM Reno time: the darkest nights of the month for sta
+ rgazing No moonlight on the nights around it: the best time for the Milky
+  Way\, faint stars and meteors away from city lights. Source: Readout (Me
+ eus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -520,6 +583,17 @@ URL:https://www.sundance.org/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-full-2027-01-22@readout
+DTSTAMP:20270122T121747Z
+DTSTART:20270122T121747Z
+DTEND:20270122T131747Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 4:17 AM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:fomc-2027-01-27@readout
 DTSTAMP:20270127T190000Z
 DTSTART:20270127T190000Z
@@ -654,6 +728,18 @@ URL:https://science.nasa.gov/eclipses/future-eclipses/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-new-2027-02-06@readout
+DTSTAMP:20270206T155634Z
+DTSTART:20270206T155634Z
+DTEND:20270206T165634Z
+SUMMARY:New moon
+DESCRIPTION:At 7:56 AM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:grammys-2027@readout
 DTSTAMP:20270207T000000Z
 DTSTART;VALUE=DATE:20270207
@@ -743,6 +829,17 @@ URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-full-2027-02-20@readout
+DTSTAMP:20270220T232358Z
+DTSTART:20270220T232358Z
+DTEND:20270221T002358Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 3:23 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bea-gdp-report-2027-02-25@readout
 DTSTAMP:20270225T133000Z
 DTSTART:20270225T133000Z
@@ -811,6 +908,18 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-new-2027-03-08@readout
+DTSTAMP:20270308T092955Z
+DTSTART:20270308T092955Z
+DTEND:20270308T102955Z
+SUMMARY:New moon
+DESCRIPTION:At 1:29 AM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-cpi-inflation-report-2027-03-10@readout
 DTSTAMP:20270310T133000Z
 DTSTART:20270310T133000Z
@@ -853,6 +962,17 @@ SUMMARY:Sonic the Hedgehog 4
 DESCRIPTION:Comedy\, Action\, Family The fourth installment in the Sonic t
  he Hedgehog film franchise. Plot TBA. Source: TMDB.
 URL:https://www.imdb.com/title/tt16744566/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-03-22@readout
+DTSTAMP:20270322T104407Z
+DTSTART:20270322T104407Z
+DTEND:20270322T114407Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 3:44 AM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1043,6 +1163,18 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-new-2027-04-06@readout
+DTSTAMP:20270406T235134Z
+DTSTART:20270406T235134Z
+DTEND:20270407T005134Z
+SUMMARY:New moon
+DESCRIPTION:At 4:51 PM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-cpi-inflation-report-2027-04-13@readout
 DTSTAMP:20270413T123000Z
 DTSTART:20270413T123000Z
@@ -1076,6 +1208,31 @@ DESCRIPTION:2026 federal returns and payments due\; last day for 2026 IRA
  . An extension gives more time to file\, not to pay. Source: IRS deadline
   rules.
 URL:https://www.irs.gov/newsroom/tax-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-04-20@readout
+DTSTAMP:20270420T222730Z
+DTSTART:20270420T222730Z
+DTEND:20270420T232730Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 3:27 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meteors-2027-04-21@readout
+DTSTAMP:20270421T000000Z
+DTSTART;VALUE=DATE:20270421
+DTEND;VALUE=DATE:20270422
+SUMMARY:Lyrids meteor shower peaks
+DESCRIPTION:Night of Apr 21–22 · Moon 100% lit: only the brighter meteo
+ rs Up to about 18 an hour under ideal dark skies\; fewer from town. Best 
+ after midnight\, as the radiant in Lyra climbs. (about this date) Source:
+  Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1163,6 +1320,32 @@ URL:https://www.arrs.org/am27/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:meteors-2027-05-05@readout
+DTSTAMP:20270505T000000Z
+DTSTART;VALUE=DATE:20270505
+DTEND;VALUE=DATE:20270506
+SUMMARY:Eta Aquariids meteor shower peaks
+DESCRIPTION:Night of May 5–6 · Moon 0% lit: dark skies Up to about 50 a
+ n hour under ideal dark skies\; fewer from town. Dust from Halley's Comet
+ . Low from Reno's latitude: a handful an hour in the hour before dawn. (a
+ bout this date) Source: Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-05-06@readout
+DTSTAMP:20270506T105859Z
+DTSTART:20270506T105859Z
+DTEND:20270506T115859Z
+SUMMARY:New moon
+DESCRIPTION:At 3:58 AM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-jobs-report-2027-05-07@readout
 DTSTAMP:20270507T123000Z
 DTSTART:20270507T123000Z
@@ -1194,6 +1377,17 @@ SUMMARY:CPI inflation report
 DESCRIPTION:April 2027 numbers Consumer prices\, from the Bureau of Labor 
  Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-05-20@readout
+DTSTAMP:20270520T105926Z
+DTSTART:20270520T105926Z
+DTEND:20270520T115926Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 3:59 AM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1272,6 +1466,18 @@ SUMMARY:Jobs report
 DESCRIPTION:May 2027 numbers Payrolls and the unemployment rate\, from the
   Bureau of Labor Statistics. Source: BLS.
 URL:https://www.bls.gov/schedule/news_release/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-06-04@readout
+DTSTAMP:20270604T194048Z
+DTSTART:20270604T194048Z
+DTEND:20270604T204048Z
+SUMMARY:New moon
+DESCRIPTION:At 12:40 PM Reno time: the darkest nights of the month for sta
+ rgazing No moonlight on the nights around it: the best time for the Milky
+  Way\, faint stars and meteors away from city lights. Source: Readout (Me
+ eus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1368,6 +1574,17 @@ URL:https://www.nyse.com/markets/hours-calendars
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-full-2027-06-18@readout
+DTSTAMP:20270619T004455Z
+DTSTART:20270619T004455Z
+DTEND:20270619T014455Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 5:44 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bea-gdp-report-2027-06-25@readout
 DTSTAMP:20270625T123000Z
 DTSTART:20270625T123000Z
@@ -1437,6 +1654,18 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-new-2027-07-03@readout
+DTSTAMP:20270704T030236Z
+DTSTART:20270704T030236Z
+DTEND:20270704T040236Z
+SUMMARY:New moon
+DESCRIPTION:At 8:02 PM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:nyse-2027-07-05@readout
 DTSTAMP:20270705T000000Z
 DTSTART;VALUE=DATE:20270705
@@ -1503,6 +1732,17 @@ SUMMARY:Penumbral lunar eclipse
 DESCRIPTION:The Moon dims slightly in Earth's outer shadow\, a subtle one.
   Source: Checked by hand.
 URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-07-18@readout
+DTSTAMP:20270718T154532Z
+DTSTART:20270718T154532Z
+DTEND:20270718T164532Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 8:45 AM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1587,6 +1827,18 @@ URL:https://science.nasa.gov/eclipses/future-eclipses/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-new-2027-08-02@readout
+DTSTAMP:20270802T100540Z
+DTSTART:20270802T100540Z
+DTEND:20270802T110540Z
+SUMMARY:New moon
+DESCRIPTION:At 3:05 AM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:bls-jobs-report-2027-08-06@readout
 DTSTAMP:20270806T123000Z
 DTSTART:20270806T123000Z
@@ -1609,6 +1861,21 @@ URL:https://www.bls.gov/schedule/news_release/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:meteors-2027-08-12@readout
+DTSTAMP:20270812T000000Z
+DTSTART;VALUE=DATE:20270812
+DTEND;VALUE=DATE:20270813
+SUMMARY:Perseids meteor shower peaks
+DESCRIPTION:Night of Aug 12–13 · Moon 84% lit: only the brighter meteor
+ s Up to about 100 an hour under ideal dark skies\; fewer from town. The s
+ ummer favorite: best after midnight\, and good for a few nights either si
+ de. (about this date) Source: Readout (yearly peaks\; the Moon worked out
+ ).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:eclipse-2027-08-17@readout
 DTSTAMP:20270817T000000Z
 DTSTART;VALUE=DATE:20270817
@@ -1617,6 +1884,17 @@ SUMMARY:Penumbral lunar eclipse
 DESCRIPTION:The Moon dims slightly in Earth's outer shadow\, a subtle one.
   Source: Checked by hand.
 URL:https://eclipse.gsfc.nasa.gov/OH/OH2027.html
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-08-17@readout
+DTSTAMP:20270817T072915Z
+DTSTART:20270817T072915Z
+DTEND:20270817T082915Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 12:29 AM Reno time Rises around sunset and is 
+ up all night. The bright nights around it wash out faint stars and meteor
+ s. Source: Readout (Meeus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1651,6 +1929,18 @@ DESCRIPTION:Theme: Spellbound. Expect heavy traffic on I-80 and through Re
  no before and after. Source: Burning Man Project.
 LOCATION:Black Rock City\, Nevada
 URL:https://burningman.org/
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-08-31@readout
+DTSTAMP:20270831T174137Z
+DTSTART:20270831T174137Z
+DTEND:20270831T184137Z
+SUMMARY:New moon
+DESCRIPTION:At 10:41 AM Reno time: the darkest nights of the month for sta
+ rgazing No moonlight on the nights around it: the best time for the Milky
+  Way\, faint stars and meteors away from city lights. Source: Readout (Me
+ eus's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1728,6 +2018,29 @@ DESCRIPTION:FOMC meeting Sep 14–15. Statement at 2:00 pm ET\, press conf
  erence at 2:30. The Federal Reserve's interest-rate decision. Source: Fed
  eral Reserve.
 URL:https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-09-15@readout
+DTSTAMP:20270915T230406Z
+DTSTART:20270915T230406Z
+DTEND:20270916T000406Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 4:04 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-09-29@readout
+DTSTAMP:20270930T023635Z
+DTSTART:20270930T023635Z
+DTEND:20270930T033635Z
+SUMMARY:New moon
+DESCRIPTION:At 7:36 PM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1821,6 +2134,31 @@ URL:https://www.imdb.com/title/tt22408968/
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
+UID:moon-full-2027-10-15@readout
+DTSTAMP:20271015T134731Z
+DTSTART:20271015T134731Z
+DTEND:20271015T144731Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 6:47 AM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meteors-2027-10-20@readout
+DTSTAMP:20271020T000000Z
+DTSTART;VALUE=DATE:20271020
+DTEND;VALUE=DATE:20271021
+SUMMARY:Orionids meteor shower peaks
+DESCRIPTION:Night of Oct 20–21 · Moon 60% lit Up to about 20 an hour un
+ der ideal dark skies\; fewer from town. Dust from Halley's Comet\; best i
+ n the hours before dawn. (about this date) Source: Readout (yearly peaks\
+ ; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:fomc-2027-10-27@readout
 DTSTAMP:20271026T000000Z
 DTSTART;VALUE=DATE:20271026
@@ -1852,6 +2190,18 @@ SUMMARY:PCE inflation report
 DESCRIPTION:September 2027 numbers Personal income and spending\, with the
   PCE price index the Fed watches most closely. Source: BEA.
 URL:https://www.bea.gov/news/schedule
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-10-29@readout
+DTSTAMP:20271029T133659Z
+DTSTART:20271029T133659Z
+DTEND:20271029T143659Z
+SUMMARY:New moon
+DESCRIPTION:At 6:36 AM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1898,6 +2248,31 @@ DESCRIPTION:Radiological Society of North America Annual Meeting Source: Y
  our meetings.
 LOCATION:McCormick Place\, Chicago
 URL:https://www.rsna.org/annual-meeting
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-full-2027-11-13@readout
+DTSTAMP:20271114T032620Z
+DTSTART:20271114T032620Z
+DTEND:20271114T042620Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 7:26 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:meteors-2027-11-16@readout
+DTSTAMP:20271116T000000Z
+DTSTART;VALUE=DATE:20271116
+DTEND;VALUE=DATE:20271117
+SUMMARY:Leonids meteor shower peaks
+DESCRIPTION:Night of Nov 16–17 · Moon 83% lit: only the brighter meteor
+ s Up to about 15 an hour under ideal dark skies\; fewer from town. Best a
+ fter midnight. Famous for rare storms\; most years are modest. (about thi
+ s date) Source: Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
@@ -1974,6 +2349,18 @@ SUMMARY:Stock market closes early
 DESCRIPTION:1:00 pm ET\, the day after Thanksgiving Source: NYSE holiday r
  ules.
 URL:https://www.nyse.com/markets/hours-calendars
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:moon-new-2027-11-27@readout
+DTSTAMP:20271128T032449Z
+DTSTART:20271128T032449Z
+DTEND:20271128T042449Z
+SUMMARY:New moon
+DESCRIPTION:At 7:24 PM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT

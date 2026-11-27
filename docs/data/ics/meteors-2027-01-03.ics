@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Quadrantids meteor shower peaks
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:meteors-2027-01-03@readout
+DTSTAMP:20270103T000000Z
+DTSTART;VALUE=DATE:20270103
+DTEND;VALUE=DATE:20270104
+SUMMARY:Quadrantids meteor shower peaks
+DESCRIPTION:Night of Jan 3–4 · Moon 11% lit: dark skies Up to about 110
+  an hour under ideal dark skies\; fewer from town. The peak lasts only a 
+ few hours\; best in the dark hours before dawn. (about this date) Source:
+  Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Perseids meteor shower peaks
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:meteors-2027-08-12@readout
+DTSTAMP:20270812T000000Z
+DTSTART;VALUE=DATE:20270812
+DTEND;VALUE=DATE:20270813
+SUMMARY:Perseids meteor shower peaks
+DESCRIPTION:Night of Aug 12–13 · Moon 84% lit: only the brighter meteor
+ s Up to about 100 an hour under ideal dark skies\; fewer from town. The s
+ ummer favorite: best after midnight\, and good for a few nights either si
+ de. (about this date) Source: Readout (yearly peaks\; the Moon worked out
+ ).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

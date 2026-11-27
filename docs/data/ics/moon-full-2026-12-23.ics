@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Full moon
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:moon-full-2026-12-23@readout
+DTSTAMP:20261224T012838Z
+DTSTART:20261224T012838Z
+DTEND:20261224T022838Z
+SUMMARY:Full moon
+DESCRIPTION:Exactly full at 5:28 PM Reno time Rises around sunset and is u
+ p all night. The bright nights around it wash out faint stars and meteors
+ . Source: Readout (Meeus's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Leonids meteor shower peaks
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:meteors-2027-11-16@readout
+DTSTAMP:20271116T000000Z
+DTSTART;VALUE=DATE:20271116
+DTEND;VALUE=DATE:20271117
+SUMMARY:Leonids meteor shower peaks
+DESCRIPTION:Night of Nov 16–17 · Moon 83% lit: only the brighter meteor
+ s Up to about 15 an hour under ideal dark skies\; fewer from town. Best a
+ fter midnight. Famous for rare storms\; most years are modest. (about thi
+ s date) Source: Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

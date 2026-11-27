@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Eta Aquariids meteor shower peaks
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:meteors-2027-05-05@readout
+DTSTAMP:20270505T000000Z
+DTSTART;VALUE=DATE:20270505
+DTEND;VALUE=DATE:20270506
+SUMMARY:Eta Aquariids meteor shower peaks
+DESCRIPTION:Night of May 5–6 · Moon 0% lit: dark skies Up to about 50 a
+ n hour under ideal dark skies\; fewer from town. Dust from Halley's Comet
+ . Low from Reno's latitude: a handful an hour in the hour before dawn. (a
+ bout this date) Source: Readout (yearly peaks\; the Moon worked out).
+URL:https://www.imo.net/resources/calendar/
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

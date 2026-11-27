@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:New moon
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:moon-new-2027-02-06@readout
+DTSTAMP:20270206T155634Z
+DTSTART:20270206T155634Z
+DTEND:20270206T165634Z
+SUMMARY:New moon
+DESCRIPTION:At 7:56 AM Reno time: the darkest nights of the month for star
+ gazing No moonlight on the nights around it: the best time for the Milky 
+ Way\, faint stars and meteors away from city lights. Source: Readout (Mee
+ us's lunar phase method).
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
