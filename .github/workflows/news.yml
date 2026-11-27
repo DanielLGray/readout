@@ -82,7 +82,7 @@ jobs:
           path: ${{ runner.temp }}/in
       - name: Check and apply the results
         env:
-          ALLOW: '^(?:docs/data/news\.json|cache/news_archive\.json)$'
+          ALLOW: '^(?:docs/data/news\.json|cache/news_archive\.json|cache/page_dates\.json)$'
           IN: ${{ runner.temp }}/in
         run: |
           python3 -I - <<'PY'

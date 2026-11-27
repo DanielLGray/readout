@@ -572,3 +572,47 @@ def test_link_only_and_no_pictures_when_fetched():
     from pipeline.common import load_base
     src = {s["name"]: s for s in load_base("news.yaml")["sources"]}
     assert src["CalMatters"]["no_pictures"] and not src["CalMatters"].get("link_only")
+
+
+NEWSROOM = """<html><body><nav><a href="/about/newsroom/featured">Featured News</a><a href="/about/newsroom?pg=2">Next</a></nav>
+<ul><li><a href="/about/newsroom/renown-health-becomes-first-in-northern-nevada-to-offer-car-t-cell-therapy"><img alt="">
+<span>Renown Health Becomes First in Northern Nevada to Offer CAR T-Cell Therapy</span></a></li>
+<li><a href="https://www.renown.org/about/newsroom/renown-announces-new-cancer-tower?utm_source=x">Read More About Renown Announces New Cancer Tower &amp; Expansion</a></li>
+<li><a href="https://elsewhere.example/about/newsroom/not-ours-at-all-today">Someone Else's Story About Something Here</a></li>
+<li><a href="/blog/measles">Measles Is Spreading Again: What to Know?</a></li></ul></body></html>"""
+
+
+def test_listing_pages_give_headlines_links_and_their_own_dates():
+    items = news.parse_listing(NEWSROOM, "https://www.renown.org/about/newsroom", "Renown Health", r"^/about/newsroom/[a-z0-9-]+/?$", NOW)
+    assert items[-1]["link"].startswith("https://elsewhere.example/")      # fetch_source drops other sites' links
+    items = items[:-1]
+    assert [i["title"] for i in items] == ["Renown Health Becomes First in Northern Nevada to Offer CAR T-Cell Therapy",
+                                           "Renown Announces New Cancer Tower & Expansion"]
+    assert items[1]["link"] == "https://www.renown.org/about/newsroom/renown-announces-new-cancer-tower"
+    page = lambda body: f"<html><head>{body}</head><body><h1>T</h1><p>By Renown</p></body></html>"
+    assert news.page_date(page('<meta property="article:published_time" content="2026-11-21T18:01:05Z">'), NOW).isoformat().startswith("2026-11-21T18:01")
+    assert news.page_date(page('<script type="application/ld+json">{"datePublished": "2026-10-02T09:00:00-07:00"}</script>'), NOW).day == 2
+    assert news.page_date("<h1>Title</h1><p>Published: <b>November 20, 2026</b></p>", NOW).date().isoformat() == "2026-11-20"
+    assert news.page_date("<h1>Title</h1><p>No date here, and 2031 isn't one</p>", NOW) is None
+    assert news.page_date('<meta name="date" content="2031-01-01"><h1>x</h1>', NOW) is None        # the future: not a publish date
+
+
+def test_listing_source_reads_each_story_page_once():
+    pages = {"https://www.renown.org/about/newsroom": NEWSROOM,
+             "https://www.renown.org/about/newsroom/renown-health-becomes-first-in-northern-nevada-to-offer-car-t-cell-therapy":
+                 '<meta property="article:published_time" content="2026-11-20T18:00:00Z"><h1>x</h1>',
+             "https://www.renown.org/about/newsroom/renown-announces-new-cancer-tower": "<h1>x</h1><p>November 21, 2026</p>"}
+    asked = []
+    http = Http(transport=lambda m, u, p: (asked.append(u), (200, pages[u]) if u in pages else (404, ""))[1], sleep=lambda s: None, retries=1)
+    src = {"name": "Renown Health", "kind": "local", "link_only": True, "style": "listing", "links": r"^/about/newsroom/[a-z0-9-]+/?$",
+           "home": "https://www.renown.org", "urls": ["https://www.renown.org/about/newsroom"]}
+    dated = {}
+    got, st = build_news.fetch_source(http, src, NOW, dated)
+    assert st["ok"] and sorted(i["date"][:10] for i in got) == ["2026-11-20", "2026-11-21"]
+    assert all(i["summary"] == "" and "img" not in i for i in got)
+    asked.clear()
+    got2, _ = build_news.fetch_source(http, src, NOW, dated)
+    assert asked == ["https://www.renown.org/about/newsroom"] and [i["date"] for i in got2] == [i["date"] for i in got]
+    one = {}                                     # a page budget of one: the other story waits for the next run
+    got3, _ = build_news.fetch_source(http, {**src, "pages_per_run": 1}, NOW, one)
+    assert len(got3) == 1 and len(one) == 1

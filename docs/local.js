@@ -62,7 +62,7 @@ function localSection() {
   const reno = week.filter((i) => i.place === "reno").length, nv = week.filter((i) => i.place === "nevada").length;
   const redraw = () => rerender();
   return el("section", { class: "sect", id: "tune-local" }, el("h2", {}, "Reno & Nevada"),
-    el("p", { class: "sub" }, "Local news from outlets whose terms let Readout show it: the Nevada Current, the Sierra Nevada Ally, High Country News’ and CalMatters’ stories about Nevada, Tahoe and the Sierra, and Nevada Public Radio’s rundowns (headlines only, as its policy asks). They differ in focus and in how much opinion they run, so each topic and each outlet can be hidden, moved down or moved up."),
+    el("p", { class: "sub" }, "Local news from outlets whose terms let Readout show it: the Nevada Current, the Sierra Nevada Ally, High Country News’ and CalMatters’ stories about Nevada, Tahoe and the Sierra, Nevada Public Radio’s rundowns and Renown Health’s press releases (those two as headlines only). They differ in focus and in how much opinion they run, so each topic and each outlet can be hidden, moved down or moved up."),
     el("p", { class: "fine" }, `Last 7 days: ${plural(week.length, "story", "stories")}; ${reno} about Reno and northern Nevada, ${nv} elsewhere in Nevada, ${week.length - reno - nv} naming neither.`),
     segPick("Which stories", LOCAL_SCOPES, T.local.scope, (v) => { setTune({ local: { ...T.local, scope: v } }); rerender(); },
       "Reno area: stories naming Reno, Washoe, Tahoe, Carson City, the Truckee Meadows and nearby. Nevada: also Las Vegas and the rest of the state. Everything: also the outlets’ stories that name neither."),

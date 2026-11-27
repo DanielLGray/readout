@@ -660,6 +660,9 @@ sources:
   #     Truckee, the Sierra and stories naming Nevada or Reno
   #   Nevada Public Radio (KNPR, Las Vegas): "happy for users to link to our online content with proper
   #     attribution", but not to embed it: headlines and links only (link_only), no summary or audio
+  #   Renown Health: its site says reproducing or redistributing its material needs written consent and
+  #     says nothing about links; headlines and links only (link_only), as chosen Nov 27, 2026. Asking
+  #     news@renown.org for consent would allow summaries too
   # Left out: Reno News & Review (no reuse without written permission), KOLO 8 (Gray's terms bar linking
   # to its content from other sites), The Nevada Independent (republishing only through partner
   # agreements), KUNR and This Is Reno (no terms for their content or feeds; NPR's feed terms don't cover
@@ -701,6 +704,17 @@ sources:
     urls:
       - https://knpr.org/podcast/the-daily-rundown/rss.xml
       - https://knpr.org/podcast/state-of-nevada/rss.xml
+
+  - name: Renown Health
+    kind: local
+    link_only: true            # headlines and links only (see the Reno & Nevada notes above Nevada Current)
+    style: listing             # no feed for its press releases: the newsroom page's links, each dated from its own page
+    links: "^/about/newsroom/[a-z0-9-]+/?$"
+    pages_per_run: 12
+    max_per_day: 3
+    home: https://www.renown.org
+    urls:
+      - https://www.renown.org/about/newsroom
 
   - name: High Country News
     kind: local

@@ -72,9 +72,12 @@ def drop_shared_images(items: list[dict]) -> None:
                 del i["img"]
 
 
-def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dict]":
+def fetch_source(http: Http, src: dict, now: datetime, dated: Optional[dict] = None) -> "tuple[list[dict], dict]":
     """Try the outlet's addresses in order; the first that returns stories wins
-    (or, with merge: true, every address that works is used)."""
+    (or, with merge: true, every address that works is used).
+    dated: link → date for style: listing (a newsroom page without a feed), kept between runs so each
+    story's own page is read once."""
+    dated = {} if dated is None else dated
     status = {"name": src["name"], "home": src.get("home", ""), "ok": False, "url": None, "count": 0,
               "newest": None, "tried": []}
     need = re.compile(src["require"], re.I) if src.get("require") else None
@@ -84,7 +87,10 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
     for url in src.get("urls", []):
         try:
             text = http.request("GET", url, {}, expect_json=False)
-            items = news.parse_feed(text, src["name"], now, verbatim=bool(src.get("verbatim")), style=str(src.get("style") or ""))
+            if src.get("style") == "listing":
+                items = news.parse_listing(text, url, src["name"], str(src.get("links") or "."), now)
+            else:
+                items = news.parse_feed(text, src["name"], now, verbatim=bool(src.get("verbatim")), style=str(src.get("style") or ""))
         except (HttpError, Exception) as exc:      # bad address, block, or unreadable feed: try the next
             status["tried"].append(f"{url} → {type(exc).__name__}: {str(exc)[:80]}")
             continue
@@ -128,6 +134,8 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
                     i["summary"] = ""
         if need:
             items = [i for i in items if need.search(i["title"] + " " + i.get("summary", ""))]
+        if src.get("style") == "listing":
+            items = date_listing(http, items, dated, int(src.get("pages_per_run", 12)), now)
         if not items:
             status["tried"].append(f"{url} → no {'matching ' if need else ''}stories")
             continue
@@ -159,6 +167,25 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
     return list(found.values()), status
 
 
+def date_listing(http: Http, items: list[dict], dated: dict, budget: int, now: datetime) -> list[dict]:
+    """Each story from a newsroom page gets the date its own page gives (read once, then kept in
+    `dated`); one that can't be read waits for the next run. A page without a date: first seen."""
+    out = []
+    for i in items:
+        if i["link"] not in dated:
+            if budget <= 0:
+                continue
+            budget -= 1
+            try:
+                when = news.page_date(http.request("GET", i["link"], {}, expect_json=False), now)
+            except Exception:                  # its page didn't answer: try again next run
+                continue
+            dated[i["link"]] = news._utc(when or now)
+        i["date"] = dated[i["link"]]
+        out.append(i)
+    return out
+
+
 def headline_only(item: dict) -> dict:
     """For an outlet that allows links with credit but not its content shown here (link_only: true in
     config/news.yaml): the headline, the byline and the link, nothing else (no summary, picture or audio)."""
@@ -182,8 +209,10 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
 
     statuses = []
     junk = re.compile(cfg["exclude"], re.I) if cfg.get("exclude") else None
+    dpath = CACHE / "page_dates.json"
+    dated = read_json(dpath, {}) or {}
     for src in cfg.get("sources", []):
-        got, status = fetch_source(http, src, now)
+        got, status = fetch_source(http, src, now, dated)
         if junk and src.get("kind", "industry") not in DEAL_KINDS:    # shopping / promotional posts
             got = [i for i in got if not junk.search(i["title"])]
         drop_shared_images(got)
@@ -200,8 +229,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             items[it["id"]] = it
 
     # an outlet's skip/require rules also clear out stories stored before the rule existed
+    if dated:                                  # newsroom pages' dates: the newest 600 links
+        write_json(dpath, dict(sorted(dated.items(), key=lambda kv: kv[1], reverse=True)[:600]), compact=False)
     rules = {src["name"]: (re.compile(src["skip"], re.I) if src.get("skip") else None,
-                           re.compile(src["require"], re.I) if src.get("require") else None)
+                           # headline-only outlets keep no summary, so their require was checked on arrival
+                           re.compile(src["require"], re.I) if src.get("require") and not src.get("link_only") else None)
              for src in cfg.get("sources", [])}
     sites = {src["name"]: news.link_sites(src) for src in cfg.get("sources", [])}
     def allowed(it):

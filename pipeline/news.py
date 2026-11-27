@@ -8,6 +8,7 @@ import math
 import re
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
+from html.parser import HTMLParser
 from typing import Optional
 from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 from xml.etree import ElementTree as ET
@@ -366,6 +367,80 @@ def _parse_sitemap(text: str, source: str, now: datetime) -> list[dict]:
             out.append({"id": item_id(link, title, source), "title": title, "link": link, "source": source,
                         "date": _utc(min(when, now)), "summary": ""})
     return out
+
+
+# ── a newsroom page with no feed (style: listing) ───────────────────────────
+class _Links(HTMLParser):
+    """Every <a href> on a page, with the text inside it."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out: list = []
+        self._open: list = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self._open.append([dict(attrs).get("href") or "", []])
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._open:
+            href, parts = self._open.pop()
+            self.out.append((href, " ".join(parts)))
+
+    def handle_data(self, data):
+        if self._open:
+            self._open[-1][1].append(data)
+
+
+def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime) -> list[dict]:
+    """A newsroom page without a feed: each link on the page whose path matches `pattern` is a
+    story, its link text the headline. Dated later from the story's own page (page_date)."""
+    p = _Links()
+    p.feed(text[:3_000_000])
+    pat = re.compile(pattern)
+    best: dict[str, str] = {}
+    for href, label in p.out:
+        link = clean_link(urljoin(base, (href or "").strip()))
+        u = urlparse(link)
+        if u.scheme != "https" or not pat.search(u.path):
+            continue
+        title = clean_text(re.sub(r"^\s*read more(?:\s+about)?\s*", "", label, flags=re.I))
+        if len(title.split()) < 5 or len(title) > 300:       # section links ("Featured News"), not stories
+            continue
+        if len(title) > len(best.get(link, "")):
+            best[link] = title
+    return [{"id": item_id(link, title, source), "title": title, "link": link, "source": source,
+             "date": _utc(now), "summary": ""} for link, title in list(best.items())[:40]]
+
+
+_MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December"
+_META_DATE = re.compile(r"<meta\b[^>]*?(?:property|name|itemprop)\s*=\s*[\"'](?:article:published_time|datePublished|publish(?:ed)?[-_]?date|date)[\"'][^>]*>", re.I)
+_LD_DATE = re.compile(r"[\"']datePublished[\"']\s*:\s*[\"']([^\"']{8,40})[\"']")
+_TIME_TAG = re.compile(r"<time\b[^>]*?datetime\s*=\s*[\"']([^\"']{8,40})[\"']", re.I)
+_TEXT_DATE = re.compile(rf"\b({_MONTHS})\s+(\d{{1,2}}),\s+(\d{{4}})\b")
+
+
+def page_date(text: str, now: datetime) -> Optional[datetime]:
+    """When a story page says it was published: its metadata, else the first written date after the
+    headline ("November 25, 2026"). None when it doesn't say, or says something implausible."""
+    found = []
+    m = _META_DATE.search(text)
+    if m:
+        c = re.search(r"content\s*=\s*[\"']([^\"']+)[\"']", m.group(0), re.I)
+        found.append(parse_date(c.group(1)) if c else None)
+    for rx in (_LD_DATE, _TIME_TAG):
+        m = rx.search(text)
+        found.append(parse_date(m.group(1)) if m else None)
+    h1 = text.lower().find("<h1")
+    m = _TEXT_DATE.search(re.sub(r"<[^>]+>", " ", text[max(0, h1):max(0, h1) + 20000] if h1 >= 0 else text[:60000]))
+    if m:
+        try:
+            found.append(datetime.strptime(f"{m[1]} {m[2]} {m[3]}", "%B %d %Y").replace(hour=17, tzinfo=timezone.utc))
+        except ValueError:
+            pass
+    for d in found:
+        if d and now - timedelta(days=3650) < d < now + timedelta(days=2):
+            return min(d, now)
+    return None
 
 
 # ── categories ───────────────────────────────────────────────────────────────
