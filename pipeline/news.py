@@ -393,7 +393,8 @@ class _Links(HTMLParser):
 
 def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime) -> list[dict]:
     """A newsroom page without a feed: each link on the page whose path matches `pattern` is a
-    story, its link text the headline. Dated later from the story's own page (page_date)."""
+    story, its link text the headline. Dated later from the story's own page (page_date), which also
+    gives the headline when the link holds only a picture or a word or two (page_title)."""
     p = _Links()
     p.feed(text[:3_000_000])
     pat = re.compile(pattern)
@@ -403,13 +404,25 @@ def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime
         u = urlparse(link)
         if u.scheme != "https" or not pat.search(u.path):
             continue
-        title = clean_text(re.sub(r"^\s*read more(?:\s+about)?\s*", "", label, flags=re.I))
-        if len(title.split()) < 5 or len(title) > 300:       # section links ("Featured News"), not stories
-            continue
-        if len(title) > len(best.get(link, "")):
+        title = clean_text(re.sub(r"^\s*read more(?:\s+about)?\s*", "", label, flags=re.I))[:300]
+        if link not in best or len(title) > len(best[link]):
             best[link] = title
     return [{"id": item_id(link, title, source), "title": title, "link": link, "source": source,
              "date": _utc(now), "summary": ""} for link, title in list(best.items())[:40]]
+
+
+_H1 = re.compile(r"<h1\b[^>]*>(.*?)</h1>", re.S | re.I)
+_OG_TITLE = re.compile(r"<meta\b[^>]*?property\s*=\s*[\"']og:title[\"'][^>]*?content\s*=\s*[\"']([^\"']+)[\"']", re.I)
+
+
+def page_title(text: str) -> str:
+    """A story page's own headline: its first <h1>, else its og:title without the site's name."""
+    m = _H1.search(text)
+    t = clean_text(m.group(1)) if m else ""
+    if not t:
+        m = _OG_TITLE.search(text)
+        t = re.sub(r"\s+[|–—-]\s+[^|–—-]{2,40}$", "", clean_text(m.group(1))) if m else ""
+    return t[:300]
 
 
 _MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December"

@@ -169,19 +169,28 @@ def fetch_source(http: Http, src: dict, now: datetime, dated: Optional[dict] = N
 
 def date_listing(http: Http, items: list[dict], dated: dict, budget: int, now: datetime) -> list[dict]:
     """Each story from a newsroom page gets the date its own page gives (read once, then kept in
-    `dated`); one that can't be read waits for the next run. A page without a date: first seen."""
+    `dated` with the page's headline); one that can't be read waits for the next run. A page without
+    a date: first seen. A link that held only a picture or a few words takes the page's headline;
+    under five words it's a section of the site, not a story."""
     out = []
     for i in items:
-        if i["link"] not in dated:
+        seen = dated.get(i["link"])
+        if isinstance(seen, str):              # kept before headlines were
+            seen = {"d": seen, "t": ""}
+        if not isinstance(seen, dict):
             if budget <= 0:
                 continue
             budget -= 1
             try:
-                when = news.page_date(http.request("GET", i["link"], {}, expect_json=False), now)
+                page = http.request("GET", i["link"], {}, expect_json=False)
             except Exception:                  # its page didn't answer: try again next run
                 continue
-            dated[i["link"]] = news._utc(when or now)
-        i["date"] = dated[i["link"]]
+            seen = {"d": news._utc(news.page_date(page, now) or now), "t": news.page_title(page)}
+        dated[i["link"]] = seen
+        title = i["title"] if len(i["title"].split()) >= 5 else seen.get("t") or ""
+        if len(title.split()) < 5:
+            continue
+        i["title"], i["date"] = title, seen["d"]
         out.append(i)
     return out
 
@@ -230,7 +239,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
 
     # an outlet's skip/require rules also clear out stories stored before the rule existed
     if dated:                                  # newsroom pages' dates: the newest 600 links
-        write_json(dpath, dict(sorted(dated.items(), key=lambda kv: kv[1], reverse=True)[:600]), compact=False)
+        when = lambda v: v.get("d", "") if isinstance(v, dict) else str(v)
+        write_json(dpath, dict(sorted(dated.items(), key=lambda kv: when(kv[1]), reverse=True)[:600]), compact=False)
     rules = {src["name"]: (re.compile(src["skip"], re.I) if src.get("skip") else None,
                            # headline-only outlets keep no summary, so their require was checked on arrival
                            re.compile(src["require"], re.I) if src.get("require") and not src.get("link_only") else None)
