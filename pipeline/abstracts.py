@@ -2,6 +2,7 @@
 study design, sample size and organ-system tags. No AI, no paraphrase."""
 from __future__ import annotations
 
+import html
 import re
 from typing import Optional
 
@@ -41,6 +42,7 @@ def _registration(sent: str) -> bool:
 
 
 def clean(text: str) -> str:
+    text = html.unescape(text)                  # records stored before PubMed's double escaping was undone
     text = _COPYRIGHT.sub("", text).strip()
     # bullet points ("…54 Gy.•MRI-based…"): make each one a sentence
     text = re.sub(r"(?<=[^.!?:;\s])\s*•\s*", ". ", text)

@@ -388,11 +388,9 @@ a { color: inherit; }
 .news-card .kind-label[data-kind="science"]::before { background: var(--h4); }
 .news-card .kind-label[data-kind="sff"]::before { background: var(--h5); border-radius: 50%; }
 .news-card .kind-label[data-kind="societies"]::before { background: var(--k-soc); }
-.news-card .kind-label[data-kind="light"]::before { background: var(--k-light); }
 .news-card .kind-label[data-kind="general"]::before { background: var(--k-gen); }
 .news-card .kind-label[data-kind="business"]::before { background: var(--k-biz); }
 .news-card .kind-label[data-kind="local"]::before { background: var(--k-local); }
-.lang.light { border-color: var(--k-light); color: var(--k-light); }
 .kind-label .pod { margin-left: 10px; color: var(--ink); font-weight: 700; }
 .player { display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 2px; border-top: 1px solid var(--line); position: relative;
   background: var(--panel); }

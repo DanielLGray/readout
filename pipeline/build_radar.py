@@ -144,7 +144,8 @@ def build(http: Http, cfg: dict, news_data: dict, news_archive: dict, state: dic
             if meta and not meta.get("heated") else None,
             "momentum": mom, "research": trend, "research_at": (rs or {}).get("at"),
             "papers": (rs or {}).get("papers") or [],
-            "preprints": [{k: p[k] for k in ("title", "date", "link", "authors") if p.get(k)} for p in pre.get(t["id"], [])[:6]],
+            "preprints": [{k: (news.detex(p[k]) if k == "title" else p[k]) for k in ("title", "date", "link", "authors") if p.get(k)}
+                          for p in pre.get(t["id"], [])[:6]],      # titles kept before LaTeX was turned to text, too
             "developments": R.developments(mine, now, days, credible, group_of, releases=releases),
         })
 

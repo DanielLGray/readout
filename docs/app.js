@@ -148,7 +148,7 @@ const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medi
   movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
 // Today's parts, in their usual order (Tune → Reading → Today → Advanced can put them in yours)
 const BRIEF_PARTS = { near: "Quakes & fires", horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
-  classic: "Classic of the day", wide: "Outside your areas", light: "Something lighter", foundations: "Next Foundations paper" };
+  classic: "Classic of the day", wide: "Outside your areas", foundations: "Next Foundations paper" };
 // alerts: which switch in Tune → Rules turns each kind off
 const ALERT_GROUPS = {
   fda: ["FDA", "Approvals and safety warnings for radiopharmaceuticals and imaging agents (contrast, PET and SPECT tracers, radioligand therapy), and new heart-valve approvals and indications."],
@@ -161,7 +161,7 @@ const ALERT_GROUPS = {
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
-  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, local: 1, business: 1, sff: 1 },   // turns per round in Everything
+  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, general: 1, local: 1, business: 1, sff: 1 },   // turns per round in Everything
   areas: { body: 3, nm: 2, cardiac: 2, general: 1 },   // interest areas: 0 off, 1 less, 2 normal, 3 more
   follow: [],           // words and phrases you follow (the Following chip)
   hiddenSystems: [],    // organ-system chips you don't want in the chip row
@@ -198,7 +198,7 @@ const TUNE_DEFAULTS = {
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true, watch: true, week: 6, hzDays: 7, watchRows: 4, local: 3, order: null },
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, horizon: true, wide: true, radar: true, watch: true, week: 6, hzDays: 7, watchRows: 4, local: 3, order: null },
   local: { scope: "nevada" },   // Reno & Nevada: "reno" (Reno and northern Nevada), "nevada" (the state) or "all"   // what Today holds (week: the day of the week brief, 0 Sunday…6 Saturday, -1 off)
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
@@ -219,7 +219,7 @@ function loadTune() {
   const num = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
   const t = obj(store.get("tune", {}));
   const mix = {};
-  for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.mix, ...obj(t.mix) })) mix[k] = Math.max(0, Math.min(6, Math.round(num(v, 1))));
+  for (const [k, v] of Object.entries({ ...TUNE_DEFAULTS.mix, ...obj(t.mix) })) if (k in TUNE_DEFAULTS.mix) mix[k] = Math.max(0, Math.min(6, Math.round(num(v, 1))));
   const ints = (v, lo, hi) => Object.fromEntries(Object.entries(obj(v)).filter(([k, x]) => typeof k === "string" && k.length <= 120 && Number.isInteger(x) && x >= lo && x <= hi).slice(0, 300));
   const within = (v, lo, hi, d) => (Number.isInteger(v) && v >= lo && v <= hi ? v : d);
   const areas = {};
@@ -270,8 +270,9 @@ function loadTune() {
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
     brief: { papers: within(b.papers, 1, 12, 5), stories: within(b.stories, 0, 8, 2), watchRows: within(b.watchRows, 1, 12, 4), local: within(b.local, 0, 8, 3),
-      order: Array.isArray(b.order) && b.order.length && b.order.every((x) => BRIEF_PARTS[x]) && new Set(b.order).size === b.order.length ? b.order : null,
-      classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false, radar: b.radar !== false, watch: b.watch !== false,
+      // your order of Today's parts; a part that no longer exists (Something lighter) just leaves it
+      order: (() => { const o = Array.isArray(b.order) ? [...new Set(b.order.filter((x) => typeof x === "string" && BRIEF_PARTS[x]))] : []; return o.length ? o : null; })(),
+      classic: b.classic !== false, foundations: b.foundations !== false, horizon: b.horizon !== false, radar: b.radar !== false, watch: b.watch !== false,
       week: [-1, 0, 1, 5, 6].includes(b.week) ? b.week : 6,
       wide: b.wide !== false, hzDays: within(b.hzDays, 1, 30, 7) },
     local: { scope: ["reno", "nevada", "all"].includes(obj(t.local).scope) ? t.local.scope : "nevada" },
@@ -409,22 +410,76 @@ function topicName(id) {
   return S.feed?.topics?.[id]?.name || S.explore?.topics?.find((t) => t.id === id)?.name || id;
 }
 
-const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "light", "general", "local", "business", "sff"];   // ties go in this order
+const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "general", "local", "business", "sff"];   // ties go in this order
 
 // Everything takes turns: a kind with weight w gets w turns per round, spread evenly.
-// Card j of a kind sits at (j + phase) / w; staggered phases keep kinds from bunching up,
-// so the default weights give paper, industry, science, paper, health, sci-fi, …
-function interleave(queues, weights) {
+// Card j of a kind sits in round r = ⌊j / w⌋ at r + (j mod w + phase) / w, so a kind's turns in a
+// round stay apart. With a seed, the kinds' places change from round to round (the same all day,
+// new tomorrow), so the feed doesn't repeat one pattern; without one, the order is fixed.
+function interleave(queues, weights, seed = null) {
   const keys = MIX_ORDER.concat(Object.keys(queues).filter((k) => !MIX_ORDER.includes(k)))
     .filter((k) => queues[k]?.length && (weights[k] ?? 1) > 0);
+  const n = keys.length, perms = new Map();
+  const phase = (i, r) => {
+    if (seed == null) return (i + 0.5) / n;
+    if (!perms.has(r)) {
+      const o = seededOrder(n, `${seed}|${r}`);
+      if (r === 0) { const z = o.indexOf(0); [o[0], o[z]] = [o[z], o[0]]; }    // the first round opens with the first kind (papers)
+      perms.set(r, o);
+    }
+    return (perms.get(r)[i] + 0.5) / n;
+  };
   const slots = [];
   keys.forEach((k, i) => {
-    const w = weights[k] ?? 1, phase = (i + 0.5) / keys.length;
-    queues[k].forEach((it, j) => slots.push([(j + phase) / w, i, it]));
+    const w = Math.max(1, Math.round(weights[k] ?? 1));
+    queues[k].forEach((it, j) => { const r = Math.floor(j / w); slots.push([r + ((j % w) + phase(i, r)) / w, i, it]); });
   });
   slots.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   return slots.map((x) => x[2]);
 }
+// 0…n−1 in an order fixed by the seed
+function seededOrder(n, seed) {
+  let h = 2166136261;
+  for (const c of String(seed)) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  const a = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+    h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
+    const j = ((h ^ (h >>> 16)) >>> 0) % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+// variety without losing the order much: take the first of the next few that doesn't clash with
+// what came just before (the same outlet, journal or organ system)
+function spreadOut(list, clash, look = 6) {
+  const pool = list.slice(), out = [];
+  while (pool.length) {
+    let k = 0;
+    for (let i = 0; i < Math.min(look, pool.length); i++) if (!clash(pool[i], out)) { k = i; break; }
+    out.push(pool.splice(k, 1)[0]);
+  }
+  return out;
+}
+const paperClash = (p, out) => {
+  const last = out.slice(-2);
+  return last.some((o) => o.journal && o.journal === p.journal) || (!!out.length && (out[out.length - 1].systems || [])[0] === (p.systems || [])[0] && !!(p.systems || [])[0]);
+};
+const outletClash = (memory) => (n, out) => out.slice(-memory).some((o) => o.source === n.source);
+// two neighbors alike (two papers, two of one news kind, one outlet twice): pull a different card
+// from just ahead between them
+function unclump(list, alike, look = 5) {
+  const out = list.slice();
+  for (let i = 1; i < out.length; i++) {
+    if (!alike(out[i - 1], out[i])) continue;
+    for (let j = i + 1; j < Math.min(out.length, i + 1 + look); j++) {
+      if (!alike(out[i - 1], out[j]) && !alike(out[j], out[i])) { out.splice(i, 0, out.splice(j, 1)[0]); break; }
+    }
+  }
+  return out;
+}
+const feedAlike = (a, b) => (a.type === "paper" && b.type === "paper")
+  || (a.type === "news" && b.type === "news" && (a.kind === b.kind || a.source === b.source));
 
 // ── interest areas (Tune → Interests) ──────────────────────────────────────
 const AREA_DEFAULTS = { body: { label: "Body imaging", short: "Body" }, nm: { label: "Nuclear medicine", short: "NM" },
@@ -676,7 +731,8 @@ function buildList(f = {}, report = null) {
   // take turns between areas by the weights you set (Tune → Interests)
   const byArea = {};
   for (const p of papers) { const a = homeArea(p, onlyArea); (byArea[a] = byArea[a] || []).push(p); }
-  papers = Object.keys(byArea).length > 1 ? interleave(byArea, T.areas) : papers;
+  for (const a of Object.keys(byArea)) byArea[a] = spreadOut(byArea[a], paperClash);    // journals and organ systems take turns
+  papers = Object.keys(byArea).length > 1 ? interleave(byArea, T.areas) : papers.length ? byArea[Object.keys(byArea)[0]] : papers;
   if (T.guess === "all") {                  // guess the result here too: about one paper in six, spaced out
     let gap = 3;
     for (const p of papers) if (--gap <= 0 && guessable(p)) { p._guess = true; gap = 6; }
@@ -695,7 +751,7 @@ function buildList(f = {}, report = null) {
   const tops = T.topCard && system === "all" && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
   const sameTitle = new Set();               // one press release (or wire story) under two names: one card
   const once = (i) => { const k = i.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); if (sameTitle.has(k)) { drop("dupes"); return false; } sameTitle.add(k); return true; };
-  if (kind !== "all") return tops.concat(news.filter((i) => (i.kind === kind || (i.also || []).includes(kind)) && once(i)));
+  if (kind !== "all") return tops.concat(spreadOut(news.filter((i) => (i.kind === kind || (i.also || []).includes(kind)) && once(i)), outletClash(1)));
   // Everything: take turns by weight, each stream newest first (or ranked, for papers), so the
   // newest papers sit at the top even though news arrives hours sooner than PubMed records
   const perSource = new Map();
@@ -712,10 +768,13 @@ function buildList(f = {}, report = null) {
     }
     (queues[n.kind] = queues[n.kind] || []).push(n);
   }
-  for (const [k, q] of Object.entries(queues)) if (q.length && (T.mix[k] ?? 1) <= 0) drop("off", q.length);
+  for (const [k, q] of Object.entries(queues)) {
+    if (q.length && (T.mix[k] ?? 1) <= 0) drop("off", q.length);
+    else if (k !== "paper") queues[k] = spreadOut(q, outletClash(2));       // a kind's outlets take turns
+  }
   // the same headline from two outlets (a society story an industry site also ran): show it once
   const said = new Set();
-  const mixed = interleave(queues, T.mix).filter((i) => {
+  const mixed = unclump(interleave(queues, T.mix, localDay()), feedAlike).filter((i) => {
     if (i.type !== "news") return true;
     const key = i.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     if (said.has(key)) { drop("dupes"); return false; }
@@ -957,7 +1016,6 @@ function newsCardEl(it) {
       el("span", {}, agoShort(it.date)),
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
       isRead(it) ? el("span", { class: "lang seen" }, "Seen") : null,
-      it._light ? el("span", { class: "lang light" }, "Something lighter") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     el("div", { class: "kind-label", "data-kind": it.kind },
@@ -1608,7 +1666,7 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), light reading (Wikipedia, NASA’s Image of the Day, Atlas Obscura, Smithsonian…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one), and each busy outlet adds at most two stories a day; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline, the outlet’s own short summary and, when its feed says, who wrote it (Tune → Reading → Bylines); Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week: sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline, the outlet’s own short summary and, when its feed says, who wrote it (Tune → Reading → Bylines); Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week: sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Radar"),
@@ -1626,11 +1684,11 @@ function openInfo() {
     el("h3", {}, "Tune"),
     el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub. Text size, your library’s off-campus link and Back up and restore are under Tune → Reading."),
     el("h3", {}, "Today"),
-    el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day, something lighter and your next Foundations paper, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
-    el("h3", {}, "Light reading and general news"),
-    el("p", {}, "Light reading brings curiosities, history, nature, books, food and wellness: Wikipedia’s featured article and picture of the day, NASA’s Image of the Day, Atlas Obscura, Smithsonian, Knowable Magazine, NYT Well and NPR’s books, food and animal stories. U.S. & world news is the day’s top and national stories from NPR, The New York Times, The Wall Street Journal and the BBC; Business & markets comes from WSJ, MarketWatch, NYT Business and NPR. AP and Reuters no longer publish feeds Readout may use. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
+    el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day and your next Foundations paper, with Coming up, the Radar, Watch and Reno & Nevada cards spread between the papers, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
+    el("h3", {}, "General and business news"),
+    el("p", {}, "U.S. & world news is the day’s top and national stories from NPR, The New York Times, The Wall Street Journal and the BBC; Business & markets comes from WSJ, MarketWatch, NYT Business and NPR. AP and Reuters no longer publish feeds Readout may use. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
     el("h3", {}, "Pictures"),
-    el("p", {}, "News and light-reading cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
+    el("p", {}, "News cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
     el("h3", {}, "Telling Readout what you like"),
     el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it; the same for the story’s writers or the paper’s first listed authors. “More like this” and “Less like this” nudge all of them a little, but not names. Below that, words from the headline and from the summary or conclusion can be followed (their own chip) or muted (by default a muted word hides cards with it in the headline or the text; Tune → Rules → Mute can limit that to headlines). Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
     el("h3", {}, "Meetings"),

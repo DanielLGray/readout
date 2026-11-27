@@ -328,7 +328,7 @@ def test_every_outlet_has_a_listed_kind():
     from pipeline.common import load_yaml
     cfg = load_yaml("news.yaml")
     kinds = set(cfg["kinds"])
-    assert {"light", "general", "business"} <= kinds
+    assert {"general", "business"} <= kinds and "light" not in kinds          # Light reading is gone
     by = {s["name"]: s for s in cfg["sources"]}
     assert by["New York Times Health"]["max_per_day"] > by["BBC Health"]["max_per_day"]          # more Times, less BBC
     assert by["New York Times Health"]["everything_per_day"] > by["BBC Health"]["everything_per_day"]
@@ -336,7 +336,7 @@ def test_every_outlet_has_a_listed_kind():
     assert all(s.get("kind", "industry") in kinds for s in cfg["sources"])
     assert all("news.google.com" not in u for s in cfg["sources"] for u in s["urls"])
     keep = cfg["settings"]["kind_keep_days"]
-    assert keep["general"] < cfg["settings"]["other_keep_days"] < keep["light"]
+    assert keep["general"] < cfg["settings"]["other_keep_days"] < keep["local"]
 
 
 def test_one_picture_per_story_from_the_feed():
@@ -536,7 +536,7 @@ def test_local_outlets_and_filler_rules_in_the_config():
     assert all(src[n]["kind"] == "local" for n in ("Nevada Current", "Sierra Nevada Ally", "High Country News"))
     hcn = re.compile(src["High Country News"]["require"], re.I)
     assert hcn.search("Drought on the Great Basin") and not hcn.search("Wolves return to Colorado")
-    assert src["Popular Science"]["kind"] == "light" and not {"MedTech Dive", "Healthcare Dive"} & set(src)   # terms don't allow it
+    assert not {"Popular Science", "MedTech Dive", "Healthcare Dive"} & set(src)   # Light reading gone; the Dives' terms don't allow it
     nyt = re.compile(src["New York Times"]["skip"], re.I)
     assert nyt.search("https://www.nytimes.com/2026/11/26/dining/leftovers.html How to Use Your Leftovers")
     assert not nyt.search("https://www.nytimes.com/2026/11/26/us/storm-power.html Storm leaves half a million without power")
@@ -642,3 +642,16 @@ def test_listing_from_a_sitemap_takes_recently_changed_stories():
       <url><loc>https://www.renown.org/blog/measles-again</loc><lastmod>2026-11-21T18:00:00Z</lastmod></url></urlset>"""
     got = news.parse_listing(sm, "https://www.renown.org/sitemap.xml", "Renown Health", r"^/about/newsroom/[a-z0-9-]+/?$", NOW)
     assert [i["link"].split("/")[-1] for i in got] == ["renown-announces-roseview-cancer-tower"] and got[0]["title"] == ""
+
+
+def test_detex_turns_arxiv_latex_into_text_and_leaves_money_alone():
+    assert news.detex(r"$\mathsf{AC}^0 \not\subseteq \mathsf{BQAC}^0/\mathsf{qpoly}$ via Pauli") == "AC⁰ ⊈ BQAC⁰/qpoly via Pauli"
+    assert news.detex(r"luminosity in galaxies at $z\sim2$") == "luminosity in galaxies at z~2"
+    assert news.detex(r"$H_2$ in \emph{situ}, $10^{-3}$ and $\mathcal{O}(n\log n)$") == "H₂ in situ, 10⁻³ and O(n log n)"
+    assert news.detex("Should I put $400,000 of my $1 million into an annuity?") == "Should I put $400,000 of my $1 million into an annuity?"
+    assert news.detex("No TeX here") == "No TeX here"
+
+
+def test_nature_publishing_line_is_not_the_summary():
+    s = "Nature, Published online: 27 November 2026; doi:10.1038/d41586-026-03800-x Wernicke’s area is known for processing spoken words."
+    assert news.clean_text(s) == "Wernicke’s area is known for processing spoken words."

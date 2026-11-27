@@ -1,6 +1,7 @@
 """PubMed E-utilities client and XML parsing."""
 from __future__ import annotations
 
+import html
 import os
 import re
 from datetime import date, timedelta
@@ -132,7 +133,8 @@ class PubMed:
 def _text(el: Optional[ET.Element]) -> str:
     if el is None:
         return ""
-    return " ".join("".join(el.itertext()).split())
+    # a few records escape their text twice ("&amp;lt;72 ml"): the entities left over become characters
+    return " ".join(html.unescape("".join(el.itertext())).split())
 
 
 def _date_from(el: Optional[ET.Element]) -> Optional[str]:

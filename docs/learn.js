@@ -316,7 +316,6 @@ function whyParts(it) {
   const kindNow = S.kind;
   if (it.classic) out.push({ s: "Classic of the day", l: "A highly cited paper at least five years old from one of your areas, one a day; areas you weight more come round more often." });
   else if (it._wide) out.push({ s: "Outside your areas", l: "One paper a day from the big general journals your area searches wouldn’t find, chosen weekly for early citations and study design." });
-  else if (it._light) out.push({ s: "Something lighter", l: "Today’s one Light reading story." });
   else if (kindNow === "today" && !news) out.push({ s: "Today’s pick", l: `One of today’s ${T.brief.papers} best new papers for your areas: its score, times your ratings, times 1.6 if it has a word you follow. Papers an earlier Today showed don’t come back.` });
   else if (kindNow === "important" && it.impact) out.push({ s: it.impact.age >= 4 ? `${topPct(it.impact.pct)} for citations` : "New, in a well-cited journal",
     l: "Most important ranks papers by citations against others from the same quarter in your areas (NIH iCite), refreshed every Tuesday." });
@@ -483,7 +482,7 @@ function alertWhen(a) {
   return days <= 0 ? "today" : `${days} d`;
 }
 function alertSrc(a) {
-  if (a.via === "watch") return [a.ev.what, a.ev.sub].filter(Boolean).join(" · ");
+  if (a.via === "watch") return [a.ev.what, typeof wSub === "function" ? wSub(a.ev) : a.ev.sub].filter(Boolean).join(" · ");
   if (a.via === "pubmed") return `${a.journal} · from PubMed`;
   const n = indepOf(a);
   return outletsText(a.sources) + (n < (a.sources || []).length ? ` (${n} independent)` : "");
@@ -1031,29 +1030,9 @@ function briefPlan() {
     if (!plan.guess.includes(p) && plan.papers.indexOf(p) > 0 && guessable(byId.get(p))) plan.guess.push(p);
   }
   if ((!plan.stories || plan.sn !== T.brief.stories) && S.news) { plan.stories = pickStories(T.brief.stories); plan.sn = T.brief.stories; }
-  const newsById = new Map((S.news?.items || []).map((i) => [i.id, i]));
-  if (plan.light && (!newsById.has(plan.light) || hiddenByTaste({ ...newsById.get(plan.light), type: "news" }))) plan.light = null;
-  if (T.brief.light && !plan.light && S.news) plan.light = pickLight(d);
+  delete plan.light;                         // Something lighter is gone
   store.set("brief", plan);
   return plan;
-}
-// something lighter: one Light reading story a day, from a different outlet each day, never one shown before
-function pickLight(d) {
-  let seen = store.get("briefLight", {});
-  if (!seen || typeof seen !== "object") seen = {};
-  const cut = localDay(daysAgo(60));
-  for (const [k, v] of Object.entries(seen)) if (v < cut) delete seen[k];
-  const since = new Date(Date.now() - 4 * 864e5).toISOString();
-  const mutedSrc = new Set(T.mutedSources || []);
-  const pool = (S.news?.items || []).filter((i) => kindOf(i) === "light" && (i.date || "") >= since && !seen[i.id]
-    && !mutedSrc.has(i.source) && !hiddenByTaste({ ...i, type: "news" }) && !obitHidden(i));
-  if (!pool.length) return null;
-  const srcs = [...new Set(pool.map((i) => i.source))].sort();
-  const src = srcs[dayNo(d) % srcs.length];
-  const pick = pool.filter((i) => i.source === src).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
-  seen[pick.id] = d;
-  store.set("briefLight", seen);
-  return pick.id;
 }
 function pickStories(n) {
   if (!n) return [];
@@ -1087,10 +1066,8 @@ function briefList() {
   const wide = T.brief.wide ? wideToday() : null;
   const fd = T.brief.foundations ? fdState() : null;
   const stories = (plan.stories || []).filter((s) => s.items?.length);
-  const lightItem = T.brief.light && plan.light ? (S.news?.items || []).find((i) => i.id === plan.light) : null;
-  const light = lightItem ? { ...lightItem, type: "news", kind: kindOf(lightItem), _light: true } : null;
-  const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, wide?.pmid, fd?.read, fd?.next, light?.id].join("|");
-  const out = [...alertCards(), { type: "brief-cover", key: "brief:cover", sig, plan, classic, wide, fd, stories, light }];
+  const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, wide?.pmid, fd?.read, fd?.next].join("|");
+  const out = [...alertCards(), { type: "brief-cover", key: "brief:cover", sig, plan, classic, wide, fd, stories }];
   const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(T.brief.hzDays || 7) : [];
   const rd = typeof radarCardItem === "function" ? radarCardItem() : null;
   const wt = typeof watchCardItem === "function" ? watchCardItem() : null;
@@ -1104,7 +1081,7 @@ function briefList() {
   if (T.brief.order) {                       // your order: each part whole, one after another
     const parts = { near: nc ? [nc] : [], horizon: soon.length ? [{ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon }] : [],
       radar: rd ? [rd] : [], watch: wt ? [wt] : [], local: lc ? [lc] : [], cites: ct ? [ct] : [], papers, stories: stories.length ? [storiesCard] : [],
-      classic: classic ? [classic] : [], wide: wide ? [wide] : [], light: light ? [light] : [],
+      classic: classic ? [classic] : [], wide: wide ? [wide] : [],
       foundations: fd?.next ? [{ type: "fd-next", key: "fd:next", sig: `${fd.next}|${fd.read}`, fd }] : [] };
     const missing = Object.keys(BRIEF_PARTS).filter((k) => !T.brief.order.includes(k));
     const order = [...missing.filter((k) => k === "near"), ...T.brief.order, ...missing.filter((k) => k !== "near")];   // a new part: quakes first, the rest last
@@ -1112,21 +1089,16 @@ function briefList() {
     out.push({ type: "brief-end", key: "brief:end", sig, plan });
     return out;
   }
-  if (soon.length) out.push({ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon });
-  if (rd) out.push(rd);
-  if (wt) out.push(wt);
-  if (lc) out.push(lc);
-  if (ct) out.push(ct);
-  papers.forEach((p, i) => {
-    out.push(p);
-    if (i === 1 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
-    if (i === 2 && classic) out.push(classic);
-    if (i === 3 && wide) out.push(wide);
-  });
-  if (papers.length < 2 && stories.length) out.push({ type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories });
-  if (papers.length < 3 && classic) out.push(classic);
-  if (papers.length < 4 && wide) out.push(wide);
-  if (light) out.push(light);
+  // the usual order: the papers, with the other parts spread between them
+  const cards = [stories.length ? storiesCard : null,
+    soon.length ? { type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon } : null,
+    rd, classic, wt, lc, wide, ct].filter(Boolean);
+  if (!papers.length) out.push(...cards);
+  else {
+    const after = papers.map(() => []);
+    cards.forEach((c, i) => after[Math.min(papers.length - 1, Math.floor((i * papers.length) / cards.length))].push(c));
+    papers.forEach((p, i) => out.push(p, ...after[i]));
+  }
   if (fd?.next) out.push({ type: "fd-next", key: "fd:next", sig: `${fd.next}|${fd.read}`, fd });
   out.push({ type: "brief-end", key: "brief:end", sig, plan });
   return out;
@@ -1149,8 +1121,8 @@ function briefCoverEl(it) {
   const now = new Date();
   const n = it.plan.papers.length, g = it.plan.guess.length;
   const parts = [n ? plural(n, "new paper") : null, it.stories.length ? plural(it.stories.length, "story", "stories") : null,
-    it.classic ? "a classic" : null, it.wide ? "one from outside your areas" : null, it.light ? "something lighter" : null, it.fd?.next ? "your next Foundations paper" : null].filter(Boolean);
-  const mins = Math.max(2, Math.round(n * 1.2 + it.stories.length * 0.6 + (it.classic ? 1.5 : 0) + (it.wide ? 1.5 : 0) + (it.light ? 1 : 0) + (it.fd?.next ? 1 : 0)));
+    it.classic ? "a classic" : null, it.wide ? "one from outside your areas" : null, it.fd?.next ? "your next Foundations paper" : null].filter(Boolean);
+  const mins = Math.max(2, Math.round(n * 1.2 + it.stories.length * 0.6 + (it.classic ? 1.5 : 0) + (it.wide ? 1.5 : 0) + (it.fd?.next ? 1 : 0)));
   const m = bannerMeeting() ? null : meetingChips()[0];          // the banner already says it
   const hour = now.getHours();
   return el("article", { class: "card brief-card brief-cover", "data-key": "brief:cover" },

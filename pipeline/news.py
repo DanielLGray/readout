@@ -70,7 +70,49 @@ def clean_text(s: str) -> str:
     s = re.sub(r"^(?:Listen (?:and|&) subscribe|Subscribe and listen|Listen) (?:on|to|wherever) [^.]{0,160}?\.\s*", "", s,
                flags=re.I)                                                                  # podcast app promo
     s = re.sub(r"^Note that some links may require registration or subscription\.\s*", "", s, flags=re.I)
+    s = re.sub(r"^[A-Z][\w .&]{1,40}, Published online: \d{1,2} [A-Z][a-z]+ \d{4}; doi:\S+\s*", "", s)   # Nature's feed: "Nature, Published online: …; doi:…"
     return s.strip()
+
+
+_TEX_SYM = {"not\\subseteq": "⊈", "subseteq": "⊆", "supseteq": "⊇", "subset": "⊂", "supset": "⊃", "notin": "∉", "in": "∈",
+            "sim": "~", "approx": "≈", "simeq": "≃", "leq": "≤", "le": "≤", "geq": "≥", "ge": "≥", "neq": "≠", "ne": "≠",
+            "pm": "±", "mp": "∓", "times": "×", "cdot": "·", "to": "→", "rightarrow": "→", "leftarrow": "←", "Rightarrow": "⇒",
+            "infty": "∞", "cap": "∩", "cup": "∪", "ell": "ℓ", "partial": "∂", "nabla": "∇", "sqrt": "√", "sum": "Σ", "prod": "Π",
+            "int": "∫", "propto": "∝", "ll": "≪", "gg": "≫", "langle": "⟨", "rangle": "⟩", "dagger": "†", "star": "⋆", "circ": "∘",
+            "hbar": "ħ", "odot": "⊙", "oplus": "⊕", "otimes": "⊗", "mid": "|", "vert": "|", "lvert": "|", "rvert": "|", "ast": "*",
+            "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η",
+            "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "pi": "π", "rho": "ρ",
+            "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "φ", "varphi": "φ", "chi": "χ", "psi": "ψ", "omega": "ω",
+            "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω"}
+_SUP = str.maketrans("0123456789+-=()nijk", "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿⁱʲᵏ")
+_SUB = str.maketrans("0123456789+-=()aeoxijrv", "₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓᵢⱼᵣᵥ")
+
+
+def _tex_math(m: str) -> str:
+    m = re.sub(r"\\(?:mathsf|mathrm|mathbf|mathit|mathcal|mathbb|mathfrak|boldsymbol|text|textrm|textit|textbf|operatorname)\s*\{([^{}]*)\}", r"\1", m)
+    m = re.sub(r"\\(not\\subseteq|[A-Za-z]+)", lambda x: _TEX_SYM.get(x.group(1), f" {x.group(1)} " if x.group(1) in ("log", "ln", "exp", "sin", "cos", "tan", "max", "min", "lim", "det") else ""), m)
+    def script(x, table, mark):
+        body = x.group(1) if x.group(1) is not None else x.group(2)
+        keys = table.keys()
+        if body and all(ord(c) in keys for c in body):
+            return body.translate(table)
+        return f"{mark}({body})" if len(body) > 1 else f"{mark}{body}"
+    m = re.sub(r"\^\s*(?:\{([^{}]*)\}|(\S))", lambda x: script(x, _SUP, "^"), m)
+    m = re.sub(r"_\s*(?:\{([^{}]*)\}|(\S))", lambda x: script(x, _SUB, "_"), m)
+    m = re.sub(r"\\[,;:! ]|\\\\", " ", m)
+    return re.sub(r"\s+", " ", m.replace("{", "").replace("}", "")).strip()
+
+
+def detex(s: str) -> str:
+    """A title written in LaTeX (arXiv): "$\\mathsf{AC}^0 \\not\\subseteq \\mathsf{BQAC}^0$" → "AC⁰ ⊈ BQAC⁰"."""
+    if "$" not in s and "\\" not in s:
+        return s
+    # math is what has TeX in it (or is one letter): "$400 and $5" stays money
+    s = re.sub(r"\$\$?([^$]{1,300}?)\$\$?", lambda x: _tex_math(x.group(1))
+               if re.search(r"[\\^_{]", x.group(1)) or re.fullmatch(r"\s*[A-Za-z]\s*", x.group(1)) else x.group(0), s)
+    s = re.sub(r"\\(?:emph|textit|textbf|texttt|textsc|textrm)\s*\{([^{}]*)\}", r"\1", s)
+    s = re.sub(r"\\([%&#_$])", r"\1", s)
+    return re.sub(r"\s+", " ", s).strip()
 
 
 def teaser(s: str, limit: int = 220) -> str:

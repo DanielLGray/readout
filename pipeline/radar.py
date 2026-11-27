@@ -90,10 +90,10 @@ def developments(items: list[dict], now: datetime, days: int, credible: set, gro
         lead = next((m for m in members if m["source"] in credible), first)
         lin = news.lineage(members, group_of, releases) if len(sources) > 1 else [{"sources": sorted(sources), "why": []}]
         out.append({
-            "id": f"d:{first['id']}", "title": lead["title"], "date": first["date"], "updated": last["date"],
+            "id": f"d:{first['id']}", "title": news.detex(lead["title"]), "date": first["date"], "updated": last["date"],
             "sources": sorted(sources), "n": len(lin), **({"copies": [g for g in lin if g["why"]]} if any(g["why"] for g in lin) else {}),
             "credible": bool(sources & credible), "label": label_for(sources, credible),
-            "items": [{k: m[k] for k in ("title", "source", "date", "link") if m.get(k)}
+            "items": [{k: (news.detex(m[k]) if k == "title" else m[k]) for k in ("title", "source", "date", "link") if m.get(k)}
                       for m in sorted(members, key=lambda m: m["date"], reverse=True)[:6]],
         })
     out.sort(key=lambda d: d["updated"], reverse=True)
@@ -146,11 +146,11 @@ def arxiv_entries(text: str) -> list[dict]:
         if not m:
             continue
         aid = m.group(1)
-        title = re.sub(r"\s+", " ", str(e.get("title") or "")).strip()
+        title = news.detex(re.sub(r"\s+", " ", str(e.get("title") or "")).strip())     # arXiv titles are LaTeX
         when = str(e.get("published") or e.get("updated") or "")[:19]
         if not title or not re.match(r"\d{4}-\d{2}-\d{2}", when):
             continue
-        summary = re.sub(r"\s+", " ", str(e.get("summary") or "")).strip()
+        summary = news.detex(re.sub(r"\s+", " ", str(e.get("summary") or "")).strip())
         out.append({"id": f"arxiv:{aid}", "title": title, "source": "arXiv", "date": when + "Z",
                     "link": f"https://arxiv.org/abs/{aid}", "summary": news.teaser(summary, 300),
                     "authors": ", ".join(a.get("name", "") for a in (e.get("authors") or [])[:3])

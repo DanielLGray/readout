@@ -357,3 +357,12 @@ def test_journal_housekeeping_is_not_a_paper():
         assert is_notice({"title": t, "pub_types": []}), t
     for t in ["Updates in cardiovascular CT imaging in 2025: A year in review.", "Reviewers' agreement on LI-RADS categories"]:
         assert not is_notice({"title": t, "pub_types": []}), t
+
+
+def test_twice_escaped_pubmed_text_reads_as_characters():
+    from xml.etree import ElementTree as ET
+    from pipeline import pubmed
+    from pipeline.abstracts import clean
+    el = ET.fromstring("<AbstractText>5-yr OS for PSMA-TTV &amp;gt;=72 ml versus &amp;lt;72 ml</AbstractText>")
+    assert pubmed._text(el) == "5-yr OS for PSMA-TTV >=72 ml versus <72 ml"
+    assert clean("OS for &lt;72 ml was 36%.") == "OS for <72 ml was 36%."

@@ -9,7 +9,7 @@ const GH = `https://github.com/${REPO}`;
 const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "" };
 
 const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)",
-  light: "var(--k-light)", general: "var(--k-gen)", local: "var(--k-local)", business: "var(--k-biz)", sff: "var(--h5)" };
+  general: "var(--k-gen)", local: "var(--k-local)", business: "var(--k-biz)", sff: "var(--h5)" };
 const kindColor = (k) => KIND_COLOR[k] || "var(--muted)";
 const kindLabel = (k) => (k === "paper" ? "Papers" : newsKinds()[k] || k);
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
@@ -250,14 +250,13 @@ function todaySection() {
   const setB = (k, v) => { setTune({ brief: { ...T.brief, [k]: v } }); rerender(); };
   const q = quizTotals(30), tried = q.r + q.p + q.w;
   return el("section", { class: "sect", id: "tune-today" }, el("h2", {}, "Today"),
-    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day, one paper from outside your areas, something lighter and your next Foundations paper, then “You’re caught up.”"),
+    el("p", { class: "sub" }, "A short stack each morning: the best new papers for your areas, the day’s big stories, the classic of the day, one paper from outside your areas and your next Foundations paper, then “You’re caught up.”"),
     segPick("Open the app on", [["today", "Today"], ["all", "Everything"], ["papers", "Papers"], ["important", "Most important"]], T.startOn,
       (v) => { setTune({ startOn: v }); rerender(); }),
     segPick("New papers in Today", [[3, "3"], [5, "5"], [8, "8"]], b.papers, (v) => setB("papers", Number(v))),
     segPick("Stories in Today", [[0, "None"], [2, "2"], [3, "3"]], b.stories, (v) => setB("stories", Number(v))),
     switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
     switchRow("Outside your areas", "One paper a day from NEJM, The Lancet, JAMA, BMJ and other big general journals that your areas wouldn’t find: recent, and already being cited. Chosen weekly with the Most important lists.", b.wide, (on) => setB("wide", on)),
-    switchRow("Something lighter", "One Light reading story a day: Wikipedia’s featured article, NASA’s image of the day, Atlas Obscura, Smithsonian and the like.", b.light, (on) => setB("light", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
     switchRow("Coming up", `The next ${b.hzDays} days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.`, b.horizon, (on) => setB("horizon", on)),
     b.horizon ? segPick("Coming up covers", [[3, "3 days"], [7, "7 days"], [14, "14 days"]], b.hzDays, (v) => setB("hzDays", Number(v))) : null,
@@ -289,7 +288,7 @@ function todayOrderEl() {
   const missing = Object.keys(BRIEF_PARTS).filter((k) => !order.includes(k));
   const full = [...missing.filter((k) => k === "near"), ...order, ...missing.filter((k) => k !== "near")];   // as Today puts them
   const move = (i, d) => { const o = full.slice(); [o[i], o[i + d]] = [o[i + d], o[i]]; setTune({ brief: { ...T.brief, order: o } }); rerender(); };
-  const onOf = { horizon: "horizon", radar: "radar", watch: "watch", classic: "classic", wide: "wide", light: "light", foundations: "foundations" };
+  const onOf = { horizon: "horizon", radar: "radar", watch: "watch", classic: "classic", wide: "wide", foundations: "foundations" };
   const offNote = (k) => (k === "near" && !T.near.quakes && !T.near.fires ? "off" : k === "cites" && !T.citeAlerts ? "off" : k === "stories" && !T.brief.stories ? "none" : onOf[k] && !T.brief[onOf[k]] ? "off" : "");
   return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Order"),
     el("p", { class: "fine", style: "margin:2px 0 6px" }, T.brief.order ? "Each part comes whole, in this order, after the alerts and the cover."
@@ -601,7 +600,7 @@ function presentKinds() {
 }
 function mixPreview(n) {
   const q = Object.fromEntries(presentKinds().map((k) => [k, Array.from({ length: n }, () => k)]));
-  return interleave(q, T.mix).slice(0, n);
+  return unclump(interleave(q, T.mix, localDay()), (a, b) => a === b).slice(0, n);
 }
 
 function alertsSection() {

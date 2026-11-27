@@ -18,6 +18,22 @@ const wFollowing = (nct) => !!nct && T.watch.follow.includes(nct);
 const W_CHANGE = { "510k": "510(k) clearances", denovo: "De Novo grants", "pma-new": "New PMA approvals", "pma-ind": "New indications for PMA devices",
   "drug-new": "New drug approvals", "drug-ind": "New indications for drugs", new: "New trials registered", status: "Trial status changes",
   results: "Trial results posted", pcd: "Primary completion reached or moved", final: "Final rules", proposed: "Proposed rules", notice: "Notices and guidance" };
+// FDA's records write companies in capitals ("ABBOTT MEDICAL"): shown in ordinary case, short
+// names (GE, USA) and company suffixes kept as they're written
+const CAPS_KEEP = { INC: "Inc", "INC.": "Inc.", LTD: "Ltd", "LTD.": "Ltd.", CORP: "Corp", "CORP.": "Corp.", CO: "Co", "CO.": "Co.", GMBH: "GmbH", OF: "of", AND: "and", THE: "the", FOR: "for" };
+function niceCaps(s) {
+  const t = String(s || "");
+  if (!/[A-Z]{4}/.test(t) || t !== t.toUpperCase()) return t;
+  return t.split(/(\s+)/).map((w, i) => {
+    if (/^\s+$/.test(w)) return w;
+    const k = CAPS_KEEP[w.replace(/,$/, "")];
+    if (k) return (i ? k : k[0].toUpperCase() + k.slice(1)) + (w.endsWith(",") ? "," : "");
+    const core = w.replace(/[^A-Z]/g, "");
+    if (core.length <= 3 || /\d/.test(w)) return w;                     // GE, USA, 3M, product codes
+    return w[0] + w.slice(1).toLowerCase().replace(/([-/&(])([a-z])/g, (m, p, c) => p + c.toUpperCase());
+  }).join("");
+}
+const wSub = (e) => wParts(e).map(niceCaps).join(" · ");
 const wParts = (e) => String(e.sub || "").split(" · ").map((p) => p.trim()).filter(Boolean);
 function wOrg(e) {
   if (e.org) return String(e.org).slice(0, 100);
@@ -142,7 +158,7 @@ function wEventEl(e) {
       wFollowing(e.nct) ? el("span", { class: "lang follow" }, "Following") : null, e.level === "alert" ? el("span", { class: "w-major" }, "Major") : null),
     el("span", { class: "news-title" }, e.acr ? `${e.acr}: ${e.title}` : e.title),
     el("span", { class: "w-what" }, e.what),
-    e.sub ? el("span", { class: "fine" }, e.sub) : null));
+    e.sub ? el("span", { class: "fine" }, wSub(e)) : null));
 }
 function drawWatch() {
   $("#topic-title").textContent = "Watch";
@@ -198,7 +214,7 @@ function openWatchEvent(e) {
     el("h2", { id: "sheet-title" }, e.acr ? `${e.acr}: ${e.title}` : e.title),
     el("p", { class: "sheet-meta" }, el("span", {}, fmtDate(e.date)), e.nct ? el("span", {}, e.nct) : null, e.level === "alert" ? el("span", {}, "Major change") : null),
     el("p", { class: "w-what big" }, e.what),
-    e.sub ? el("p", { class: "hz-sub" }, e.sub) : null,
+    e.sub ? el("p", { class: "hz-sub" }, wSub(e)) : null,
     e.kind === "device" && e.topic === "devices" ? el("p", { class: "fine" }, "A 510(k) clearance means the FDA found the device as safe and effective as one already on the market; it isn’t an approval of new claims.") : null,
     e.kind === "trial" && /primary completion/i.test(e.what) ? el("p", { class: "fine" }, "Primary completion is when the last participant’s main outcome is measured. Results usually follow months later.") : null,
     el("div", { class: "link-row" },

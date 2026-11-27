@@ -47,7 +47,6 @@ SCHEMA: dict[str, dict] = {
             F("settings.keep_days", "Radiology industry stories kept", "int", min=14, max=365, unit="days"),
             F("settings.other_keep_days", "Health, science and sci-fi stories kept", "int", min=7, max=120, unit="days"),
             F("settings.kind_keep_days.societies", "ACR & societies stories kept", "int", min=14, max=365, unit="days"),
-            F("settings.kind_keep_days.light", "Light reading kept", "int", min=7, max=120, unit="days"),
             F("settings.kind_keep_days.general", "U.S. & world news kept", "int", min=1, max=30, unit="days"),
             F("settings.kind_keep_days.business", "Business & markets kept", "int", min=1, max=30, unit="days"),
             F("settings.kind_keep_days.local", "Reno & Nevada kept", "int", min=3, max=120, unit="days"),

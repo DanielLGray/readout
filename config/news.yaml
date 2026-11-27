@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Readout — news: radiology industry outlets, science & health, light reading and general news
+# Readout — news: radiology industry outlets, science & health and general news
 #
 # Each outlet lists one or more feed addresses. The news job tries them in
 # order and uses the first that returns stories, so a site redesign that
@@ -23,7 +23,6 @@ settings:
   other_keep_days: 21     # health, science and sci-fi stories (many more of them) leave sooner
   kind_keep_days:         # kinds that post rarely keep their stories longer; news goes stale fast
     societies: 180
-    light: 45
     general: 4
     local: 30
     business: 7
@@ -82,7 +81,6 @@ kinds:
   societies: ACR & societies
   health: Health & medicine
   science: Science
-  light: Light reading
   general: U.S. & world news
   local: Reno & Nevada
   business: Business & markets
@@ -415,13 +413,6 @@ sources:
       - https://www.smithsonianmag.com/rss/science-nature/
       - https://www.smithsonianmag.com/rss/latest_articles/
 
-  - name: Popular Science      # mostly animals, photo galleries and curiosities: light reading, not science news
-    kind: light
-    max_per_day: 3
-    home: https://www.popsci.com
-    urls:
-      - https://www.popsci.com/feed/
-
   - name: Live Science
     group: future            # Live Science and Space.com: one publisher (Future)
     kind: science
@@ -449,97 +440,6 @@ sources:
     urls:
       - https://www.nasa.gov/news-release/feed/
       - https://www.nasa.gov/feed/
-
-  # ── Light reading: curiosities, history, nature, books, food, wellness ──
-  # Wikipedia's daily features are CC BY-SA; NASA's images are public domain; Knowable Magazine is
-  # CC BY-ND; NPR and the Times allow their feeds on a personal, non-commercial site with credit.
-  - name: Wikipedia, today's featured article
-    kind: light
-    style: wikipedia             # the feed titles each day by its date: the headline comes from the blurb
-    max_per_day: 1
-    home: https://en.wikipedia.org
-    urls:
-      - https://en.wikipedia.org/w/api.php?action=featuredfeed&feed=featured&feedformat=atom
-
-  - name: Wikipedia, picture of the day
-    kind: light
-    style: wikipedia
-    max_per_day: 1
-    home: https://en.wikipedia.org
-    urls:
-      - https://en.wikipedia.org/w/api.php?action=featuredfeed&feed=potd&feedformat=atom
-
-  - name: NASA Image of the Day
-    kind: light
-    max_per_day: 1
-    home: https://www.nasa.gov
-    urls:
-      - https://www.nasa.gov/feeds/iotd-feed/
-
-  - name: Atlas Obscura
-    kind: light
-    max_per_day: 2
-    home: https://www.atlasobscura.com
-    urls:
-      - https://www.atlasobscura.com/feeds/latest
-
-  - name: Smithsonian Smart News
-    kind: light
-    group: smithsonian
-    max_per_day: 3
-    home: https://www.smithsonianmag.com/smart-news/
-    urls:
-      - https://www.smithsonianmag.com/rss/smart-news/
-
-  - name: Smithsonian History
-    kind: light
-    group: smithsonian
-    max_per_day: 2
-    home: https://www.smithsonianmag.com/history/
-    urls:
-      - https://www.smithsonianmag.com/rss/history/
-
-  - name: Knowable Magazine
-    kind: light
-    max_per_day: 2
-    home: https://knowablemagazine.org
-    urls:
-      - https://knowablemagazine.org/rss
-
-  - name: New York Times Well
-    kind: light
-    group: nyt
-    verbatim: true
-    max_per_day: 2
-    home: https://www.nytimes.com
-    urls:
-      - https://rss.nytimes.com/services/xml/rss/nyt/Well.xml
-
-  - name: NPR Books
-    group: npr
-    kind: light
-    max_per_day: 2
-    home: https://www.npr.org/books/
-    urls:
-      - https://feeds.npr.org/1032/rss.xml
-
-  - name: NPR Food
-    group: npr
-    kind: light
-    max_per_day: 1
-    home: https://www.npr.org/sections/food/
-    urls:
-      - https://feeds.npr.org/1053/rss.xml
-
-  - name: NPR Animals and Strange News
-    group: npr
-    kind: light
-    max_per_day: 2
-    merge: true
-    home: https://www.npr.org/sections/animals/
-    urls:
-      - https://feeds.npr.org/1132/rss.xml
-      - https://feeds.npr.org/1146/rss.xml
 
   # ── General news: the day's top stories ──────────────────────────────────
   - name: NPR News
