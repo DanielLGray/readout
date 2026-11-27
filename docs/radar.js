@@ -130,7 +130,7 @@ function openSpotted(c) {
     el("p", { class: "sheet-meta" }, el("span", {}, `${plural(c.count, "headline")}, ${plural(c.publishers, "publisher")}`), el("span", {}, KIND_WORD[c.kind] || c.kind)),
     el("ul", { class: "rows" }, (c.examples || []).map((h) => el("li", { class: "news-item" },
       el(h.link ? "a" : "div", h.link ? { href: safeUrl(h.link), target: "_blank", rel: "noopener" } : {},
-        el("span", { class: "news-src" }, el("b", {}, h.source), el("span", {}, agoShort(h.date))),
+        el("span", { class: "news-src" }, el("b", {}, srcName(h.source)), el("span", {}, agoShort(h.date))),
         el("span", { class: "news-title" }, h.title))))),
     el("p", { class: "fine" }, `It joins the Radar after ${c.need} weeks of headlines, unless it’s an established field that just happens to be in the news.`));
 }
@@ -144,7 +144,7 @@ function devEl(d) {
   return el("li", { class: "news-item" }, el("button", { class: "rd-dev", onclick: open },
     el("span", { class: "news-src" }, el("b", {}, d.sources.length > 1 ? coverageText(d) : d.sources[0]), lab ? el("span", {}, lab) : null, el("span", {}, agoShort(d.updated || d.date))),
     el("span", { class: "news-title" }, d.title),
-    d.sources.length > 1 ? el("span", { class: "fine" }, d.sources.join(", ")) : null));
+    d.sources.length > 1 ? el("span", { class: "fine" }, d.sources.map(srcName).join(", ")) : null));
 }
 function drawRadarTopic(id) {
   const t = radarTopics().find((x) => x.id === id) || (S.radar?.topics || []).find((x) => x.id === id);

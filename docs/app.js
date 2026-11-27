@@ -171,7 +171,7 @@ const TUNE_DEFAULTS = {
   topCard: true,        // open the feed with stories several outlets covered
   topPer: 0,            // top stories per kind in that card: 0 = 3, or 2 when there are three kinds or more
   topAgain: 36,         // hours before a top story you were shown leads the card again (12, 36 or 72)
-  bylines: true,        // the writers' names under news stories, when the outlet's feed gives them
+  allBylines: false,    // every story's writers; off: only outlets whose terms ask that writers be credited
   why: true,            // a line on each card saying what put it there
   citeAlerts: true,     // new papers citing ones you saved (this phone asks NIH iCite once a day)
   muteIn: "text",       // muted words: "title" (headlines only) or "text" (headlines and the text on the card)
@@ -240,7 +240,7 @@ function loadTune() {
     topCard: typeof t.topCard === "boolean" ? t.topCard : TUNE_DEFAULTS.topCard,
     topPer: [0, 2, 3, 5].includes(t.topPer) ? t.topPer : 0,
     topAgain: [12, 36, 72].includes(t.topAgain) ? t.topAgain : 36,
-    bylines: t.bylines !== false,
+    allBylines: t.allBylines === true,
     why: t.why !== false,
     citeAlerts: t.citeAlerts !== false,
     muteIn: t.muteIn === "title" ? "title" : "text",
@@ -599,10 +599,26 @@ function rankPapers(list) {
   return list.map((p) => [paperScore(p, now).score * Math.pow(1.5, p._t || 0), p]).sort((a, b) => b[0] - a[0]).map((x) => x[1]);
 }
 
+// Names as people write them: outlets and sections in their usual short forms (NYT, Health & Med)
+// wherever the app writes them; Tune's settings keep the full names where they're edited
+const SRC_SHORT = { "New York Times": "NYT", "New York Times Business": "NYT Business", "New York Times Health": "NYT Health",
+  "New York Times Science": "NYT Science", "Wall Street Journal": "WSJ", "BBC News": "BBC", "NPR News": "NPR",
+  "Nevada Public Radio": "KNPR", "High Country News": "HCN", "Scientific American": "SciAm", "Imaging Technology News": "ITN",
+  "Medical Xpress Radiology": "Medical Xpress", "MedPage Today": "MedPage", "Planet Money and The Indicator": "Planet Money",
+  "Quanta Magazine": "Quanta", "Science Friday": "SciFri", "The Imaging Wire": "Imaging Wire", "Renown Health": "Renown",
+  "FDA press releases": "FDA", "FDA safety alerts": "FDA safety", "NIH News": "NIH" };
+const srcName = (s) => SRC_SHORT[s] || String(s || "").replace(/ \(via ([^)]+)\)$/, " via $1");
+const KIND_SHORT = { industry: "Industry", health: "Health & Med", general: "U.S. & World", local: "Reno & NV", business: "Business", sff: "Sci-fi" };
+const CAT_SHORT = { policy: "Policy", ai_industry: "AI", deals: "Deals", regulatory: "FDA", technology: "Tech", nv_gov: "Gov & Politics",
+  nv_health: "Health", nv_housing: "Housing", nv_env: "Environment", nv_schools: "Schools", nv_economy: "Economy",
+  nv_safety: "Courts & Safety", nv_culture: "Arts", nv_opinion: "Opinion" };
+const catLabel = (c) => (S.news?.categories?.[c] ? CAT_SHORT[c] || S.news.categories[c] : "");
+let kindsMemo = [null, {}];
 function newsKinds() {
-  const k = S.news?.kinds;
-  if (k) return k;
-  return S.news ? { industry: "Industry news", science: "Science & health" } : {};
+  const k = S.news?.kinds || (S.news ? { industry: "Industry news", science: "Science & health" } : null);
+  if (!k) return {};
+  if (kindsMemo[0] !== k) kindsMemo = [k, Object.fromEntries(Object.entries(k).map(([key, label]) => [key, KIND_SHORT[key] || label]))];
+  return kindsMemo[1];
 }
 const kindOf = (n) => n.kind || "industry";
 
@@ -1000,33 +1016,39 @@ function newsImgEl(it) {
   return box;
 }
 const bylineText = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0] || "");
+// writers' names: only where an outlet's license or terms ask that they be credited (credit, from
+// the news job), unless you turn on every byline in Tune → Reading
+let creditMemo = [null, new Set()];
+const creditOutlets = () => (creditMemo[0] === S.news ? creditMemo[1]
+  : (creditMemo = [S.news, new Set((S.news?.sources || []).filter((s) => s.credit).map((s) => s.name))])[1]);
+const bylineShown = (it) => Array.isArray(it.by) && it.by.some((x) => typeof x === "string" && x) && (T.allBylines || creditOutlets().has(it.source));
 function bylineEl(it) {
-  const by = Array.isArray(it.by) ? it.by.filter((x) => typeof x === "string") : [];
-  return T.bylines && by.length ? el("p", { class: "news-by" }, `By ${bylineText(by)}`) : null;
+  return bylineShown(it) ? el("span", { class: "by-in" }, `by ${bylineText(it.by.filter((x) => typeof x === "string" && x))}`) : null;
 }
+// a card's picture beside its headline, a quarter of the card wide
+const headRow = (pic, head) => (pic ? el("div", { class: "headrow" }, pic, el("div", { class: "headtext" }, head)) : head);
 function newsCardEl(it) {
   const isNew = S.newsNew.has(it.id);
-  const cats = (it.categories || []).map((c) => S.news?.categories?.[c]).filter(Boolean);
+  const cats = (it.categories || []).map(catLabel).filter(Boolean);
   const saved = !!S.saved[saveKey(it)];
   const saveBtn = el("button", { class: "act save-btn", "aria-pressed": String(saved), onclick: () => toggleSave(it, saveBtn) },
     icon(saved ? ICONS.saved : ICONS.save), saved ? "Saved" : "Save");
+  // one line above (it wraps): outlet, time, section and why, the byline where it must be credited
   return el("article", { class: "card news-card", "data-key": saveKey(it) },
     el("div", { class: "card-meta" },
-      el("span", { class: "card-journal" }, it.source),
+      el("span", { class: "card-journal" }, srcName(it.source)),
       el("span", {}, agoShort(it.date)),
+      whyInline(it, newsKinds()[it.kind] || "News", it.kind),
+      it.audio ? el("span", { class: "pod" }, `Podcast${it.duration ? `, ${it.duration} min` : ""}`) : null,
+      bylineEl(it),
       followHit(it) ? el("span", { class: "lang follow" }, "Following") : null,
       isRead(it) ? el("span", { class: "lang seen" }, "Seen") : null,
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
-    el("div", { class: "kind-label", "data-kind": it.kind },
-      newsKinds()[it.kind] || "News", it.audio ? el("span", { class: "pod" }, `Podcast${it.duration ? `, ${it.duration} min` : ""}`) : null),
-    newsImgEl(it),
+    headRow(newsImgEl(it), el("h2", { class: "news-headline" }, el("a", { class: "head-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, it.title))),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
-      el("h2", { class: "news-headline" }, el("a", { class: "head-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, it.title)),
-      it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null,
-      bylineEl(it))),
+      it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
-    whyEl(it),
     el("div", { class: "actions" + (it.audio ? " five" : "") },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
       el("a", { class: "act", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, icon(ICONS.read), "Read"),
@@ -1060,7 +1082,7 @@ function play(it) {
     savePos();                       // the episode you're leaving
     a.src = it.audio;
     a.dataset.id = it.id;
-    a.dataset.src = it.source;
+    a.dataset.src = srcName(it.source);
     const saved = (store.get("pos", {}) || {})[it.id];
     if (saved) {
       a.addEventListener("loadedmetadata", () => {
@@ -1068,7 +1090,7 @@ function play(it) {
       }, { once: true });
     }
     $("#pl-title").textContent = it.title;
-    $("#pl-src").textContent = it.source;
+    $("#pl-src").textContent = srcName(it.source);
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: it.title, artist: it.source, album: "Readout" });
     }
@@ -1152,12 +1174,12 @@ const indepOf = (st) => { const all = (st?.sources || []).length; return Number.
 function coverageText(st, names = false) {
   const all = (st.sources || []).length, n = indepOf(st);
   const head = n < all ? `${all} outlets, ${n} independent` : plural(all, "outlet");
-  return names ? `${head}: ${st.sources.join(", ")}` : head;
+  return names ? `${head}: ${st.sources.map(srcName).join(", ")}` : head;
 }
 const andList = (l) => (l.length <= 2 ? l.join(" and ") : `${l.slice(0, -1).join(", ")} and ${l[l.length - 1]}`);
 function copiesNote(st) {
   const c = (st.copies || []).filter((g) => (g.sources || []).length > 1);
-  return c.length ? el("p", { class: "fine" }, "Counted once: ", c.map((g) => `${andList(g.sources)} (${(g.why || []).join("; ")})`).join("; "), ".") : null;
+  return c.length ? el("p", { class: "fine" }, "Counted once: ", c.map((g) => `${andList(g.sources.map(srcName))} (${(g.why || []).join("; ")})`).join("; "), ".") : null;
 }
 function openStory(st, byId) {
   openSheet(
@@ -1166,7 +1188,7 @@ function openStory(st, byId) {
     copiesNote(st),
     el("ul", { class: "rows" }, st.items.map((id) => byId[id]).filter(Boolean).map((it) =>
       el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
-        el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date))),
+        el("span", { class: "news-src" }, el("b", {}, srcName(it.source)), el("span", {}, agoShort(it.date))),
         el("span", { class: "news-title" }, it.title),
         it.summary ? el("span", { class: "news-teaser" }, it.summary) : null)))));
 }
@@ -1188,14 +1210,14 @@ function paperCardEl(it) {
       it.classic ? el("span", { class: "lang classic" }, "Classic of the day") : null,
       it._wide ? el("span", { class: "lang wide" }, "Outside your areas") : null,
       fullTextOf(it)?.free ? el("span", { class: "lang free" }, "Free full text") : null,
+      whyInline(it),
       el("span", { class: "spacer" }),
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     it.classic ? classicLine(it) : it._wide ? wideLine(it) : impactEl(it),
     it.retracted ? el("div", { class: "warn" }, "Retracted. See the notice on PubMed before using this.") : null,
     it.concern ? el("div", { class: "warn" }, "Expression of concern published for this paper.") : null,
-    el("h2", { class: "card-title clamp" }, el("a", { class: "head-link", href: pubmedUrl(it.pmid),
-      onclick: (e) => { e.preventDefault(); openAbstract(it); } }, it.title)),
-    fig,
+    headRow(fig, el("h2", { class: "card-title clamp" }, el("a", { class: "head-link", href: pubmedUrl(it.pmid),
+      onclick: (e) => { e.preventDefault(); openAbstract(it); } }, it.title))),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
       c.kind === "none"
         ? el("p", { class: "concl-text none" }, old ? "PubMed has no abstract for this paper. Abstract and PubMed open what there is."
@@ -1208,7 +1230,6 @@ function paperCardEl(it) {
     evidenceEl(it.design, false, it.sample),
     (it.topics || []).length ? el("div", { class: "topic-tags" },
       it.topics.slice(0, 3).map((t) => el("button", { class: "topic-tag", onclick: () => { S.topic = t; S.system = "all"; leaveFixed(); refreshFeed(); } }, topicName(t)))) : null,
-    whyEl(it),
     actionsEl(it, true));
   return card;
 }
@@ -1510,7 +1531,7 @@ function openSearch() {
       el("span", { class: "news-title" }, marked(p.title, r.words)),
       p.conclusion?.text ? el("span", { class: "news-teaser clamp2" }, marked(p.conclusion.text, r.words)) : null));
     const newsRow = (n) => el("li", { class: "news-item" }, el("a", { href: safeUrl(n.link), target: "_blank", rel: "noopener", onclick: () => bump("open", n) },
-      el("span", { class: "news-src" }, el("b", {}, n.source || ""), el("span", {}, agoShort(n.date))),
+      el("span", { class: "news-src" }, el("b", {}, srcName(n.source)), el("span", {}, agoShort(n.date))),
       el("span", { class: "news-title" }, marked(n.title, r.words))));
     const groups = [group("Papers", r.papers, "papers", paperRow), group("News", r.news, "news", newsRow)].filter(Boolean);
     out.replaceChildren(...(groups.length ? groups : [el("p", { class: "fine" }, `Nothing here matches “${input.value.trim()}”. Fewer or shorter words find more.`)]));
@@ -1534,14 +1555,20 @@ function setInert() {
   $("#sheet").inert = !sheet;
 }
 function refocus(elm) { if (elm?.isConnected && !elm.closest("[inert]")) elm.focus({ preventScroll: true }); }
+// a sheet whose first item is DONE_TOP gets a Done button up by the close button (Rate)
+const DONE_TOP = { doneTop: true };
 function openSheet(...content) {
   if (!$("#sheet").classList.contains("open")) sheetOpener = document.activeElement;
   S.onSheetClose = null;
   const card = $("#sheet-card");
+  const done = content[0] === DONE_TOP;
+  if (done) content = content.slice(1);
   card.replaceChildren(
-    el("div", { style: "display:flex;align-items:center" },
-      el("div", { class: "grab", style: "margin:0 auto" }),
-      el("button", { class: "icon-btn", "aria-label": "Close", onclick: closeSheet }, icon(ICONS.close))),
+    el("div", { class: "sheet-top" },
+      el("div", { class: "grab" }),
+      el("div", { class: "sheet-top-btns" },
+        done ? el("button", { class: "act done-top", onclick: closeSheet }, "Done") : null,
+        el("button", { class: "icon-btn", "aria-label": "Close", onclick: closeSheet }, icon(ICONS.close)))),
     ...content.flat(3).filter((x) => x != null && x !== false));
   card.scrollTop = 0;
   const sheet = $("#sheet");
@@ -1666,7 +1693,7 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the headline, the outlet’s own short summary and, when its feed says, who wrote it (Tune → Reading → Bylines); Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week: sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the outlet, its section and why the card is there on one line, the picture the outlet supplies (small, beside the headline), the headline and the outlet’s own short summary; the writers are named only where an outlet’s terms ask for it, unless you turn on Every byline in Tune → Reading. Outlets and sections go by their usual short names (NYT, WSJ, Health & Med). Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week: sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Radar"),
@@ -1929,10 +1956,10 @@ function newsTrendsEl() {
                 el("p", { class: "sheet-meta" }, el("span", {}, (() => {
                   const shown = t.ids.filter((id) => byId[id]).length;
                   return shown < t.count ? `${plural(t.count, "headline")}, ${shown} still in the feed` : plural(t.count, "headline");
-                })()), el("span", {}, t.sources.join(", "))),
+                })()), el("span", {}, t.sources.map(srcName).join(", "))),
                 el("ul", { class: "rows" }, t.ids.map((id) => byId[id]).filter(Boolean).map((it) =>
                   el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
-                    el("span", { class: "news-src" }, el("b", {}, it.source), el("span", {}, agoShort(it.date))),
+                    el("span", { class: "news-src" }, el("b", {}, srcName(it.source)), el("span", {}, agoShort(it.date))),
                     el("span", { class: "news-title" }, it.title)))))) },
               t.term, el("b", {}, String(t.count)))))
           : el("p", { class: "nothing" }, "Not enough headlines yet."));
@@ -2059,7 +2086,7 @@ function agoShort(iso) {
 
 function savedNewsEl(it) {
   return el("article", { class: "paper", "data-key": saveKey(it) },
-    el("div", { class: "paper-meta" }, el("b", {}, it.source), el("span", {}, fmtDate((it.date || "").slice(0, 10)))),
+    el("div", { class: "paper-meta" }, el("b", {}, srcName(it.source)), el("span", {}, fmtDate((it.date || "").slice(0, 10)))),
     el("h3", { class: "paper-title" }, it.title),
     it.summary ? el("p", { class: "news-teaser", style: "margin:0" }, it.summary) : null,
     el("div", { class: "actions", style: `grid-template-columns:repeat(${it.audio ? 4 : 3},1fr)` },

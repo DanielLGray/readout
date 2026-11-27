@@ -48,6 +48,7 @@ function featuresOf(it) {
 // Bylines: a story's writers (from the outlet's feed) or a paper's listed authors. Only what you
 // choose for them in Rate counts; 👍, 👎 and what you open don't teach names (there are too many).
 function bylinesOf(it) {
+  if (isNewsItem(it) && !bylineShown(it)) return [];        // writers you don't see don't count either
   const list = isNewsItem(it) ? it.by : it.cite?.au;
   return (Array.isArray(list) ? list : []).filter((x) => typeof x === "string" && x && x.length <= 80).slice(0, 3);
 }
@@ -77,8 +78,8 @@ function featureName(f) {
     case "jr": return [v, "Journal"];
     case "ds": return [DESIGN_NAMES[v] || v, "Kind of study"];
     case "fl": return [FLAVORS[v]?.[0] || v, "Subject"];
-    case "src": return [v, "Outlet"];
-    case "cat": return [S.news?.categories?.[v] || v, "News category"];
+    case "src": return [srcName(v), "Outlet"];
+    case "cat": return [catLabel(v) || v, "News category"];
     case "by": return [v, "Byline"];
     case "wk": return [WATCH_KINDS[v] || v, "Watch section"];
     case "wt": return [S.watch?.topics?.[v] || v, "Watch topic"];
@@ -213,7 +214,7 @@ function openFeedback(it, picked = null) {
     const textPhrases = fresh(phrasesOf(shownText(it), true)).slice(0, 8);
     const wordChip = (w) => el("button", { class: "chip" + (picked === w ? " chip-topic" : ""), onclick: () => draw(picked === w ? null : w) }, w);
     const bylines = byFeatures(it);
-    refillSheet(
+    refillSheet(DONE_TOP,
       el("h2", { id: "sheet-title" }, "What do you think?"),
       el("p", { class: "sheet-meta fb-title" }, el("span", {}, it.title)),
       el("div", { class: "fb-quick" },
@@ -339,19 +340,24 @@ function whyParts(it) {
   } else {
     const k = it.kind || kindOf(it);
     const label = newsKinds()[k] || "News";
-    out.push({ s: label, l: `${label}, from ${it.source}. In Everything it gets ${plural(T.mix[k] ?? 1, "turn")} per round${T.cap && k !== "industry" ? `, and at most ${T.cap} a day from one outlet` : ""}.` });
+    out.push({ s: label, l: `${label}, from ${srcName(it.source)}. In Everything it gets ${plural(T.mix[k] ?? 1, "turn")} per round${T.cap && k !== "industry" ? `, and at most ${T.cap} a day from one outlet` : ""}.` });
     const many = topStoryLists(null).some(([, l]) => l.some((st) => (st.items || []).includes(it.id)));
     if (many) out.push({ s: "Several outlets", l: "Other outlets covered this story too: it’s in Top stories." });
   }
   if (isRead(it)) out.push({ s: "Seen", l: "You’ve seen it before, so it comes after cards you haven’t (Tune → Rules → Cards you’ve seen go to the end)." });
   return out;
 }
-function whyEl(it) {
-  if (!T.why || !it || SPECIAL.has(it.type)) return null;
-  const parts = whyParts(it);
-  if (!parts.length) return null;
-  return el("button", { class: "why-line", "aria-label": `Why this card: ${parts.map((p) => p.s).join(", ")}. Tap for more.`, onclick: () => openWhy(it) },
-    el("span", { class: "why-k" }, "Why"), el("span", { class: "why-t" }, parts.slice(0, 3).map((p) => p.s).join(" · ")));
+// the why, in the card's top line: for a story its section leads (and is part of the why); the
+// rest follows and wraps. Tap for the whole account.
+function whyInline(it, lead = null, kind = null) {
+  const leadEl = lead ? el("span", { class: "kind-label", "data-kind": kind || "" }, lead) : null;
+  if (!T.why || !it || SPECIAL.has(it.type)) return leadEl;
+  const shown = new Set([lead, it.classic ? "Classic of the day" : null, it._wide ? "Outside your areas" : null]);   // already on the card
+  const parts = whyParts(it).filter((p) => !shown.has(p.s));
+  if (!parts.length && !lead) return null;
+  return el("button", { class: "why-in", "aria-label": `Why this card: ${[lead, ...parts.map((p) => p.s)].filter(Boolean).join(", ")}. Tap for more.`, onclick: () => openWhy(it) },
+    leadEl || el("span", { class: "why-k" }, "Why"),
+    parts.length ? el("span", { class: "why-t" }, `${lead ? " · " : " "}${parts.slice(0, 3).map((p) => p.s).join(" · ")}`) : null);
 }
 function openWhy(it) {
   const news = isNewsItem(it);
@@ -473,7 +479,7 @@ function alertCards() {
     return { type: "alert", key: `alert:${a.id}`, sig: `${a.id}|${(a.sources || []).length}|${m}`, a, more: m };
   });
 }
-const outletsText = (s = []) => (s.length <= 2 ? s.join(" and ") : `${s.slice(0, 2).join(", ")} and ${plural(s.length - 2, "more outlet")}`);
+const outletsText = (s = []) => { s = s.map(srcName); return s.length <= 2 ? s.join(" and ") : `${s.slice(0, 2).join(", ")} and ${plural(s.length - 2, "more outlet")}`; };
 // a guideline carries the day PubMed listed it, not a time: count whole days, not hours since midnight UTC
 function alertWhen(a) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date || "")) return agoShort(a.date);

@@ -567,11 +567,16 @@ def test_link_only_and_no_pictures_when_fetched():
     (lo,), _ = build_news.fetch_source(http, {"name": "R", "link_only": True, "urls": ["https://radio.test/feed"]}, NOW)
     assert lo["title"] == "Rundown: Lake Mead and CCSD" and lo["link"] == "https://radio.test/ep1"
     assert not lo["summary"] and not lo.get("img") and not lo.get("audio")
-    (npic,), _ = build_news.fetch_source(http, {"name": "R", "no_pictures": True, "urls": ["https://radio.test/feed"]}, NOW)
+    (npic,), st = build_news.fetch_source(http, {"name": "R", "no_pictures": True, "urls": ["https://radio.test/feed"]}, NOW)
     assert npic["summary"] and not npic.get("img") and npic.get("audio")
+    assert "credit" not in st
+    _, st = build_news.fetch_source(http, {"name": "R", "credit_writers": True, "urls": ["https://radio.test/feed"]}, NOW)
+    assert st["credit"] is True                     # the app shows this outlet's bylines
     from pipeline.common import load_base
     src = {s["name"]: s for s in load_base("news.yaml")["sources"]}
     assert src["CalMatters"]["no_pictures"] and not src["CalMatters"].get("link_only")
+    credit = {n for n, s in src.items() if s.get("credit_writers")}
+    assert {"The Conversation", "KFF Health News", "Nevada Current"} <= credit and "New York Times" not in credit
 
 
 NEWSROOM = """<html><body><nav><a href="/about/newsroom/featured">Featured News</a><a href="/about/newsroom?pg=2">Next</a></nav>

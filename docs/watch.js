@@ -270,7 +270,7 @@ function openWatchRate(e) {
     const feats = wFeatures(e).sort((a, b) => order.indexOf(a.split(":")[0]) - order.indexOf(b.split(":")[0]));
     const group = ALERT_GROUP_OF[e.kind];
     const t = wTaste(e);
-    refillSheet(
+    refillSheet(DONE_TOP,
       el("h2", { id: "sheet-title" }, "What do you think?"),
       el("p", { class: "sheet-meta fb-title" }, el("span", {}, e.acr ? `${e.acr}: ${e.title}` : e.title)),
       el("p", { class: "fine" }, "More moves changes like this up in Watch and Today. Less moves them to the end of Watch, out of Today’s card and out of alerts. Hide takes them out of all of them."),
@@ -296,7 +296,7 @@ function rateAlert(a) {
   const story = a.via === "pubmed" ? null : (S.news?.items || []).find((i) => (a.items || []).includes(i.id));
   const paper = a.via === "pubmed" ? ((S.feed?.items || []).find((x) => x.pmid === a.pmid) || a.card) : null;
   const draw = () => {
-    refillSheet(
+    refillSheet(DONE_TOP,
       el("h2", { id: "sheet-title" }, "What do you think?"),
       el("p", { class: "sheet-meta fb-title" }, el("span", {}, a.title)),
       el("p", { class: "fine" }, "Turn this kind of alert off, or hide alerts with a word in the headline. The story or paper stays in your feed."),

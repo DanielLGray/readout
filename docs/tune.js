@@ -276,9 +276,9 @@ function todaySection() {
       (on) => { setTune({ weather: on }); if (on) wxRefresh(0); else renderWx(); rerender(); })),
     switchRow("Pictures", "A figure from each open-access paper whose license allows it, credited, and the picture each news outlet puts in its feed. Off: no pictures, less data.", T.pictures,
       (on) => { setTune({ pictures: on }); rerender(); }),
-    switchRow("Bylines", "Who wrote each news story, under its summary, when the outlet’s feed says. Rate on a story can hide or favor a writer either way.", T.bylines,
-      (on) => { setTune({ bylines: on }); rerender(); }),
-    switchRow("Why this card", "A line on each paper and story saying what put it there: the list, words you follow, what you’ve rated, its area. Tap it for the whole account, with the paper’s score.", T.why,
+    switchRow("Every byline", "Who wrote each news story, when the outlet’s feed says. Off: only for KFF Health News, The Conversation, the Nevada Current, HCN, CalMatters and the Sierra Nevada Ally, whose terms ask that writers be credited. Rate can hide or favor a writer you see.", T.allBylines,
+      (on) => { setTune({ allBylines: on }); rerender(); }),
+    switchRow("Why this card", "In each card’s top line, after the outlet or journal: what put it there (the section, the list, words you follow, what you’ve rated, its area). Tap it for the whole account, with the paper’s score.", T.why,
       (on) => { setTune({ why: on }); rerender(); }));
 }
 
@@ -691,7 +691,7 @@ function openHidden(g) {
   const day = (it) => (it.type === "watch" ? String(it.date || "").slice(0, 10) : dayOf(it));
   const row = (it) => el("li", { class: "news-item" }, el("button", { class: "w-row",
     onclick: () => (it.type === "watch" ? openWatchEvent(it.ev) : it.type === "paper" ? openAbstract(it) : window.open(safeUrl(it.link), "_blank", "noopener")) },
-    el("span", { class: "news-src" }, el("b", {}, it.type === "watch" ? WATCH_SHORT[it.ev.kind] || "Watch" : it.type === "paper" ? it.journal : it.source), el("span", {}, fmtDate(day(it)))),
+    el("span", { class: "news-src" }, el("b", {}, it.type === "watch" ? WATCH_SHORT[it.ev.kind] || "Watch" : it.type === "paper" ? it.journal : srcName(it.source)), el("span", {}, fmtDate(day(it)))),
     el("span", { class: "news-title" }, it.title)));
   openSheet(
     el("h2", { id: "sheet-title" }, g.label),
@@ -720,7 +720,7 @@ function algoPane() {
       el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
         const keep = { mutedSources: [], mutedWords: [] };
-        const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "bylines", "meetings", "taste", "learned", "reacts", "learnedAt", "learnImplicit", "learnRate", "fade"].map((k) => [k, T[k]]));
+        const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "allBylines", "meetings", "taste", "learned", "reacts", "learnedAt", "learnImplicit", "learnRate", "fade"].map((k) => [k, T[k]]));
         T = { ...TUNE_DEFAULTS, ...keep, ...mine }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
         toast("Feed rules reset"); rerender();
       })))];

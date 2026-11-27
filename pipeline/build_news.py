@@ -80,6 +80,8 @@ def fetch_source(http: Http, src: dict, now: datetime, dated: Optional[dict] = N
     dated = {} if dated is None else dated
     status = {"name": src["name"], "home": src.get("home", ""), "ok": False, "url": None, "count": 0,
               "newest": None, "tried": []}
+    if src.get("credit_writers"):              # its license or terms ask that writers be credited: the app shows bylines
+        status["credit"] = True
     need = re.compile(src["require"], re.I) if src.get("require") else None
     skip = re.compile(src["skip"], re.I) if src.get("skip") else None     # e.g. a magazine's poetry section
     found: dict[str, dict] = {}

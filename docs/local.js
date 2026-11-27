@@ -33,12 +33,12 @@ function localCardItem() {
   return { type: "brief-local", key: "brief:local", sig: items.map((i) => i.id).join(","), items, more: fresh.length - items.length };
 }
 function localCardEl(it) {
-  const cats = S.news?.categories || {};
+  const cats = Object.fromEntries((S.news?.local?.topics || []).map((c) => [c, catLabel(c)]));
   const card = el("article", { class: "card brief-card local-card", "data-key": "brief:local" },
     el("div", { class: "card-meta" }, el("span", { class: "card-journal" }, "Reno & Nevada"), el("span", {}, plural(it.items.length, "new story", "new stories"))),
     el("ul", { class: "rows" }, it.items.map((i) => el("li", { class: "news-item" },
       el("a", { class: "w-row", href: safeUrl(i.link), target: "_blank", rel: "noopener", onclick: () => learnFrom({ ...i, type: "news" }, "open") },
-        el("span", { class: "news-src" }, el("b", {}, i.source), el("span", {}, agoShort(i.date)),
+        el("span", { class: "news-src" }, el("b", {}, srcName(i.source)), el("span", {}, agoShort(i.date)),
           (i.categories || []).filter((c) => cats[c]).slice(0, 2).map((c) => el("span", {}, cats[c]))),
         el("span", { class: "news-title" }, i.title))))),
     el("div", { class: "link-row", style: "margin:0" },

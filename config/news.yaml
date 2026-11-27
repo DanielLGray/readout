@@ -233,6 +233,7 @@ sources:
 
   - name: KFF Health News
     kind: health
+    credit_writers: true       # its republishing terms ask for a byline with the reporter's name
     max_per_day: 6
     home: https://kffhealthnews.org
     urls:
@@ -316,6 +317,7 @@ sources:
 
   - name: The Conversation
     kind: health
+    credit_writers: true       # CC BY-ND: credit authors and their institutions, ideally in the byline
     max_per_day: 6
     home: https://theconversation.com/us/health
     urls:
@@ -572,6 +574,7 @@ sources:
   - name: Nevada Current
     group: statesnewsroom
     kind: local
+    credit_writers: true       # CC BY-NC-ND: attribution names the writer
     no_pictures: true          # its Getty and AP photos aren't free to show
     max_per_day: 8
     home: https://nevadacurrent.com
@@ -580,6 +583,7 @@ sources:
 
   - name: Sierra Nevada Ally
     kind: local
+    credit_writers: true       # Creative Commons: attribution names the writer
     no_pictures: true          # no stated terms for its pictures
     max_per_day: 6
     home: https://sierranevadaally.org
@@ -588,6 +592,7 @@ sources:
 
   - name: CalMatters
     kind: local
+    credit_writers: true       # "Give prominent credit to our journalists"
     max_per_day: 3
     no_pictures: true          # its wire photos aren't free to show
     home: https://calmatters.org
@@ -622,6 +627,7 @@ sources:
 
   - name: High Country News
     kind: local
+    credit_writers: true       # CC BY-NC-ND: attribution names the writer
     no_pictures: true          # photos need its written permission
     max_per_day: 4
     home: https://www.hcn.org

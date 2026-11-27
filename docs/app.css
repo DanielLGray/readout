@@ -175,8 +175,15 @@ a { color: inherit; }
   padding: 14px 18px 12px; display: flex; flex-direction: column; gap: 10px;
   border-bottom: 1px solid var(--line); overflow: hidden;
 }
-.card-meta { display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: var(--muted); }
+.card-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 13px; color: var(--muted); }
 .card-meta > * { flex: none; white-space: nowrap; }
+/* the why rides in the top line and wraps there; tap it for the whole account */
+.card-meta > .why-in { flex: 0 1 auto; min-width: 0; white-space: normal; text-align: left; padding: 0; margin: 0; border: 0;
+  background: none; font: inherit; color: var(--muted); line-height: 1.35; }
+.why-in .kind-label { font-size: inherit; }
+.why-in .why-k { margin-right: 1px; }
+.card-meta > .by-in { white-space: normal; flex: 0 1 auto; min-width: 0; }
+.card-meta .pod { color: var(--ink); font-weight: 700; }
 .card-meta > .card-journal { flex: 0 1 auto; min-width: 2em; overflow: hidden; text-overflow: ellipsis; }
 .card-journal { color: var(--ink); font-weight: 700; }
 /* top stories and Today: the label stays whole; the note after it gives way */
@@ -391,7 +398,6 @@ a { color: inherit; }
 .news-card .kind-label[data-kind="general"]::before { background: var(--k-gen); }
 .news-card .kind-label[data-kind="business"]::before { background: var(--k-biz); }
 .news-card .kind-label[data-kind="local"]::before { background: var(--k-local); }
-.kind-label .pod { margin-left: 10px; color: var(--ink); font-weight: 700; }
 .player { display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 2px; border-top: 1px solid var(--line); position: relative;
   background: var(--panel); }
 .player .icon-btn { color: var(--ink); flex: none; }
@@ -630,6 +636,10 @@ a { color: inherit; }
 .fig-credit { position: absolute; right: 6px; bottom: 6px; font-size: 11.5px; line-height: 1; color: #e8ecee;
   background: rgba(0,0,0,.62); padding: 4px 7px; border-radius: 6px; }
 .fig.in-sheet { height: auto; max-height: 46dvh; margin-top: 12px; }
+.sheet-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.sheet-top > .grab { grid-column: 2; margin: 0; }
+.sheet-top-btns { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 6px; }
+.act.done-top { height: 36px; padding: 0 16px; font-weight: 700; }
 .fig.in-sheet img { max-height: 46dvh; }
 .fig-full { display: block; background: #000; border-radius: 10px; overflow: hidden; margin: 4px 0 10px; }
 .fig-full img { display: block; width: 100%; height: auto; max-height: 62dvh; object-fit: contain; }
@@ -977,3 +987,17 @@ a { color: inherit; }
 .num-in::placeholder { font-weight: 400; color: var(--muted); }
 .ol-row.cap-only { grid-template-areas: "name step" "reset reset"; padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
 .ol-row.cap-only .stepper { grid-area: step; justify-self: end; }
+
+/* (kept last: it overrides the picture sizes for paged and compact cards above) */
+/* a card's picture: a quarter of the card wide, the headline beside it */
+.headrow { display: flex; gap: 12px; align-items: flex-start; }
+.headrow > .headtext { flex: 1; min-width: 0; }
+.headrow .news-headline, .feed.flow .headrow .news-headline { font-size: calc(18.5px * var(--ts, 1)); line-height: 1.28; }
+.card .headrow > .fig, .feed.flow .headrow > .fig.news-img { flex: none; width: 26%; max-width: 132px; height: auto; max-height: none;
+  aspect-ratio: 4 / 3; border-radius: 8px; }
+.card .headrow > .fig.small, .card .headrow > .fig.tiny { height: auto; }
+.card .headrow > .fig:not(.news-img) { aspect-ratio: 1; }                 /* a paper's figure: square, the whole of it shown */
+.card .headrow > .fig img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.news-card .concl-inner { margin-block: 0 auto; }                         /* the summary sits under its headline */
+.headrow > .fig .fig-credit { right: 3px; bottom: 3px; padding: 2px 4px; font-size: 9.5px; border-radius: 4px; max-width: calc(100% - 6px);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
