@@ -708,7 +708,9 @@ sources:
   - name: Renown Health
     kind: local
     link_only: true            # headlines and links only (see the Reno & Nevada notes above Nevada Current)
-    style: listing             # no feed for its press releases: the newsroom page's links, each dated from its own page
+    style: listing             # no feed for its press releases: the newsroom page's links and the sitemap's
+                               # recently changed newsroom addresses, each read once for its headline and date
+    merge: true
     links: "^/about/newsroom/[a-z0-9-]+/?$"
     scan: "/about/newsroom/[a-z0-9-]{8,}"     # its list is drawn by script: the addresses are in the page data
     pages_per_run: 12
@@ -716,6 +718,7 @@ sources:
     home: https://www.renown.org
     urls:
       - https://www.renown.org/about/newsroom
+      - https://www.renown.org/sitemap.xml        # robots.txt names it; the newsroom page shows only some releases
 
   - name: High Country News
     kind: local

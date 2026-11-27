@@ -633,3 +633,12 @@ def test_listing_source_reads_each_story_page_once():
     old = {k: v["d"] for k, v in dated.items()}  # dates kept before headlines were still count
     got4, _ = build_news.fetch_source(http, src, NOW, old)
     assert len(got4) == 2 and {i["title"] for i in got4} <= {i["title"] for i in got}
+
+
+def test_listing_from_a_sitemap_takes_recently_changed_stories():
+    sm = """<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url><loc>https://www.renown.org/about/newsroom/old-release-from-last-year-here</loc><lastmod>2025-06-10T14:07:13Z</lastmod></url>
+      <url><loc>https://www.renown.org/about/newsroom/renown-announces-roseview-cancer-tower</loc><lastmod>2026-11-20T18:00:00.000Z</lastmod></url>
+      <url><loc>https://www.renown.org/blog/measles-again</loc><lastmod>2026-11-21T18:00:00Z</lastmod></url></urlset>"""
+    got = news.parse_listing(sm, "https://www.renown.org/sitemap.xml", "Renown Health", r"^/about/newsroom/[a-z0-9-]+/?$", NOW)
+    assert [i["link"].split("/")[-1] for i in got] == ["renown-announces-roseview-cancer-tower"] and got[0]["title"] == ""

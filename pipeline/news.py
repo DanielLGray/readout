@@ -391,15 +391,26 @@ class _Links(HTMLParser):
             self._open[-1][1].append(data)
 
 
-def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime, scan: str = "") -> list[dict]:
+def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime, scan: str = "", recent: int = 45) -> list[dict]:
     """A newsroom page without a feed: each link on the page whose path matches `pattern` is a
     story, its link text the headline. Dated later from the story's own page (page_date), which also
     gives the headline when the link holds only a picture or a word or two (page_title).
     scan: also take story addresses written anywhere in the page (a site that draws its list with
-    script keeps the addresses in its page data, not in links)."""
+    script keeps the addresses in its page data, not in links).
+    The site's sitemap works too: its addresses changed in the last `recent` days."""
+    pat = re.compile(pattern)
+    if "<urlset" in text.lstrip()[:600]:
+        check_xml(text)
+        out = []
+        for u in ET.fromstring(text).iter(f"{SITEMAP_NS}url"):
+            loc, changed = (u.findtext(f"{SITEMAP_NS}loc") or "").strip(), parse_date(u.findtext(f"{SITEMAP_NS}lastmod") or "")
+            link = clean_link(urljoin(base, loc)) if loc else ""
+            if link and changed and changed >= now - timedelta(days=recent) and urlparse(link).scheme == "https" \
+                    and pat.search(urlparse(link).path):
+                out.append({"id": item_id(link, "", source), "title": "", "link": link, "source": source, "date": _utc(now), "summary": ""})
+        return out[:60]
     p = _Links()
     p.feed(text[:3_000_000])
-    pat = re.compile(pattern)
     best: dict[str, str] = {}
     for href, label in p.out:
         link = clean_link(urljoin(base, (href or "").strip()))

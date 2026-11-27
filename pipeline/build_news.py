@@ -88,7 +88,8 @@ def fetch_source(http: Http, src: dict, now: datetime, dated: Optional[dict] = N
         try:
             text = http.request("GET", url, {}, expect_json=False)
             if src.get("style") == "listing":
-                items = news.parse_listing(text, url, src["name"], str(src.get("links") or "."), now, str(src.get("scan") or ""))
+                items = news.parse_listing(text, url, src["name"], str(src.get("links") or "."), now, str(src.get("scan") or ""),
+                                           int(src.get("recent_days", 45)))
             else:
                 items = news.parse_feed(text, src["name"], now, verbatim=bool(src.get("verbatim")), style=str(src.get("style") or ""))
         except (HttpError, Exception) as exc:      # bad address, block, or unreadable feed: try the next
