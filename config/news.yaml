@@ -653,6 +653,8 @@ sources:
   #   Sierra Nevada Ally (Reno nonprofit): noncommercial Creative Commons republishing guidelines, as Our
   #     Town Reno reports; its own site turned away automated reading, so this rests on that report
   #   High Country News: CC BY-NC-ND 4.0 (on each story); regional (the West), so kept to Nevada and the Sierra
+  #   Pictures: none from these outlets (no_pictures). States Newsroom allows only its own photos with
+  #     their stories, HCN's need written permission, and the Ally states nothing about its pictures
   #   CalMatters: "All of the articles at CalMatters are available to republish for free" with credit,
   #     unedited, not sold; wire photos excluded (no_pictures). California-wide, so kept to Tahoe,
   #     Truckee, the Sierra and stories naming Nevada or Reno
@@ -667,6 +669,7 @@ sources:
   - name: Nevada Current
     group: statesnewsroom
     kind: local
+    no_pictures: true          # its Getty and AP photos aren't free to show
     max_per_day: 8
     home: https://nevadacurrent.com
     urls:
@@ -674,6 +677,7 @@ sources:
 
   - name: Sierra Nevada Ally
     kind: local
+    no_pictures: true          # no stated terms for its pictures
     max_per_day: 6
     home: https://sierranevadaally.org
     urls:
@@ -700,6 +704,7 @@ sources:
 
   - name: High Country News
     kind: local
+    no_pictures: true          # photos need its written permission
     max_per_day: 4
     home: https://www.hcn.org
     require: "\\b(?:Nevada|Reno|Tahoe|Truckee|Washoe|Carson City|Great Basin|Sierra Nevada|Pyramid Lake|Walker Lake|Lake Mead|Las Vegas|Elko)\\b"
