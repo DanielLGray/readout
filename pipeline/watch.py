@@ -262,6 +262,96 @@ def drug_events(app: dict, iso_re: "re.Pattern", agents_re: "re.Pattern", skip_r
     return out
 
 
+# ── FDA drug shortages (openFDA, public domain) ────────────────────────────
+FDA_SHORTAGES_PAGE = "https://www.accessdata.fda.gov/scripts/drugshortages/default.cfm"
+
+
+def fda_day(s) -> Optional[date]:
+    """openFDA's shortage dates: 'MM/DD/YYYY', or '2026-11-27' / '20261127'."""
+    s = str(s or "").strip()
+    m = re.fullmatch(r"(\d{1,2})/(\d{1,2})/(\d{4})", s)
+    if m:
+        try:
+            return date(int(m[3]), int(m[1]), int(m[2]))
+        except ValueError:
+            return None
+    return ymd(s[:10])
+
+
+def _short_status(s: str) -> str:
+    s = str(s or "").strip().lower()
+    return "current" if s.startswith("current") else "disc" if "discontinu" in s else "resolved" if s.startswith("resolved") else ""
+
+
+def shortage_report(rows: list[dict], cfg: dict, today: date) -> "tuple[list[dict], list[dict]]":
+    """The FDA's shortage list (one record per package) → the imaging drugs in shortage now, one entry
+    per drug, and Watch changes: a new shortage, one resolved, a drug to be discontinued."""
+    match = re.compile(cfg.get("match") or r"x^", re.I)
+    inject_only = re.compile(cfg.get("inject_only") or r"x^", re.I)
+    alert = re.compile(cfg.get("alert") or r"x^", re.I)
+    window = int(cfg.get("window_days", 60))
+    drugs: dict[str, dict] = {}
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        name = clean_text(str(r.get("generic_name") or ""))[:120]
+        of = r.get("openfda") if isinstance(r.get("openfda"), dict) else {}
+        words = " ".join([name, str(r.get("proprietary_name") or ""), " ".join(map(str, of.get("substance_name") or []))])
+        if not name or not match.search(words):
+            continue
+        form = clean_text(str(r.get("dosage_form") or ""))[:60]
+        if inject_only.search(words) and not re.search(r"inject", f"{form} {r.get('presentation') or ''}", re.I):
+            continue
+        st = _short_status(r.get("status"))
+        if not st:
+            continue
+        key = H.slug(name)
+        d = drugs.setdefault(key, {"name": name, "st": set(), "companies": [], "brands": [], "forms": [], "reasons": [], "avail": [],
+                                   "related": "", "link": "", "posted": None, "updated": None, "n": 0})
+        d["st"].add(st)
+        d["n"] += 1
+        for k, v in (("companies", r.get("company_name")), ("brands", r.get("proprietary_name")), ("forms", form), ("reasons", r.get("shortage_reason"))):
+            v = clean_text(str(v or ""))[:100]
+            if v and v not in d[k]:
+                d[k].append(v)
+        d["avail"].append(clean_text(str(r.get("availability") or "")).lower())
+        if not d["related"] and r.get("related_info"):
+            d["related"] = clean_text(str(r["related_info"]))[:400]
+        link = str(r.get("related_info_link") or "")
+        if not d["link"] and re.fullmatch(r"https://(?:www\.)?(?:accessdata\.)?fda\.gov/\S{1,300}", link):
+            d["link"] = link
+        p, u = fda_day(r.get("initial_posting_date")), fda_day(r.get("update_date") or r.get("change_date"))
+        if p and st == "current" and (not d["posted"] or p < d["posted"]):
+            d["posted"] = p
+        if u and (not d["updated"] or u > d["updated"]):
+            d["updated"] = u
+    now_list, events = [], []
+    since = today - timedelta(days=window)
+    for key, d in sorted(drugs.items()):
+        status = "current" if "current" in d["st"] else "disc" if "disc" in d["st"] else "resolved"
+        unavailable = sum(1 for a in d["avail"] if a.startswith("unavailable"))
+        limited = sum(1 for a in d["avail"] if a.startswith("limited"))
+        avail = ", ".join(x for x in (f"{unavailable} of {d['n']} unavailable" if unavailable else "",
+                                      f"{limited} limited" if limited else "") if x) or ""
+        entry = {"id": key, "name": d["name"], "status": status, "companies": d["companies"][:6], "brands": d["brands"][:4],
+                 "forms": d["forms"][:4], "reason": d["reasons"][0] if d["reasons"] else "", "avail": avail, "related": d["related"],
+                 "posted": d["posted"].isoformat() if d["posted"] else "", "updated": d["updated"].isoformat() if d["updated"] else "",
+                 "link": d["link"] or FDA_SHORTAGES_PAGE}
+        if status in ("current", "disc"):
+            now_list.append(entry)
+        sub = " · ".join(x for x in (", ".join(d["companies"][:3]), entry["reason"]) if x)
+        base = {"kind": "shortage", "topic": "shortages", "title": d["name"], "sub": sub[:200], "link": entry["link"],
+                "org": d["companies"][0] if d["companies"] else ""}
+        if status == "current" and d["posted"] and d["posted"] >= since:
+            events.append({**base, "id": f"shortage:{key}:new:{d['posted']}", "date": d["posted"].isoformat(), "what": "New shortage posted by the FDA",
+                           "level": "alert" if alert.search(d["name"]) else "update"})
+        elif status in ("resolved", "disc") and d["updated"] and d["updated"] >= since:
+            events.append({**base, "id": f"shortage:{key}:{'resolved' if status == 'resolved' else 'disc'}:{d['updated']}", "date": d["updated"].isoformat(),
+                           "what": "Shortage resolved" if status == "resolved" else "To be discontinued", "level": "update"})
+    now_list.sort(key=lambda e: (e["status"] != "current", e["posted"] or "9999", e["name"]))
+    return now_list, events
+
+
 # ── Federal Register ───────────────────────────────────────────────────────
 _CORRECTION = re.compile(r";\s*Correct(?:ion|ing Amendment)s?\s*$|^Correction", re.I)
 FR_KIND = {"Rule": "Final rule", "Proposed Rule": "Proposed rule", "Notice": "Notice"}

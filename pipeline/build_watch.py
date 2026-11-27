@@ -19,11 +19,12 @@ CTGOV = "https://clinicaltrials.gov/api/v2/studies"
 FDA_510K = "https://api.fda.gov/device/510k.json"
 FDA_PMA = "https://api.fda.gov/device/pma.json"
 FDA_DRUGS = "https://api.fda.gov/drug/drugsfda.json"
+FDA_SHORTAGES = "https://api.fda.gov/drug/shortages.json"
 FED_REG = "https://www.federalregister.gov/api/v1/documents.json"
 CT_FIELDS = ("NCTId|BriefTitle|Acronym|OverallStatus|WhyStopped|PrimaryCompletionDate|PrimaryCompletionDateType|"
              "StudyFirstPostDate|LastUpdatePostDate|ResultsFirstPostDate|Phase|StudyType|EnrollmentCount|LeadSponsorName|HasResults")
 ACTIVE_FILTER = "NOT_YET_RECRUITING,RECRUITING,ENROLLING_BY_INVITATION,ACTIVE_NOT_RECRUITING"
-KINDS = {"trial": "Trials", "device": "FDA devices", "drug": "FDA drugs", "rule": "Rules and guidance"}
+KINDS = {"trial": "Trials", "device": "FDA devices", "drug": "FDA drugs", "shortage": "Shortages", "rule": "Rules and guidance"}
 
 
 def ct_query(http: Http, params: dict, max_pages: int) -> list[dict]:
@@ -211,8 +212,22 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
             fr_dates.update({d["id"]: d for d in dates})
         return n
 
+    sh_cfg = cfg.get("shortages") or {}
+    short_now: list = list(state.get("shortages") or [])         # the last list, if the FDA can't be read today
+
+    def shortages() -> int:
+        rows = fda_query(http, FDA_SHORTAGES, "_exists_:generic_name", max_pages=4)
+        if not rows:
+            raise RuntimeError("openFDA sent no shortage records")
+        now_list, evs = W.shortage_report(rows, sh_cfg, today)
+        short_now[:] = now_list
+        add(evs)
+        return len(now_list)
+
     source("openFDA devices", devices)
     source("openFDA drugs", drugs)
+    if sh_cfg:
+        source("openFDA shortages", shortages)
     source("Federal Register", rules)
 
     # keep what's recent; trials stay while under way, or for 400 days after their last update
@@ -239,14 +254,15 @@ def build(http: Http, cfg: dict, state: dict, now: datetime) -> "tuple[dict, dic
         "kinds": KINDS,
         "topics": {**{t["id"]: t["name"] for t in topics.values()}, "follow": follow_topic["name"],
                    **{r["id"]: r["name"] for r in cfg.get("rules") or []}, "devices": "Radiology devices", "pma": "Heart valve approvals",
-                   "drugs": "Imaging agents and radiopharmaceuticals"},
+                   "drugs": "Imaging agents and radiopharmaceuticals", "shortages": "Imaging drug shortages"},
+        "shortages": short_now,
         "sources": sources,
         "events": kept,
         "dates": sorted(list(fr_dates.values()) + readouts, key=lambda e: e["start"]),
         "tracked": sum(1 for v in trials.values() if v.get("s") in W.ACTIVE),
     }
     new_state = {"last_run": today.isoformat(), "readouts_at": state.get("readouts_at", ""), "trials": trials,
-                 "events": kept, "dates": list(fr_dates.values())}
+                 "events": kept, "dates": list(fr_dates.values()), "shortages": short_now}
     return data, new_state
 
 

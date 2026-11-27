@@ -3,20 +3,20 @@
    Loaded after radar.js. */
 "use strict";
 
-const WATCH_KINDS = { trial: "Trials", device: "FDA devices", drug: "FDA drugs", rule: "Rules and guidance" };
-const WATCH_SHORT = { trial: "Trial", device: "FDA device", drug: "FDA drug", rule: "Rule" };
-const WATCH_LINK = { trial: "ClinicalTrials.gov", device: "FDA database", drug: "Drugs@FDA", rule: "Federal Register" };
-const WATCH_COUNT = { trial: "trial change", device: "device clearance", drug: "drug approval", rule: "rule" };
-const W_FILTERS = [["all", "All"], ["trial", "Trials"], ["fda", "FDA"], ["rule", "Rules"], ["follow", "Following"]];
+const WATCH_KINDS = { trial: "Trials", device: "FDA devices", drug: "FDA drugs", shortage: "Shortages", rule: "Rules and guidance" };
+const WATCH_SHORT = { trial: "Trial", device: "FDA device", drug: "FDA drug", shortage: "Shortage", rule: "Rule" };
+const WATCH_LINK = { trial: "ClinicalTrials.gov", device: "FDA database", drug: "Drugs@FDA", shortage: "FDA shortage list", rule: "Federal Register" };
+const WATCH_COUNT = { trial: "trial change", device: "device clearance", drug: "drug approval", shortage: "shortage change", rule: "rule" };
+const W_FILTERS = [["all", "All"], ["trial", "Trials"], ["fda", "FDA"], ["shortage", "Shortages"], ["rule", "Rules"], ["follow", "Following"]];
 
-const wTopic = (e) => S.watch?.topics?.[e.topic] || "";
+const wTopic = (e) => (e.topic === "shortages" ? "" : S.watch?.topics?.[e.topic] || "");     // a shortage's kind already says it
 const wFollowing = (nct) => !!nct && T.watch.follow.includes(nct);
 
 // ── Rate: what you think of a device type, a company, a kind of change… ────
 // The same Hide, Less, Same and More as on cards (kept with them, in Tune → Interests → What you
 // like), about these features. pipeline/watch_features.py does the same for notifications.
 const W_CHANGE = { "510k": "510(k) clearances", denovo: "De Novo grants", "pma-new": "New PMA approvals", "pma-ind": "New indications for PMA devices",
-  "drug-new": "New drug approvals", "drug-ind": "New indications for drugs", new: "New trials registered", status: "Trial status changes",
+  "drug-new": "New drug approvals", "drug-ind": "New indications for drugs", "short-new": "New shortages", "short-end": "Shortages resolved", "short-disc": "Drugs to be discontinued", new: "New trials registered", status: "Trial status changes",
   results: "Trial results posted", pcd: "Primary completion reached or moved", final: "Final rules", proposed: "Proposed rules", notice: "Notices and guidance" };
 // FDA's records write companies in capitals ("ABBOTT MEDICAL"): shown in ordinary case, short
 // names (GE, USA) and company suffixes kept as they're written
@@ -40,6 +40,7 @@ function wOrg(e) {
   const p = wParts(e);
   if (e.kind === "device" && p.length && !p[0].startsWith("product code")) return p[0].slice(0, 100);
   if (e.kind === "drug" && p.length) return p[0].slice(0, 100);
+  if (e.kind === "shortage" && p.length) return p[0].split(", ")[0].slice(0, 100);
   if (e.kind === "trial") { const r = p.filter((x) => !x.startsWith("Phase ") && !/\bpatients$/.test(x)); return r.length ? r[r.length - 1].slice(0, 100) : ""; }
   return "";
 }
@@ -51,11 +52,12 @@ function wChange(e) {
   if (e.kind === "drug") return what.startsWith("New drug") ? "drug-new" : "drug-ind";
   if (e.kind === "trial") { const c = (id.split(":")[2] || "").split("-")[0]; return ["new", "status", "results", "pcd"].includes(c) ? c : ""; }
   if (e.kind === "rule") { const h = what.split(";")[0].trim().toLowerCase(); return h === "final rule" ? "final" : h === "proposed rule" ? "proposed" : "notice"; }
+  if (e.kind === "shortage") return { new: "short-new", resolved: "short-end", disc: "short-disc" }[id.split(":")[2]] || "";
   return "";
 }
 function wFeatures(e) {
   const f = [`wk:${e.kind}`];
-  if (e.topic && e.topic !== "devices" && e.topic !== "drugs") f.push(`wt:${e.topic}`);
+  if (e.topic && !["devices", "drugs", "shortages"].includes(e.topic)) f.push(`wt:${e.topic}`);
   const c = wChange(e), pc = wCode(e), o = wOrg(e), ph = wPhase(e);
   if (c) f.push(`wc:${c}`);
   if (pc) f.push(`wp:${pc}`);
@@ -178,7 +180,7 @@ function drawWatch() {
   const weekCut = localDay(daysAgo(7)), monthCut = localDay(daysAgo(30));
   const groups = [["This week", (e) => e.date >= weekCut], ["Earlier this month", (e) => e.date < weekCut && e.date >= monthCut], ["Before that", (e) => e.date < monthCut]];
   body.replaceChildren(el("div", { class: "rd-page w-page" },
-    el("p", { class: "lede small" }, "What changed in trials, FDA approvals and clearances, and federal rules for your areas, read every day from the public records."),
+    el("p", { class: "lede small" }, "What changed in trials, FDA approvals and clearances, drug shortages and federal rules for your areas, read every day from the public records."),
     el("div", { class: "chips wrap w-chips", role: "group", "aria-label": "Show" },
       W_FILTERS.filter(([k]) => k !== "follow" || T.watch.follow.length).map(([k, l]) => el("button", { class: "chip", "aria-pressed": String(f === k),
         onclick: () => { S.watchFilter = k; drawWatch(); } }, l))),
@@ -189,6 +191,7 @@ function drawWatch() {
       el("ul", { class: "rows" }, ahead.map((d) => el("li", { class: "news-item" }, el("button", { class: "w-row", onclick: () => openHzEvent(d) },
         el("span", { class: "news-src" }, el("b", {}, `~${fmtDate(d.start.slice(0, 10))}`), d.sub ? el("span", {}, d.sub) : null),
         el("span", { class: "news-title" }, d.title.replace(/: primary completion \(estimated\)$/, ""))))))) : null,
+    (f === "all" || f === "shortage") && T.watch.kinds.shortage !== false ? shortageNowEl() : null,
     W && !list.length ? el("p", { class: "nothing" }, f === "follow" ? "No changes yet in the trials you follow." : "Nothing here in the last four months.") : null,
     groups.map(([label, test]) => {
       const g = shown.filter(test);
@@ -202,11 +205,42 @@ function drawWatch() {
       el("summary", {}, "Rated less", el("span", { class: "fine" }, String(less.length))),
       el("p", { class: "fine", style: "margin:0 0 6px" }, "Changes like ones you rated Less: kept here, out of Today’s card and alerts. Open one and tap Rate to change that."),
       el("ul", { class: "rows" }, less.slice(0, 120).map(wEventEl))) : null,
-    W ? el("p", { class: "fine" }, "From ClinicalTrials.gov (U.S. National Library of Medicine), openFDA (510(k), PMA and Drugs@FDA; the FDA’s device data arrive monthly) and the Federal Register, all public records; Readout isn’t endorsed by any of them. ",
+    W ? el("p", { class: "fine" }, "From ClinicalTrials.gov (U.S. National Library of Medicine), openFDA (510(k), PMA, Drugs@FDA and the FDA’s drug shortage list; the FDA’s device data arrive monthly) and the Federal Register, all public records; Readout isn’t endorsed by any of them. ",
       (W.sources || []).filter((s) => !s.ok).map((s) => el("span", { class: "warn-text" }, `${s.name} couldn’t be read on the last run. `)),
       `Updated ${ago(W.generated)}. `,
       el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("interests", "tune-watch"); } }, "Choose what shows")) : null));
   body.scrollTop = keep;
+}
+// what's in shortage now (the FDA's list, by drug), oldest first
+function shortageNowEl() {
+  const list = S.watch?.shortages || [];
+  if (!list.length) return null;
+  const now = list.filter((d) => d.status === "current"), disc = list.filter((d) => d.status !== "current");
+  const row = (d) => el("li", { class: "news-item" }, el("button", { class: "w-row", onclick: () => openShortage(d) },
+    el("span", { class: "news-src" }, el("b", {}, d.status === "current" ? "In shortage" : "Discontinuing"),
+      d.posted ? el("span", {}, `since ${fmtDate(d.posted)}`) : null, d.avail ? el("span", {}, d.avail) : null),
+    el("span", { class: "news-title" }, d.name + (d.brands.length ? ` (${d.brands.slice(0, 2).join(", ")})` : "")),
+    d.reason ? el("span", { class: "fine" }, d.reason) : null));
+  return el("details", { class: "outlets w-short", open: S.watchFilter === "shortage" },
+    el("summary", {}, "In shortage now", el("span", { class: "fine" }, String(now.length) + (disc.length ? ` + ${disc.length} to be discontinued` : ""))),
+    el("p", { class: "fine", style: "margin:0 0 6px" }, "Imaging drugs on the FDA’s shortage list, one line per drug. The FDA lists each package; a shortage can be partial, so check with your pharmacy or supplier."),
+    el("ul", { class: "rows" }, now.concat(disc).map(row)));
+}
+function openShortage(d) {
+  const link = safeUrl(d.link || "");
+  openSheet(
+    el("p", { class: "hz-kind" }, "Shortages · FDA drug shortage list"),
+    el("h2", { id: "sheet-title" }, d.name),
+    el("p", { class: "sheet-meta" }, el("span", {}, d.status === "current" ? "In shortage" : "To be discontinued"),
+      d.posted ? el("span", {}, `first reported ${fmtDate(d.posted)}`) : null, d.updated ? el("span", {}, `updated ${fmtDate(d.updated)}`) : null),
+    d.brands.length ? el("p", {}, el("b", {}, "Brands: "), d.brands.join(", ")) : null,
+    d.companies.length ? el("p", {}, el("b", {}, "Companies: "), d.companies.map(niceCaps).join(", ")) : null,
+    d.forms.length ? el("p", {}, el("b", {}, "Forms: "), d.forms.join(", ")) : null,
+    d.avail ? el("p", {}, el("b", {}, "Packages: "), d.avail) : null,
+    d.reason ? el("p", {}, el("b", {}, "Reason: "), d.reason) : null,
+    d.related ? el("p", {}, d.related) : null,
+    el("p", { class: "fine" }, "From the FDA’s drug shortage list (openFDA, public domain), in its own words."),
+    el("div", { class: "link-row" }, link !== "#" ? el("a", { class: "act", href: link, target: "_blank", rel: "noopener" }, icon(ICONS.read), "FDA shortage list") : null));
 }
 function openWatchEvent(e) {
   const link = safeUrl(e.link || "");
@@ -234,7 +268,7 @@ function openWatchEvent(e) {
 }
 
 // ── the Rate sheet for a Watch change, and for an alert ────────────────────
-const ALERT_GROUP_OF = { trial: "trials", rule: "rules", drug: "fda", device: "fda" };
+const ALERT_GROUP_OF = { trial: "trials", rule: "rules", drug: "fda", device: "fda", shortage: "fda" };
 function alertKindRow(group, redraw) {
   const name = ALERT_GROUPS[group]?.[0] || group;
   return el("div", { class: "fb-row" },
@@ -357,13 +391,14 @@ function watchSection() {
   const titles = {};
   (W?.events || []).forEach((e) => { if (e.nct) titles[e.nct] = e.acr || e.title; });
   (W?.dates || []).forEach((d) => { if (d.nct) titles[d.nct] ||= d.title.replace(/: primary completion.*$/, ""); });
-  const topics = Object.entries(W?.topics || {}).filter(([k]) => !["follow", "devices", "pma", "drugs"].includes(k));
+  const topics = Object.entries(W?.topics || {}).filter(([k]) => !["follow", "devices", "pma", "drugs", "shortages"].includes(k));
   return el("section", { class: "sect", id: "tune-watch" }, el("h2", {}, "Watch"),
     el("p", { class: "sub" }, "Changes in trials, FDA approvals and clearances, and federal rules, in Explore → Watch and once in Today. Major ones (a new imaging agent or heart valve approved, Phase 3 results posted, a final Medicare payment rule) are alerts."),
     Object.entries(WATCH_KINDS).map(([k, label]) => switchRow(label, {
       trial: "New trials, status changes, results posted, primary completion reached or moved (ClinicalTrials.gov).",
       device: "510(k) clearances from the FDA’s radiology panel, and new heart-valve approvals and indications.",
       drug: "New radiopharmaceuticals and contrast agents, and new indications for them.",
+      shortage: "The FDA’s shortage list for contrast, radiopharmaceuticals and their kits, and the drugs imaging leans on (stress agents, sincalide, secretin, thyroid blocking): what’s short now, and each new shortage, resolution or discontinuation. A new shortage of iodinated or gadolinium contrast, Tc-99m and its main kits, regadenoson, FDG, PSMA and SSTR agents, Lu-177, rubidium or sincalide is an alert.",
       rule: "Medicare payment rules, NRC rules on medical use of radioactive material, FDA radiology and mammography rules and guidance.",
     }[k], T.watch.kinds[k] !== false, (on) => setW({ kinds: { ...T.watch.kinds, [k]: on } }))),
     switchRow("Only AI among device clearances", "Leaves out routine scanner, coil and workstation clearances.", T.watch.aiOnly, (on) => setW({ aiOnly: on })),

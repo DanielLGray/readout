@@ -19,6 +19,8 @@ def org_of(e: dict) -> str:
         return parts[0][:100]
     if k == "drug" and parts:
         return parts[0][:100]
+    if k == "shortage" and parts:                  # the first of the companies listed
+        return parts[0].split(", ")[0][:100]
     if k == "trial":
         rest = [p for p in parts if not p.startswith("Phase ") and not re.search(r"\bpatients$", p)]
         return rest[-1][:100] if rest else ""
@@ -49,6 +51,9 @@ def change_of(e: dict) -> str:
     if k == "trial":
         code = i.split(":", 2)[2] if i.count(":") >= 2 else ""
         return code.split("-")[0] if code.split("-")[0] in ("new", "status", "results", "pcd") else ""
+    if k == "shortage":
+        part = i.split(":")[2] if i.count(":") >= 2 else ""
+        return {"new": "short-new", "resolved": "short-end", "disc": "short-disc"}.get(part, "")
     if k == "rule":
         head = what.split(";")[0].strip().lower()
         return "final" if head == "final rule" else "proposed" if head == "proposed rule" else "notice"
@@ -59,7 +64,7 @@ def features(e: dict) -> list[str]:
     """What Rate can say something about: wk kind, wt topic, wc kind of change, wp device type (product
     code), wa AI, wo company or sponsor, wph phase."""
     f = [f"wk:{e.get('kind')}"]
-    if e.get("topic") and e["topic"] not in ("devices", "drugs"):
+    if e.get("topic") and e["topic"] not in ("devices", "drugs", "shortages"):
         f.append(f"wt:{e['topic']}")
     for pre, v in (("wc", change_of(e)), ("wp", code_of(e))):
         if v:

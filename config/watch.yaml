@@ -81,6 +81,17 @@ drugs:
   # site licenses for long-established PET drugs (dozens a year, none of them news)
   skip: '\b(?:FLUDEOXYGLUCOSE|AMMONIA N\W?13|SODIUM FLUORIDE F\W?18)\b'
 
+# FDA drug shortages (openFDA's copy of the FDA Drug Shortages list, public domain): contrast, the
+# radiopharmaceuticals and their kits, and the drugs nuclear medicine and imaging lean on (stress agents,
+# sincalide, secretin, thyroid blocking). Watch lists what's in shortage now, and each new shortage,
+# resolution or discontinuation as a change; a new shortage of one in `alert` is an alert.
+shortages:
+  window_days: 60
+  match: '\b(?:io(?:hexol|pamidol|dixanol|versol|promide|meprol|bitridol)|diatrizoate|barium sulfate|gado\w+|perflutren|perflexane|sulfur hexafluoride|ferumoxytol|technetium|pertechnetate|tc[ -]?99m|sestamibi|tetrofosmin|medronate|oxidronate|mertiatide|pentetate|aggregated albumin|albumin aggregated|sulfur colloid|mebrofenin|disofenin|pyrophosphate|exametazime|bicisate|succimer|tilmanocept|sincalide|regadenoson|adenosine|dipyridamole|dobutamine|thallous|gallium|indium|sodium iodide|iobenguane|ioflupane|xenon|rubidium|fludeoxyglucose|fluciclovine|piflufolastat|flotufolastat|gozetotide|dotatate|dotatoc|lutetium|radium|flurpiridaz|florbetapir|florbetaben|flutemetamol|flortaucipir|fluoroestradiol|fluorodopa|thyrotropin|secretin|glucagon|potassium iodide|acetazolamide|furosemide)\b'
+  # also used elsewhere as tablets or emergency kits: only their injections count
+  inject_only: '\b(?:adenosine|dipyridamole|dobutamine|regadenoson|glucagon|furosemide|acetazolamide)\b'
+  alert: '\b(?:io(?:hexol|pamidol|dixanol|versol|promide|meprol)|gado\w+|pertechnetate|technetium|sestamibi|tetrofosmin|medronate|regadenoson|fludeoxyglucose|piflufolastat|flotufolastat|gozetotide|dotatate|lutetium|rubidium|sincalide)\b'
+
 rules:
   # agency: the Federal Register's name for it; cfr: [title, part]; types: RULE, PRORULE, NOTICE
   # title: only documents whose title matches; alert: a final rule whose title matches is an alert

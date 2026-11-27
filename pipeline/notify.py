@@ -31,8 +31,8 @@ from .watch_features import features as watch_features
 PUSH_HOSTS = re.compile(r"(?:^|\.)(?:push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com)$")
 _B64U = re.compile(r"^[A-Za-z0-9_-]+$")
 CONTACT = "https://daniellgray.github.io"               # who sends, for the push service: the app's own site (no email needed)
-GROUP_OF_KIND = {"trial": "trials", "rule": "rules", "drug": "fda", "device": "fda"}
-LABEL_OF_KIND = {"trial": "Trial results", "rule": "Federal rule", "drug": "FDA", "device": "FDA"}
+GROUP_OF_KIND = {"trial": "trials", "rule": "rules", "drug": "fda", "device": "fda", "shortage": "fda"}
+LABEL_OF_KIND = {"trial": "Trial results", "rule": "Federal rule", "drug": "FDA", "device": "FDA", "shortage": "FDA shortage"}
 MAX_EACH = 3                                             # more new alerts than this in one go: the rest as one summary
 
 
