@@ -11546,8 +11546,8 @@
   "a1272d789661": [
     "2026-11-27T12:25:25Z",
     "Stocks Rally at End of a Week of Wild Swings",
-    "New York Times",
-    "general"
+    "New York Times Business",
+    "business"
   ],
   "a7fa7ec0a8e6": [
     "2026-11-27T12:22:00Z",
@@ -11720,8 +11720,8 @@
   "5f46bc8e8eae": [
     "2026-11-27T10:00:00Z",
     "12 strategies to cut your risk of dementia. Take this quiz to start",
-    "NPR Health",
-    "health"
+    "NPR News",
+    "general"
   ],
   "80d54bc16a73": [
     "2026-11-27T10:00:00Z",
@@ -12820,5 +12820,71 @@
     "Fort McDermitt death, Dolores Huerta and Station Casinos negotiations",
     "Nevada Public Radio",
     "local"
+  ],
+  "0b96ddb36a03": [
+    "2026-11-27T16:00:54Z",
+    "STAT+: FDA extends assessment of experimental Vertex kidney drug",
+    "STAT",
+    "health"
+  ],
+  "54920689baaf": [
+    "2026-11-27T16:00:07Z",
+    "Meteor blast scars hint at Venus's gradual volcanic makeover",
+    "Phys.org",
+    "science"
+  ],
+  "f3030c018611": [
+    "2026-11-27T16:00:00Z",
+    "‘The Dark Knight’ Batsuit, Jon Snow’s sword, and hundreds of other iconic movie props up for auction",
+    "Popular Science",
+    "light"
+  ],
+  "c26728ea18ee": [
+    "2026-11-27T15:52:00Z",
+    "These stocks soared the most during a wild week highlighted by Huang’s return to Nvidia",
+    "MarketWatch",
+    "business"
+  ],
+  "b6b70bbc552b": [
+    "2026-11-27T15:49:05Z",
+    "The stories we’re grateful for this year",
+    "STAT",
+    "health"
+  ],
+  "12e3ae11c270": [
+    "2026-11-27T15:47:57Z",
+    "In Democrats vs. Trump, the Loser May Be Federal Contractors",
+    "New York Times",
+    "general"
+  ],
+  "57632ce765bb": [
+    "2026-11-27T15:47:49Z",
+    "Supreme Court Rulings Cheered by Republicans Wound Up Hurting Them",
+    "New York Times",
+    "general"
+  ],
+  "128bd72f98f2": [
+    "2026-11-27T15:40:27Z",
+    "The faintest supernova ever observed refuses to go out, staying visible for nearly a year",
+    "Phys.org",
+    "science"
+  ],
+  "7d6ae72496d4": [
+    "2026-11-27T15:40:11Z",
+    "Brazil loses up to 75 days of rainy season as extreme heat threatens food production",
+    "Phys.org",
+    "science"
+  ],
+  "7b0a608574c0": [
+    "2026-11-27T15:38:55Z",
+    "Catherine joins cancer support group in new documentary",
+    "BBC Health",
+    "health"
+  ],
+  "5e6bff051036": [
+    "2026-11-27T15:18:51Z",
+    "John Simpson: Ukraine is bowed but still unbroken as freezing weather sets in",
+    "BBC News",
+    "general"
   ]
 }
