@@ -583,6 +583,109 @@
       "t": "2026-11-26",
       "why": "no picture among 6 figures",
       "v": 3
+    },
+    "PMC13809024": {
+      "t": "2026-11-27",
+      "why": "no picture among 8 figures",
+      "v": 3
+    },
+    "PMC13809272": {
+      "t": "2026-11-27",
+      "fig": {
+        "src": "figs/PMC13809272.webp",
+        "w": 960,
+        "h": 884,
+        "n": "Fig. 2",
+        "cap": "Best tumor response with localized mRECIST in evaluable patients with post-LT recurrent HCC treated with Y-90 TARE. (a) Histogram depicting best overall tumor response. (b) Waterfall plot of best percentage change in target lesion size. (c) Representative imaging data from a patient with disseminated post-LT HCC who underwent two TARE cycles and achieved PR after each intervention. Abbreviations: mRECIST modified Response Evaluation Criteria in Solid Tumors; LT Liver transplantation; HCC Hepatocellular carcinoma; Y-90 yttrium-90; TARE Transarterial radioembolization; CR Complete response; PR, partial response; SD, stable disease; PD Progressive disease; NE Not evaluable; PET-CT Positron emission tomography computed tomography",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13809507": {
+      "t": "2026-11-27",
+      "why": "no picture among 4 figures",
+      "v": 3
+    },
+    "PMC13809405": {
+      "t": "2026-11-27",
+      "fig": {
+        "src": "figs/PMC13809405.webp",
+        "w": 960,
+        "h": 840,
+        "n": "Fig. 2",
+        "cap": "Comparison of metabolic characteristics on dual-time-point ¹⁸F-FDG PET/CT between PDAC and non-PDAC lesions. Note: * P<0.05;**** P<0.0001",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13809521": {
+      "t": "2026-11-27",
+      "fig": {
+        "src": "figs/PMC13809521.webp",
+        "w": 960,
+        "h": 626,
+        "n": "Fig. 3",
+        "cap": "Self-reported rectal MRI exposure in the main analytic cohort (n = 142). “None” denotes residents who reported prior general MRI experience but had not yet interpreted any rectal MRI cases; respondents without prior general MRI experience were not included in the main analytic cohort",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13809271": {
+      "t": "2026-11-27",
+      "fig": {
+        "src": "figs/PMC13809271.webp",
+        "w": 935,
+        "h": 960,
+        "n": "Fig. 2",
+        "cap": "Row A shows representative maximum intensity projection (MIP) images from static PET (SUV; 60–65 min p.i.) and parametric PET imaging, including net influx rate (Ki) and distribution volume (DV). Arrows indicate the axial image levels in row B",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13809275": {
+      "t": "2026-11-27",
+      "fig": {
+        "src": "figs/PMC13809275.webp",
+        "w": 960,
+        "h": 786,
+        "n": "Fig. 3",
+        "cap": "Oncocytic thyroid tumour with predominant PD-L1 staining in tumour cells and intense focal tracer uptake of the 99mTc-labelled anti-PD-L1 nanobody. (A) Planar 99mTc-pertechnetate scintigraphy demonstrating a hypofunctional nodule in the left thyroid lobe (arrow). (B) Planar PD-L1 nanobody scintigraphy showing intense focal tracer uptake corresponding to the same lesion. (C) SPECT/CT acquired 2 h after tracer injection demonstrates intense focal tracer accumulation within the nodule (arrow), with low background activity. A common colour scale with identical intensity limits was applied to all SPECT/CT images in Figs. 3, 5 and 4, as indicated by the colour bar, to facilitate direct visual comparison across patients. (D) Histopathology demonstrates an oncocytic thyroid tumour with predominant membranous PD-L1 staining in tumour cells. The inset shows higher magnification. Scale bars: 5 mm (main image), 1 mm (inset)",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13809389": {
+      "t": "2026-11-27",
+      "fig": {
+        "src": "figs/PMC13809389.webp",
+        "w": 709,
+        "h": 960,
+        "n": "Fig. 1",
+        "cap": "Longitudinal PET/CT imaging of FAPI radioligand uptake in U87MG xenografts. (A) Representative PET/CT images of U87MG-mice on days 7, 11, and 15 post-implantation following injection of [68Ga]Ga-DATA5m.SA.FAPI, with the corresponding quantitative analysis shown in (B). Representative scans using [68Ga]Ga-DOTAGA.Glu.(FAPI)2, for which longitudinal imaging was extended to days 17 and 21 post-implantation, are shown in (C) with the corresponding quantitative analysis shown in (D). Quantitative data are presented as mean ± SD with individual animal values (n = 3); two-way repeated-measures ANOVA with Tukey’s test. Only significant comparisons are shown: *p < 0.05, **p < 0.01",
+        "lic": "CC BY",
+        "lu": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13809047": {
+      "t": "2026-11-27",
+      "why": "no picture among 2 figures",
+      "v": 3
+    },
+    "PMC13809703": {
+      "t": "2026-11-27",
+      "why": "not in the open-access dataset",
+      "v": 3
+    },
+    "PMC13809704": {
+      "t": "2026-11-27",
+      "why": "not in the open-access dataset",
+      "v": 3
     }
   },
   "idconv": {
@@ -1035,6 +1138,8 @@
     "43097044": "2026-11-26",
     "43097043": "2026-11-26",
     "43097024": "2026-11-26",
-    "43097018": "2026-11-26"
+    "43097018": "2026-11-26",
+    "43099238": "2026-11-27",
+    "43099226": "2026-11-27"
   }
 }
