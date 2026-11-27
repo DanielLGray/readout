@@ -536,7 +536,7 @@ def test_local_outlets_and_filler_rules_in_the_config():
     assert all(src[n]["kind"] == "local" for n in ("Nevada Current", "Sierra Nevada Ally", "High Country News"))
     hcn = re.compile(src["High Country News"]["require"], re.I)
     assert hcn.search("Drought on the Great Basin") and not hcn.search("Wolves return to Colorado")
-    assert src["Popular Science"]["kind"] == "light" and src["Healthcare Dive"]["group"] == src["MedTech Dive"]["group"]
+    assert src["Popular Science"]["kind"] == "light" and not {"MedTech Dive", "Healthcare Dive"} & set(src)   # terms don't allow it
     nyt = re.compile(src["New York Times"]["skip"], re.I)
     assert nyt.search("https://www.nytimes.com/2026/11/26/dining/leftovers.html How to Use Your Leftovers")
     assert not nyt.search("https://www.nytimes.com/2026/11/26/us/storm-power.html Storm leaves half a million without power")

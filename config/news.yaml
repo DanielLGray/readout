@@ -215,12 +215,9 @@ sources:
     urls:
       - https://theimagingwire.com/feed/
 
-  - name: MedTech Dive
-    group: industrydive        # Industry Dive (Informa TechTarget): MedTech Dive and Healthcare Dive count once
-    home: https://www.medtechdive.com
-    require: "imaging|radiolog|\\bMRI\\b|\\bCT\\b|\\bPET\\b|ultrasound|X-ray|scanner|mammogra|theranostic|radiopharm|Healthineers|GE HealthCare|Philips|Canon Medical|Hologic|Fujifilm|RadNet"
-    urls:
-      - https://www.medtechdive.com/feeds/news/
+
+  # Left out: MedTech Dive and Healthcare Dive (Industry Dive, now Informa TechTarget), whose terms
+  # forbid displaying their content without written permission and say nothing about feeds.
 
   - name: Signify Research
     home: https://www.signifyresearch.net
@@ -649,23 +646,17 @@ sources:
       - https://feeds.npr.org/510325/podcast.xml    # The Indicator: ten minutes, weekdays
       - https://feeds.npr.org/510289/podcast.xml
 
-  # The business of healthcare: hospitals, payers, CMS policy, health IT. Same publisher (Industry
-  # Dive) and terms as MedTech Dive above.
-  - name: Healthcare Dive
-    group: industrydive
-    kind: business
-    max_per_day: 5
-    home: https://www.healthcaredive.com
-    urls:
-      - https://www.healthcaredive.com/feeds/news/
 
   # Reno & Nevada. Only outlets whose stories may be reused non-commercially, credited and linked:
-  #   Nevada Current (States Newsroom): Creative Commons BY-NC-ND 4.0
-  #   Sierra Nevada Ally (Reno nonprofit): noncommercial Creative Commons republishing guidelines
-  #   High Country News: CC BY-NC-ND 4.0; regional (the West), so kept to stories about Nevada and the Sierra
+  #   Nevada Current (States Newsroom): its site footer says its stories "may be republished online or in
+  #     print under Creative Commons license CC BY-NC-ND 4.0" (States Newsroom's policy for all its sites)
+  #   Sierra Nevada Ally (Reno nonprofit): noncommercial Creative Commons republishing guidelines, as Our
+  #     Town Reno reports; its own site turned away automated reading, so this rests on that report
+  #   High Country News: CC BY-NC-ND 4.0 (on each story); regional (the West), so kept to Nevada and the Sierra
   # Left out: Reno News & Review (no reuse without written permission), KOLO 8 (Gray's terms bar linking
-  # to its content from other sites). KUNR, This Is Reno and The Nevada Independent state no terms for
-  # their feeds; add one here once it does. Where each story is, and what it's about, is in local: below.
+  # to its content from other sites), The Nevada Independent (republishing only through partner
+  # agreements), and KUNR and This Is Reno (no terms for their content or feeds). Add one here if that
+  # changes. Where each story is, and what it's about, is in local: below.
   - name: Nevada Current
     group: statesnewsroom
     kind: local
