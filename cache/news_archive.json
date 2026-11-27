@@ -9806,8 +9806,8 @@
   "d8c617951df1": [
     "2026-11-27T13:25:14Z",
     "Elder Care Is Unequally Shared. But Not Among Gen Z.",
-    "New York Times",
-    "general"
+    "New York Times Health",
+    "health"
   ],
   "149629a9ce45": [
     "2026-11-25T17:39:00Z",
@@ -10670,8 +10670,8 @@
   "cad4ceb6975f": [
     "2026-11-27T13:40:20Z",
     "Photos: Macy’s Thanksgiving Day Parade History and Wacky Moments",
-    "New York Times Business",
-    "business"
+    "New York Times",
+    "general"
   ],
   "438eb0460449": [
     "2026-11-26T13:41:00Z",
@@ -11546,8 +11546,8 @@
   "a1272d789661": [
     "2026-11-27T12:25:25Z",
     "Stocks Rally at End of a Week of Wild Swings",
-    "New York Times Business",
-    "business"
+    "New York Times",
+    "general"
   ],
   "a7fa7ec0a8e6": [
     "2026-11-27T12:22:00Z",
@@ -12652,5 +12652,173 @@
     "The Witcher 3 Remastered’s Mod Library Just Got a Massive Update",
     "Polygon",
     "sff"
+  ],
+  "f9cd465eeb45": [
+    "2026-11-27T15:34:59Z",
+    "“A seat at the table”: European radiology sets out its Brussels agenda",
+    "AuntMinnie Europe",
+    "industry"
+  ],
+  "0197668f1d5f": [
+    "2026-11-27T15:30:19Z",
+    "It’s Boom Times for Old TV Shows. New TV, Not So Much.",
+    "New York Times Business",
+    "business"
+  ],
+  "636640124d90": [
+    "2026-11-27T15:30:00Z",
+    "Private-Equity Firms Have a Surprising New Source for Debt: the Nordic Bond Market",
+    "WSJ Markets",
+    "business"
+  ],
+  "42787d33eece": [
+    "2026-11-27T15:29:05Z",
+    "Black Friday Deals and Holiday Sales Are Big Money for Influencers",
+    "New York Times Business",
+    "business"
+  ],
+  "d57a1e9ae8a6": [
+    "2026-11-25T20:03:11Z",
+    "Medicaid Express, CCSD facilities plan and Nevada groundwater research",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "47251d0c5e59": [
+    "2026-11-25T18:38:19Z",
+    "November 25: Food safety, Thanksgiving traditions, and Native American Heritage Month",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "5b85fcd27a67": [
+    "2026-11-24T19:15:23Z",
+    "Federal permitting bill, problem gambling split and Roseman expansion",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "e4414e3b098d": [
+    "2026-11-23T19:54:07Z",
+    "Nevada revenue forecast, Lake Mead water levels and airport tunnel work",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "2502ee1569dd": [
+    "2026-11-19T20:33:04Z",
+    "State worker insurance, Mayweather charges and F1 road closures",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "8fdea0906f9b": [
+    "2026-11-18T23:09:20Z",
+    "November 18: Energy development reform, Nevada's Economic Forum, and Her Story Through Art",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "1d4ce87b039d": [
+    "2026-11-18T20:00:54Z",
+    "What's next for Nevada election results, Space Academy bid and NV Energy rate cut",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "a4cd25a56813": [
+    "2026-11-17T20:45:39Z",
+    "FAA flight disruptions, Greenlink protest and F1 road closures",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "2d5845b291ec": [
+    "2026-11-16T20:22:04Z",
+    "Nevada Assembly leadership, El Niño flood insurance and I-11 ramp closure",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "4f9c5b518cc5": [
+    "2026-11-13T20:38:06Z",
+    "Aaron Ford transition, wild horse sales and tribal permitting concerns",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "b9aa24e050f6": [
+    "2026-11-12T23:14:29Z",
+    "November 11: Short-term rentals, election day takeaways, and the Coffee Note",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "0ce5ca01a639": [
+    "2026-11-12T19:49:03Z",
+    "Nevada housing shortage, rising household debt and Harry Reid archive",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "64dc807503eb": [
+    "2026-11-10T21:06:42Z",
+    "Energy permitting bill, Nevada gas prices and Blue Diamond trail",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "bd92022b542c": [
+    "2026-11-09T20:08:37Z",
+    "Nevada tribal legislation, Lake Powell rebound and seat belt campaign",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "fb04959e62c3": [
+    "2026-11-06T20:14:20Z",
+    "Historic midterm firsts, UNLV's endowment and NBA arena options",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "4b5ed21a2d78": [
+    "2026-11-05T20:20:30Z",
+    "Nevada House sweep, short-term rentals and Native language preservation",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "fdcc0e729624": [
+    "2026-11-04T21:22:45Z",
+    "Aaron Ford wins, Nevada ballot measures pass and midterm turnout surges",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "669a1a00103c": [
+    "2026-11-04T20:44:54Z",
+    "November 4: Midterms, Nevada sports, and Clark County's new poet laureate",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "931aaa913734": [
+    "2026-11-03T22:29:48Z",
+    "Nevada voter turnout, prediction markets and new RTC bus shelters",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "17ef83289ec4": [
+    "2026-11-02T20:23:44Z",
+    "Why is the gaming industry threatened by prediction markets?",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "7792764acab2": [
+    "2026-11-02T19:57:36Z",
+    "California voter fight, wild horse roundup and Charleston storm drain",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "c3d8c0c59b47": [
+    "2026-10-29T21:55:07Z",
+    "October 28: Prediction markets, midterm projections, and Nevada Day",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "41589964576a": [
+    "2026-10-29T19:02:42Z",
+    "Nevada children’s hospital, Brightline delay and Moapa solar milestone",
+    "Nevada Public Radio",
+    "local"
+  ],
+  "74aca0d00c28": [
+    "2026-10-28T21:23:12Z",
+    "Fort McDermitt death, Dolores Huerta and Station Casinos negotiations",
+    "Nevada Public Radio",
+    "local"
   ]
 }
