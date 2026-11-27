@@ -145,9 +145,9 @@ const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "A
   JPM: "JPMorgan Chase", BAC: "Bank of America", WFC: "Wells Fargo", C: "Citigroup", GS: "Goldman Sachs", GEHC: "GE HealthCare",
   SMMNY: "Siemens Healthineers", PHG: "Philips", EW: "Edwards Lifesciences", MDT: "Medtronic", LNTH: "Lantheus", RDNT: "RadNet" };
 const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
-  movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
+  sky: "Night sky", movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
 // Today's parts, in their usual order (Tune → Reading → Today → Advanced can put them in yours)
-const BRIEF_PARTS = { near: "Quakes & fires", horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
+const BRIEF_PARTS = { near: "Near Reno", horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
   classic: "Classic of the day", wide: "Outside your areas", foundations: "Next Foundations paper" };
 // alerts: which switch in Tune → Rules turns each kind off
 const ALERT_GROUPS = {
@@ -181,7 +181,7 @@ const TUNE_DEFAULTS = {
   hidePending: true,    // hide papers whose abstract isn't in PubMed yet (the conclusion is the card)
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
-  near: { quakes: true, fires: true, mi: 100, mag: 3, days: 2, acres: 10, rx: false, contained: false },   // Today's card of quakes and fires near Reno
+  near: { quakes: true, fires: true, mi: 100, mag: 3, days: 2, acres: 10, rx: false, contained: false, alerts: true, roads: true, air: true, aqi: 101 },   // Today's Near Reno card (near.js)
   swipe: true,          // swipe a card left to save it, right to clear it
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT, range: 90 },   // Coming up (range: days Explore shows)
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
@@ -280,7 +280,8 @@ function loadTune() {
     local: { scope: ["reno", "nevada", "all"].includes(obj(t.local).scope) ? t.local.scope : "nevada" },
     near: (() => { const n = obj(t.near), mag = num(n.mag, 3);
       return { quakes: n.quakes !== false, fires: n.fires !== false, mi: within(n.mi, 10, 300, 100), days: within(n.days, 1, 7, 2),
-        mag: mag >= 2.5 && mag <= 7 ? Math.round(mag * 2) / 2 : 3, acres: within(n.acres, 0, 100000, 10), rx: n.rx === true, contained: n.contained === true }; })(),
+        mag: mag >= 2.5 && mag <= 7 ? Math.round(mag * 2) / 2 : 3, acres: within(n.acres, 0, 100000, 10), rx: n.rx === true, contained: n.contained === true,
+        alerts: n.alerts !== false, roads: n.roads !== false, air: n.air !== false, aqi: [51, 101, 151].includes(n.aqi) ? n.aqi : 101 }; })(),
     alertDays: within(t.alertDays, 1, 14, 7), alertMax: within(t.alertMax, 0, 6, 2), alertTwo: t.alertTwo === true,
     maxAge: ints(t.maxAge, 1, 365), capBy: ints(t.capBy, 0, 20),
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
@@ -1728,10 +1729,10 @@ function openInfo() {
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Weather"),
     el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
-    el("h3", {}, "Quakes & fires near Reno"),
-    el("p", {}, "While an earthquake or an active fire is within reach (100 miles unless you change it), a card in Today lists it: magnitude, where and how long ago, felt reports; a fire\u2019s size, containment, crews and distance. Your phone asks the U.S. Geological Survey (magnitude 2.5 and up, public domain) and the interagency wildland-fire data the National Interagency Fire Center publishes, every 15 minutes for quakes and 30 for fires while Readout is open, and on pull-down. A quake opens its USGS page; a fire opens on a map, and the card links to InciWeb for the crews\u2019 updates. Tune \u2192 Interests sets the distance, the smallest quake and fire, and whether prescribed burns and contained fires count."),
+    el("h3", {}, "Near Reno"),
+    el("p", {}, "A card in Today while something nearby is worth knowing, and nothing when it\u2019s quiet. Weather alerts: National Weather Service warnings, watches and advisories for Reno, Donner Summit and South Lake Tahoe; tap one for the NWS\u2019s own text. Sierra roads (October to May): Caltrans chain controls on I-80, US-50 and the Tahoe and Truckee roads, from Caltrans\u2019s own feed when your phone can reach it, else from the copy a roads job makes every half hour; and new snow in Donner Summit\u2019s NWS forecast. Air: the U.S. AQI for Reno from the CAMS model via Open-Meteo, an estimate that tracks smoke (AirNow has monitor readings), when it reaches the level you choose. Earthquakes (USGS, magnitude 2.5 and up) and active fires (the interagency data NIFC publishes) within reach: 100 miles unless you change it. A quake opens its USGS page; a fire opens on a map, and the card links to InciWeb for the crews\u2019 updates. Tune \u2192 Interests \u2192 Near Reno turns each part on or off and sets its limits."),
     el("h3", {}, "Coming up"),
-    el("p", {}, "A card in Today shows the next 7 days of events you follow; Explore → Coming up shows 90 days, by week. Markets and the economy: Fed decisions (Federal Reserve calendar), jobs and CPI reports (Bureau of Labor Statistics), GDP and PCE reports (Bureau of Economic Analysis), stock market holidays (NYSE rules) and earnings for the companies you watch. Medicine: your meetings, FDA advisory panels on imaging and heart devices (from their Federal Register notices), J.P. Morgan Healthcare week. Science: notable launches (Launch Library 2, The Space Devs) and eclipses (NASA). News: CES and other set dates, plus a list of events expected without a date yet. A daily job reads the calendars; times show in your phone’s time zone."),
+    el("p", {}, "A card in Today shows the next 7 days of events you follow; Explore → Coming up shows 90 days, by week. Markets and the economy: Fed decisions (Federal Reserve calendar), jobs and CPI reports (Bureau of Labor Statistics), GDP and PCE reports (Bureau of Economic Analysis), stock market holidays (NYSE rules) and earnings for the companies you watch. Medicine: your meetings, FDA advisory panels on imaging and heart devices (from their Federal Register notices), J.P. Morgan Healthcare week. Science: notable launches (Launch Library 2, The Space Devs). Night sky: full and new moons and meteor shower peaks with how much of the Moon is lit (worked out by the job), eclipses (NASA), and nights NOAA forecasts a geomagnetic storm strong enough for aurora low in Reno\u2019s northern sky. News: CES and other set dates, plus a list of events expected without a date yet. A daily job reads the calendars; times show in your phone’s time zone."),
     el("p", {}, "Personal finance: IRS deadlines (worked out each year from the IRS’s rules, so a weekend or holiday moves them), each year’s new contribution limits, the big sales weekends, and at the start of each month the things usually discounted then. Culture: awards nights, festivals, Comic-Con and Burning Man, and a list of events expected without a date yet. Sci-fi and fantasy movies: the big theatrical releases, from the studios’ announced dates; Explore → Coming up can show the next 12 months."),
     el("p", {}, "Sci-fi and fantasy release dates come from TMDB (The Movie Database) once its token is added on GitHub (Tune → Updates → Set up), checked daily and linked to each film’s IMDb page; IMDb itself doesn’t allow automated use. Until then, a hand-checked list is used."),
     typeof tmdbCredit === "function" ? tmdbCredit() : null,
@@ -2220,7 +2221,7 @@ async function reload(announce) {
   updateHeadNote();
   renderBanner();
   if (typeof wxRefresh === "function") wxRefresh(announce ? 5 : 30);      // minutes before a forecast counts as old
-  if (typeof nearRefresh === "function") nearRefresh(announce ? 2 : 15);   // quakes and fires near Reno (near.js)
+  if (typeof nearRefresh === "function") nearRefresh(announce ? 2 : 15);   // Near Reno: alerts, roads, air, quakes and fires (near.js)
   if (announce) {
     if (S.offline) toast(`You’re offline. Showing what’s on this phone${S.feed ? ` (papers from ${ago(S.feed.generated)})` : ""}.`);
     else if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");

@@ -289,7 +289,7 @@ function todayOrderEl() {
   const full = [...missing.filter((k) => k === "near"), ...order, ...missing.filter((k) => k !== "near")];   // as Today puts them
   const move = (i, d) => { const o = full.slice(); [o[i], o[i + d]] = [o[i + d], o[i]]; setTune({ brief: { ...T.brief, order: o } }); rerender(); };
   const onOf = { horizon: "horizon", radar: "radar", watch: "watch", classic: "classic", wide: "wide", foundations: "foundations" };
-  const offNote = (k) => (k === "near" && !T.near.quakes && !T.near.fires ? "off" : k === "cites" && !T.citeAlerts ? "off" : k === "stories" && !T.brief.stories ? "none" : onOf[k] && !T.brief[onOf[k]] ? "off" : "");
+  const offNote = (k) => (k === "near" && !["quakes", "fires", "alerts", "roads", "air"].some((x) => T.near[x]) ? "off" : k === "cites" && !T.citeAlerts ? "off" : k === "stories" && !T.brief.stories ? "none" : onOf[k] && !T.brief[onOf[k]] ? "off" : "");
   return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Order"),
     el("p", { class: "fine", style: "margin:2px 0 6px" }, T.brief.order ? "Each part comes whole, in this order, after the alerts and the cover."
       : "The usual order spreads the stories, the classic and the outside paper between the papers. Move any part to set your own."),

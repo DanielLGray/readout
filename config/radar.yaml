@@ -25,6 +25,7 @@ credible:
   - Phys.org
   - Phys.org research
   - Tech Xplore
+  - Medical Xpress research
   - arXiv
   - Nature
   - Science
@@ -74,7 +75,17 @@ sources:
     stale_days: 60
     urls:
       - https://techxplore.com/rss-feed/energy-green-tech-news/
+      - https://techxplore.com/rss-feed/robotics-news/
       - https://techxplore.com/rss-feed/
+  - name: Medical Xpress research
+    group: sciencex
+    verbatim: true
+    merge: true
+    home: https://medicalxpress.com
+    stale_days: 60
+    urls:
+      - https://medicalxpress.com/rss-feed/genetics-news/
+      - https://medicalxpress.com/rss-feed/neuroscience-news/
 
 # Topics you chose. words: any of these in a headline or summary (case doesn't matter; whole words).
 # require: optional, must also match (for short words with other meanings). exclude: never these.
@@ -112,6 +123,39 @@ topics:
             IBM Quantum, Google Quantum AI, quantum processor, quantum chip]
     arxiv: 'abs:"logical qubit" OR abs:"quantum error correction" OR abs:"fault-tolerant quantum" OR abs:"quantum advantage"'
     openalex: '"quantum computing" OR "quantum computer" OR "quantum error correction" OR "logical qubits"'
+  - id: bci
+    name: Brain-computer interfaces
+    words: [brain-computer interface, brain-computer interfaces, brain–computer interface, brain–computer interfaces, brain-machine interface,
+            brain-machine interfaces, BCI, BCIs, brain implant, brain implants, neural implant, neural implants, neuroprosthesis, neuroprostheses,
+            speech neuroprosthesis, intracortical, Utah array, Neuralink, Synchron, Stentrode, Precision Neuroscience, Paradromics,
+            Blackrock Neurotech, thought-to-text, mind-controlled]
+    arxiv: 'abs:"brain-computer interface" OR abs:"brain-machine interface" OR abs:"intracortical" OR abs:"speech neuroprosthesis"'
+    openalex: '"intracortical brain-computer interface" OR "speech neuroprosthesis" OR "implanted brain-computer interface" OR "brain-machine interface"'
+  - id: gene-editing
+    name: Gene editing
+    words: [gene editing, gene-editing, genome editing, genome-editing, CRISPR, Cas9, Cas12, base editing, base editor, base editors,
+            prime editing, prime editor, prime editors, epigenetic editing, in vivo editing, gene editor, gene editors, Casgevy, Intellia,
+            Beam Therapeutics, Verve Therapeutics, Prime Medicine, CRISPR Therapeutics, Editas, Tessera Therapeutics]
+    arxiv: 'abs:CRISPR OR abs:"genome editing" OR abs:"base editing" OR abs:"prime editing"'
+    openalex: '"base editing" OR "prime editing" OR "in vivo genome editing" OR "epigenetic editing"'
+  - id: humanoids
+    name: Humanoid robots
+    words: [humanoid robot, humanoid robots, humanoid, humanoids, bipedal robot, bipedal robots, Optimus robot, Tesla Optimus, Figure AI,
+            Agility Robotics, Apptronik, Unitree, 1X Technologies, Boston Dynamics, general-purpose robot, general-purpose robots]
+    require: '\b(?:robot\w*|android\w*|Optimus|Unitree|Apptronik|Agility|Figure AI|Boston Dynamics|1X)\b'
+    exclude: '\bOptimus Prime\b|\bTransformers\b|\bhumanoid (?:alien|creature|monster|species)s?\b'
+    arxiv: 'abs:"humanoid robot" OR abs:"humanoid robots" OR abs:"humanoid locomotion"'
+    openalex: '"humanoid robot" OR "humanoid robots" OR "humanoid locomotion"'
+  - id: moon-mars
+    name: Moon & Mars missions
+    words: [Artemis, Artemis II, Artemis III, lunar lander, lunar landers, moon landing, lunar landing, lunar base, lunar south pole,
+            Human Landing System, Blue Moon lander, Blue Ghost, Intuitive Machines, Firefly Aerospace, ispace, Chang'e, Chandrayaan, Gateway station,
+            Mars sample return, Mars Sample Return, Mars rover, Perseverance rover, Mars mission, Mars missions, crewed Mars, Mars landing,
+            Tianwen, ESCAPADE, Starship moon, lunar mission, lunar missions, moon mission, moon missions]
+    require: '\b(?:moon|lunar|Mars|Martian|NASA|SpaceX|Starship|rocket|launch\w*|astronaut\w*|lander|rover|orbit\w*|spacecraft|mission\w*|ESA|CNSA|ISRO|JAXA)\b'
+    exclude: '\bThe Martian\b|\bArtemis Fowl\b'
+    arxiv: 'abs:"lunar lander" OR abs:"Mars sample return" OR abs:"lunar south pole" OR abs:"Artemis program"'
+    openalex: '"Artemis program" OR "lunar lander" OR "Mars sample return" OR "lunar south pole"'
 
 # Spotting new topics: phrases in science and business headlines (and Radar feeds) that are new
 # or rising. A phrase needs `min_headlines` headlines from `min_publishers` publishers in the last

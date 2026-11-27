@@ -44,6 +44,22 @@ bls_fallback:
 # FDA advisory committee meetings to show (a regular expression on the committee's name)
 fda_include: 'Circulatory System Devices|Radiological Devices|Medical Imaging'
 
+# The night sky (the Night sky kind). Full and new moons are worked out by the job (Meeus's method,
+# within a minute or two). Meteor showers: each one's usual peak night (the evening it begins; peaks
+# drift by about a day from year to year), with how much of the Moon is lit that night worked out too.
+# Rates are the usual zenithal hourly rates, the most anyone sees under ideal dark skies.
+# Aurora: a line when NOAA's 3-day forecast reaches this Kp at night in Reno (7 is a G3 storm).
+sky:
+  aurora_kp: 7
+  meteors:
+    - {name: Quadrantids, month: 1, day: 3, zhr: 110, note: "The peak lasts only a few hours; best in the dark hours before dawn."}
+    - {name: Lyrids, month: 4, day: 21, zhr: 18, note: "Best after midnight, as the radiant in Lyra climbs."}
+    - {name: Eta Aquariids, month: 5, day: 5, zhr: 50, note: "Dust from Halley's Comet. Low from Reno's latitude: a handful an hour in the hour before dawn."}
+    - {name: Perseids, month: 8, day: 12, zhr: 100, note: "The summer favorite: best after midnight, and good for a few nights either side."}
+    - {name: Orionids, month: 10, day: 20, zhr: 20, note: "Dust from Halley's Comet; best in the hours before dawn."}
+    - {name: Leonids, month: 11, day: 16, zhr: 15, note: "Best after midnight. Famous for rare storms; most years are modest."}
+    - {name: Geminids, month: 12, day: 13, zhr: 150, note: "The year's richest shower, and good from mid-evening, not just before dawn."}
+
 # Launch Library 2: which upcoming launches are worth a line
 launches:
   rockets: 'Starship|SLS|New Glenn|Falcon Heavy|Neutron'
@@ -86,45 +102,45 @@ events:
     place: Las Vegas
     about: The consumer technology show, where AI, health tech and car makers show what's next.
     url: https://www.ces.tech/
-  # eclipses: NASA (science.nasa.gov/eclipses/future-eclipses, eclipse.gsfc.nasa.gov/OH/OH2027.html)
+  # eclipses (the Night sky kind): NASA (science.nasa.gov/eclipses/future-eclipses, eclipse.gsfc.nasa.gov/OH/OH2027.html)
   - id: eclipse-2027-02-06
-    kind: science
+    kind: sky
     title: Annular solar eclipse
     start: 2027-02-06
     about: A "ring of fire" eclipse, annular in southern Chile and Argentina, partial across South America and western Africa. Not visible from North America.
     url: https://science.nasa.gov/eclipses/future-eclipses/
   - id: eclipse-2027-02-20
-    kind: science
+    kind: sky
     title: Penumbral lunar eclipse
     start: 2027-02-20
     about: The Moon dims slightly in Earth's outer shadow, a subtle one.
     url: https://eclipse.gsfc.nasa.gov/OH/OH2027.html
   - id: eclipse-2027-07-18
-    kind: science
+    kind: sky
     title: Penumbral lunar eclipse
     start: 2027-07-18
     about: The Moon dims slightly in Earth's outer shadow, a subtle one.
     url: https://eclipse.gsfc.nasa.gov/OH/OH2027.html
   - id: eclipse-2027-08-02
-    kind: science
+    kind: sky
     title: Total solar eclipse
     start: 2027-08-02
     about: One of the longest totalities of the century, over 6 minutes, across southern Spain, North Africa (Morocco to Egypt), Saudi Arabia and Yemen.
     url: https://science.nasa.gov/eclipses/future-eclipses/
   - id: eclipse-2027-08-17
-    kind: science
+    kind: sky
     title: Penumbral lunar eclipse
     start: 2027-08-17
     about: The Moon dims slightly in Earth's outer shadow, a subtle one.
     url: https://eclipse.gsfc.nasa.gov/OH/OH2027.html
   - id: eclipse-2028-01-26
-    kind: science
+    kind: sky
     title: Annular solar eclipse
     start: 2028-01-26
     about: Annular across Ecuador, Peru and Brazil, then the North Atlantic to Portugal and Spain.
     url: https://science.nasa.gov/eclipses/future-eclipses/
   - id: eclipse-2028-07-22
-    kind: science
+    kind: sky
     title: Total solar eclipse
     start: 2028-07-22
     about: Total across Australia and New Zealand.

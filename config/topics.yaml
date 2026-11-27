@@ -101,6 +101,11 @@ topics:
     system: gi
     query: '(appendicitis[tiab] OR "bowel obstruction"[tiab] OR "mesenteric ischemia"[tiab] OR "bowel ischemia"[tiab] OR "acute abdomen"[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR ultrasound[tiab] OR MRI[tiab])'
 
+  - id: abd_trauma
+    name: Abdominal & pelvic trauma CT
+    system: gi
+    query: '(trauma*[tiab] OR blunt[tiab] OR "penetrating injury"[tiab] OR "penetrating injuries"[tiab] OR "splenic injury"[tiab] OR "bowel injury"[tiab] OR "mesenteric injury"[tiab] OR "solid organ injury"[tiab] OR AAST[tiab]) AND (abdominal[tiab] OR abdomen[tiab] OR pelvic[tiab] OR pelvis[tiab] OR spleen[tiab] OR splenic[tiab] OR liver[tiab] OR hepatic[tiab] OR renal[tiab] OR kidney[tiab] OR bowel[tiab] OR mesenteric[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR "whole-body CT"[tiab])'
+
   # ── GU & adrenal ───────────────────────────────────────────────────────────
   - id: prostate_mri
     name: Prostate MRI & PI-RADS
@@ -158,6 +163,18 @@ topics:
     system: onc_nm
     query: '177Lu[tiab] OR "Lu-177"[tiab] OR lutetium[tiab] OR "radioligand therapy"[tiab] OR "peptide receptor radionuclide"[tiab] OR PRRT[tiab] OR theranostic*[tiab]'
     trials: radioligand therapy
+
+  - id: y90_dosimetry
+    name: Y-90 radioembolization & dosimetry
+    system: onc_nm
+    query: 'radioembolization[tiab] OR radioembolisation[tiab] OR "selective internal radiation"[tiab] OR SIRT[tiab] OR TARE[tiab] OR "yttrium-90"[tiab] OR "90Y"[tiab] OR "Y-90"[tiab] OR "holmium-166"[tiab] OR ((dosimetry[tiab] OR "absorbed dose"[tiab]) AND (radioligand[tiab] OR 177Lu[tiab] OR "Lu-177"[tiab] OR lutetium[tiab] OR PRRT[tiab] OR theranostic*[tiab] OR radiopharmaceutical*[tiab]))'
+    trials: radioembolization
+
+  - id: infection_pet
+    name: Infection & inflammation PET (endocarditis, devices, vasculitis)
+    system: onc_nm
+    query: '(FDG[tiab] OR "positron emission"[tiab] OR PET[tiab] OR "leukocyte scintigraphy"[tiab] OR "labeled leukocyte"[tiab] OR "labelled leukocyte"[tiab] OR "white blood cell scintigraphy"[tiab]) AND (endocarditis[tiab] OR "prosthetic valve"[tiab] OR "device infection"[tiab] OR "cardiac device"[tiab] OR "graft infection"[tiab] OR "fever of unknown origin"[tiab] OR "inflammation of unknown origin"[tiab] OR vasculitis[tiab] OR "giant cell arteritis"[tiab] OR "large vessel vasculitis"[tiab] OR osteomyelitis[tiab] OR "periprosthetic joint infection"[tiab] OR "diabetic foot"[tiab] OR spondylodiscitis[tiab])'
+    trials: FDG PET infection
 
   - id: net_sstr
     name: Neuroendocrine tumors & SSTR PET
@@ -225,6 +242,17 @@ topics:
     query: '("transcatheter aortic valve"[tiab] OR TAVR[tiab] OR TAVI[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR "CT angiography"[tiab])'
     trials: TAVR CT
 
+  - id: structural_ct
+    name: Structural heart CT (LAA, mitral, tricuspid)
+    system: cardiac
+    query: '("left atrial appendage"[tiab] OR LAAO[tiab] OR LAAC[tiab] OR "transcatheter mitral"[tiab] OR TMVR[tiab] OR "mitral valve"[tiab] OR "mitral annulus"[tiab] OR "transcatheter tricuspid"[tiab] OR "tricuspid valve"[tiab] OR "paravalvular leak"[tiab] OR "structural heart"[tiab]) AND (CT[tiab] OR "computed tomography"[tiab] OR "CT angiography"[tiab] OR "cardiac CT"[tiab])'
+    trials: left atrial appendage CT
+
+  - id: aortic_cta
+    name: Aortic CTA (aneurysm, dissection, EVAR)
+    system: cardiac
+    query: '("aortic aneurysm"[tiab] OR "aortic dissection"[tiab] OR "acute aortic syndrome"[tiab] OR "intramural hematoma"[tiab] OR "penetrating aortic ulcer"[tiab] OR endoleak[tiab] OR EVAR[tiab] OR TEVAR[tiab] OR "aortic diameter"[tiab] OR iliofemoral[tiab]) AND (CT[tiab] OR CTA[tiab] OR "computed tomography"[tiab] OR "CT angiography"[tiab])'
+
   - id: ccta
     name: Coronary CT angiography & CAD-RADS
     system: cardiac
@@ -252,10 +280,21 @@ topics:
     system: cardiac
     query: '"myocardial perfusion"[tiab] AND (PET[tiab] OR SPECT[tiab] OR "positron emission"[tiab] OR flurpiridaz[tiab])'
 
+  - id: cardiac_amyloid
+    name: Cardiac amyloidosis & sarcoidosis imaging
+    system: cardiac
+    query: '(("cardiac amyloid*"[tiab] OR "cardiac amyloidosis"[tiab] OR transthyretin[tiab] OR ATTR[tiab] OR "ATTR-CM"[tiab]) AND (pyrophosphate[tiab] OR PYP[tiab] OR DPD[tiab] OR HMDP[tiab] OR "bone scintigraphy"[tiab] OR scintigraph*[tiab] OR SPECT[tiab] OR PET[tiab] OR CMR[tiab] OR "cardiac magnetic resonance"[tiab] OR "extracellular volume"[tiab] OR CT[tiab])) OR ("cardiac sarcoidosis"[tiab] AND (PET[tiab] OR FDG[tiab] OR "positron emission"[tiab] OR CMR[tiab] OR "magnetic resonance"[tiab]))'
+    trials: cardiac amyloidosis imaging
+
   - id: radioiodine
     name: Radioiodine & thyroid
     system: thyroid
     query: '(radioiodine[tiab] OR "radioactive iodine"[tiab] OR "I-131"[tiab] OR "131I"[tiab]) AND thyroid*[tiab]'
+
+  - id: parathyroid
+    name: Parathyroid imaging (4D-CT, choline PET, sestamibi)
+    system: thyroid
+    query: 'parathyroid*[tiab] AND ("4D-CT"[tiab] OR 4DCT[tiab] OR "four-dimensional CT"[tiab] OR "four-dimensional computed tomography"[tiab] OR choline[tiab] OR fluorocholine[tiab] OR sestamibi[tiab] OR MIBI[tiab] OR SPECT[tiab] OR PET[tiab] OR scintigraph*[tiab] OR ultrasound[tiab] OR localization[tiab])'
 
   # ── general radiology ───────────────────────────────────────────────────
   - id: lung_screening
@@ -268,6 +307,11 @@ topics:
     name: Incidental findings
     system: practice
     query: '("incidental finding"[tiab] OR "incidental findings"[tiab] OR incidentaloma*[tiab]) AND (CT[tiab] OR MRI[tiab] OR imaging[tiab])'
+
+  - id: pitfalls
+    name: Pitfalls, mimics & misses
+    system: practice
+    query: '(pitfall*[tiab] OR mimic*[tiab] OR "diagnostic error"[tiab] OR "diagnostic errors"[tiab] OR "missed diagnosis"[tiab] OR "missed diagnoses"[tiab] OR "missed findings"[tiab] OR "interpretive error"[tiab] OR "interpretive errors"[tiab] OR "perceptual error"[tiab] OR "perceptual errors"[tiab] OR misdiagnos*[tiab] OR "major discrepancy"[tiab] OR "major discrepancies"[tiab]) AND (CT[tiab] OR MRI[tiab] OR "computed tomography"[tiab] OR "magnetic resonance"[tiab] OR ultrasound[tiab] OR PET[tiab] OR radiolog*[tiab])'
 
   - id: radiology_workforce
     name: Workforce & burnout

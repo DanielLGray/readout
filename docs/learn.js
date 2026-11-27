@@ -752,6 +752,7 @@ function openWx() {
       el("div", { class: "wx-row-h" }, wxIcon(p), el("b", {}, p.n), el("span", { class: p.day ? "wx-hi" : "wx-lo" }, `${p.day ? "High" : "Low"} ${p.t}°`),
         p.pop >= 10 ? el("span", { class: "wx-pop" }, `${p.pop}% chance of rain or snow`) : null),
       el("p", {}, p.df || p.sf)))),
+    typeof airLine === "function" ? airLine() : null,
     el("p", { class: "fine" }, `National Weather Service forecast for ${WX.place}${wxData?.up ? `, issued ${new Date(wxData.up).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}` : ""}${fetched ? `; checked ${fetched}` : ""}.`),
     el("div", { class: "link-row" },
       el("a", { class: "act", href: WX_PAGE, target: "_blank", rel: "noopener" }, "Full forecast at weather.gov"),
@@ -1082,7 +1083,7 @@ function briefList() {
   const nc = typeof nearCardItem === "function" ? nearCardItem() : null;
   const ct = typeof citeCardItem === "function" ? citeCardItem() : null;
   const wk = typeof weekCardItem === "function" ? weekCardItem() : null;
-  if (nc && !T.brief.order) out.push(nc);       // quakes and fires right after the cover
+  if (nc && !T.brief.order) out.push(nc);       // Near Reno right after the cover
   if (wk) out.push(wk);
   const storiesCard = { type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories };
   if (T.brief.order) {                       // your order: each part whole, one after another

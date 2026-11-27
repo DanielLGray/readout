@@ -316,7 +316,8 @@ function horizonSection() {
     Object.entries(HZ_KINDS).map(([k, label]) => switchRow(label, {
       markets: "Earnings, Fed decisions, jobs, CPI, GDP and PCE reports, stock market holidays.",
       medicine: "Your meetings (switch them under Meetings), FDA panels on imaging and heart devices, J.P. Morgan Healthcare week.",
-      science: "Notable launches (crewed, Starship, probes) and eclipses.",
+      science: "Notable launches (crewed, Starship, probes).",
+      sky: "Full and new moons, meteor shower peaks with how bright the Moon will be, eclipses, and nights NOAA forecasts a geomagnetic storm strong enough for aurora low in Reno’s northern sky.",
       news: "CES, the State of the Union, the end of the Supreme Court term, Apple’s WWDC, once their dates are set.",
       money: "IRS deadlines, new contribution limits, the big sales weekends, and each month’s usual good buys.",
       culture: "Awards nights, Sundance, the Super Bowl, Comic-Con, Burning Man and Reno’s big events.",

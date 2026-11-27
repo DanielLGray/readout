@@ -1,7 +1,8 @@
 """Daily job: Coming up → docs/data/horizon.json, docs/data/horizon.ics and docs/data/ics/<event>.ics
 
 Reads the Federal Reserve's FOMC calendar, the BLS and BEA release calendars, the FDA advisory
-committee calendar and Launch Library 2, adds stock-market holidays (NYSE rules), your meetings
+committee calendar, Launch Library 2 and NOAA's geomagnetic forecast (aurora), adds stock-market
+holidays (NYSE rules), full and new moons and meteor showers (pipeline/sky.py), your meetings
 (config/meetings.yaml) and the hand-checked dates in config/horizon.yaml. A source that can't be
 read keeps its events from the last good run, and the app says which one is behind.
 
@@ -15,6 +16,7 @@ from datetime import date, datetime, timedelta, timezone
 
 from . import horizon as H
 from . import http as http_mod
+from . import sky
 from .common import DATA, load_yaml, now_iso, read_json, write_json
 from .http import Http, log
 
@@ -29,6 +31,7 @@ LL2 = ["https://ll.thespacedevs.com/2.3.0/launches/upcoming/", "https://ll.thesp
 
 SOURCES = {          # source name → the `src` its events carry, to keep them when it can't be read
     "fed": "Federal Reserve", "bls": "BLS", "bea": "BEA", "fda": "FDA", "launches": "Launch Library 2 (The Space Devs)", "movies": "TMDB",
+    "aurora": "NOAA Space Weather Prediction Center",
 }
 
 
@@ -141,7 +144,10 @@ def build(http: Http, cfg: dict, meetings: list, prev: dict, now: datetime, tmdb
 
     source("fda", fda)
     source("launches", lambda: H.launch_events(launches(http), cfg.get("launches") or {}, start, stop))
+    # the night sky: moons and meteor showers worked out here; storms from NOAA's 3-day Kp forecast
+    source("aurora", lambda: sky.aurora_events(http.get_json(sky.SWPC_KP, {}), now, sky.kp_min(cfg.get("sky"))))
     for name, got in (("markets", H.market_events(start, stop)), ("seasons", H.season_events(start, stop)),
+                      ("sky", sky.sky_events(cfg.get("sky") or {}, start, stop)),
                       ("money", H.finance_events(start, stop, cfg.get("finance") or {})),
                       ("culture", H.config_events(cfg.get("culture"), start, stop, kind="culture")),
 

@@ -66,6 +66,7 @@ journals:
   - '"Korean J Radiol"[ta]'
   - '"Insights Imaging"[ta]'
   - '"Radiol Artif Intell"[ta]'
+  - '"Emerg Radiol"[ta]'            # trauma and acute abdomen; the body filter keeps the body papers
   - '"J Am Coll Radiol"[ta]'
 
 # Nuclear medicine journals.
@@ -221,6 +222,11 @@ tavr_terms: >-
   TAVR[tiab] OR TAVI[tiab] OR "transcatheter aortic"[tiab] OR "aortic stenosis"[tiab] OR "aortic annulus"[tiab] OR
   "aortic valve replacement"[tiab] OR "valve-in-valve"[tiab] OR "structural heart"[tiab]
 
+# Other structural heart procedures planned on CT: appendage closure, mitral and tricuspid devices.
+structural_terms: >-
+  "left atrial appendage"[tiab] OR LAAO[tiab] OR LAAC[tiab] OR "transcatheter mitral"[tiab] OR TMVR[tiab] OR
+  "mitral valve"[tiab] OR "transcatheter tricuspid"[tiab] OR "tricuspid valve"[tiab] OR "paravalvular leak"[tiab]
+
 cardiac_terms: >-
   {tavr_terms} OR coronary[tiab] OR cardiac[tiab] OR myocard*[tiab] OR aorta[tiab] OR aortic[tiab] OR
   "pulmonary vein*"[tiab] OR "left atrial"[tiab] OR endoleak[tiab]
@@ -262,8 +268,8 @@ streams:
 
   - id: tavr_ct
     area: cardiac
-    name: Interventional cardiology journals — TAVR planning CT
-    query: '({interventional_journals}) AND ({tavr_terms}) AND ({ct_terms}) NOT ({exclude})'
+    name: Interventional cardiology journals — TAVR and structural heart CT
+    query: '({interventional_journals}) AND ({tavr_terms} OR {structural_terms}) AND ({ct_terms}) NOT ({exclude})'
 
   - id: general_radiology
     area: general
