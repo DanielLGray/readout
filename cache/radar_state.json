@@ -258,6 +258,217 @@
         }
       ],
       "at": "2026-11-26"
+    },
+    "smr": {
+      "years": {
+        "2026": 2914,
+        "2025": 2307,
+        "2024": 1977,
+        "2023": 1576,
+        "2022": 1323,
+        "2021": 1209,
+        "2020": 1138,
+        "2019": 1064,
+        "2018": 966,
+        "2017": 828,
+        "2014": 818,
+        "2015": 811,
+        "2013": 769,
+        "2016": 759,
+        "2012": 652,
+        "2011": 623,
+        "2009": 590,
+        "2010": 566,
+        "2008": 452,
+        "2006": 436,
+        "2007": 426,
+        "2005": 388,
+        "2004": 326,
+        "2003": 256,
+        "2002": 223,
+        "2001": 197,
+        "2000": 175,
+        "1997": 119,
+        "1999": 114,
+        "1998": 100,
+        "1996": 79,
+        "1995": 75,
+        "1994": 70,
+        "1993": 63,
+        "1992": 55,
+        "1991": 51,
+        "1988": 46,
+        "1984": 45,
+        "1986": 40,
+        "1987": 40,
+        "1990": 40,
+        "1983": 39,
+        "1989": 39,
+        "1985": 37,
+        "1970": 36,
+        "1967": 30,
+        "1968": 30,
+        "1975": 29,
+        "1976": 28,
+        "1980": 28,
+        "1972": 27,
+        "1971": 26,
+        "1982": 26,
+        "1978": 23,
+        "1965": 22,
+        "1969": 22,
+        "1977": 22,
+        "1966": 21,
+        "1979": 16,
+        "1981": 16,
+        "1973": 15,
+        "1962": 14,
+        "1961": 13,
+        "1964": 13,
+        "1960": 12,
+        "1963": 11,
+        "1958": 10,
+        "1959": 9,
+        "1974": 9,
+        "1900": 8,
+        "1957": 2,
+        "1938": 1,
+        "1953": 1,
+        "1956": 1
+      },
+      "papers": [
+        {
+          "title": "Nano Bifunctional Catalysts as Miniaturized Chemical Processes for CO x -to-Aromatics Conversion",
+          "venue": "Accounts of Chemical Research",
+          "date": "2026-01-27",
+          "cites": 80,
+          "link": "https://doi.org/10.1021/acs.accounts.5c00818"
+        },
+        {
+          "title": "Long‐Range Electronically Polarized Fe‐N 5 Catalysts Redirect Polymerization‐Driven Phenolic Pollutant Removal Toward Sustainable Carbon Sequestration",
+          "venue": "Angewandte Chemie International Edition",
+          "date": "2025-07-09",
+          "cites": 40,
+          "link": "https://doi.org/10.1002/anie.202509493"
+        },
+        {
+          "title": "Microreactors in chemical process intensification: Chemical reactions, crystallizations, extractions and emulsifications",
+          "venue": "Chemical Engineering Journal",
+          "date": "2025-07-01",
+          "cites": 37,
+          "link": "https://doi.org/10.1016/j.cej.2025.165223"
+        },
+        {
+          "title": "Research and Developments of Heterogeneous Catalytic Technologies",
+          "venue": "Molecules",
+          "date": "2025-08-05",
+          "cites": 31,
+          "link": "https://doi.org/10.3390/molecules30153279"
+        },
+        {
+          "title": "Design and applications of synthetic biomolecular condensates",
+          "venue": "Nature Nanotechnology",
+          "date": "2025-12-30",
+          "cites": 30,
+          "link": "https://doi.org/10.1038/s41565-025-02053-5"
+        }
+      ],
+      "at": "2026-11-27"
+    },
+    "quantum": {
+      "years": {
+        "2026": 17160,
+        "2025": 14229,
+        "2024": 8943,
+        "2023": 6305,
+        "2022": 4755,
+        "2021": 4264,
+        "2020": 3347,
+        "2019": 2588,
+        "2018": 2100,
+        "2017": 1585,
+        "2016": 1313,
+        "2015": 1141,
+        "2013": 1086,
+        "2014": 1068,
+        "2012": 983,
+        "2011": 860,
+        "2007": 840,
+        "2009": 825,
+        "2006": 801,
+        "2008": 797,
+        "2010": 782,
+        "2005": 756,
+        "2003": 697,
+        "2004": 695,
+        "2002": 631,
+        "2001": 471,
+        "2000": 397,
+        "1999": 224,
+        "1998": 209,
+        "1997": 132,
+        "1996": 91,
+        "1995": 28,
+        "1994": 16,
+        "2027": 9,
+        "1993": 7,
+        "1985": 5,
+        "1992": 5,
+        "1990": 4,
+        "1991": 4,
+        "1980": 3,
+        "1986": 3,
+        "1987": 3,
+        "1900": 2,
+        "1967": 2,
+        "1968": 2,
+        "1989": 2,
+        "1965": 1,
+        "1970": 1,
+        "1971": 1,
+        "1973": 1,
+        "1977": 1,
+        "1978": 1,
+        "1982": 1
+      },
+      "papers": [
+        {
+          "title": "A tweezer array with 6,100 highly coherent atomic qubits",
+          "venue": "Nature",
+          "date": "2025-09-24",
+          "cites": 500,
+          "link": "https://doi.org/10.1038/s41586-025-09641-4"
+        },
+        {
+          "title": "Does provable absence of barren plateaus imply classical simulability?",
+          "venue": "Nature Communications",
+          "date": "2025-08-25",
+          "cites": 468,
+          "link": "https://doi.org/10.1038/s41467-025-63099-6"
+        },
+        {
+          "title": "Chemistry beyond the scale of exact diagonalization on a quantum-centric supercomputer",
+          "venue": "Science Advances",
+          "date": "2025-06-18",
+          "cites": 443,
+          "link": "https://doi.org/10.1126/sciadv.adu9991"
+        },
+        {
+          "title": "A fault-tolerant neutral-atom architecture for universal quantum computation",
+          "venue": "Nature",
+          "date": "2025-11-10",
+          "cites": 428,
+          "link": "https://doi.org/10.1038/s41586-025-09848-5"
+        },
+        {
+          "title": "Tour de gross: A modular quantum computer based on bivariate bicycle codes",
+          "venue": "arXiv",
+          "date": "2025-06-03",
+          "cites": 256,
+          "link": "https://doi.org/10.48550/arxiv.2506.03094"
+        }
+      ],
+      "at": "2026-11-27"
     }
   },
   "preprints": {
@@ -273,7 +484,7 @@
       },
       {
         "id": "arxiv:2611.34802",
-        "title": "Tipping the scales in Blue Jay: Dust energy balance overpredicts IR luminosity in galaxies at $z\\sim2$",
+        "title": "Tipping the scales in Blue Jay: Dust energy balance overpredicts IR luminosity in galaxies at z~2",
         "source": "arXiv",
         "date": "2026-11-25T17:53:50Z",
         "link": "https://arxiv.org/abs/2611.34802",
@@ -425,7 +636,7 @@
         "source": "arXiv",
         "date": "2026-11-19T17:01:51Z",
         "link": "https://arxiv.org/abs/2611.26418",
-        "summary": "No planned neutrino experiment is expected to surpass Daya Bay's precision on $\\thone$. Doing so requires innovative strategies to reduce statistical and systematic uncertainties. In this study, we consider a futuristic program with a movable reactor antineutrino source placed within short…",
+        "summary": "No planned neutrino experiment is expected to surpass Daya Bay's precision on . Doing so requires innovative strategies to reduce statistical and systematic uncertainties. In this study, we consider a futuristic program with a movable reactor antineutrino source placed within short distances (L 3)…",
         "authors": "Matheus Hostert, Stephan A. Meighen-Berger, Maxim Pospelov"
       },
       {
@@ -495,11 +706,11 @@
       },
       {
         "id": "arxiv:2611.34803",
-        "title": "$\\mathsf{AC}^0 \\not\\subseteq \\mathsf{BQAC}^0/\\mathsf{qpoly}$ via Sublinear-Degree Pauli Approximation",
+        "title": "AC⁰ ⊈ BQAC⁰/qpoly via Sublinear-Degree Pauli Approximation",
         "source": "arXiv",
         "date": "2026-11-25T17:53:53Z",
         "link": "https://arxiv.org/abs/2611.34803",
-        "summary": "We prove $\\mathsf{AC}^0 \\not\\subseteq \\mathsf{BQAC}^0/\\mathsf{qpoly}$ in the single-copy, single-output model via an explicit $\\mathsf{P}$-uniform family of linear-size monotone depth-2 CNFs. Every $\\mathsf{QAC}^0$ circuit with arbitrary quantum advice achieves only an inverse-polynomial worst-case…",
+        "summary": "We prove AC⁰ ⊈ BQAC⁰/qpoly in the single-copy, single-output model via an explicit P-uniform family of linear-size monotone depth-2 CNFs. Every QAC⁰ circuit with arbitrary quantum advice achieves only an inverse-polynomial worst-case advantage over random guessing on this family. To prove this, we…",
         "authors": "Xiaoming Sun, Jingheng Wang"
       },
       {
@@ -564,7 +775,7 @@
       "term": "riemann hypothesis",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -573,7 +784,7 @@
       "term": "COP31",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -582,7 +793,7 @@
       "term": "el niño",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -591,7 +802,7 @@
       "term": "BepiColombo",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -600,7 +811,7 @@
       "term": "climate change",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -609,7 +820,7 @@
       "term": "homo erectus",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -618,7 +829,7 @@
       "term": "MAHA",
       "kind": "health",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -627,16 +838,16 @@
       "term": "next-generation",
       "kind": "radar",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
     },
     "black hole": {
-      "term": "black holes",
+      "term": "black hole",
       "kind": "science",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]
@@ -661,9 +872,27 @@
     },
     "artificial intelligence": {
       "term": "artificial intelligence",
-      "kind": "health",
+      "kind": "business",
       "first": "2026-11-26",
-      "last": "2026-11-26",
+      "last": "2026-11-27",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "giant star": {
+      "term": "giant star",
+      "kind": "science",
+      "first": "2026-11-27",
+      "last": "2026-11-27",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "ai trade": {
+      "term": "AI trade",
+      "kind": "business",
+      "first": "2026-11-27",
+      "last": "2026-11-27",
       "weeks": [
         "2026-W48"
       ]

@@ -1375,14 +1375,6 @@
     "Scientists can determine the mass of subatomic particles that are built from quarks by looking at the particles' energy and momentum in four-dimensional spacetime. One of the quantities that encode this information, called the trace anomaly, is linked to the fact that physical…",
     "radar"
   ],
-  "a581b76665ec": [
-    "2024-10-28T13:42:03Z",
-    "Cool journey to the center of the Earth: Researchers build superconducting cryomodule prototype",
-    "Phys.org research",
-    "https://phys.org/news/2024-10-cool-journey-center-earth-superconducting.html",
-    "Patience and complexity are the hallmarks of fundamental scientific research. Work at the Department of Energy (DOE) Office of Science takes time.",
-    "radar"
-  ],
   "e9deb04c1e86": [
     "2026-11-25T13:20:01Z",
     "Most precise measurement of coherent elastic neutrino–nucleus scattering to date tightens limits on new forces",
@@ -1941,6 +1933,198 @@
     "New York Times Science",
     "https://www.nytimes.com/2026/11/20/science/quantum-computer-neutral-atoms.html",
     "A rising technology based on “neutral atoms” has accelerated the competition — prompting many experts to believe that a usable machine could arrive this decade.",
+    "science"
+  ],
+  "10c64bd4703e": [
+    "2026-11-27T18:40:06Z",
+    "ATLAS finds hints of the hidden structure of the vacuum",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-atlas-hints-hidden-vacuum.html",
+    "Researchers at the University of Bonn, together with colleagues from Oxford and Prague, played a leading role in analyzing particle collisions at CERN's Large Hadron Collider. The ATLAS Collaboration observed more proton collisions with the particle pattern it was looking for…",
+    "radar"
+  ],
+  "da47e101b3cf": [
+    "2026-11-27T18:00:04Z",
+    "Robots, not astronauts, will have to fix space data centers",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-robots-astronauts-space-centers.html",
+    "Yesterday we explored some of the difficulties facing orbital data centers in our look at the bottleneck of launching enough solar panels and radiative cooling systems to power the AI computing boom in space. JPL physicist Dr. Slava Turyshev, who wrote the paper at the center of…",
+    "radar"
+  ],
+  "7f96a65946ca": [
+    "2026-11-27T12:40:10Z",
+    "Nonlinear optical lattice boosts spatial coherence by concentrating light in a single mode",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-nonlinear-optical-lattice-boosts-spatial.html",
+    "Light waves can have varying degrees of coherence, which means that the consistency of the relationship between their phases across space or time can differ. Reliable methods to enhance the coherence of light could pave the way for the development of high-quality lasers and…",
+    "radar"
+  ],
+  "19a20347ae20": [
+    "2026-11-27T15:40:06Z",
+    "Q&A: Evolutionary algorithms may automate the search for better energy forecasting model settings",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-qa-evolutionary-algorithms-automate-energy.html",
+    "A doctoral dissertation of Aleksei Vakhnin in the field of Environmental Science will be examined at the Faculty of Science, Forestry and Technology, Kuopio campus.",
+    "radar"
+  ],
+  "1f97ee729b76": [
+    "2026-11-27T14:30:01Z",
+    "Salty lake water helps a zinc battery keep working at −50°C",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-salty-lake-zinc-battery-50c.html",
+    "Extreme cold can affect a water-based battery's ability to deliver electricity. Its liquid electrolyte—the fluid that carries charge—can freeze, while the charged particles moving through it slow down. Researchers have now built a rechargeable zinc battery that works at −50°C…",
+    "radar"
+  ],
+  "f417e5367364": [
+    "2026-11-27T12:20:12Z",
+    "Wind power boom risks leaving developing countries dependent on foreign technology",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-power-boom-countries-foreign-technology.html",
+    "The global shift toward renewable energy risks creating a new divide between countries that control green technology and those left doing the manufacturing, according to new research involving The University of Manchester.",
+    "radar"
+  ],
+  "10f463afd56a": [
+    "2026-11-27T12:10:06Z",
+    "Blockchain power trading could cut energy costs by up to 56% in simulated microgrid",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-blockchain-power-energy-simulated-microgrid.html",
+    "A blockchain-based system for trading electricity directly between households and businesses could cut energy costs by up to 56% and increase the income of small-scale producers by almost 150%, according to research in the International Journal of Industrial and Systems…",
+    "radar"
+  ],
+  "84c0a45c36db": [
+    "2026-11-26T22:20:02Z",
+    "Study identifies catalyst that could resolve key challenge hampering clean hydrogen fuel transportation",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-catalyst-key-hampering-hydrogen-fuel.html",
+    "Researchers from Skoltech—a VEB.RF Group institution—have identified tungsten borides as promising catalysts for breaking ammonia down into hydrogen and nitrogen. This industrially important reaction is crucial for creating a flexible global market for clean hydrogen fuel: Pure…",
+    "radar"
+  ],
+  "82bdf26a16fb": [
+    "2026-11-27T18:40:02Z",
+    "Frozen language model helps predict materials properties with roughly 95% less training time",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-frozen-language-materials-properties-roughly.html",
+    "Discovering new materials often involves predicting their properties before investing time and resources in making and testing them in the laboratory. Machine-learning models are widely used to estimate important properties, such as band gap and formation energy, helping…",
+    "radar"
+  ],
+  "ad8976380143": [
+    "2026-11-27T18:20:01Z",
+    "Ultrafast imaging reveals narrow copper ion routes in material that could harvest waste heat",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-ultrafast-imaging-reveals-narrow-copper.html",
+    "If heat escaping from hot car exhaust pipes and factory pipelines could be converted into electricity, this otherwise wasted energy could be put to practical use. One material being explored for such applications is copper sulfide, a compound of copper and sulfur.",
+    "radar"
+  ],
+  "87373071ba24": [
+    "2026-11-27T17:00:01Z",
+    "76% of Australians are struggling to tell apart real and AI content",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-australians-struggling-real-ai-content.html",
+    "Most Australians are using—or at least have tried out—generative artificial intelligence (AI) tools such as ChatGPT, Copilot and Gemini, among many others.",
+    "radar"
+  ],
+  "befd7a3e7672": [
+    "2026-11-27T16:40:04Z",
+    "We built an AI you can dance with. It taught us about developing the technology responsibly",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-built-ai-taught-technology-responsibly.html",
+    "In recent months, top researchers have quit leading artificial intelligence companies, warning the AI race is moving too quickly, with too little oversight and accountability.",
+    "radar"
+  ],
+  "fa723e885334": [
+    "2026-11-27T16:20:04Z",
+    "Climate change could expose underwater internet cables to fishing damage",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-climate-expose-underwater-internet-cables.html",
+    "From online banking and video calls to international communications, everyday life relies on a vast network of cables hidden beneath the sea. But climate change could create new threats to the underwater cables that keep the world connected, according to new research involving…",
+    "radar"
+  ],
+  "878421857ed5": [
+    "2026-11-27T16:00:01Z",
+    "Building critical hardware for Canada's first quantum satellite mission",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-critical-hardware-canada-quantum-satellite.html",
+    "The Institute for Quantum Computing (IQC) team selected by the Canadian Space Agency to lead the science of the Quantum Encryption and Science Satellite (QEYSSat)—Canada's first quantum satellite mission—has recently delivered two quantum sources to the Canadian Space Agency…",
+    "radar"
+  ],
+  "f44d6845714f": [
+    "2026-11-27T15:20:12Z",
+    "Free will is not an illusion but a control achievement of the brain—and it can be tested in machines",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-free-illusion-brain-machines.html",
+    "Is free will real, or is it an illusion created by our brains? For neuroscientist Paul Verschure, distinguished university professor at Miguel Hernández University of Elche (UMH), in Spain, free will is real—and measurable. In two papers published in Philosophical Transactions…",
+    "radar"
+  ],
+  "27f4cefef651": [
+    "2026-11-27T15:00:10Z",
+    "A gadget straight out of a James Bond film: Tiny tooth-mounted sensor recognizes silent speech",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-gadget-straight-james-bond-tiny.html",
+    "Speaking unobtrusively with artificial intelligence may one day be possible with a small sensor attached to a tooth. The sensor recognizes the wearer's words as they mouth them naturally and silently, remaining completely hidden from outside view.",
+    "radar"
+  ],
+  "6cb724c15d5e": [
+    "2026-11-27T15:00:04Z",
+    "Solar-powered system targets fouling in complex wastewater treatment",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-solar-powered-fouling-complex-wastewater.html",
+    "Researchers at the Xinjiang Technical Institute of Physics and Chemistry (XTIPC) of the Chinese Academy of Sciences (CAS) have developed a solar-powered electrocoagulation–membrane filtration (SPEC-MF) system to reduce membrane fouling during the treatment of oily and complex…",
+    "radar"
+  ],
+  "b64f0e0f4ae7": [
+    "2026-11-27T14:20:06Z",
+    "It's making your list, and checking your price: Holiday shopping goes AI",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-price-holiday-ai.html",
+    "From sales that seem to start earlier each year to a dwindling desire by shoppers to camp outside of big-box stores in the early morning to snag the best deals, Black Friday has changed over the years.",
+    "radar"
+  ],
+  "68f45dc01e98": [
+    "2026-11-27T12:40:13Z",
+    "Bipolar plates up to 30% less expensive to manufacture: Hollow embossing rolling shows strong potential",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-bipolar-plates-expensive-hollow-embossing.html",
+    "Producing fuel cells and electrolyzers competitively at high volumes means scrutinizing every cent spent on their individual components. One important lever is the bipolar plate, which encloses the electrochemical heart of the system, the membrane, on both sides and uses fine…",
+    "radar"
+  ],
+  "eb20fa134e6e": [
+    "2026-11-27T12:40:01Z",
+    "From lab to blueberry field: Blueberry-picking robot uses soft silicone bands to selectively harvest ripe fruit",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-lab-blueberry-field-robot-soft.html",
+    "Building a robot that can pick blueberries without damaging the fruit is a technical challenge. Turning that robot into something growers can afford and use in the field presents a different set of questions.",
+    "radar"
+  ],
+  "f9b5559fa5cc": [
+    "2026-11-27T10:40:02Z",
+    "'King is back': Nvidia boss's return sparks fresh AI deepfake deluge",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-king-nvidia-boss-fresh-ai.html",
+    "Scandal-hit Jensen Huang's return as chief executive of U.S. chip giant Nvidia has triggered a fresh avalanche of AI-generated parody videos, highlighting how the sex-and-espionage saga has become a prime target for hyperrealistic deepfakes.",
+    "radar"
+  ],
+  "f28bf3186845": [
+    "2026-11-27T10:05:45Z",
+    "Sony's dog robot can't do chores but offers companionship",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-sony-dog-robot-chores-companionship.html",
+    "The people at Sony don't use words like \"product\" or \"reboot\" when they talk about Aibo, the Japanese electronics and entertainment company's robotic dog.",
+    "radar"
+  ],
+  "4e2f3fb3d0cc": [
+    "2026-11-27T10:05:14Z",
+    "As Google threatens to cut schools' search access, Los Angeles blocks AI features",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-google-threatens-schools-access-los.html",
+    "School districts are taking steps to block Google's artificial intelligence features and are considering dropping Google products entirely unless the company gives them a permanent AI workaround, pitting them against the tech giant whose Chromebook computers and learning tools…",
+    "radar"
+  ],
+  "80d54bc16a73": [
+    "2026-11-27T10:00:00Z",
+    "DARPA is assessing Microsoft's controversial quantum computing technology. What will happen if the Majorana 2 platform is vindicated?",
+    "Live Science",
+    "https://www.livescience.com/technology/quantum/darpa-is-assessing-microsofts-controversial-quantum-computing-technology-what-will-happen-if-the-majorana-2-platform-is-vindicated",
+    "Microsoft has doubled down on its Majorana 2 quantum computing platform despite pushback from the physics community, with DARPA researchers now set to evaluate the bold claims.",
     "science"
   ]
 }
