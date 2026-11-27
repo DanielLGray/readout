@@ -782,7 +782,7 @@ local:
            Sparks City Council, Sparks Police, TMCC, Reno-Sparks, RTC Washoe, Biggest Little City]
     nevada: [Nevada, Nevadans, Nevadan, Las Vegas, Henderson, Clark County, Elko, Winnemucca, Ely, Pahrump, Mesquite,
              Lombardo, Nevada Legislature, Carson City, Lake Mead, UNLV, CCSD, Silver State]
-  opinion: "/(?:commentary|opinion|op-?ed|columns?)/|^(?:OPINION|COMMENTARY|Op-?[Ee]d|Column|Guest column|Letter)\\b"
+  opinion: "/(?:commentary|opinion|op-?ed|columns?)/|(?i:^(?:opinion|commentary|op-?ed|column|guest column|letter to the editor|editorial|analysis)\\b)"
   topics:
     nv_gov:
       label: Government & politics
@@ -800,7 +800,7 @@ local:
     nv_env:
       label: Environment, water & land
       words: [water, drought, wildfire, fire, snowpack, Lake Tahoe, Truckee River, lithium, mining, mine, mines, public lands,
-              BLM, climate, air quality, wildlife, Pyramid Lake, groundwater, Colorado River, heat, wild horses, sagebrush,
+              BLM, climate, air quality, wildlife, Pyramid Lake, groundwater, Colorado River, heat wave, extreme heat, wild horses, sagebrush,
               solar, geothermal, transmission line]
     nv_schools:
       label: Schools & universities

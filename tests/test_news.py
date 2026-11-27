@@ -507,6 +507,8 @@ def test_local_places_topics_and_opinion():
     cats, place = tag("Lombardo's veto hurts renters", "https://nevadacurrent.com/commentary/lombardo-veto/")
     assert "nv_opinion" in cats and place == "nevada"
     assert tag("OPINION: A better way to fund schools")[0][-1] == "nv_opinion"
+    assert tag("Commentary: Democrats swept Nevada. Now protect all workers.")[0][-1] == "nv_opinion"
+    assert "nv_opinion" not in tag("Letter carriers rally in Reno")[0] and "nv_env" not in tag("US economy heats up on AI investment")[0]
     assert tag("Tennessee redraws its congressional maps")[1] == ""                      # another state's story
     assert "nv_culture" not in tag("Artificial intelligence and the article that started it")[0]   # whole words: not "art"
     assert tag("Decision sparks outrage in the capital")[1] == ""                        # "sparks" isn't the city
