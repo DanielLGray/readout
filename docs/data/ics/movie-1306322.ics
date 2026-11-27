@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Spaceballs: The New One
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1306322@readout
+DTSTAMP:20270423T000000Z
+DTSTART;VALUE=DATE:20270423
+DTEND;VALUE=DATE:20270424
+SUMMARY:Spaceballs: The New One
+DESCRIPTION:Comedy\, Science Fiction\, Adventure Forty years after the eve
+ nts of the first Spaceballs\, the galaxy is once again under threat. A th
+ reat so evil\, so unstoppable\, so completely lacking in any original ide
+ as\, that it has vowed to bring back the past... every last bit of it. Wi
+ th Lone Starr in hiding\, Queen Vespa on the throne\, and the Schwartz st
+ retched thinner than a franchise releasing TV… Source: TMDB.
+URL:https://www.imdb.com/title/tt32659463/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

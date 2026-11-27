@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Readout//Coming up//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:CoComelon: The Movie
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:movie-1480503@readout
+DTSTAMP:20270219T000000Z
+DTSTART;VALUE=DATE:20270219
+DTEND;VALUE=DATE:20270220
+SUMMARY:CoComelon: The Movie
+DESCRIPTION:Animation\, Family\, Adventure JJ embarks on the biggest adven
+ ture of his life: Kindergarten. But when\, on his first day at school\, J
+ J discovers that his beloved stuffed bear Boba has gone missing\, JJ and 
+ his friends Cody\, CeCe and Nina will begin a quest that will transport t
+ hem into a magical land ruled by Princess Harmony\, who has created a wor
+ ld with one rule: No singing. Source: TMDB.
+URL:https://www.imdb.com/title/tt31339071/
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
