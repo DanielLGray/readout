@@ -146,12 +146,26 @@ def fetch_source(http: Http, src: dict, now: datetime) -> "tuple[list[dict], dic
         found = {i["title"].lower(): i for day in by_day.values() for i in day[:int(cap)]}
     if found:
         got = list(found.values())
+        for i in got:
+            if src.get("link_only"):
+                headline_only(i)
+            elif src.get("no_pictures"):           # photos it may not let others show (wire photos)
+                i.pop("img", None)
         status.update(ok=True, url=" + ".join(used), count=len(got), newest=max(i["date"] for i in got))
         # answers, but nothing new in a month: the outlet probably moved its feed
         status["stale"] = status["newest"] < news._utc(now - timedelta(days=int(src.get("stale_days", STALE_DAYS))))
     elif status["ok"]:
         status["url"] = "works; no matching stories right now"
     return list(found.values()), status
+
+
+def headline_only(item: dict) -> dict:
+    """For an outlet that allows links with credit but not its content shown here (link_only: true in
+    config/news.yaml): the headline, the byline and the link, nothing else (no summary, picture or audio)."""
+    item["summary"] = ""
+    for k in ("img", "audio", "duration", "fig"):
+        item.pop(k, None)
+    return item
 
 
 def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
@@ -217,8 +231,14 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         by_source.setdefault(it["source"], []).append(it)
     for lst in by_source.values():             # stored stories too: logos and show art out, phone-sized pictures
         drop_shared_images(lst)
+    link_only = {src["name"] for src in cfg.get("sources", []) if src.get("link_only")}
+    no_pictures = {src["name"] for src in cfg.get("sources", []) if src.get("no_pictures")}
     for it in items.values():                  # every run, so word-list changes reach stored stories too
         it["kind"] = kind_of.get(it["source"], it.get("kind", "industry"))     # an outlet moved to another kind
+        if it["source"] in link_only:
+            headline_only(it)
+        elif it["source"] in no_pictures:
+            it.pop("img", None)
         if it.get("img") and it.get("audio") and "brightspotcdn.com" not in it["img"]:
             del it["img"]
         if it.get("img"):

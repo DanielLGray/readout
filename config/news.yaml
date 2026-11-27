@@ -653,10 +653,17 @@ sources:
   #   Sierra Nevada Ally (Reno nonprofit): noncommercial Creative Commons republishing guidelines, as Our
   #     Town Reno reports; its own site turned away automated reading, so this rests on that report
   #   High Country News: CC BY-NC-ND 4.0 (on each story); regional (the West), so kept to Nevada and the Sierra
+  #   CalMatters: "All of the articles at CalMatters are available to republish for free" with credit,
+  #     unedited, not sold; wire photos excluded (no_pictures). California-wide, so kept to Tahoe,
+  #     Truckee, the Sierra and stories naming Nevada or Reno
+  #   Nevada Public Radio (KNPR, Las Vegas): "happy for users to link to our online content with proper
+  #     attribution", but not to embed it: headlines and links only (link_only), no summary or audio
   # Left out: Reno News & Review (no reuse without written permission), KOLO 8 (Gray's terms bar linking
   # to its content from other sites), The Nevada Independent (republishing only through partner
-  # agreements), and KUNR and This Is Reno (no terms for their content or feeds). Add one here if that
-  # changes. Where each story is, and what it's about, is in local: below.
+  # agreements), KUNR and This Is Reno (no terms for their content or feeds; NPR's feed terms don't cover
+  # member stations' own), Washoe County (non-media use by permission), the Tahoe Daily Tribune and
+  # KTVN (no terms found that allow it). Add one here if that changes. Where each story is, and what
+  # it's about, is in local: below.
   - name: Nevada Current
     group: statesnewsroom
     kind: local
@@ -671,6 +678,25 @@ sources:
     home: https://sierranevadaally.org
     urls:
       - https://sierranevadaally.org/feed/
+
+  - name: CalMatters
+    kind: local
+    max_per_day: 3
+    no_pictures: true          # its wire photos aren't free to show
+    home: https://calmatters.org
+    require: "\\b(?:Tahoe|Truckee|Donner|Sierra Nevada|Nevada|Reno)\\b"
+    urls:
+      - https://calmatters.org/feed/
+
+  - name: Nevada Public Radio
+    kind: local
+    link_only: true            # its policy allows links with credit, not its content shown elsewhere
+    merge: true
+    max_per_day: 2
+    home: https://knpr.org
+    urls:
+      - https://knpr.org/podcast/the-daily-rundown/rss.xml
+      - https://knpr.org/podcast/state-of-nevada/rss.xml
 
   - name: High Country News
     kind: local

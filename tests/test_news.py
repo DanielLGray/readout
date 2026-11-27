@@ -541,3 +541,34 @@ def test_local_outlets_and_filler_rules_in_the_config():
     assert nyt.search("https://www.nytimes.com/2026/11/26/dining/leftovers.html How to Use Your Leftovers")
     assert not nyt.search("https://www.nytimes.com/2026/11/26/us/storm-power.html Storm leaves half a million without power")
     assert re.compile(src["Space.com"]["skip"], re.I).search("x On this day in space! Nov. 26, 2011")
+
+
+def test_link_only_outlets_keep_just_headline_byline_and_link():
+    it = {"title": "State of Nevada: housing", "link": "https://knpr.org/x", "summary": "Long description", "img": "https://knpr.org/a.jpg",
+          "audio": "https://knpr.org/a.mp3", "duration": 30, "by": ["Joe Schoenmann"]}
+    assert build_news.headline_only(it) == {"title": "State of Nevada: housing", "link": "https://knpr.org/x", "summary": "", "by": ["Joe Schoenmann"]}
+    from pipeline.common import load_base
+    src = {s["name"]: s for s in load_base("news.yaml")["sources"]}
+    assert src["Nevada Public Radio"]["link_only"] and src["CalMatters"]["kind"] == "local"
+    cal = re.compile(src["CalMatters"]["require"], re.I)
+    assert cal.search("Lake Tahoe clarity fund shifts to tourism") and not cal.search("L.A. Unified superintendent resigns")
+
+
+def test_link_only_and_no_pictures_when_fetched():
+    feed = """<?xml version="1.0"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>t</title>
+      <item><title>Rundown: Lake Mead and CCSD</title><link>https://radio.test/ep1</link><pubDate>Sun, 22 Nov 2026 10:00:00 GMT</pubDate>
+        <description>A long description of the episode, with what was said.</description>
+        <media:content url="https://x.brightspotcdn.com/a.jpg" medium="image"/>
+        <enclosure url="https://radio.test/a.mp3" type="audio/mpeg" length="1"/></item>
+    </channel></rss>"""
+    http = Http(transport=lambda m, u, p: (200, feed), sleep=lambda s: None, retries=1)
+    plain, _ = build_news.fetch_source(http, {"name": "R", "urls": ["https://radio.test/feed"]}, NOW)
+    assert plain[0]["summary"] and plain[0].get("img") and plain[0].get("audio")
+    (lo,), _ = build_news.fetch_source(http, {"name": "R", "link_only": True, "urls": ["https://radio.test/feed"]}, NOW)
+    assert lo["title"] == "Rundown: Lake Mead and CCSD" and lo["link"] == "https://radio.test/ep1"
+    assert not lo["summary"] and not lo.get("img") and not lo.get("audio")
+    (npic,), _ = build_news.fetch_source(http, {"name": "R", "no_pictures": True, "urls": ["https://radio.test/feed"]}, NOW)
+    assert npic["summary"] and not npic.get("img") and npic.get("audio")
+    from pipeline.common import load_base
+    src = {s["name"]: s for s in load_base("news.yaml")["sources"]}
+    assert src["CalMatters"]["no_pictures"] and not src["CalMatters"].get("link_only")
