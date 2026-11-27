@@ -1001,3 +1001,18 @@ a { color: inherit; }
 .news-card .concl-inner { margin-block: 0 auto; }                         /* the summary sits under its headline */
 .headrow > .fig .fig-credit { right: 3px; bottom: 3px; padding: 2px 4px; font-size: 9.5px; border-radius: 4px; max-width: calc(100% - 6px);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* topic filters (filters.js): a subject, what keeps a card anyway, and the form for one */
+.rule-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.rule-row .row-name { flex-direction: column; align-items: flex-start; gap: 2px; }
+.rule-row .row-sub { font-size: 13.5px; color: var(--muted); font-weight: 400; }
+.rule-btns { display: flex; gap: 6px; }
+.rule-btns .act { height: 34px; padding: 0 12px; }
+.rule-form { display: grid; gap: 8px; margin-top: 10px; }
+.rule-form .ctl-label { margin-top: 6px; }
+.rule-form .fine { margin: 0; }
+.rule-form .word-add { grid-template-columns: 1fr; }
+.rule-reach { font-weight: 600; }
+.rule-edit { display: block; padding-bottom: 12px; }
+.fb-subjects { margin: 14px 0 6px; }
+.fb-subjects .chips { margin-top: 6px; }

@@ -195,6 +195,7 @@ const TUNE_DEFAULTS = {
   obits: "wide",        // death notices: "wide" (only those many outlets ran, or high office), "all" or "none"
   cardLayout: "compact", // phones: "compact" (cards as tall as what they hold) or "paged" (one per screen); wider screens are always compact
   mutedSources: [], mutedWords: [],
+  rules: RULE_DEFAULTS,  // topic filters (filters.js): hide a subject everywhere unless it mentions what you choose
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
@@ -263,6 +264,7 @@ function loadTune() {
       watch: Array.isArray(hz.watch) ? [...new Set(strs(hz.watch).map((s) => s.trim().toUpperCase()).filter((s) => /^[A-Z][A-Z0-9.-]{0,9}$/.test(s)))].slice(0, 60)
         : WATCH_DEFAULT.slice() },
     mutedSources: strs(t.mutedSources), mutedWords: strs(t.mutedWords),
+    rules: Array.isArray(t.rules) ? t.rules.map(cleanRule).filter(Boolean).slice(0, 30) : RULE_DEFAULTS.map((r) => ({ ...r })),
     trend: Object.keys(trend).length ? trend : null,
     impReviews: t.impReviews === true,
     textSize: TEXT_SIZES.includes(t.textSize) ? t.textSize : 1,
@@ -571,11 +573,15 @@ function impactEl(it) {
     m.kind === "other" ? el("span", { class: "imp-kind" }, "Review or guideline") : null);
 }
 
-function mutedRe() { return wordRe(T.mutedWords); }
+// what hides cards everywhere: muted words, and topic filters (filters.js); null when there are none
+function mutedRe() { const w = wordRe(T.mutedWords), r = compiledRules(); return w || r.length ? { w, r } : null; }
 // the text a card shows under its headline: a paper's conclusion, a story's summary
 const shownText = (it) => it?.conclusion?.text || it?.summary || "";
 // a muted word in the headline, or (Tune → Rules → Mute, the default) in the text on the card too
-const mutedHit = (it, re = mutedRe()) => !!re && !!it && re.test(T.muteIn === "title" ? it.title || "" : `${it.title || ""} ${shownText(it)}`);
+const wordHit = (it, re) => re.test(T.muteIn === "title" ? it.title || "" : `${it.title || ""} ${shownText(it)}`);
+// m: what mutedRe() returns, or one word's regex
+const mutedHit = (it, m = mutedRe()) => !!m && !!it
+  && (m instanceof RegExp ? wordHit(it, m) : (!!m.w && wordHit(it, m.w)) || (m.r.length > 0 && !!ruleHit(it, m.r)));
 
 const sampleN = (s) => { const m = String(s || "").replace(/(\d),(?=\d{3})/g, "$1").match(/\d+/); return m ? +m[0] : 0; };
 // score = freshness × (1 + evidence + size + conclusion + your systems); each factor 0–1 times its weight
@@ -1736,7 +1742,7 @@ function openInfo() {
     el("p", {}, "Reno & Nevada is local news from the Nevada Current, the Sierra Nevada Ally and High Country News (its stories about Nevada and the Sierra). Each story is tagged with where it is and what it’s about; Tune → Interests → Reno & Nevada keeps to the Reno area or all of Nevada, sets its turns in Everything and Today’s card, and moves each topic and outlet up, down or out."),
     el("p", {}, "Tune has two levels. Each section’s main switches are up front; Advanced, under them, holds exact numbers: how many papers and stories Today holds and the order of its parts, each outlet’s stories a day and rating, the oldest story shown per kind, how long alerts stay pinned, how far Coming up looks. What the jobs on GitHub do (outlets, what counts as a top story or an alert, Watch’s trial topics, the Radar’s topics, including ones of your own) is in Tune → Updates → each job → Change settings; changes are sent to GitHub, checked, and used from each job’s next run."),
     el("h3", {}, "Full text, citations and notifications"),
-    el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → Reading), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Rules → Alerts and paste the setup into GitHub once. Tune → Rules → What your filters hid lists what each mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
+    el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → Reading), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Rules → Alerts and paste the setup into GitHub once. Tune → Rules → Topic filters hides a subject everywhere unless it mentions what you choose (Heart valves, unless CT or radiology, comes on): no AI, just lists of the words, abbreviations and device names each subject goes by. Tune → Rules → What your filters hid lists what each filter, mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),

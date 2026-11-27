@@ -53,6 +53,15 @@ function alertChoices() {
   Object.keys(T.taste).filter((f) => W_FEAT.test(f) && T.taste[f]).sort().forEach((f) => { taste[f] = T.taste[f]; });
   const body = { groups: Object.keys(ALERT_GROUPS).filter((k) => T.alerts[k] !== false), taste, words: [...T.watch.mute].sort(),
     off: Object.keys(WATCH_KINDS).filter((k) => T.watch.kinds[k] === false), topics: [...T.watch.hidden].sort(), follow: [...T.watch.follow].sort() };
+  // topic filters, as their words (up to 12, and small enough to seal: the job takes up to 40,000 characters)
+  const rules = [];
+  let size = 0;
+  for (const r of T.rules || []) {
+    const t = ruleTerms(r), n = JSON.stringify(t).length;
+    if (rules.length >= 12 || size + n > 20000) break;
+    rules.push(t); size += n;
+  }
+  if (rules.length) body.rules = rules;
   return { v: 1, sig: hashStr(JSON.stringify(body)), ...body };
 }
 const b64uBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (s.length % 4)) % 4)), (c) => c.charCodeAt(0));
@@ -110,7 +119,7 @@ function choicesNote() {
 }
 function choicesStatusEl(st) {
   const c = alertChoices();
-  if (st?.choices_sig === c.sig) return el("p", { class: "fine" }, "Notifications follow your choices: alert kinds, words hidden from alerts, and what you rated in Watch.");
+  if (st?.choices_sig === c.sig) return el("p", { class: "fine" }, "Notifications follow your choices: alert kinds, words hidden from alerts, topic filters, and what you rated in Watch.");
   if (!st || !st.generated) return el("p", { class: "fine" }, "Your choices (alert kinds, hidden words, Watch ratings) go with the setup.");
   const sent = pushState.sentSig === c.sig && Date.now() - (pushState.sentAt || 0) < 15 * 60e3;
   return el("p", { class: "fine" }, "Your latest choices haven’t reached notifications yet. ",

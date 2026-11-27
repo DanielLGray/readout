@@ -85,13 +85,15 @@ function wTaste(e) {                         // −Infinity hidden; below 0 less
 let wMuteMemo = [null, null];
 const wMuteRe = () => (wMuteMemo[0] === T.watch.mute ? wMuteMemo[1] : (wMuteMemo = [T.watch.mute, wordRe(T.watch.mute)])[1]);
 const wName = (e) => `${e.acr || ""} ${e.title || ""}`;
-const wMuted = (e) => { const re = wMuteRe(); return !!re && re.test(wName(e)); };
+const wWordMuted = (e) => { const re = wMuteRe(); return !!re && re.test(wName(e)); };
+// a word hidden from Watch, or a topic filter (Tune → Rules → Topic filters)
+const wMuted = (e) => wWordMuted(e) || !!ruleHit(wItem(e));
 const wLess = (e) => !wFollowing(e.nct) && wTaste(e) < 0;
 const wMore = (e) => wTaste(e) > 0;
 // an alert with a word you hid from Watch and alerts in its headline
 function alertMuted(a) {
   const re = wMuteRe();
-  return !!re && re.test(a.via === "watch" ? wName(a.ev) : String(a.title || ""));
+  return (!!re && re.test(a.via === "watch" ? wName(a.ev) : String(a.title || ""))) || !!ruleHit(a.via === "watch" ? wItem(a.ev) : a);
 }
 
 const wRoutine = (e) => e.kind === "device" && !e.ai && e.level !== "alert" && !wMore(e);      // a routine scanner or coil clearance
@@ -279,6 +281,7 @@ function openWatchRate(e) {
         e.level === "alert" && ALERT_GROUPS[group] ? alertKindRow(group, redraw) : null),
       t === -Infinity || t < 0 || t > 0 ? el("p", { class: "fine" }, t === -Infinity ? "Hidden: out of Watch, Today and alerts." : t < 0 ? "Rated less: at the end of Watch, not in Today or alerts." : "Rated more: first in Watch and Today.") : null,
       hideWordsEl(wName(e), redraw),
+      subjectOffer(wItem(e), redraw),
       el("p", { class: "fine" }, typeof choicesNote === "function" ? choicesNote() : "Changes apply at once, on this phone."),
       el("div", { class: "link-row" },
         el("button", { class: "act", onclick: closeSheet }, "Done"),

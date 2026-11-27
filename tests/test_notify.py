@@ -127,6 +127,27 @@ def test_words_and_alert_kinds_from_the_choices(tmp_path):
     assert sent == []
 
 
+# a topic filter as the app's ruleTerms sends it: Heart valves, unless CT or radiology
+VALVES = {"h": ["aortic valve", "valvul*", "transcatheter aortic", "mitral*"], "hc": ["TAVR", "TAVI"],
+          "k": ["radiolog*", "imaging", "computed tomograph*"], "kc": ["CT", "CTA", "PET"]}
+
+
+def test_topic_filters_leave_out_alerts_on_the_subject(tmp_path):
+    news = [{"id": "n:1", "title": "FDA clears TAVR planning CT software", "label": "FDA", "group": "fda", "date": "2026-11-26"},
+            {"id": "n:2", "title": "FDA approves new mitral clip", "label": "FDA", "group": "fda", "date": "2026-11-26"}]
+    sent, _, _ = _sent_with(tmp_path, {**CH, "rules": [VALVES]}, news=news)
+    # the TAVI device and the clip are about valves; the CT software mentions CT, so it's kept
+    assert sorted(sent) == ["FDA clears TAVR planning CT software", "SPLASH: Lu-177 in mCRPC (Results posted)"]
+    sent, _, _ = _sent_with(tmp_path / "b", {**CH, "rules": [{**VALVES, "k": [], "kc": []}]}, news=news)
+    assert sent == ["SPLASH: Lu-177 in mCRPC (Results posted)"]           # no exceptions: all three valve alerts go
+    trial = {**TRIAL, "title": "TAVI in mCRPC"}                           # a trial you follow always counts
+    sent, _, _ = _sent_with(tmp_path / "c", {**CH, "rules": [VALVES], "follow": [TRIAL["nct"]]}, events=(PMA, trial))
+    assert sent == ["SPLASH: TAVI in mCRPC (Results posted)"]
+    assert notify.clean_choices({"v": 1, "rules": [VALVES, {"h": [], "hc": []}, "x", {"h": ["ok", 3, "x" * 61]}]})["rules"] == [
+        VALVES, {"h": ["ok"], "hc": [], "k": [], "kc": []}]
+    assert not notify.caps_re(["CT"]).search("ACT now") and notify.caps_re(["CT"]).search("TAVR CT-derived")
+
+
 def test_which_choices_count(tmp_path):
     old = {**CH, "at": "2026-11-20T00:00:00Z", "sig": "old", "taste": {"wo:ABBOTT MEDICAL": -2}}
     new = {**CH, "at": "2026-11-26T12:00:00Z", "sig": "new"}

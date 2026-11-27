@@ -6,7 +6,7 @@ const REPO = location.hostname.endsWith("github.io")
   ? `${location.hostname.split(".")[0]}/${location.pathname.split("/")[1] || "readout"}`
   : "DanielLGray/readout";
 const GH = `https://github.com/${REPO}`;
-const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "" };
+const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "", ruleEdit: null };
 
 const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)",
   general: "var(--k-gen)", local: "var(--k-local)", business: "var(--k-biz)", sff: "var(--h5)" };
@@ -648,6 +648,8 @@ function hiddenReport(days = 7) {
     }
     const w = words.find(([, re]) => mutedHit(it, re));
     if (w) { add(`w:${w[0]}`, `Muted “${w[0]}”`, "word", it, () => setTune({ mutedWords: T.mutedWords.filter((x) => x !== w[0]) })); continue; }
+    const rh = ruleHit(it);
+    if (rh) { add(`r:${ruleKey(rh.r)}`, `Topic filter: ${ruleName(rh.r)}`, "topic", it, () => removeRule(rh.r)); continue; }
     if (taste && tasteOf(it) === -Infinity) {
       const f = featuresOf(it).concat(byFeatures(it)).find((x) => T.taste[x] === HIDE);
       if (f) {
@@ -672,6 +674,8 @@ function hiddenReport(days = 7) {
     if (!e?.id || !e.title || (e.seen || e.date || "") < wcut || wFollowing(e.nct)) continue;
     total++;
     const it = wItem(e);
+    const wr = !wWordMuted(e) && ruleHit(it);
+    if (wr) { add(`r:${ruleKey(wr.r)}`, `Topic filter: ${ruleName(wr.r)}`, "topic", it, () => removeRule(wr.r)); continue; }
     if (wMuted(e)) {
       const w = T.watch.mute.find((x) => wordRe([x])?.test(wName(e)));
       add(`ww:${w}`, `Hidden from Watch: “${w}”`, "word", it, () => setTune({ watch: { ...T.watch, mute: T.watch.mute.filter((x) => x !== w) } }));
@@ -683,10 +687,10 @@ function hiddenReport(days = 7) {
     }
   }
   const list = [...groups.values()].sort((a, b) => b.items.length - a.items.length);
-  list.forEach((g) => { g.lot = (g.kind === "word" || g.kind === "rating" || g.kind === "outlet") && (g.items.length >= 25 || g.items.length >= total * 0.05); });
+  list.forEach((g) => { g.lot = (g.kind === "word" || g.kind === "rating" || g.kind === "outlet" || g.kind === "topic") && (g.items.length >= 25 || g.items.length >= total * 0.05); });
   return { list, total, hidden: list.reduce((a, g) => a + g.items.length, 0), days };
 }
-const UNDO_LABEL = { word: "Unmute", outlet: "Unmute", rating: "Show again", obit: "Show all", pending: "Show them", kind: "Turn back on" };
+const UNDO_LABEL = { topic: "Remove the filter", word: "Unmute", outlet: "Unmute", rating: "Show again", obit: "Show all", pending: "Show them", kind: "Turn back on" };
 function openHidden(g) {
   const day = (it) => (it.type === "watch" ? String(it.date || "").slice(0, 10) : dayOf(it));
   const row = (it) => el("li", { class: "news-item" }, el("button", { class: "w-row",
@@ -707,7 +711,7 @@ function hiddenSection() {
   const r = hiddenReport(7);
   return el("section", { class: "sect", id: "tune-hidden" }, el("h2", {}, "What your filters hid"),
     el("p", { class: "sub" }, r.hidden ? `In the last 7 days your filters kept ${plural(r.hidden, "item")} of ${r.total.toLocaleString()} out of Everything and Watch. Each counts under the first filter that caught it. Kind chips and search still show papers and stories.`
-      : "Nothing in the last 7 days. Mutes, ratings set to Hide, death notices and areas you turn off show here with what they kept out."),
+      : "Nothing in the last 7 days. Topic filters, mutes, ratings set to Hide, death notices and areas you turn off show here with what they kept out."),
     r.list.length ? el("ul", { class: "rows" }, r.list.map((g) => el("li", { class: "row hid-row" },
       el("button", { class: "hid-b", onclick: () => openHidden(g) },
         el("span", { class: "row-name" }, g.label, g.lot ? el("span", { class: "w-major" }, "hides a lot") : null),
@@ -715,11 +719,11 @@ function hiddenSection() {
 }
 
 function algoPane() {
-  return [alertsSection(), hiddenSection(), importantSection(), mixSection(), orderSection(), muteSection(), trendSection(),
+  return [alertsSection(), hiddenSection(), importantSection(), mixSection(), orderSection(), topicFilterSection(), muteSection(), trendSection(),
     el("section", { class: "sect" }, el("h2", {}, "Start over"),
       el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
-        const keep = { mutedSources: [], mutedWords: [] };
+        const keep = { mutedSources: [], mutedWords: [], rules: RULE_DEFAULTS };
         const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "allBylines", "meetings", "taste", "learned", "reacts", "learnedAt", "learnImplicit", "learnRate", "fade"].map((k) => [k, T[k]]));
         T = { ...TUNE_DEFAULTS, ...keep, ...mine }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
         toast("Feed rules reset"); rerender();
@@ -875,6 +879,32 @@ function rankPreview() {
           el("span", { class: "factor" }, `fresh ${Math.round(sc.fresh * 100)}%`),
           Object.entries(sc.parts).filter(([, v]) => v > 0.005).map(([k, v]) => el("span", { class: "factor" }, `${names[k]} +${v.toFixed(2)}`)))));
     })));
+}
+
+// ── topic filters: a subject hidden everywhere unless it mentions what you choose (filters.js) ──
+function topicFilterSection() {
+  const rules = T.rules || [];
+  const hidN = Object.fromEntries(hiddenReport(7).list.map((g) => [g.key, g]));
+  const editing = TU.ruleEdit;             // "new", a filter's key, or null
+  const free = Object.keys(SUBJECTS).find((k) => !rules.some((r) => r.s === k)) || "";
+  const done = () => { TU.ruleEdit = null; rerender(); };
+  return el("section", { class: "sect", id: "tune-topics" }, el("h2", {}, "Topic filters"),
+    el("p", { class: "sub" }, "Hide a subject everywhere (Today, Everything, Watch and alerts) unless it mentions something you want. No AI: each subject is the list of words, abbreviations and device names stories use for it, so Heart valves catches TAVR and MitraClip without the word valve. A card is about a subject when its headline names it, or its text does twice. A radiology journal or outlet counts as mentioning radiology."),
+    rules.length ? el("ul", { class: "rows" }, rules.map((r) => {
+      const k = ruleKey(r), g = hidN[`r:${k}`];
+      if (editing === k) return el("li", { class: "row rule-edit" }, ruleForm(r, { onSave: (n) => { putRule(n, r); done(); }, onCancel: done }));
+      return el("li", { class: "row hid-row rule-row" },
+        el("button", { class: "hid-b", onclick: () => (g ? openHidden(g) : toast("Nothing hidden in the last 7 days")) },
+          el("span", { class: "row-name" }, el("b", {}, ruleName(r)), el("span", { class: "row-sub" }, ruleUnless(r))),
+          el("span", { class: "hid-n" }, String(g ? g.items.length : 0))),
+        el("div", { class: "rule-btns" },
+          el("button", { class: "act", onclick: () => { TU.ruleEdit = k; rerender(); } }, "Edit"),
+          el("button", { class: "act", onclick: () => { removeRule(r); toast(`Filter off: ${ruleName(r)}`); rerender(); } }, "Remove")));
+    })) : null,
+    rules.length ? el("p", { class: "fine" }, "The number is how many cards and Watch changes each kept out in the last 7 days; tap one to see them.") : null,
+    editing === "new"
+      ? ruleForm({ s: free, keep: ["imaging"] }, { onSave: (r) => { putRule(r); toast(`Filter on: ${ruleName(r)}`); done(); }, onCancel: done })
+      : el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => { TU.ruleEdit = "new"; rerender(); } }, "Add a filter")));
 }
 
 function muteSection() {

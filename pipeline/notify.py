@@ -6,7 +6,7 @@ The PUSH_SETUP secret holds what the phone made in Tune → Rules → Alerts: it
 (an address at Apple's push service, and the keys that encrypt messages to it) and the private key
 the phone made to sign them. After each news, papers or watch update this sends every alert it
 hasn't sent before, once, unless your choices in the app leave it out (an alert kind turned off,
-a word hidden from alerts, a Watch item rated Hide or Less). Those choices come sealed with a key
+a word hidden from alerts, a topic filter, a Watch item rated Hide or Less). Those choices come sealed with a key
 made from the signing key: in the setup, and newer ones when the app starts this job (CHOICES).
 Only the sealed copy is kept (cache/alert-rules.json), so the public repository can't read them. Nothing else leaves the job: the alert's label and headline, encrypted,
 go only to the push service in the subscription. docs/data/notify.json tells the app how it went
@@ -68,7 +68,18 @@ def clean_choices(d) -> dict:
             "taste": taste, "words": [w.strip()[:60] for w in strs(d.get("words"), 200) if w.strip()],
             "off": [k for k in strs(d.get("off"), 10) if k in GROUP_OF_KIND],
             "topics": [t for t in strs(d.get("topics"), 100) if re.fullmatch(r"[a-z0-9-]{1,40}", t)],
-            "follow": [n for n in strs(d.get("follow"), 100) if _NCT.match(n)]}
+            "follow": [n for n in strs(d.get("follow"), 100) if _NCT.match(n)],
+            "rules": [r for r in (_clean_rule(x) for x in (d.get("rules") or [])[:12] if isinstance(d.get("rules"), list)) if r]}
+
+
+def _clean_rule(r) -> Optional[dict]:
+    """A topic filter as the app sends it: the words for the subject (h, any case; hc, exact case)
+    and the words that keep an alert anyway (k, kc)."""
+    if not isinstance(r, dict):
+        return None
+    terms = lambda x: [w.strip() for w in x if isinstance(w, str) and w.strip() and len(w) <= 60][:150] if isinstance(x, list) else []
+    out = {k: terms(r.get(k)) for k in ("h", "hc", "k", "kc")}
+    return out if out["h"] or out["hc"] else None
 
 
 def open_choices(key: str, sealed: str) -> dict:
@@ -99,7 +110,37 @@ def word_re(words: list[str]) -> "Optional[re.Pattern]":
     return re.compile(r"(?:^|[\W_])(?:" + "|".join(parts) + ")", re.I) if parts else None
 
 
-def left_out(a: dict, choices: Optional[dict], words: "Optional[re.Pattern]") -> bool:
+def caps_re(words: list[str]) -> "Optional[re.Pattern]":
+    """Whole words in exact case: abbreviations and brand names (the app's termSet)."""
+    parts = [re.escape(w) for w in words or [] if w]
+    return re.compile(r"(?:^|[\W_])(?:" + "|".join(parts) + r")(?![^\W_])") if parts else None
+
+
+def topic_rules(choices: Optional[dict]) -> list:
+    """Each topic filter as (subject patterns, keep patterns)."""
+    out = []
+    for r in (choices or {}).get("rules") or []:
+        hide = [p for p in (word_re(r["h"]), caps_re(r["hc"])) if p]
+        keep = [p for p in (word_re(r["k"]), caps_re(r["kc"])) if p]
+        if hide:
+            out.append((hide, keep))
+    return out
+
+
+def topic_hidden(a: dict, rules: list) -> bool:
+    """As in the app: about the subject when the headline names it, or the text does twice;
+    kept when it mentions any of the filter's exceptions."""
+    head = a["title"]
+    body = a.get("text") or ""
+    body = "" if body == head else body
+    for hide, keep in rules:
+        about = any(p.search(head) for p in hide) or sum(len(p.findall(body)) for p in hide) >= 2
+        if about and not any(p.search(f"{head} {body}") for p in keep):
+            return True
+    return False
+
+
+def left_out(a: dict, choices: Optional[dict], words: "Optional[re.Pattern]", rules: Optional[list] = None) -> bool:
     """Whether your choices keep this alert out of the app, so out of notifications too."""
     if not choices:
         return False
@@ -107,7 +148,11 @@ def left_out(a: dict, choices: Optional[dict], words: "Optional[re.Pattern]") ->
         return True
     if words and words.search(a.get("text") or a["title"]):
         return True
-    if a.get("feats") is None or (a.get("nct") and a["nct"] in choices["follow"]):
+    if a.get("nct") and a["nct"] in choices["follow"]:
+        return False
+    if rules and topic_hidden(a, rules):
+        return True
+    if a.get("feats") is None:
         return False
     if a.get("kind") in choices["off"] or a.get("topic") in choices["topics"]:
         return True
@@ -170,10 +215,11 @@ def plan(alerts: list[dict], state: dict, groups: list[str], now: datetime, choi
     today = now.date().isoformat()
     first = not state.get("started")
     words = word_re(choices["words"]) if choices else None
+    rules = topic_rules(choices)
     if choices and choices["groups"]:
         groups = choices["groups"]                     # newer than the ones in the setup
     new = [a for a in alerts if a["id"] not in sent and (not groups or not a["group"] or a["group"] in groups)
-           and not left_out(a, choices, words)]
+           and not left_out(a, choices, words, rules)]
     for a in alerts:
         sent.setdefault(a["id"], today)
     msgs = []

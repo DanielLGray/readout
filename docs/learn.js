@@ -246,6 +246,7 @@ function openFeedback(it, picked = null) {
           ? "Hide a writer’s stories, or move them up or down. Only what you choose here counts for names."
           : "The first listed authors. Hide their papers, or move them up or down; only what you choose here counts for names."),
         bylines.map(row)) : null,
+      subjectOffer(it, redraw),
       el("div", { class: "ctl-label" }, "Words"),
       el("p", { class: "fine", style: "margin-top:2px" }, `Tap one to follow it (its own chip) or mute it (gone everywhere${T.muteIn === "title" ? ", when it’s in a headline" : ""}), or type your own.`),
       el("div", { class: "chips wrap" },
