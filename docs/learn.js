@@ -1095,16 +1095,19 @@ function briefList() {
   const rd = typeof radarCardItem === "function" ? radarCardItem() : null;
   const wt = typeof watchCardItem === "function" ? watchCardItem() : null;
   const lc = typeof localCardItem === "function" ? localCardItem() : null;
+  const nc = typeof nearCardItem === "function" ? nearCardItem() : null;
   const ct = typeof citeCardItem === "function" ? citeCardItem() : null;
   const wk = typeof weekCardItem === "function" ? weekCardItem() : null;
+  if (nc && !T.brief.order) out.push(nc);       // quakes and fires right after the cover
   if (wk) out.push(wk);
   const storiesCard = { type: "brief-stories", key: "brief:stories", sig: stories.map((s) => s.title).join("|"), stories };
   if (T.brief.order) {                       // your order: each part whole, one after another
-    const parts = { horizon: soon.length ? [{ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon }] : [],
+    const parts = { near: nc ? [nc] : [], horizon: soon.length ? [{ type: "brief-horizon", key: "brief:horizon", sig: soon.map((e) => e.id).join(","), events: soon }] : [],
       radar: rd ? [rd] : [], watch: wt ? [wt] : [], local: lc ? [lc] : [], cites: ct ? [ct] : [], papers, stories: stories.length ? [storiesCard] : [],
       classic: classic ? [classic] : [], wide: wide ? [wide] : [], light: light ? [light] : [],
       foundations: fd?.next ? [{ type: "fd-next", key: "fd:next", sig: `${fd.next}|${fd.read}`, fd }] : [] };
-    const order = T.brief.order.concat(Object.keys(BRIEF_PARTS).filter((k) => !T.brief.order.includes(k)));
+    const missing = Object.keys(BRIEF_PARTS).filter((k) => !T.brief.order.includes(k));
+    const order = [...missing.filter((k) => k === "near"), ...T.brief.order, ...missing.filter((k) => k !== "near")];   // a new part: quakes first, the rest last
     order.forEach((k) => out.push(...(parts[k] || [])));
     out.push({ type: "brief-end", key: "brief:end", sig, plan });
     return out;
@@ -1134,6 +1137,7 @@ function briefCardEl(it) {
   if (it.type === "brief-radar") return radarCardEl(it);
   if (it.type === "brief-watch") return watchCardEl(it);
   if (it.type === "brief-local") return localCardEl(it);
+  if (it.type === "brief-near") return nearCardEl(it);
   if (it.type === "brief-week") return weekCardEl(it);
   if (it.type === "brief-cites") return citeCardEl(it);
   if (it.type === "brief-cover") return briefCoverEl(it);

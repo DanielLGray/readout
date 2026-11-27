@@ -147,7 +147,7 @@ const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "A
 const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
   movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
 // Today's parts, in their usual order (Tune → Reading → Today → Advanced can put them in yours)
-const BRIEF_PARTS = { horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
+const BRIEF_PARTS = { near: "Quakes & fires", horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
   classic: "Classic of the day", wide: "Outside your areas", light: "Something lighter", foundations: "Next Foundations paper" };
 // alerts: which switch in Tune → Rules turns each kind off
 const ALERT_GROUPS = {
@@ -181,6 +181,7 @@ const TUNE_DEFAULTS = {
   hidePending: true,    // hide papers whose abstract isn't in PubMed yet (the conclusion is the card)
   readLast: true,       // cards you've already seen go to the end of each list
   weather: true,        // today's and tomorrow's forecast for Reno under the chips
+  near: { quakes: true, fires: true, mi: 100, mag: 3, days: 2, acres: 10, rx: false, contained: false },   // Today's card of quakes and fires near Reno
   swipe: true,          // swipe a card left to save it, right to clear it
   horizon: { kinds: Object.fromEntries(Object.keys(HZ_KINDS).map((k) => [k, true])), watch: WATCH_DEFAULT, range: 90 },   // Coming up (range: days Explore shows)
   alerts: { fda: true, uspstf: true, acs: true, societies: true },   // rare alerts at the top of Everything and Today
@@ -274,6 +275,9 @@ function loadTune() {
       week: [-1, 0, 1, 5, 6].includes(b.week) ? b.week : 6,
       wide: b.wide !== false, hzDays: within(b.hzDays, 1, 30, 7) },
     local: { scope: ["reno", "nevada", "all"].includes(obj(t.local).scope) ? t.local.scope : "nevada" },
+    near: (() => { const n = obj(t.near), mag = num(n.mag, 3);
+      return { quakes: n.quakes !== false, fires: n.fires !== false, mi: within(n.mi, 10, 300, 100), days: within(n.days, 1, 7, 2),
+        mag: mag >= 2.5 && mag <= 7 ? Math.round(mag * 2) / 2 : 3, acres: within(n.acres, 0, 100000, 10), rx: n.rx === true, contained: n.contained === true }; })(),
     alertDays: within(t.alertDays, 1, 14, 7), alertMax: within(t.alertMax, 0, 6, 2), alertTwo: t.alertTwo === true,
     maxAge: ints(t.maxAge, 1, 365), capBy: ints(t.capBy, 0, 20),
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
@@ -311,7 +315,7 @@ const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
 let seenRecent = store.get("seenRecent", null);
 if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
-const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "brief-watch", "brief-week", "brief-cites", "brief-local", "alert"]);
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "brief-watch", "brief-week", "brief-cites", "brief-local", "brief-near", "alert"]);
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
@@ -1633,6 +1637,8 @@ function openInfo() {
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Weather"),
     el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
+    el("h3", {}, "Quakes & fires near Reno"),
+    el("p", {}, "While an earthquake or an active fire is within reach (100 miles unless you change it), a card in Today lists it: magnitude, where and how long ago, felt reports; a fire\u2019s size, containment, crews and distance. Your phone asks the U.S. Geological Survey (magnitude 2.5 and up, public domain) and the interagency wildland-fire data the National Interagency Fire Center publishes, every 15 minutes for quakes and 30 for fires while Readout is open, and on pull-down. A quake opens its USGS page; a fire opens on a map, and the card links to InciWeb for the crews\u2019 updates. Tune \u2192 Interests sets the distance, the smallest quake and fire, and whether prescribed burns and contained fires count."),
     el("h3", {}, "Coming up"),
     el("p", {}, "A card in Today shows the next 7 days of events you follow; Explore → Coming up shows 90 days, by week. Markets and the economy: Fed decisions (Federal Reserve calendar), jobs and CPI reports (Bureau of Labor Statistics), GDP and PCE reports (Bureau of Economic Analysis), stock market holidays (NYSE rules) and earnings for the companies you watch. Medicine: your meetings, FDA advisory panels on imaging and heart devices (from their Federal Register notices), J.P. Morgan Healthcare week. Science: notable launches (Launch Library 2, The Space Devs) and eclipses (NASA). News: CES and other set dates, plus a list of events expected without a date yet. A daily job reads the calendars; times show in your phone’s time zone."),
     el("p", {}, "Personal finance: IRS deadlines (worked out each year from the IRS’s rules, so a weekend or holiday moves them), each year’s new contribution limits, the big sales weekends, and at the start of each month the things usually discounted then. Culture: awards nights, festivals, Comic-Con and Burning Man, and a list of events expected without a date yet. Sci-fi and fantasy movies: the big theatrical releases, from the studios’ announced dates; Explore → Coming up can show the next 12 months."),
@@ -2123,6 +2129,7 @@ async function reload(announce) {
   updateHeadNote();
   renderBanner();
   if (typeof wxRefresh === "function") wxRefresh(announce ? 5 : 30);      // minutes before a forecast counts as old
+  if (typeof nearRefresh === "function") nearRefresh(announce ? 2 : 15);   // quakes and fires near Reno (near.js)
   if (announce) {
     if (S.offline) toast(`You’re offline. Showing what’s on this phone${S.feed ? ` (papers from ${ago(S.feed.generated)})` : ""}.`);
     else if (!feed && !newsData) toast("Couldn’t reach Readout. Showing what’s on this phone.");

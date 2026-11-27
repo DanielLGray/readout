@@ -286,10 +286,11 @@ function todaySection() {
 // the order of Today's parts: up and down, and the parts that have a switch
 function todayOrderEl() {
   const order = T.brief.order || Object.keys(BRIEF_PARTS);
-  const full = order.concat(Object.keys(BRIEF_PARTS).filter((k) => !order.includes(k)));
+  const missing = Object.keys(BRIEF_PARTS).filter((k) => !order.includes(k));
+  const full = [...missing.filter((k) => k === "near"), ...order, ...missing.filter((k) => k !== "near")];   // as Today puts them
   const move = (i, d) => { const o = full.slice(); [o[i], o[i + d]] = [o[i + d], o[i]]; setTune({ brief: { ...T.brief, order: o } }); rerender(); };
   const onOf = { horizon: "horizon", radar: "radar", watch: "watch", classic: "classic", wide: "wide", light: "light", foundations: "foundations" };
-  const offNote = (k) => (k === "cites" && !T.citeAlerts ? "off" : k === "stories" && !T.brief.stories ? "none" : onOf[k] && !T.brief[onOf[k]] ? "off" : "");
+  const offNote = (k) => (k === "near" && !T.near.quakes && !T.near.fires ? "off" : k === "cites" && !T.citeAlerts ? "off" : k === "stories" && !T.brief.stories ? "none" : onOf[k] && !T.brief[onOf[k]] ? "off" : "");
   return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Order"),
     el("p", { class: "fine", style: "margin:2px 0 6px" }, T.brief.order ? "Each part comes whole, in this order, after the alerts and the cover."
       : "The usual order spreads the stories, the classic and the outside paper between the papers. Move any part to set your own."),
@@ -505,6 +506,7 @@ function interestsPane() {
     typeof radarSection === "function" ? radarSection() : null,
     typeof watchSection === "function" ? watchSection() : null,
     typeof localSection === "function" ? localSection() : null,
+    typeof nearSection === "function" ? nearSection() : null,
     el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),

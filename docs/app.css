@@ -440,6 +440,8 @@ a { color: inherit; }
 .news-item a { display: grid; gap: 4px; padding: 12px 0; text-decoration: none; }
 .news-src { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
 .news-src b { color: var(--ink); }
+.news-src b.near-mag, .news-src b.near-fire { color: var(--heat-text); }   /* quakes and fires near Reno */
+.near-card .news-title { font-size: calc(15px * var(--ts, 1)); }
 .news-title { font: 600 calc(16.5px * var(--ts, 1))/1.35 var(--sans); }
 .news-teaser { font: 400 calc(15px * var(--ts, 1))/1.45 var(--serif); color: var(--muted); }
 .news-cats { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--faint); }

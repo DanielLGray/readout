@@ -62,7 +62,7 @@ function localSection() {
   const reno = week.filter((i) => i.place === "reno").length, nv = week.filter((i) => i.place === "nevada").length;
   const redraw = () => rerender();
   return el("section", { class: "sect", id: "tune-local" }, el("h2", {}, "Reno & Nevada"),
-    el("p", { class: "sub" }, "Local news from outlets whose terms let Readout show it: the Nevada Current, the Sierra Nevada Ally, and High Country News’ stories about Nevada and the Sierra. They differ in focus and in how much opinion they run, so each topic and each outlet can be hidden, moved down or moved up."),
+    el("p", { class: "sub" }, "Local news from outlets whose terms let Readout show it: the Nevada Current, the Sierra Nevada Ally, High Country News’ and CalMatters’ stories about Nevada, Tahoe and the Sierra, and Nevada Public Radio’s rundowns (headlines only, as its policy asks). They differ in focus and in how much opinion they run, so each topic and each outlet can be hidden, moved down or moved up."),
     el("p", { class: "fine" }, `Last 7 days: ${plural(week.length, "story", "stories")}; ${reno} about Reno and northern Nevada, ${nv} elsewhere in Nevada, ${week.length - reno - nv} naming neither.`),
     segPick("Which stories", LOCAL_SCOPES, T.local.scope, (v) => { setTune({ local: { ...T.local, scope: v } }); rerender(); },
       "Reno area: stories naming Reno, Washoe, Tahoe, Carson City, the Truckee Meadows and nearby. Nevada: also Las Vegas and the rest of the state. Everything: also the outlets’ stories that name neither."),
@@ -76,5 +76,5 @@ function localSection() {
     outlets.length ? el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Outlets"),
       el("p", { class: "fine", style: "margin:2px 0 6px" }, "What you think of each, and how many of its stories a day Everything shows."),
       el("section", { class: "fb-sect" }, outlets.map((o) => [rateRow(`src:${o.name}`, redraw), outletRowEl(o, true)]))) : null,
-    el("p", { class: "fine" }, "Turn an outlet off, change how many stories it keeps or add place names: Tune → Updates → News → Change settings. Left out for their terms: Reno News & Review and KOLO 8 don’t allow it; KUNR, This Is Reno and The Nevada Independent don’t say, and can be added once they do."));
+    el("p", { class: "fine" }, "Turn an outlet off, change how many stories it keeps or add place names: Tune → Updates → News → Change settings. Left out for their terms: Reno News & Review, KOLO 8, UNR’s Nevada Today and The Nevada Independent don’t allow it; KUNR and This Is Reno don’t say, and can be added once they do. Pictures stay out: the outlets’ photo rights are separate."));
 }
