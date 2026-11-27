@@ -25,6 +25,7 @@ settings:
     societies: 180
     light: 45
     general: 4
+    local: 30
     business: 7
   max_items: 4000
   archive_days: 730       # headlines kept (titles only) for trend analysis
@@ -83,6 +84,7 @@ kinds:
   science: Science
   light: Light reading
   general: U.S. & world news
+  local: Reno & Nevada
   business: Business & markets
   sff: Sci-fi & fantasy
 
@@ -214,6 +216,7 @@ sources:
       - https://theimagingwire.com/feed/
 
   - name: MedTech Dive
+    group: industrydive        # Industry Dive (Informa TechTarget): MedTech Dive and Healthcare Dive count once
     home: https://www.medtechdive.com
     require: "imaging|radiolog|\\bMRI\\b|\\bCT\\b|\\bPET\\b|ultrasound|X-ray|scanner|mammogra|theranostic|radiopharm|Healthineers|GE HealthCare|Philips|Canon Medical|Hologic|Fujifilm|RadNet"
     urls:
@@ -415,9 +418,9 @@ sources:
       - https://www.smithsonianmag.com/rss/science-nature/
       - https://www.smithsonianmag.com/rss/latest_articles/
 
-  - name: Popular Science
-    kind: science
-    max_per_day: 4
+  - name: Popular Science      # mostly animals, photo galleries and curiosities: light reading, not science news
+    kind: light
+    max_per_day: 3
     home: https://www.popsci.com
     urls:
       - https://www.popsci.com/feed/
@@ -435,6 +438,8 @@ sources:
     group: future
     kind: science
     max_per_day: 3
+    everything_per_day: 1    # one a day in Everything at Tune's limit of 2; the Science chip has the rest
+    skip: "On this day in space"
     home: https://www.space.com
     urls:
       - https://www.space.com/feeds.xml
@@ -566,7 +571,7 @@ sources:
     verbatim: true
     merge: true
     max_per_day: 5
-    skip: " Here’s the latest\\.?$|/opinion/"   # live-blog stubs and opinion columns
+    skip: " Here’s the latest\\.?$|/opinion/|/(?:dining|style|well|crosswords|games|realestate|travel|t-magazine|fashion|smarter-living|wirecutter|parenting)/"   # live-blog stubs, opinion, and lifestyle sections
     home: https://www.nytimes.com
     urls:
       - https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
@@ -643,6 +648,47 @@ sources:
     urls:
       - https://feeds.npr.org/510325/podcast.xml    # The Indicator: ten minutes, weekdays
       - https://feeds.npr.org/510289/podcast.xml
+
+  # The business of healthcare: hospitals, payers, CMS policy, health IT. Same publisher (Industry
+  # Dive) and terms as MedTech Dive above.
+  - name: Healthcare Dive
+    group: industrydive
+    kind: business
+    max_per_day: 5
+    home: https://www.healthcaredive.com
+    urls:
+      - https://www.healthcaredive.com/feeds/news/
+
+  # Reno & Nevada. Only outlets whose stories may be reused non-commercially, credited and linked:
+  #   Nevada Current (States Newsroom): Creative Commons BY-NC-ND 4.0
+  #   Sierra Nevada Ally (Reno nonprofit): noncommercial Creative Commons republishing guidelines
+  #   High Country News: CC BY-NC-ND 4.0; regional (the West), so kept to stories about Nevada and the Sierra
+  # Left out: Reno News & Review (no reuse without written permission), KOLO 8 (Gray's terms bar linking
+  # to its content from other sites). KUNR, This Is Reno and The Nevada Independent state no terms for
+  # their feeds; add one here once it does. Where each story is, and what it's about, is in local: below.
+  - name: Nevada Current
+    group: statesnewsroom
+    kind: local
+    max_per_day: 8
+    home: https://nevadacurrent.com
+    urls:
+      - https://nevadacurrent.com/feed/
+
+  - name: Sierra Nevada Ally
+    kind: local
+    max_per_day: 6
+    home: https://sierranevadaally.org
+    urls:
+      - https://sierranevadaally.org/feed/
+
+  - name: High Country News
+    kind: local
+    max_per_day: 4
+    home: https://www.hcn.org
+    require: "\\b(?:Nevada|Reno|Tahoe|Truckee|Washoe|Carson City|Great Basin|Sierra Nevada|Pyramid Lake|Walker Lake|Lake Mead|Las Vegas|Elko)\\b"
+    urls:
+      - https://www.hcn.org/feed/
+      - https://www.hcn.org/feeds/rss/
 
   # ── Sci-fi & fantasy ─────────────────────────────────────────────────────
   - name: Reactor
@@ -722,3 +768,54 @@ categories:
   technology:
     label: Equipment & tech
     words: [scanner, photon-counting, MRI, CT, PET, SPECT, ultrasound, X-ray, mammography, theranostics, radiopharmaceutical, tracer, installation, installs, launches, unveils, debuts, helium-free, low-field]
+
+# Reno & Nevada stories: where each is (Tune → Interests → Reno & Nevada can keep to Reno and northern
+# Nevada, all of Nevada, or everything the outlets carry) and what it's about (each topic can be
+# hidden, moved down or up there, and in Rate). Place names match as written (capitalized); topic
+# words match any case.
+local:
+  kinds: [local]
+  places:
+    reno: [Reno, Washoe, Truckee Meadows, Truckee, Tahoe, Incline Village, Carson City, Carson Valley, Minden,
+           Gardnerville, Fernley, Fallon, Dayton, Douglas County, Lyon County, Storey County, Virginia City, Verdi,
+           Sun Valley, Spanish Springs, Pyramid Lake, Northern Nevada, northern Nevada, UNR, Renown, City of Sparks,
+           Sparks City Council, Sparks Police, TMCC, Reno-Sparks, RTC Washoe, Biggest Little City]
+    nevada: [Nevada, Nevadans, Nevadan, Las Vegas, Henderson, Clark County, Elko, Winnemucca, Ely, Pahrump, Mesquite,
+             Lombardo, Nevada Legislature, Carson City, Lake Mead, UNLV, CCSD, Silver State]
+  opinion: "/(?:commentary|opinion|op-?ed|columns?)/|^(?:OPINION|COMMENTARY|Op-?[Ee]d|Column|Guest column|Letter)\\b"
+  topics:
+    nv_gov:
+      label: Government & politics
+      words: [Legislature, lawmakers, legislator, governor, Lombardo, county commission, commissioners, city council, council,
+              mayor, election, elections, ballot, voters, campaign, candidate, budget, ordinance, attorney general, secretary of state,
+              Congress, congressional, senator, Cortez Masto, Jacky Rosen, Amodei, Dina Titus, Horsford, Susie Lee, veto, bills]
+    nv_health:
+      label: Health & healthcare
+      words: [hospital, hospitals, Renown, health, healthcare, health care, Medicaid, clinic, doctor, doctors, nurse, nurses,
+              mental health, overdose, public health, health district, patients, insurance, measles, flu, vaccine]
+    nv_housing:
+      label: Housing & growth
+      words: [housing, homeless, homelessness, rent, rents, renters, development, developer, apartments, zoning, growth,
+              affordable, eviction, evictions, data center, data centers, Tesla, industrial park, land swap, sprawl]
+    nv_env:
+      label: Environment, water & land
+      words: [water, drought, wildfire, fire, snowpack, Lake Tahoe, Truckee River, lithium, mining, mine, mines, public lands,
+              BLM, climate, air quality, wildlife, Pyramid Lake, groundwater, Colorado River, heat, wild horses, sagebrush,
+              solar, geothermal, transmission line]
+    nv_schools:
+      label: Schools & universities
+      words: [school, schools, students, student, teachers, teacher, school district, WCSD, CCSD, superintendent, UNR, UNLV,
+              university, TMCC, education, classroom, college]
+    nv_economy:
+      label: Business & economy
+      words: [jobs, economy, economic, business, businesses, casino, casinos, gaming, tourism, tax, taxes, wages,
+              unemployment, workers, union, strike, minimum wage, prices, inflation]
+    nv_safety:
+      label: Courts & public safety
+      words: [police, sheriff, deputies, arrest, arrested, shooting, crash, killed, court, judge, trial, lawsuit, sued,
+              sentenced, crime, prison, jail, inmate, RPD, ICE, deportation, immigration]
+    nv_culture:
+      label: Arts & community
+      words: [art, arts, artist, museum, music, festival, Burning Man, theater, theatre, film, book, books, culture,
+              community, history, Indigenous, tribe, tribal]
+

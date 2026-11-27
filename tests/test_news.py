@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
+import re
 import pytest
 
 from pipeline import build_news, news
@@ -495,3 +496,46 @@ def test_origin_in():
     assert news.origin_in({}, "<p>Text.</p><p>This article is republished from <a href='x'>The Conversation</a> under a Creative Commons license.</p>") == "The Conversation"
     assert news.origin_in({}, "This story was originally published by KFF Health News.") == "KFF Health News"
     assert news.origin_in({"author": "Jane Doe"}, "A plain summary about AP courses (AP Biology).") == ""
+
+
+# ── Reno & Nevada, and one outlet's re-worded headlines ────────────────────
+def test_local_places_topics_and_opinion():
+    from pipeline.common import load_base
+    L = news.compile_local(load_base("news.yaml")["local"])
+    tag = lambda t, link="https://nevadacurrent.com/2026/11/20/x/": news.tag_local({"title": t, "summary": "", "link": link}, L)
+    assert tag("Washoe County commissioners approve new homeless shelter budget") == (["nv_gov", "nv_housing"], "reno")
+    cats, place = tag("Lombardo's veto hurts renters", "https://nevadacurrent.com/commentary/lombardo-veto/")
+    assert "nv_opinion" in cats and place == "nevada"
+    assert tag("OPINION: A better way to fund schools")[0][-1] == "nv_opinion"
+    assert tag("Tennessee redraws its congressional maps")[1] == ""                      # another state's story
+    assert "nv_culture" not in tag("Artificial intelligence and the article that started it")[0]   # whole words: not "art"
+    assert tag("Decision sparks outrage in the capital")[1] == ""                        # "sparks" isn't the city
+
+
+def test_near_duplicates_from_one_outlet():
+    T = lambda i, t, src="BBC News", d="2026-11-26T10:00:00Z": {"id": i, "title": t, "source": src, "date": d}
+    items = [T("a", "Zelensky criticises 'strange' Trump-Putin friendship in BBC interview", d="2026-11-26T22:06:20Z"),
+             T("b", "Zelensky questions 'strange' Trump-Putin friendship in BBC interview", d="2026-11-26T22:49:27Z"),
+             T("c", "Stocks rise as Fed signals rate cut ahead this week", "WSJ"),
+             T("d", "Stocks fall as Fed signals rate cut ahead this week", "WSJ", "2026-11-26T11:00:00Z"),
+             T("e", "Smith wins primary for Nevada governor in tight race", "NYT"),
+             T("f", "Jones wins primary for Nevada governor in tight race", "NYT", "2026-11-26T11:00:00Z"),
+             T("g", "Zelensky criticises 'strange' Trump-Putin friendship in BBC interview", "NPR News")]
+    assert news.near_duplicates(items, {}) == {"a"}                     # the older; opposites, names and other outlets stay
+    items.append(T("h", "Zelensky questions 'strange' Trump-Putin friendship in BBC interview", d="2026-11-29T10:00:00Z"))
+    assert news.near_duplicates(items, {}) == {"a"}                     # three days apart: not merged
+
+
+def test_local_outlets_and_filler_rules_in_the_config():
+    from pipeline.common import load_base
+    cfg = load_base("news.yaml")
+    src = {s["name"]: s for s in cfg["sources"]}
+    assert cfg["kinds"]["local"] == "Reno & Nevada" and {"Nevada Current", "Sierra Nevada Ally", "High Country News"} <= set(src)
+    assert all(src[n]["kind"] == "local" for n in ("Nevada Current", "Sierra Nevada Ally", "High Country News"))
+    hcn = re.compile(src["High Country News"]["require"], re.I)
+    assert hcn.search("Drought on the Great Basin") and not hcn.search("Wolves return to Colorado")
+    assert src["Popular Science"]["kind"] == "light" and src["Healthcare Dive"]["group"] == src["MedTech Dive"]["group"]
+    nyt = re.compile(src["New York Times"]["skip"], re.I)
+    assert nyt.search("https://www.nytimes.com/2026/11/26/dining/leftovers.html How to Use Your Leftovers")
+    assert not nyt.search("https://www.nytimes.com/2026/11/26/us/storm-power.html Storm leaves half a million without power")
+    assert re.compile(src["Space.com"]["skip"], re.I).search("x On this day in space! Nov. 26, 2011")

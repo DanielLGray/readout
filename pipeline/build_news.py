@@ -163,6 +163,7 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
     old = read_json(path, {}) or {}
     items = {i["id"]: i for i in old.get("items", [])}
     compiled = news.compile_categories(cfg.get("categories", {}))
+    local = news.compile_local(cfg.get("local"))
     systems = compile_systems((load_yaml("feeds.yaml") or {}).get("systems", {}))
 
     statuses = []
@@ -230,6 +231,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         if it.get("summary"):                  # and summary clean-up changes (already a teaser: just tidy it)
             it["summary"] = news.clean_text(it["summary"])
         it["categories"] = news.categorize(it, compiled) if it.get("kind", "industry") == "industry" else []
+        it.pop("place", None)
+        if it.get("kind") in local["kinds"]:   # Reno & Nevada: its topics, and where it is
+            it["categories"], place = news.tag_local(it, local)
+            if place:
+                it["place"] = place
         it["systems"] = tag_systems({"title": it["title"], "sections": [{"text": it.get("summary", "")}]}, systems)
 
     # one copy per headline per publisher (sister sites syndicate): keep the one with a summary
@@ -241,6 +247,8 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
         if key not in best or len(it.get("summary", "")) > len(best[key].get("summary", "")):
             best[key] = it
     unique = sorted(best.values(), key=lambda i: i["date"], reverse=True)
+    again = news.near_duplicates(unique, group_of)             # one outlet's re-worded headline for the same story
+    unique = [i for i in unique if i["id"] not in again]
 
     kinds = list((cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"}).keys())
     other_days = int(settings.get("other_keep_days", settings.get("science_keep_days", 30)))
@@ -291,7 +299,11 @@ def run(http: Optional[Http] = None, now: Optional[datetime] = None) -> dict:
             "trending": {"week": spans["week"], "month": spans["month"], "phrases": n_terms},
         },
         "sources": statuses,
-        "categories": {k: v["label"] for k, v in cfg.get("categories", {}).items()},
+        "categories": {**{k: v["label"] for k, v in cfg.get("categories", {}).items()},
+                       **{k: v["label"] for k, v in ((cfg.get("local") or {}).get("topics") or {}).items()},
+                       **({"nv_opinion": "Opinion & commentary"} if (cfg.get("local") or {}).get("opinion") else {})},
+        "local": {"kinds": sorted(local["kinds"]), "topics": list(((cfg.get("local") or {}).get("topics") or {}).keys())
+                  + (["nv_opinion"] if (cfg.get("local") or {}).get("opinion") else [])},
         "kinds": cfg.get("kinds") or {"industry": "Industry news", "science": "Science & health"},
         "meetings": [{k: v for k, v in m.items() if not k.startswith("_")} for m in meetings],
         "top_stories": {k: news.top_stories([i for i in kept if i.get("kind", "industry") == k], now,

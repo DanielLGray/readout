@@ -388,6 +388,82 @@ def categorize(item: dict, compiled: dict) -> list[str]:
     return [k for k, pats in compiled.items() if any(p.search(text) for p in pats)]
 
 
+# ── Reno & Nevada: where a story is, and what it's about ─────────────────────
+def _word_pats(words: list, cased: bool) -> list:
+    """Whole words (and plurals). Place names (cased) match as written; topic words any case, except
+    short acronyms (ICE, UNR), which match only in capitals."""
+    out = []
+    for w in words or []:
+        w = str(w)
+        esc = re.escape(w).replace(r"\ ", r"[\s-]")
+        exact = cased or (w.isupper() and len(w) <= 5)
+        out.append(re.compile(r"(?<![A-Za-z0-9])" + esc + r"(?:e?s)?(?![A-Za-z])", 0 if exact else re.I))
+    return out
+
+
+def compile_local(cfg: dict) -> dict:
+    """config/news.yaml local: → patterns for places, topics and opinion pieces."""
+    cfg = cfg or {}
+    return {"kinds": set(cfg.get("kinds") or ["local"]),
+            "places": {k: _word_pats(v, True) for k, v in (cfg.get("places") or {}).items()},
+            "topics": {k: _word_pats(v.get("words"), False) for k, v in (cfg.get("topics") or {}).items()},
+            "opinion": re.compile(cfg["opinion"]) if cfg.get("opinion") else None}
+
+
+def tag_local(item: dict, L: dict) -> "tuple[list[str], str]":
+    """A local story's topics (nv_gov…, and nv_opinion for opinion and commentary) and place: "reno"
+    (Reno and northern Nevada), "nevada" (elsewhere in the state) or "" (neither named)."""
+    text = item["title"] + " " + item.get("summary", "")
+    cats = [k for k, pats in L["topics"].items() if any(p.search(text) for p in pats)]
+    op = L.get("opinion")
+    if op and (op.search(urlparse(item.get("link", "")).path or "") or op.search(item["title"])):
+        cats.append("nv_opinion")
+    place = next((k for k in ("reno", "nevada") if any(p.search(text) for p in L["places"].get(k, []))), "")
+    return cats, place
+
+
+_OPPOSITES = [tuple(p.split("/")) for p in """rise/fall rises/falls rising/falling rose/fell up/down gain/loss gains/losses gain/lose
+higher/lower high/low win/lose wins/loses won/lost win/loss approve/reject approves/rejects approved/rejected open/close
+opens/closes opened/closed more/less more/fewer increase/decrease increases/decreases boost/cut boosts/cuts raise/cut
+raises/cuts raised/cut begin/end begins/ends start/stop starts/stops for/against pro/anti before/after beat/miss
+beats/misses best/worst buy/sell buys/sells add/remove adds/drops allow/ban allows/bans lift/impose lifts/imposes
+guilty/innocent convicted/acquitted dies/survives died/survived yes/no strong/weak stronger/weaker surge/slump
+surges/slumps hike/cut hikes/cuts expands/shrinks expand/shrink in/out""".split()]
+
+
+def near_duplicates(items: list[dict], group_of: dict, hours: int = 36, share: float = 0.75, min_words: int = 7) -> set:
+    """One outlet's re-worded headline for the same story ("Zelensky criticises…", then "Zelensky
+    questions…"): the ids of the older copies. Only within one publisher, a day and a half apart, for
+    headlines of 7 words or more sharing three quarters of their words, and not when the words that
+    differ are opposites (stocks rise, stocks fall) or names (a different team, a different person)."""
+    tok = lambda t: re.findall(r"[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*", t)
+    opposite = {frozenset(p) for p in _OPPOSITES}
+
+    def same_story(a: list, b: list) -> bool:
+        wa, wb = {w.lower() for w in a}, {w.lower() for w in b}
+        if min(len(wa), len(wb)) < min_words or len(wa & wb) / len(wa | wb) < share:
+            return False
+        da, db = wa - wb, wb - wa
+        if any(frozenset((x, y)) in opposite for x in da for y in db):
+            return False
+        named = {w.lower() for w in a + b if w[:1].isupper()}                  # a name, or a headline's first word
+        return not ((da | db) & named)
+    by_group: dict = {}
+    for it in sorted(items, key=lambda i: i["date"], reverse=True):
+        by_group.setdefault(group_of.get(it["source"], it["source"]), []).append(it)
+    drop = set()
+    for lst in by_group.values():
+        kept: list = []
+        for it in lst:
+            when = parse_date(it["date"]) or datetime.now(timezone.utc)
+            words = tok(it["title"])
+            if any(abs((when - kwhen).total_seconds()) <= hours * 3600 and same_story(words, kwords) for kwords, kwhen in kept):
+                drop.add(it["id"])
+            else:
+                kept.append((words, when))
+    return drop
+
+
 # ── the same story across outlets ────────────────────────────────────────────
 # words that tie unrelated stories together: dates, and topics every outlet of a kind covers daily
 _CALENDAR = set("""january february march april may june july august september october november december jan feb

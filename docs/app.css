@@ -45,6 +45,7 @@
   --k-light: #a8c69f;       /* light reading: a soft sage, clearly not part of the heat scale */
   --k-gen: #c3ccd2;         /* general news: plain, near-neutral */
   --k-biz: #b8a3e0;         /* business & markets: a muted violet */
+  --k-local: #5ec4b6;       /* Reno & Nevada: turquoise, the state stone */
   --hot-iron: linear-gradient(90deg, #000 0%, var(--h1) 22%, var(--h2) 42%, var(--h3) 62%, var(--h4) 80%, var(--h5) 100%);
 
   --serif: "Literata", "Iowan Old Style", Georgia, serif;
@@ -75,6 +76,7 @@
     --k-light: #4f7a45;
     --k-gen: #5f6c77;
     --k-biz: #6b52a3;
+    --k-local: #1f7f73;
     color-scheme: light;
   }
 }
@@ -389,6 +391,7 @@ a { color: inherit; }
 .news-card .kind-label[data-kind="light"]::before { background: var(--k-light); }
 .news-card .kind-label[data-kind="general"]::before { background: var(--k-gen); }
 .news-card .kind-label[data-kind="business"]::before { background: var(--k-biz); }
+.news-card .kind-label[data-kind="local"]::before { background: var(--k-local); }
 .lang.light { border-color: var(--k-light); color: var(--k-light); }
 .kind-label .pod { margin-left: 10px; color: var(--ink); font-weight: 700; }
 .player { display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 2px; border-top: 1px solid var(--line); position: relative;
@@ -972,3 +975,5 @@ a { color: inherit; }
 .num-wrap { display: flex; align-items: center; gap: 8px; }
 .num-in { width: 92px; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 16px; font-weight: 700; text-align: right; }
 .num-in::placeholder { font-weight: 400; color: var(--muted); }
+.ol-row.cap-only { grid-template-areas: "name step" "reset reset"; padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
+.ol-row.cap-only .stepper { grid-area: step; justify-self: end; }

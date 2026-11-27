@@ -9,7 +9,7 @@ const GH = `https://github.com/${REPO}`;
 const TU = { pane: store.get("tunePane", "reading"), span: "7", armed: null, wordDraft: "" };
 
 const KIND_COLOR = { paper: "var(--ink)", industry: "var(--h3)", societies: "var(--k-soc)", health: "var(--h2)", science: "var(--h4)",
-  light: "var(--k-light)", general: "var(--k-gen)", business: "var(--k-biz)", sff: "var(--h5)" };
+  light: "var(--k-light)", general: "var(--k-gen)", local: "var(--k-local)", business: "var(--k-biz)", sff: "var(--h5)" };
 const kindColor = (k) => KIND_COLOR[k] || "var(--muted)";
 const kindLabel = (k) => (k === "paper" ? "Papers" : newsKinds()[k] || k);
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
@@ -504,6 +504,7 @@ function interestsPane() {
     typeof horizonSection === "function" ? horizonSection() : null,
     typeof radarSection === "function" ? radarSection() : null,
     typeof watchSection === "function" ? watchSection() : null,
+    typeof localSection === "function" ? localSection() : null,
     el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
@@ -654,6 +655,10 @@ function hiddenReport(days = 7) {
         continue;
       }
     }
+    if (isNews && typeof localInScope === "function" && !localInScope(it)) {
+      add("far", `Reno & Nevada stories outside ${T.local.scope === "reno" ? "the Reno area" : "Nevada"}`, "kind", it, () => setTune({ local: { ...T.local, scope: "all" } }));
+      continue;
+    }
     if (isNews && tooOld(it)) { add(`age:${it.kind}`, `${kindLabel(it.kind)} older than ${plural(T.maxAge[it.kind], "day")}`, "kind", it, () => { const m = { ...T.maxAge }; delete m[it.kind]; setTune({ maxAge: m }); }); continue; }
     if (isNews && obitHidden(it)) { add("obits", T.obits === "none" ? "Death notices (all)" : "Death notices few outlets ran", "obit", it, () => setTune({ obits: "all" })); continue; }
     if (!isNews && !homeArea(it)) { add("area", "Papers from areas you turned off", "area", it, null); continue; }
@@ -737,6 +742,20 @@ function ageEl(ks) {
     ks.filter((k) => k !== "paper").map((k) => stepRow(kindLabel(k), null, T.maxAge[k] ?? null, { min: 1, max: 60, unit: (T.maxAge[k] ?? 0) === 1 ? "day" : "days", empty: "Any age" },
       (v) => { const m = { ...T.maxAge }; if (v == null) delete m[k]; else m[k] = v; setTune({ maxAge: m }); rerender(); })));
 }
+// one outlet: its stories a day in Everything (your number, or the usual), and Hide/Less/Same/More (as in Rate)
+function outletRowEl(x, capOnly = false) {
+  const setCap = (name, v) => { const c = { ...T.capBy }; if (v == null) delete c[name]; else c[name] = v; setTune({ capBy: c }); rerender(); };
+  const own = T.capBy[x.name];
+  const usual = x.kind === "industry" && !T.cap ? null : T.cap ? outletLimit(x.name) : null;
+  const tw = T.taste[`src:${x.name}`] ?? 0;
+  return el("div", { class: "ol-row" + (capOnly ? " cap-only" : "") + (own != null || (!capOnly && tw) ? " changed" : "") },
+    el("div", { class: "ol-name" }, capOnly ? el("span", { class: "fine" }, "In Everything a day") : el("b", {}, x.name),
+      el("span", { class: "fine" }, own != null ? `your number${usual != null ? ` (usually ${usual})` : ""}` : usual == null ? "no limit" : `usually ${usual} a day`)),
+    numStep(own ?? usual ?? null, { min: 0, max: 20, empty: "No limit", unit: "a day" }, (v) => setCap(x.name, v), `${x.name}, stories a day`),
+    capOnly ? null : el("select", { class: "ol-taste", "aria-label": `What you think of ${x.name}`, onchange: (e) => { setTaste(`src:${x.name}`, Number(e.currentTarget.value)); rerender(); } },
+      [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([v, l]) => el("option", { value: v, ...(tw === v ? { selected: true } : {}) }, l))),
+    own != null ? el("button", { class: "inline-link", onclick: () => setCap(x.name, null) }, "Usual") : null);
+}
 // each outlet: stories a day in Everything, and what you think of it (the same as Rate)
 let outletOpen = new Set();
 function outletsEl() {
@@ -744,25 +763,12 @@ function outletsEl() {
   if (!sources.length) return null;
   const byKind = {};
   sources.forEach((x) => { (byKind[x.kind || "industry"] ||= []).push(x); });
-  const setCap = (name, v) => { const c = { ...T.capBy }; if (v == null) delete c[name]; else c[name] = v; setTune({ capBy: c }); rerender(); };
-  const row = (x) => {
-    const own = T.capBy[x.name];
-    const usual = x.kind === "industry" && !T.cap ? null : T.cap ? outletLimit(x.name) : null;
-    const tw = T.taste[`src:${x.name}`] ?? 0;
-    return el("div", { class: "ol-row" + (own != null || tw ? " changed" : "") },
-      el("div", { class: "ol-name" }, el("b", {}, x.name),
-        el("span", { class: "fine" }, own != null ? `your number${usual != null ? ` (usually ${usual})` : ""}` : usual == null ? "no limit" : `usually ${usual} a day`)),
-      numStep(own ?? usual ?? null, { min: 0, max: 20, empty: "No limit", unit: "a day" }, (v) => setCap(x.name, v), `${x.name}, stories a day`),
-      el("select", { class: "ol-taste", "aria-label": `What you think of ${x.name}`, onchange: (e) => { setTaste(`src:${x.name}`, Number(e.currentTarget.value)); rerender(); } },
-        [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([v, l]) => el("option", { value: v, ...(tw === v ? { selected: true } : {}) }, l))),
-      own != null ? el("button", { class: "inline-link", onclick: () => setCap(x.name, null) }, "Usual") : null);
-  };
   return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Each outlet"),
     el("p", { class: "fine", style: "margin:2px 0 6px" }, "Stories a day in Everything (0 keeps it to its own chip), and Hide, Less, Same or More, as in Rate. What the job fetches is in Tune → Updates → News → Change settings."),
     Object.keys(newsKinds()).filter((k) => byKind[k]).map((k) => el("details", { class: "outlets", ...(outletOpen.has(k) ? { open: true } : {}),
       ontoggle: (e) => { if (e.currentTarget.open) outletOpen.add(k); else outletOpen.delete(k); } },
       el("summary", {}, swatch(k), kindLabel(k), el("span", { class: "fine" }, String(byKind[k].length))),
-      byKind[k].map(row))));
+      byKind[k].map((x) => outletRowEl(x)))));
 }
 function mixSection() {
   const ks = presentKinds();

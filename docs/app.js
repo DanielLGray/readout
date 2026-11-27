@@ -147,7 +147,7 @@ const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "A
 const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
   movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
 // Today's parts, in their usual order (Tune → Reading → Today → Advanced can put them in yours)
-const BRIEF_PARTS = { horizon: "Coming up", radar: "Radar", watch: "Watch", cites: "New citations", papers: "New papers", stories: "Stories",
+const BRIEF_PARTS = { horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
   classic: "Classic of the day", wide: "Outside your areas", light: "Something lighter", foundations: "Next Foundations paper" };
 // alerts: which switch in Tune → Rules turns each kind off
 const ALERT_GROUPS = {
@@ -161,7 +161,7 @@ const ALERT_GROUPS = {
 
 // ── tuning: the settings that drive the feed, kept on this phone (Tune tab) ──
 const TUNE_DEFAULTS = {
-  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, business: 1, sff: 1 },   // turns per round in Everything
+  mix: { paper: 2, industry: 1, societies: 1, science: 1, health: 1, light: 1, general: 1, local: 1, business: 1, sff: 1 },   // turns per round in Everything
   areas: { body: 3, nm: 2, cardiac: 2, general: 1 },   // interest areas: 0 off, 1 less, 2 normal, 3 more
   follow: [],           // words and phrases you follow (the Following chip)
   hiddenSystems: [],    // organ-system chips you don't want in the chip row
@@ -197,7 +197,8 @@ const TUNE_DEFAULTS = {
   trend: null,          // null: the weekly job's rules; else { breakout, rising, cooling, minScale }
   impReviews: false,    // Most important: also reviews, meta-analyses and guidelines
   startOn: "today",     // the view the app opens on: today, all, papers or important
-  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true, watch: true, week: 6, hzDays: 7, watchRows: 4, order: null },   // what Today holds (week: the day of the week brief, 0 Sunday…6 Saturday, -1 off)
+  brief: { papers: 5, stories: 2, classic: true, foundations: true, light: true, horizon: true, wide: true, radar: true, watch: true, week: 6, hzDays: 7, watchRows: 4, local: 3, order: null },
+  local: { scope: "nevada" },   // Reno & Nevada: "reno" (Reno and northern Nevada), "nevada" (the state) or "all"   // what Today holds (week: the day of the week brief, 0 Sunday…6 Saturday, -1 off)
   guess: "brief",       // guess the result: "off", "brief" (two a day in Today) or "all" (also every few papers elsewhere)
   pictures: true,       // open-access figures on cards
   meetings: {},         // meeting id → false to hide its banner and chip (true to show one that's off by default)
@@ -267,11 +268,12 @@ function loadTune() {
     library: typeof t.library === "string" && /^https?:\/\/\S{4,300}$/i.test(t.library.trim()) ? t.library.trim() : "",
     // Today came in with v2: a phone that opened on Everything only because that was the default now opens on Today
     startOn: t.v !== 2 && startOn === "all" ? "today" : startOn,
-    brief: { papers: within(b.papers, 1, 12, 5), stories: within(b.stories, 0, 8, 2), watchRows: within(b.watchRows, 1, 12, 4),
+    brief: { papers: within(b.papers, 1, 12, 5), stories: within(b.stories, 0, 8, 2), watchRows: within(b.watchRows, 1, 12, 4), local: within(b.local, 0, 8, 3),
       order: Array.isArray(b.order) && b.order.length && b.order.every((x) => BRIEF_PARTS[x]) && new Set(b.order).size === b.order.length ? b.order : null,
       classic: b.classic !== false, foundations: b.foundations !== false, light: b.light !== false, horizon: b.horizon !== false, radar: b.radar !== false, watch: b.watch !== false,
       week: [-1, 0, 1, 5, 6].includes(b.week) ? b.week : 6,
       wide: b.wide !== false, hzDays: within(b.hzDays, 1, 30, 7) },
+    local: { scope: ["reno", "nevada", "all"].includes(obj(t.local).scope) ? t.local.scope : "nevada" },
     alertDays: within(t.alertDays, 1, 14, 7), alertMax: within(t.alertMax, 0, 6, 2), alertTwo: t.alertTwo === true,
     maxAge: ints(t.maxAge, 1, 365), capBy: ints(t.capBy, 0, 20),
     guess: ["off", "brief", "all"].includes(t.guess) ? t.guess : "brief",
@@ -309,7 +311,7 @@ const itemKind = (it) => (it.pmid ? "paper" : (it.kind || "industry"));
 let statsTimer;
 let seenRecent = store.get("seenRecent", null);
 if (!seenRecent || typeof seenRecent !== "object" || Array.isArray(seenRecent)) seenRecent = {};   // card → the day it was read
-const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "brief-watch", "brief-week", "brief-cites", "alert"]);
+const SPECIAL = new Set(["top", "brief-cover", "brief-stories", "brief-end", "fd-next", "brief-horizon", "brief-radar", "brief-watch", "brief-week", "brief-cites", "brief-local", "alert"]);
 function bump(type, it) {
   if (!it || SPECIAL.has(it.type)) return;
   const d = localDay();
@@ -403,7 +405,7 @@ function topicName(id) {
   return S.feed?.topics?.[id]?.name || S.explore?.topics?.find((t) => t.id === id)?.name || id;
 }
 
-const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "light", "general", "business", "sff"];   // ties go in this order
+const MIX_ORDER = ["paper", "industry", "societies", "science", "health", "light", "general", "local", "business", "sff"];   // ties go in this order
 
 // Everything takes turns: a kind with weight w gets w turns per round, spread evenly.
 // Card j of a kind sits at (j + phase) / w; staggered phases keep kinds from bunching up,
@@ -681,6 +683,7 @@ function buildList(f = {}, report = null) {
   news = news.filter((i) => (!mutedSrc.has(i.source) && !mutedHit(i, mute)) || (drop("muted"), false));
   news = news.filter((i) => !obitHidden(i) || (drop("obits"), false));
   news = news.filter((i) => !tooOld(i) || (drop("old"), false));
+  if (typeof localInScope === "function") news = news.filter((i) => localInScope(i) || (drop("far"), false));   // Reno & Nevada: the area you chose
   if (taste) news = byTaste(news.filter((i) => (i._t = tasteOf(i)) > -Infinity || (drop("taste"), false)),
     (n) => Date.parse(n.date) || 0, 6 * 36e5);                       // an outlet you like: its stories a few hours higher
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
@@ -1639,6 +1642,7 @@ function openInfo() {
     el("h3", {}, "Moving around"),
     el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
     el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back. Why? after a clear lets you say why: Already know it, Not for me (fewer like this, the same as Less in Rate), Weak study, or Not now (back in 3 days); only Not for me changes what you see (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
+    el("p", {}, "Reno & Nevada is local news from the Nevada Current, the Sierra Nevada Ally and High Country News (its stories about Nevada and the Sierra). Each story is tagged with where it is and what it’s about; Tune → Interests → Reno & Nevada keeps to the Reno area or all of Nevada, sets its turns in Everything and Today’s card, and moves each topic and outlet up, down or out."),
     el("p", {}, "Tune has two levels. Each section’s main switches are up front; Advanced, under them, holds exact numbers: how many papers and stories Today holds and the order of its parts, each outlet’s stories a day and rating, the oldest story shown per kind, how long alerts stay pinned, how far Coming up looks. What the jobs on GitHub do (outlets, what counts as a top story or an alert, Watch’s trial topics, the Radar’s topics, including ones of your own) is in Tune → Updates → each job → Change settings; changes are sent to GitHub, checked, and used from each job’s next run."),
     el("h3", {}, "Full text, citations and notifications"),
     el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → Reading), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Rules → Alerts and paste the setup into GitHub once. Tune → Rules → What your filters hid lists what each mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
