@@ -580,11 +580,15 @@ NEWSROOM = """<html><body><nav><a href="/about/newsroom/featured">Featured News<
 <li><a href="https://www.renown.org/about/newsroom/renown-announces-new-cancer-tower?utm_source=x">Read More About Renown Announces New Cancer Tower &amp; Expansion</a></li>
 <li><a href="https://elsewhere.example/about/newsroom/not-ours-at-all-today">Someone Else's Story About Something Here</a></li>
 <li><a href="/blog/measles">Measles Is Spreading Again: What to Know?</a></li>
-<li><a href="/about/newsroom/renown-opens-roseview-cancer-tower"><img alt=""></a><h3>Renown Opens Roseview Cancer Tower</h3></li></ul></body></html>"""
+<li><a href="/about/newsroom/renown-opens-roseview-cancer-tower"><img alt=""></a><h3>Renown Opens Roseview Cancer Tower</h3></li></ul>
+<script>self.__next_f.push([1,"{\\"href\\":\\"/about/newsroom/renown-crisis-care-center-marks-one-year\\",\\"title\\":\\"x\\"}"])</script></body></html>"""
 
 
 def test_listing_pages_give_headlines_links_and_their_own_dates():
     items = news.parse_listing(NEWSROOM, "https://www.renown.org/about/newsroom", "Renown Health", r"^/about/newsroom/[a-z0-9-]+/?$", NOW)
+    scanned = news.parse_listing(NEWSROOM, "https://www.renown.org/about/newsroom", "Renown Health", r"^/about/newsroom/[a-z0-9-]+/?$", NOW,
+                                 scan=r"/about/newsroom/[a-z0-9-]{8,}")
+    assert {i["link"].split("/")[-1] for i in scanned} - {i["link"].split("/")[-1] for i in items} == {"renown-crisis-care-center-marks-one-year"}
     by = {i["link"].split("/")[-1]: i["title"] for i in items}
     assert by == {"featured": "Featured News",                     # a section: dropped once its page is read
                   "renown-health-becomes-first-in-northern-nevada-to-offer-car-t-cell-therapy": "Renown Health Becomes First in Northern Nevada to Offer CAR T-Cell Therapy",

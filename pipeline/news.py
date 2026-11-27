@@ -391,10 +391,12 @@ class _Links(HTMLParser):
             self._open[-1][1].append(data)
 
 
-def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime) -> list[dict]:
+def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime, scan: str = "") -> list[dict]:
     """A newsroom page without a feed: each link on the page whose path matches `pattern` is a
     story, its link text the headline. Dated later from the story's own page (page_date), which also
-    gives the headline when the link holds only a picture or a word or two (page_title)."""
+    gives the headline when the link holds only a picture or a word or two (page_title).
+    scan: also take story addresses written anywhere in the page (a site that draws its list with
+    script keeps the addresses in its page data, not in links)."""
     p = _Links()
     p.feed(text[:3_000_000])
     pat = re.compile(pattern)
@@ -407,6 +409,10 @@ def parse_listing(text: str, base: str, source: str, pattern: str, now: datetime
         title = clean_text(re.sub(r"^\s*read more(?:\s+about)?\s*", "", label, flags=re.I))[:300]
         if link not in best or len(title) > len(best[link]):
             best[link] = title
+    for m in (re.finditer(scan, text[:3_000_000]) if scan else ()):
+        link = clean_link(urljoin(base, m.group(0)))
+        if urlparse(link).scheme == "https" and pat.search(urlparse(link).path):
+            best.setdefault(link, "")
     return [{"id": item_id(link, title, source), "title": title, "link": link, "source": source,
              "date": _utc(now), "summary": ""} for link, title in list(best.items())[:40]]
 

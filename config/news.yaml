@@ -710,6 +710,7 @@ sources:
     link_only: true            # headlines and links only (see the Reno & Nevada notes above Nevada Current)
     style: listing             # no feed for its press releases: the newsroom page's links, each dated from its own page
     links: "^/about/newsroom/[a-z0-9-]+/?$"
+    scan: "/about/newsroom/[a-z0-9-]{8,}"     # its list is drawn by script: the addresses are in the page data
     pages_per_run: 12
     max_per_day: 3
     home: https://www.renown.org
