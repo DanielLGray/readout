@@ -12137,24 +12137,6 @@
     "Nevada Current",
     "local"
   ],
-  "d6467c2b310f": [
-    "2026-11-25T16:26:00Z",
-    "Medicare sets 2028 prices for 13 new drugs under Biden-era law",
-    "Healthcare Dive",
-    "business"
-  ],
-  "64699b074425": [
-    "2026-11-25T13:54:48Z",
-    "Inside HLTH 2026",
-    "Healthcare Dive",
-    "business"
-  ],
-  "fc59bb3987f0": [
-    "2026-11-25T13:50:09Z",
-    "Just a handful of payers control US health insurance markets, AMA warns",
-    "Healthcare Dive",
-    "business"
-  ],
   "76b35002f231": [
     "2026-11-25T12:00:28Z",
     "Proposed SNAP rule could strip food aid from Nevadans with modest savings",
@@ -12167,41 +12149,11 @@
     "Nevada Current",
     "local"
   ],
-  "050f50930628": [
-    "2026-11-24T22:44:14Z",
-    "Rural health orgs keep pace with chronic care demand, but Medicaid cuts could change that",
-    "Healthcare Dive",
-    "business"
-  ],
-  "05f2318cb653": [
-    "2026-11-24T22:20:24Z",
-    "A quarter of physicians eye the exit — and it’s not just burnout: survey",
-    "Healthcare Dive",
-    "business"
-  ],
   "3168e8181e01": [
     "2026-11-24T21:17:56Z",
     "Cortez Masto eager to grill Huang over Nvidia, Trump",
     "Nevada Current",
     "local"
-  ],
-  "09c14edc9504": [
-    "2026-11-24T16:27:53Z",
-    "Florida AG sues Leapfrog over ‘bogus’ hospital grades",
-    "Healthcare Dive",
-    "business"
-  ],
-  "303fa74c2bde": [
-    "2026-11-24T14:43:37Z",
-    "MAHA model’s first cohort snags $47M for chronic disease coaching",
-    "Healthcare Dive",
-    "business"
-  ],
-  "2618c6721b17": [
-    "2026-11-24T14:00:00Z",
-    "Who oversees digital health? Providers face a regulatory maze",
-    "Healthcare Dive",
-    "business"
   ],
   "843dba6a1e75": [
     "2026-11-24T12:00:56Z",
@@ -12221,23 +12173,11 @@
     "Nevada Current",
     "local"
   ],
-  "8bf0c29279d5": [
-    "2026-11-23T16:52:51Z",
-    "Tampa General loses 340B lawsuit against Eli Lilly",
-    "Healthcare Dive",
-    "business"
-  ],
   "77e5e732fc2b": [
     "2026-11-23T15:57:48Z",
     "Commentary: Hello from the bright side, where we’re always looking",
     "Nevada Current",
     "local"
-  ],
-  "51ca58a654cc": [
-    "2026-11-23T15:29:33Z",
-    "Feds unveil portal to track No Surprises disputes",
-    "Healthcare Dive",
-    "business"
   ],
   "da3dcc6023eb": [
     "2026-11-23T13:00:25Z",
@@ -12706,5 +12646,11 @@
     "Artemis III Astronaut Andre Douglas Visits VAB",
     "NASA",
     "science"
+  ],
+  "f85fb62a9db5": [
+    "2026-11-27T15:23:31Z",
+    "The Witcher 3 Remastered’s Mod Library Just Got a Massive Update",
+    "Polygon",
+    "sff"
   ]
 }
