@@ -469,6 +469,158 @@
         }
       ],
       "at": "2026-11-27"
+    },
+    "bci": {
+      "years": {
+        "2025": 453,
+        "2026": 432,
+        "2024": 381,
+        "2014": 358,
+        "2013": 345,
+        "2023": 336,
+        "2018": 333,
+        "2019": 325,
+        "2021": 322,
+        "2017": 314,
+        "2015": 312,
+        "2020": 311,
+        "2016": 310,
+        "2022": 306,
+        "2011": 257,
+        "2012": 223,
+        "2009": 193,
+        "2010": 176,
+        "2008": 130,
+        "2007": 117,
+        "2005": 54,
+        "2006": 51,
+        "2004": 47,
+        "2003": 17,
+        "2000": 3,
+        "2001": 3,
+        "1985": 2,
+        "2002": 2,
+        "1881": 1,
+        "1949": 1,
+        "1958": 1,
+        "1965": 1,
+        "1972": 1,
+        "1973": 1,
+        "1993": 1,
+        "1996": 1,
+        "1998": 1
+      },
+      "papers": [
+        {
+          "title": "Long-term independent use of an intracortical brain–computer interface for speech and cursor control",
+          "venue": "Nature Medicine",
+          "date": "2026-06-15",
+          "cites": 40,
+          "link": "https://doi.org/10.1038/s41591-026-04414-6"
+        },
+        {
+          "title": "Long-term unsupervised recalibration of cursor-based intracortical brain–computer interfaces using a hidden Markov model",
+          "venue": "Nature Biomedical Engineering",
+          "date": "2025-12-08",
+          "cites": 39,
+          "link": "https://doi.org/10.1038/s41551-025-01536-z"
+        },
+        {
+          "title": "Neuron‐Inspired Ferroelectric Bioelectronics for Adaptive Biointerfacing",
+          "venue": "Advanced Materials",
+          "date": "2025-05-29",
+          "cites": 39,
+          "link": "https://doi.org/10.1002/adma.202416698"
+        },
+        {
+          "title": "Ultrasensitive measurement of brain penetration mechanics and blood vessel rupture with microscale probes",
+          "venue": "Proceedings of the National Academy of Sciences",
+          "date": "2026-03-26",
+          "cites": 33,
+          "link": "https://doi.org/10.1073/pnas.2529147123"
+        },
+        {
+          "title": "Neural-MCRL: Neural Multimodal Contrastive Representation Learning for EEG-based Visual Decoding",
+          "venue": "IEEE International Conference on Multimedia and Expo (ICME)",
+          "date": "2025-06-30",
+          "cites": 32,
+          "link": "https://doi.org/10.1109/icme59968.2025.11210130"
+        }
+      ],
+      "at": "2026-11-27"
+    },
+    "gene-editing": {
+      "years": {
+        "2026": 1595,
+        "2025": 1090,
+        "2024": 776,
+        "2023": 681,
+        "2022": 550,
+        "2021": 455,
+        "2020": 331,
+        "2019": 265,
+        "2018": 170,
+        "2017": 93,
+        "2016": 60,
+        "2015": 18,
+        "2012": 14,
+        "2014": 13,
+        "2013": 8,
+        "2006": 6,
+        "2011": 6,
+        "2000": 4,
+        "2007": 4,
+        "2009": 4,
+        "2010": 4,
+        "1990": 2,
+        "2002": 2,
+        "2003": 2,
+        "2004": 2,
+        "2027": 2,
+        "1973": 1,
+        "1986": 1,
+        "1993": 1,
+        "1994": 1,
+        "1997": 1
+      },
+      "papers": [
+        {
+          "title": "Design of highly functional genome editors by modelling CRISPR–Cas sequences",
+          "venue": "Nature",
+          "date": "2025-07-30",
+          "cites": 242,
+          "link": "https://doi.org/10.1038/s41586-025-09298-z"
+        },
+        {
+          "title": "Revolutionizing CRISPR technology with artificial intelligence",
+          "venue": "Experimental & Molecular Medicine",
+          "date": "2025-07-31",
+          "cites": 106,
+          "link": "https://doi.org/10.1038/s12276-025-01462-9"
+        },
+        {
+          "title": "Tissue-specific mRNA delivery and prime editing with peptide–ionizable lipid nanoparticles",
+          "venue": "Nature Materials",
+          "date": "2025-09-01",
+          "cites": 97,
+          "link": "https://doi.org/10.1038/s41563-025-02320-9"
+        },
+        {
+          "title": "In Vivo Base Editing of PCSK9 with VERVE-102 for Hypercholesterolemia",
+          "venue": "New England Journal of Medicine",
+          "date": "2026-05-25",
+          "cites": 77,
+          "link": "https://doi.org/10.1056/nejmoa2601283"
+        },
+        {
+          "title": "Emerging trends in prime editing for precision genome editing",
+          "venue": "Experimental & Molecular Medicine",
+          "date": "2025-07-31",
+          "cites": 77,
+          "link": "https://doi.org/10.1038/s12276-025-01463-8"
+        }
+      ],
+      "at": "2026-11-27"
     }
   },
   "preprints": {
@@ -767,6 +919,302 @@
         "summary": "Quantum mechanisms satisfying quantum local differential privacy (QLDP) have been shown to achieve a quantum advantage over classical local differential privacy (LDP) mechanisms in certain hypothesis-testing problems. While previous demonstrations have considered the transmission of quantum states…",
         "authors": "Ji-Ho Jung, Seung-Hyun Nam, Si-Hyeon Lee"
       }
+    ],
+    "bci": [
+      {
+        "id": "arxiv:2611.31989",
+        "title": "Reconstructing Natural Images from Brain Activity during Natural Vision",
+        "source": "arXiv",
+        "date": "2026-11-24T05:43:00Z",
+        "link": "https://arxiv.org/abs/2611.31989",
+        "summary": "Reconstructing images from brain activity has two broad goals. The first is to build brain-computer interfaces. The second is to understand how the brain sees. The eyes deliver incomplete, noisy input, so the brain must fill in the gaps with its expectations of what natural scenes look like. This…",
+        "authors": "Tejasvi Kothapalli, Ryan Ressmeyer, Declan Rowley et al."
+      },
+      {
+        "id": "arxiv:2611.31171",
+        "title": "EEG Decoding in Context: A Framework for Tuning-Free EEG Foundation Models",
+        "source": "arXiv",
+        "date": "2026-11-23T18:30:53Z",
+        "link": "https://arxiv.org/abs/2611.31171",
+        "summary": "Electroencephalography (EEG) decoding is a central route toward brain-computer interfaces for communication, rehabilitation, cognitive assessment, and neurological monitoring. Recent EEG foundation models have substantially advanced reusable signal representations, but their downstream use still…",
+        "authors": "Hao-Run Cai, Si-Yang Liu, Han-Jia Ye et al."
+      },
+      {
+        "id": "arxiv:2611.29457",
+        "title": "MAS-BIT: A Multi-Agent System for End-to-End BraIn-to-Text Decoding",
+        "source": "arXiv",
+        "date": "2026-11-22T12:55:45Z",
+        "link": "https://arxiv.org/abs/2611.29457",
+        "summary": "Speech brain-computer interfaces aim to restore communication by translating neural activity into text, yet end-to-end decoders have historically trailed cascaded systems in accuracy. We introduce a Multi-Agent System for BraIn-to-Text (MAS-BIT), the first multi-agent framework for end-to-end…",
+        "authors": "Xinjie Zhang, Linyang He, Yizi Zhang et al."
+      },
+      {
+        "id": "arxiv:2611.27029",
+        "title": "Mind World Models: Joint Learning of Motor EEG Representations and Action-Conditioned World Dynamics",
+        "source": "arXiv",
+        "date": "2026-11-20T03:00:38Z",
+        "link": "https://arxiv.org/abs/2611.27029",
+        "summary": "Motor decoding from electroencephalography (EEG) supports non-invasive brain-computer interfaces, yet existing methods either rely on costly cue-based trials and coarse categorical labels or use pretraining objectives that do not directly capture how movement unfolds, limiting their ability to…",
+        "authors": "Weikang Qiu, Zheng Huang, Tinglin Huang et al."
+      },
+      {
+        "id": "arxiv:2611.24206",
+        "title": "GALA: Gallery-Level Alignment for Real-Life Vision Decoding from EEG",
+        "source": "arXiv",
+        "date": "2026-11-18T10:40:59Z",
+        "link": "https://arxiv.org/abs/2611.24206",
+        "summary": "Neural decoding of visual experience from electroencephalography (EEG) has achieved strong performance in intra-subject settings, but current methods fail to generalize across individuals: on the standard 200-way benchmark THINGS-EEG-2, top-1 accuracy drops from above 80% within subjects to about…",
+        "authors": "Philippe Forest, Giulia Lioi, Mai Pham Quyen et al."
+      },
+      {
+        "id": "arxiv:2611.24163",
+        "title": "Stabilizing Neural-to-Image Retrieval with Frequency-Domain Priors and Adaptive Supervision",
+        "source": "arXiv",
+        "date": "2026-11-18T10:06:13Z",
+        "link": "https://arxiv.org/abs/2611.24163",
+        "summary": "Visual neural decoding aims to infer perceived visual stimuli from brain activity, offering important insights into human visual cognition while enabling transformative applications in brain computer interfaces and artificial intelligence. Recent advances in pretrained vision-language models have…",
+        "authors": "YaoYang Liu, ZhuoShi Tang, Haopeng Lai et al."
+      },
+      {
+        "id": "arxiv:2611.23991",
+        "title": "SIRAZ: Sparse Inter-Layer Residual Aggregation for Zero-Shot Visual Neural Decoding",
+        "source": "arXiv",
+        "date": "2026-11-18T07:34:31Z",
+        "link": "https://arxiv.org/abs/2611.23991",
+        "summary": "Brain-computer interfaces aim to establish direct communication between neural activity and external systems, making interpretation of brain signals an important problem. In this context, neural visual decoding seeks to infer visual information from neural activity by learning a mapping between…",
+        "authors": "Neha, Mudasir Ganaie"
+      },
+      {
+        "id": "arxiv:2611.21399",
+        "title": "MegNIST, A Benchmark for Non-Invasive Inner Speech Decoding",
+        "source": "arXiv",
+        "date": "2026-11-16T16:52:25Z",
+        "link": "https://arxiv.org/abs/2611.21399",
+        "summary": "MegNIST is a benchmark dataset for developing and evaluating machine learning methods for inner speech decoding from magnetoencephalography (MEG). The dataset comprises 12,000 trials of a single participant imagining speaking the digits zero through nine, recorded across four sessions. Each trial…",
+        "authors": "Teyun Kwon, Pratik Somaiya, Gereon Elvers et al."
+      }
+    ],
+    "gene-editing": [
+      {
+        "id": "arxiv:2611.32407",
+        "title": "Every Edit Its Own Budget: Per-Instruction Token Freezing for Training-Free Acceleration of Multi-Edit Image Editing",
+        "source": "arXiv",
+        "date": "2026-11-24T11:09:33Z",
+        "link": "https://arxiv.org/abs/2611.32407",
+        "summary": "Accelerating instruction-based image editing when one instruction requests several edits is challenging. Many training-free accelerators for flow-matching image editors skip tokens whose prediction has stopped changing, but decide this with a single threshold for the whole image. With several…",
+        "authors": "Jyotirmoy Nath, Neeraj Kumar, Brejesh Lall"
+      },
+      {
+        "id": "arxiv:2611.31227",
+        "title": "How Far Can Linear Go? BiPert, a Unified Framework for Single-Cell Perturbation Modelling",
+        "source": "arXiv",
+        "date": "2026-11-23T18:58:32Z",
+        "link": "https://arxiv.org/abs/2611.31227",
+        "summary": "Understanding how genetic perturbations affect cellular behaviour is essential for studying gene function and regulatory mechanisms. Large-scale CRISPR screens measure these effects across thousands of genes, but cover relatively few cellular contexts. Predicting perturbation responses in unseen…",
+        "authors": "Abhishek Sharma, Aleksej Zelezniak"
+      },
+      {
+        "id": "arxiv:2611.30527",
+        "title": "Nonequilibrium Dynamics of R-loop Formation in the CRISPR-Cas9 System",
+        "source": "arXiv",
+        "date": "2026-11-23T11:40:54Z",
+        "link": "https://arxiv.org/abs/2611.30527",
+        "summary": "The binding specificity of CRISPR-Cas9 is governed by the stepwise formation of an R-loop, in which the sgRNA displaces the nontarget DNA strand and hybridizes with the target strand in discrete base pair steps. Here we develop a nonequilibrium dynamics framework that models R-loop formation as a…",
+        "authors": "Yu Liu, Bing Miao"
+      },
+      {
+        "id": "arxiv:2611.29612",
+        "title": "Subsurface Model Programming: Frontier Large Language Models Natively Interpret and Edit Dynamic Reservoir Models",
+        "source": "arXiv",
+        "date": "2026-11-22T17:11:16Z",
+        "link": "https://arxiv.org/abs/2611.29612",
+        "summary": "Multiphase flow simulation in heterogeneous porous media supports decisions in hydrocarbon recovery, geological carbon sequestration, and geothermal extraction. We introduce Subsurface Model Programming, a workflow in which large language models (LLMs) read and edit reservoir simulation decks…",
+        "authors": "Yanchen Song, Huizhu Xiang, Zhengdong Lei et al."
+      },
+      {
+        "id": "arxiv:2611.29055",
+        "title": "Hypothesis Generation and Semantic Attribution in Inverse Perturbation Modeling",
+        "source": "arXiv",
+        "date": "2026-11-21T21:34:13Z",
+        "link": "https://arxiv.org/abs/2611.29055",
+        "summary": "Understanding gene regulatory relationships at scale can help identify intervention points and anticipate unintended effects, but connecting a black-box model's learned computation to biological knowledge remains difficult. We investigate whether a sparse, typed gene network can generate…",
+        "authors": "Pascal Passigan, Manolis Kellis"
+      },
+      {
+        "id": "arxiv:2611.26408",
+        "title": "Training Vision Models for LLM-Driven Weight-Space Programming",
+        "source": "arXiv",
+        "date": "2026-11-19T16:56:27Z",
+        "link": "https://arxiv.org/abs/2611.26408",
+        "summary": "It has been demonstrated that, in certain settings, large language models can perform weight-space programming to directly modify the weights of neural networks. However, it is unknown how dedicated training of these networks can contribute to the successes of weight-space programming. We present a…",
+        "authors": "Timo Ropinski, Sebastian Kranz"
+      },
+      {
+        "id": "arxiv:2611.25861",
+        "title": "Decoupled Knowledge Retrieval and Compact Memory Enable Reliable Lifelong Model Editing",
+        "source": "arXiv",
+        "date": "2026-11-19T10:10:57Z",
+        "link": "https://arxiv.org/abs/2611.25861",
+        "summary": "Lifelong model editing requires continuously incorporating new facts into deployed large language models (LLMs) without expensive retraining or compromising existing capabilities. Memory-based editors offer an appealing solution by keeping the base parameters untouched, yet their practical use is…",
+        "authors": "Yue Che, Jingze Wang, Chen Guoyi et al."
+      },
+      {
+        "id": "arxiv:2611.25584",
+        "title": "An Explainable and Scalable Hierarchical Tensor Framework for Integrating Multi-Omics and Digital Pathomics",
+        "source": "arXiv",
+        "date": "2026-11-19T06:27:17Z",
+        "link": "https://arxiv.org/abs/2611.25584",
+        "summary": "Background: Precision oncology requires integration of heterogeneous molecular and pathology data, yet many fusion models offer limited biologically grounded interpretability and struggle with missing modalities. Methods: We present Hierarchical Interpretable Tensor Fusion (HIT-Fuse), integrating…",
+        "authors": "Ahmad Hussein, Ali Anaissi, Mukesh Prasad et al."
+      }
+    ],
+    "humanoids": [
+      {
+        "id": "arxiv:2611.34884",
+        "title": "FineDex: Bridging Fine-Grained Human-Object Interaction Generation to Dexterous Humanoid Manipulation",
+        "source": "arXiv",
+        "date": "2026-11-25T18:40:47Z",
+        "link": "https://arxiv.org/abs/2611.34884",
+        "summary": "Dexterity is, at its core, finger-level control, yet existing dexterous manipulation and human-object interaction (HOI) generation methods rarely let one specify how an interaction is performed: five-fingered hands are often reduced to grippers, or finger usage is copied from individual human…",
+        "authors": "Yujia Zeng, Yuxin Chen, Yuzhen Song et al."
+      },
+      {
+        "id": "arxiv:2611.34569",
+        "title": "Riding the Wave: Sim-to-Real Humanoid Control on Elastic Terrain",
+        "source": "arXiv",
+        "date": "2026-11-25T15:36:13Z",
+        "link": "https://arxiv.org/abs/2611.34569",
+        "summary": "Humanoid robots on deformable elastic terrains face a surface whose position and motion are coupled in space and time: deflection and rebound persist between contacts, and load at one foothold alters the support at others, so training must capture how each contact changes the support that follows.…",
+        "authors": "Yinglei Zhu, Qin Li, Honghao Pan et al."
+      },
+      {
+        "id": "arxiv:2611.33828",
+        "title": "Learning a Whole-Body Pivot-Walking Gait for Heavy-Box Transport with a Humanoid",
+        "source": "arXiv",
+        "date": "2026-11-25T05:59:20Z",
+        "link": "https://arxiv.org/abs/2611.33828",
+        "summary": "Through pivot walking, humans can transport objects that are too heavy to lift. Previous humanoid studies have relied on planned sequences in which object manipulation and stepping are executed separately and the object is brought to rest between successive rotations. However, few studies have…",
+        "authors": "Rikuto Hidaka, Tsung-Yuan Chen, Kento Kawaharazuka"
+      },
+      {
+        "id": "arxiv:2611.33407",
+        "title": "An Adversarial Multi-Agent Pursuit Game for Locomotor Agility Pretraining",
+        "source": "arXiv",
+        "date": "2026-11-24T20:33:56Z",
+        "link": "https://arxiv.org/abs/2611.33407",
+        "summary": "Agile humanoid locomotion requires controllers that can adapt to rapidly changing motion demands while remaining stable and robust. Recent locomotion controllers are typically designed with either a dense reward that is carefully shaped to encourage steps and penalize falling, or by using a…",
+        "authors": "Nathan A. C. Hogg, Matt Hyatt, Neil Klingensmith et al."
+      },
+      {
+        "id": "arxiv:2611.32944",
+        "title": "DynaMimic: A Physics-Informed World Model for Humanoid Motion Tracking",
+        "source": "arXiv",
+        "date": "2026-11-24T16:47:34Z",
+        "link": "https://arxiv.org/abs/2611.32944",
+        "summary": "Whole-body motion tracking enables humanoid robots to reproduce diverse skills from human demonstrations. Existing model-free reinforcement learning methods either distill motion specialists into a single policy at the cost of performance or train a generalist policy directly using cluster-scale…",
+        "authors": "Chaoyue Xing, Linyi Huang, Yiting He et al."
+      },
+      {
+        "id": "arxiv:2611.32642",
+        "title": "BARE: Body-Aware Reflexive Evasion for Humanoid Robots",
+        "source": "arXiv",
+        "date": "2026-11-24T14:01:29Z",
+        "link": "https://arxiv.org/abs/2611.32642",
+        "summary": "Dynamic obstacle avoidance is essential for safely deploying humanoid robots in real-world environments, where rapidly approaching objects require immediate evasive responses. Recent advances in reflexive evasion have focused primarily on quadrupeds, which typically rely on large-scale whole-body…",
+        "authors": "Zihao Li, Tong Chen, Hua Song et al."
+      },
+      {
+        "id": "arxiv:2611.30449",
+        "title": "CHAMP: Coordinated Humanoid Loco-Manipulation with Whole-Body Motion Priors",
+        "source": "arXiv",
+        "date": "2026-11-23T10:40:38Z",
+        "link": "https://arxiv.org/abs/2611.30449",
+        "summary": "Coordinating locomotion and dexterous manipulation is fundamental to humanoid robots operating in human environments. A key challenge is learning motion priors from diverse data and using them effectively for coordinated robot control. We present CHAMP, a unified framework for humanoid…",
+        "authors": "Lijun Han, Muyuan Ma, Zichen Wang et al."
+      },
+      {
+        "id": "arxiv:2611.29897",
+        "title": "Motion Mamba 2.0: Autoregressive Diffusion Mamba for Long-Horizon Humanoid Control",
+        "source": "arXiv",
+        "date": "2026-11-23T01:51:57Z",
+        "link": "https://arxiv.org/abs/2611.29897",
+        "summary": "Long-horizon, real-time controllable motion generation is essential for interactive animation and humanoid robotics, where an agent must respond to changing instructions and spatial goals while moving. Existing autoregressive diffusion methods generate motion incrementally, but bounded attention…",
+        "authors": "Yue Huang, Tianshan Zhang, Zeyu Zhang et al."
+      }
+    ],
+    "moon-mars": [
+      {
+        "id": "arxiv:2611.31802",
+        "title": "Modeling Lunar Power Harvesting and Battery Recharging In The Presence of Random Pointing Error",
+        "source": "arXiv",
+        "date": "2026-11-24T01:53:40Z",
+        "link": "https://arxiv.org/abs/2611.31802",
+        "summary": "In our work, we establish a lunar power beaming environment between a low-lunar orbiter and a circular solar panel mounted on top of a lunar vehicle located at the Lunar South Pole. Due to the random nature of the pointing errors, various upper bounds reflecting the severity of these errors are…",
+        "authors": "Barış Dönmez, Yanni Jiwan-Mercier, Julien Magné et al."
+      },
+      {
+        "id": "arxiv:2611.25356",
+        "title": "Data-Driven Hamiltonian Under Parametric Uncertainty",
+        "source": "arXiv",
+        "date": "2026-11-19T01:50:45Z",
+        "link": "https://arxiv.org/abs/2611.25356",
+        "summary": "Hamilton--Jacobi (HJ) reachability computes the states from which a system can be kept out of an unsafe region, but it requires knowledge of dynamics. The data-driven Hamiltonian (DDH), under a black-box dynamics setting, lower bounds the Hamiltonian directly from trajectory data, which produces a…",
+        "authors": "Zach Liu, Namhoon Cho, Jason J. Choi"
+      },
+      {
+        "id": "arxiv:2610.36378",
+        "title": "Data-Driven Hamiltonian for Neural Optimal Control",
+        "source": "arXiv",
+        "date": "2026-10-26T22:49:49Z",
+        "link": "https://arxiv.org/abs/2610.36378",
+        "summary": "Reinforcement learning (RL) has emerged as a prominent data-driven approach to optimal control, but suffers from sample inefficiency and sensitivity to the data distribution. In this paper, we propose an alternative approach grounded in the well-established Hamilton-Jacobi framework in optimal…",
+        "authors": "Christopher A. Strong, Aswin Surya, Namhoon Cho et al."
+      },
+      {
+        "id": "arxiv:2610.34554",
+        "title": "LunarRF: A Terrain-Aware Propagation Engine and Pole-Wide 3GPP Surface Coverage Atlas of the Lunar South Pole",
+        "source": "arXiv",
+        "date": "2026-10-25T20:32:21Z",
+        "link": "https://arxiv.org/abs/2610.34554",
+        "summary": "Artemis surface operations will depend on 3GPP cellular links, yet no public product shows where such links are physically possible across the lunar south pole. We present LunarRF, a GPU system for terrain-aware surface coverage, and the pole-wide atlas produced with it. A footprint engine casts…",
+        "authors": "Christopher J. Santorelli, Alexander M. Wyglinski"
+      },
+      {
+        "id": "arxiv:2610.31726",
+        "title": "Cognitively Constrained Partners for Zero-Shot Coordination in Real-Time Partitioned Control",
+        "source": "arXiv",
+        "date": "2026-10-22T13:53:38Z",
+        "link": "https://arxiv.org/abs/2610.31726",
+        "summary": "Effective human-machine teaming requires agents that coordinate with unpredictable human partners. Reinforcement learning from live human feedback or large behavioural datasets is expensive, while purely simulated training overfits to artificial conventions and fails at Zero-Shot Coordination with…",
+        "authors": "Ash Simmons, George De Ath, Richard M. Everson"
+      },
+      {
+        "id": "arxiv:2610.25720",
+        "title": "Enhancing Lunar PNT Performance Through Surface Station Enabled Radiometric Observables",
+        "source": "arXiv",
+        "date": "2026-10-19T03:20:01Z",
+        "link": "https://arxiv.org/abs/2610.25720",
+        "summary": "Future lunar surface missions require reliable positioning for autonomous rover operations. Lunar navigation satellite systems may provide limited vertical positioning accuracy due to satellite availability and observation geometry, particularly during early deployment. This study investigates a…",
+        "authors": "Toshiki Tanaka, Satoshi Ikari"
+      },
+      {
+        "id": "arxiv:2610.24491",
+        "title": "VBO-MI: A Differentiable Black-Box Optimization Framework via Variational Mutual Information Estimation",
+        "source": "arXiv",
+        "date": "2026-10-17T06:25:23Z",
+        "link": "https://arxiv.org/abs/2610.24491",
+        "summary": "Many real-world tasks require optimizing expensive black-box functions accessible only through noisy evaluations, a setting commonly addressed with Bayesian optimization. While Gaussian processes(GPs) and Bayesian neural networks have driven significant progress, GP-based methods scale cubically…",
+        "authors": "Farhad Mirkarimi"
+      },
+      {
+        "id": "arxiv:2609.06496",
+        "title": "Mechanisms of Electrostatic Charge Formation and Retention in Lunar Regolith",
+        "source": "arXiv",
+        "date": "2026-09-06T09:24:05Z",
+        "link": "https://arxiv.org/abs/2609.06496",
+        "summary": "As the Artemis program advances toward the lunar south pole and permanently shadowed regions (PSRs), understanding lunar charging is increasingly important for protecting astronauts, robotic systems, instruments, and infrastructure. Persistent darkness, cryogenic temperatures, low regolith…",
+        "authors": "Minhyeok Kim, Hyun Jung Kim, Sang H. Choi et al."
+      }
     ]
   },
   "cand_research": {},
@@ -891,6 +1339,24 @@
     "ai trade": {
       "term": "AI trade",
       "kind": "business",
+      "first": "2026-11-27",
+      "last": "2026-11-27",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "us about": {
+      "term": "us about",
+      "kind": "science",
+      "first": "2026-11-27",
+      "last": "2026-11-27",
+      "weeks": [
+        "2026-W48"
+      ]
+    },
+    "brain cell": {
+      "term": "brain cells",
+      "kind": "health",
       "first": "2026-11-27",
       "last": "2026-11-27",
       "weeks": [

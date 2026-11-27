@@ -2126,5 +2126,509 @@
     "https://www.livescience.com/technology/quantum/darpa-is-assessing-microsofts-controversial-quantum-computing-technology-what-will-happen-if-the-majorana-2-platform-is-vindicated",
     "Microsoft has doubled down on its Majorana 2 quantum computing platform despite pushback from the physics community, with DARPA researchers now set to evaluate the bold claims.",
     "science"
+  ],
+  "e32f1fe87094": [
+    "2026-11-27T22:40:04Z",
+    "New research establishes fundamental complexity limit for quantum circuit optimization",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-fundamental-complexity-limit-quantum-circuit.html",
+    "Quantum circuit optimization is an important research area, as the computational resources required to execute quantum algorithms remain a major challenge. In particular, two-qubit operations are generally associated with higher error rates than single-qubit gates on current…",
+    "radar"
+  ],
+  "9078fa0d72ca": [
+    "2026-11-27T21:00:01Z",
+    "Strawberries, cucumbers and lemon basil show promise for future moon and Mars menus",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-strawberries-cucumbers-lemon-basil-future.html",
+    "As NASA prepares for future missions to the moon and Mars, researchers are studying crops that could provide astronauts with fresh food, nutrition and variety far from Earth. Such crop variety can help with menus in deep space, something top of mind this week as the nation…",
+    "radar"
+  ],
+  "42707007da2a": [
+    "2026-11-27T23:00:04Z",
+    "Battery-free implant harvests ultrasound energy and glows to reveal its condition",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-battery-free-implant-harvests-ultrasound.html",
+    "Implantable bioelectronics enable health care professionals to continuously monitor patients' physiological conditions, deliver targeted treatments and support recovery. However, once implanted, these devices are difficult to inspect directly, and damage or degradation may go…",
+    "radar"
+  ],
+  "3bfaeb77c8c9": [
+    "2026-11-27T22:20:04Z",
+    "Engineers reveal the interlayer elastic limits of van der Waals crystals",
+    "Phys.org research",
+    "https://phys.org/news/2026-11-reveal-interlayer-elastic-limits-van.html",
+    "A research team led by Professor Yang Lu from the Department of Mechanical Engineering in the Faculty of Engineering at The University of Hong Kong (HKU), in collaboration with Tsinghua University, has measured the interlayer elastic limits of graphite and hexagonal boron…",
+    "radar"
+  ],
+  "04806c06970a": [
+    "2026-11-25T13:40:13Z",
+    "Inflatable FaBrick enables soft robots to contract, bend and twist",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-inflatable-fabrick-enables-soft-robots.html",
+    "Soft robots that contract, bend, twist, rotate or stiffen can be built from the same pneumatically actuated fabric with easily accessible tools, according to a University of Michigan Engineering study. The fabric, embedded with a grid of inflatable pouches, earned the name…",
+    "radar"
+  ],
+  "698060e2c81c": [
+    "2026-11-23T18:20:07Z",
+    "New drone prototype folds itself through gaps half its width during flight",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-drone-prototype-gaps-width-flight.html",
+    "Drones are now commonly used in areas that are difficult for humans to access, but these spaces often have small or awkwardly shaped regions that are also difficult for drones to access. Some designs have attempted to overcome these limitations with shape-changing mechanisms…",
+    "radar"
+  ],
+  "dfa591ba3381": [
+    "2026-11-23T17:20:02Z",
+    "Artificial muscles sense their own motion to give robots precise control",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-artificial-muscles-motion-robots-precise.html",
+    "A robotic finger presses a piano key, pauses and moves to the next note. An artificial eye shifts its gaze through a series of controlled movements. Behind both demonstrations is a new kind of artificial muscle that can sense its own state, hold intermediate positions and…",
+    "radar"
+  ],
+  "f4499228b4e0": [
+    "2026-11-23T14:48:16Z",
+    "'Self-reflective' robot recognizes its limitations",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-robot-limitations.html",
+    "A new AI model developed by researchers at the Technical University of Munich (TUM) teaches robots to recognize their own limitations. When they encounter an unfamiliar situation they cannot handle, for example, they simply stop and wait for someone to help them. This enables…",
+    "radar"
+  ],
+  "241ae7d73526": [
+    "2026-11-23T12:40:01Z",
+    "A LEASH for AI-controlled robots: New system could reduce harmful actions",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-leash-ai-robots-actions.html",
+    "Large language models, the models behind the functioning of ChatGPT, Gemini and similar platforms, are now also used in robotics. These models can help robots to interpret user instructions, plan their actions and respond to changes in their surroundings.",
+    "radar"
+  ],
+  "da0a6b4339eb": [
+    "2026-11-20T16:00:28Z",
+    "Outdoor 3D tracking technology uses a drone's flight path as a 'moving ruler'",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-outdoor-3d-tracking-technology-drone.html",
+    "The secret behind the lifelike movements of the characters in the film \"Avatar\" was motion capture, a technology that records movement in three dimensions by attaching markers to actors' bodies and filming them with multiple cameras inside a studio. However, bringing such…",
+    "radar"
+  ],
+  "540f3a8165c0": [
+    "2026-11-20T14:50:02Z",
+    "Countries open path toward 'killer robots' pact",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-killer-robots-clock.html",
+    "Countries opened a path Saturday toward finding an international agreement on regulating lethal autonomous weapons systems—though campaigners seeking to stop so-called killer robots were disappointed by the \"weakened\" outcome.",
+    "radar"
+  ],
+  "da94a78424f4": [
+    "2026-11-20T13:00:08Z",
+    "Adaptive AI agent connects experimental planning with robotic control in wastewater treatment test",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-ai-agent-experimental-robotic-wastewater.html",
+    "Artificial intelligence systems are now widely used in research settings, primarily to analyze data, make predictions and discover promising materials, drugs or solutions. Most of the agents used for research are disembodied, which means that they are computer-based and require…",
+    "radar"
+  ],
+  "c3fd1c56c70e": [
+    "2026-11-19T16:40:04Z",
+    "Six-inch robot could inspect nuclear waste pipes beyond reach of conventional cameras",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-inch-robot-nuclear-pipes-conventional.html",
+    "How do you inspect underground pipes that carry contaminated waste from the inside out? It's a question the Hanford Site in Washington state has faced as it works to clean up the waste left by decades of nuclear production.",
+    "radar"
+  ],
+  "ed7c50a30b4f": [
+    "2026-11-18T19:00:25Z",
+    "Featherweight flying robot carries its own sensors and computers",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-featherweight-flying-robot-sensors.html",
+    "Over the past decade, MIT researchers have developed aerial microrobots with bumblebee-like speed, agility and durability for tasks like precision agriculture or search and rescue. But these featherweight microrobots couldn't carry the electronics needed for navigation, forcing…",
+    "radar"
+  ],
+  "f712317b2e55": [
+    "2026-11-18T19:00:16Z",
+    "The fastest soft robot ever built doesn't need electronics to function",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-fastest-soft-robot-built-doesnt.html",
+    "The fastest robot to be made entirely of soft materials can reach speeds of up to 4.72 meters—a little more than 5 yards—per second, engineers at the University of California San Diego have shown. The six-legged robot can run on a wide range of terrain, from sand to mulch to…",
+    "radar"
+  ],
+  "1f4f2fe9a40f": [
+    "2026-11-18T18:00:09Z",
+    "Study investigates haptic feedback in virtual reality on users' experience",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-haptic-feedback-virtual-reality-users.html",
+    "Research published in the International Journal of Manufacturing Research shows that \"haptic,\" vibration-based feedback in virtual reality (VR) can help users understand collaborative robots and improve safety controls. However, in a pilot study researchers found no measurable…",
+    "radar"
+  ],
+  "f209be90919d": [
+    "2026-11-18T16:40:05Z",
+    "The beginning of a beautiful friendship? Interaction could be key to human acceptance of robots",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-beautiful-friendship-interaction-key-human.html",
+    "Whether people accept humanoid robots depends not only on what the robots can do for us, but above all on how we experience interacting with them—through all our senses and over time. This is the conclusion of a research team at the University of Potsdam that examined the…",
+    "radar"
+  ],
+  "67898ef1ae47": [
+    "2026-11-18T12:00:10Z",
+    "Robots learn human movement patterns to find paths through dense crowds",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-robots-human-movement-patterns-paths.html",
+    "Navigating a bustling train station or airport is a major challenge for people with visual impairments. New research from Örebro University teaches robots to follow the \"unwritten rules\" of human movement and make their way through dense crowds. In the long term, the technology…",
+    "radar"
+  ],
+  "cc7152d76dc1": [
+    "2026-11-18T11:00:01Z",
+    "Chinese robots learn from humans in tech hub Shenzhen",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-chinese-robots-humans-tech-hub.html",
+    "At a park refreshment stand in China's tech capital, Shenzhen, a humanoid robot grabs a cup and pulls a lever to form an ice cream spiral, then hands the customer their order.",
+    "radar"
+  ],
+  "f2439682da47": [
+    "2026-11-17T20:00:01Z",
+    "Single-propeller drone uses its own spin to scan surroundings in all directions",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-propeller-drone-scan.html",
+    "A research team from the Department of Mechanical Engineering in the Faculty of Engineering at The University of Hong Kong (HKU) has developed a single-propeller autonomous drone powered by only one motor. It can not only fly at high speed in complex environments such as forests…",
+    "radar"
+  ],
+  "8f247e561454": [
+    "2026-11-16T17:00:10Z",
+    "A shared signal for humans and robots: Flexible display uses both color and near-infrared to communicate",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-humans-robots-flexible-display-infrared.html",
+    "A joint research team from the Korea Advanced Institute of Science and Technology (KAIST) and Yonsei University has developed a flexible display that can communicate information to both humans and robots. Human workers can interpret information through visible color changes…",
+    "radar"
+  ],
+  "47d70c94f662": [
+    "2026-11-16T16:20:05Z",
+    "Self-illuminating fibers reveal soft robot movements without batteries or complex electronic circuits",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-illuminating-fibers-reveal-soft-robot.html",
+    "A research team led by Professor Soon Moon Jeong of the Department of Advanced Technology at the Graduate School of Engineering Practice at DGIST, has developed a new sensing technology for soft robots that emits light whenever the robot moves, providing an intuitive visual…",
+    "radar"
+  ],
+  "6e4f12848fc1": [
+    "2026-11-14T13:40:02Z",
+    "Robots recognize the shape of an arena by messaging each other",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-robots-arena-messaging.html",
+    "Humans can create loose maps of environments they are exploring in their minds, using their senses and navigation skills. Many robots, on the other hand, rely on set maps of known environments or new maps produced using data collected by their sensors.",
+    "radar"
+  ],
+  "21b418c8c36d": [
+    "2026-11-13T15:20:07Z",
+    "High-resolution bionic eye combines color imaging with more efficient motion detection",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-high-resolution-bionic-eye-combines.html",
+    "Researchers at The Hong Kong University of Science and Technology (HKUST) have developed a high-resolution bionic eye that integrates full-color imaging, an aberration-corrected field of view exceeding 160 degrees and event-driven motion detection.",
+    "radar"
+  ],
+  "d5ffb12f9151": [
+    "2026-11-13T12:20:01Z",
+    "Autonomous drones detect cracks in concrete bridges",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-autonomous-drones-concrete-bridges.html",
+    "A research team at Ruhr University Bochum is developing an autonomous flying drone that detects cracks in concrete bridges. The drone is intended to make costly, labor-intensive bridge inspections more efficient, safer and more affordable. It is being developed by David Müller…",
+    "radar"
+  ],
+  "5f4224bd3122": [
+    "2026-11-12T19:20:01Z",
+    "German AI robotics startup valued at $8.5 billion after new fundraising",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-german-ai-robotics-startup-valued.html",
+    "German AI robotics startup Agile Robots said Thursday that a new funding round valued the company at $8.5 billion (7.7 billion euros), providing additional firepower for a global expansion.",
+    "radar"
+  ],
+  "02ce174dc798": [
+    "2026-11-12T18:00:05Z",
+    "Hand gestures and vibrating belt enable drone control without visual feedback in early tests",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-gestures-vibrating-belt-enable-drone.html",
+    "Operating a drone manually requires pilots to watch a screen while coordinating controls. This divides attention between the aircraft and its surroundings. Researchers are exploring ways to make drone operation more intuitive and less dependent on continuous visual monitoring. A…",
+    "radar"
+  ],
+  "b77af433159b": [
+    "2026-11-27T20:20:02Z",
+    "Conductive dyes turn hair into electrodes for brain monitoring",
+    "Tech Xplore",
+    "https://techxplore.com/news/2026-11-dyes-hair-electrodes-brain.html",
+    "When doctors want to record the brain's electrical activity, they place electrodes on a person's scalp. However, hair can get in the way, making it harder for the electrodes to pick up clear signals. But that could soon be a thing of the past. A team of scientists has developed…",
+    "radar"
+  ],
+  "e031bdf2df05": [
+    "2026-11-27T19:00:12Z",
+    "Artificial protein activates faulty insulin receptors and lowers blood sugar in mice",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-artificial-protein-faulty-insulin-receptors.html",
+    "The body relies on a finely tuned network of receptors that unlock their docking sites in response to specific chemical signals. In some genetic diseases, however, mutations can leave these receptors unable to do their job. A recent study published in Science Translational…",
+    "radar"
+  ],
+  "c976bc532ead": [
+    "2026-11-27T18:18:21Z",
+    "A new map reveals how individual brain cells use different RNA versions of the same genes",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-reveals-individual-brain-cells-rna.html",
+    "In complex organisms such as humans, the same gene can produce different RNA molecules. This is known as alternative splicing. The differently spliced RNA molecules, called isoforms, may in turn result in different proteins.",
+    "radar"
+  ],
+  "aa3a441fc305": [
+    "2026-11-27T18:00:08Z",
+    "Scientists identify brain circuit behind sensory hypersensitivity in autism",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-scientists-brain-circuit-sensory-hypersensitivity.html",
+    "For many people with autism spectrum disorder (ASD), ordinary sensory experiences can be unusually intense or overwhelming. A light touch or a mildly uncomfortable sensation may provoke a disproportionately strong response, making everyday activities difficult.",
+    "radar"
+  ],
+  "eb9da692749f": [
+    "2026-11-27T16:20:13Z",
+    "Got a frozen shoulder? It could be due to your blood sugar and genes",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-frozen-shoulder-due-blood-sugar.html",
+    "Frozen shoulder can develop seemingly out of nowhere. One day your shoulder feels uncomfortable. A few months later, even putting on a coat or reaching into a cupboard can be difficult. Research on blood sugar offers a clue to why some people are more likely to develop it…",
+    "radar"
+  ],
+  "c81d823067c8": [
+    "2026-11-27T13:40:01Z",
+    "An RNA therapy approach to treat heart damage in Fabry disease",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-rna-therapy-approach-heart-fabry.html",
+    "Fabry disease, also known as Morbus Fabry, is an inherited metabolic disorder in which certain fatty substances cannot be broken down sufficiently. These substances then accumulate in various organs, where they can cause serious damage.",
+    "radar"
+  ],
+  "5414c1a57da6": [
+    "2026-11-26T23:00:02Z",
+    "Genomic work helps find treatment for rare blood disorder",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-genomic-treatment-rare-blood-disorder.html",
+    "Sisters with a rare blood condition are the first patients to receive a repurposed drug to treat it, after a team of doctors and cardiovascular scientists used genomic sequencing to identify the drug's target.",
+    "radar"
+  ],
+  "8c2009b087ca": [
+    "2026-11-26T19:00:07Z",
+    "An engineered 'glue' for aged eggs could prevent premature chromosome separation",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-aged-eggs-premature-chromosome.html",
+    "",
+    "radar"
+  ],
+  "dcc1d9f20fdd": [
+    "2026-11-25T22:50:02Z",
+    "Genetic information can improve prostate cancer risk assessment",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-genetic-prostate-cancer.html",
+    "Genetic information can help provide a more individual assessment of prostate cancer risk among men undergoing PSA testing, according to a new study from Karolinska Institutet published in JAMA Network Open. PSA is a protein produced by the prostate that can be measured with a…",
+    "radar"
+  ],
+  "7146166404cd": [
+    "2026-11-25T21:00:11Z",
+    "Same oncogenic mutation, different outcomes: Why some blood vessels develop malformations while others remain resistant",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-oncogenic-mutation-outcomes-blood-vessels.html",
+    "Why do certain cancer-associated mutations cause malformations in some blood vessels while leaving others largely unaffected? The answer lies in the identity and developmental stage of endothelial cells, the cells lining the inside of blood vessels.",
+    "radar"
+  ],
+  "307898517ac4": [
+    "2026-11-25T19:00:49Z",
+    "Brain organoids in space reveal new clues to Alzheimer's disease",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-brain-organoids-space-reveal-clues.html",
+    "Researchers at the University of California San Diego have found that spaceflight alters biological processes associated with Alzheimer's disease in different ways depending on genetic background. The study, published on Nov. 25, 2026, in Science Advances, suggests space could…",
+    "radar"
+  ],
+  "0917d01647ac": [
+    "2026-11-25T18:00:04Z",
+    "Mouse study reveals early eye damage in rare childhood disease",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-mouse-reveals-early-eye-rare.html",
+    "A study in mice that involved University of Manchester scientists has revealed that eye damage linked to a rare inherited childhood disease may begin remarkably early and worsen progressively over time. The team investigated deficiency in an enzyme called HGSNAT, the root cause…",
+    "radar"
+  ],
+  "1a6d70f47268": [
+    "2026-11-25T16:00:15Z",
+    "Genetic map uncovers how inherited variants contribute to coronary artery disease",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-genetic-uncovers-inherited-variants-contribute.html",
+    "Researchers have amassed a detailed catalog identifying how specific genetic changes play causal roles in coronary artery disease, a condition in which the vessels that carry blood to the heart narrow or become blocked. The undertaking is the first to connect inherited genetic…",
+    "radar"
+  ],
+  "ffa551710e79": [
+    "2026-11-24T23:00:08Z",
+    "Common patterns of b/tsDMARD use identified in rheumatoid arthritis",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-common-patterns-btsdmard-rheumatoid-arthritis.html",
+    "Common patterns of biologic and targeted synthetic disease-modifying antirheumatic drug (b/tsDMARD) use are seen among patients with rheumatoid arthritis (RA), and these patterns are associated with underlying genetic associations, according to a study published online Nov. 20…",
+    "radar"
+  ],
+  "5b12033173e2": [
+    "2026-11-24T19:00:02Z",
+    "Exploring the underrecognized role of lipid metabolism in neurodegenerative disease",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-exploring-underrecognized-role-lipid-metabolism.html",
+    "Ole Isacson, M.D., Ph.D., founding director of the Neuroregeneration Institute at McLean Hospital within Mass General Brigham, is the lead and corresponding author of a paper published in Cell Reports Medicine titled \"Lipid homeostasis and cellular metabolism in…",
+    "radar"
+  ],
+  "ac60ed30a8c2": [
+    "2026-11-24T15:20:08Z",
+    "Body clock genes could guide when men have prostate cancer radiotherapy",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-body-clock-genes-men-prostate.html",
+    "The time of day men have radiotherapy for prostate cancer could affect their risk of long-term side effects, depending on their version of a body-clock gene, researchers find.",
+    "radar"
+  ],
+  "66f761de4d24": [
+    "2026-11-24T12:00:08Z",
+    "Whole-genome screening identifies opportunities for more patients to benefit from existing therapies",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-genome-screening-opportunities-patients-benefit.html",
+    "Experts argue that we are overlooking substantial opportunities every year to match cancer patients with targeted treatments because current genomic testing and targeted treatment approvals are often organized around where in the body a cancer originates, rather than the tumor's…",
+    "radar"
+  ],
+  "ae86dfd52e07": [
+    "2026-11-23T21:10:01Z",
+    "Lack of data hinders genetic screening for heart failure in the Brazilian population",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-lack-hinders-genetic-screening-heart.html",
+    "The low representation of Brazilians in global genomic databases compromises the accuracy of tests used to investigate the causes of heart failure. This is according to a study by the University of São Paulo (USP), which revealed an additional limitation of these tests…",
+    "radar"
+  ],
+  "3090465759c1": [
+    "2026-11-23T20:40:11Z",
+    "For your health—shedding light on family history and cancer risk",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-health-family-history-cancer.html",
+    "If you ask some of your friends to name three things that increase the risk of cancer, it'd be likely that some version of \"family history\" would make most of their lists.",
+    "radar"
+  ],
+  "3c6fd77f98a9": [
+    "2026-11-23T20:00:28Z",
+    "T cells gone viral: New study finds host genetics shape the brain's immune response to chronic herpesvirus infection",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-cells-viral-host-genetics-brain.html",
+    "Scientists have long suspected a common human herpesvirus contributed to the development of multiple sclerosis, a disease affecting the central nervous system and a leading cause of disability in young adults. A new study published in the Proceedings of the National Academy of…",
+    "radar"
+  ],
+  "a692bfaaf2fc": [
+    "2026-11-23T18:20:14Z",
+    "Scientists reveal how chemical changes switch on leukemia-driving genes",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-scientists-reveal-chemical-leukemia-genes.html",
+    "Research has uncovered how abnormal chemical changes to proteins associated with DNA can switch on genes that drive acute myeloid leukemia (AML), helping to explain how a rare form of the disease develops.",
+    "radar"
+  ],
+  "d0be5709bcc2": [
+    "2026-11-20T22:20:02Z",
+    "Your genes might boost risk for high cholesterol",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-genes-boost-high-cholesterol.html",
+    "Frustrated that your cholesterol levels aren't budging for the better? You may have your genes to blame, a new study finds.",
+    "radar"
+  ],
+  "0f0b53f09c58": [
+    "2026-11-20T19:30:01Z",
+    "Heart rhythm data reveal early signs of heart disease before conventional measures",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-heart-rhythm-reveal-early-disease.html",
+    "The heart does not beat like a regular clock. Even at rest, the time between successive heartbeats continuously varies. Researchers at Tampere and Stanford universities have shown that the patterns of these subtle variations can reveal the early effects of cardiomyopathy, which…",
+    "radar"
+  ],
+  "60704957d54b": [
+    "2026-11-20T19:00:11Z",
+    "Cell biologists uncover key mechanism behind a rare cause of childhood epilepsy",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-cell-biologists-uncover-key-mechanism.html",
+    "University of Liverpool scientists have discovered how a protein linked to a severe form of childhood epilepsy is positioned within nerve cells, providing new insights into a rare genetic neurological disorder.",
+    "radar"
+  ],
+  "91a6a9591292": [
+    "2026-11-20T16:20:12Z",
+    "Genetic data from over one million people reveals new clues to how endometriosis develops",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-genetic-million-people-reveals-clues.html",
+    "In a large, international study analyzing data from over 1 million people, researchers identified multiple genomic regions, associations and pathways underlying endometriosis, a debilitating, chronic condition in which tissue similar to the lining of the uterus grows in other…",
+    "radar"
+  ],
+  "f58b38d8d430": [
+    "2026-11-20T15:20:22Z",
+    "New liver model for studying alpha-1-antitrypsin deficiency",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-liver-alpha-antitrypsin-deficiency.html",
+    "AATD is a rare genetic metabolic disorder that affects the liver and lungs. A mutation causes liver cells (hepatocytes) to form misfolded alpha-1-antitrypsin (AAT). This misfolding results in reduced secretion of AAT into the blood plasma. AAT plays an important role in…",
+    "radar"
+  ],
+  "fe1acfdd480b": [
+    "2026-11-20T13:40:12Z",
+    "World-first study identifies genetic markers of young-onset type 2 diabetes in Chinese population",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-world-genetic-markers-young-onset.html",
+    "The Chinese University of Hong Kong (CUHK)'s Faculty of Medicine (CU Medicine) has conducted the world's first and largest genetic association study of age at diagnosis of type 2 diabetes in a Chinese population. The study identified three genetic regions associated with younger…",
+    "radar"
+  ],
+  "5db4c98ab4e5": [
+    "2026-11-19T22:40:01Z",
+    "Targeting a cellular 'traffic jam' treats multiple diseases in mice",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-cellular-traffic-multiple-diseases-mice.html",
+    "A single therapy may be able to treat inherited disorders of both the kidneys and eyes—and potentially more genetic diseases called proteinopathies, researchers at the Broad Institute have discovered.",
+    "radar"
+  ],
+  "018b385c3b42": [
+    "2026-11-19T22:20:02Z",
+    "Possible new treatment for Wilson disease seeks to minimize effects on mitochondria using metformin",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-treatment-wilson-disease-minimize-effects.html",
+    "Wilson disease is a rare genetic condition in which the liver loses the ability to effectively remove copper, allowing it to accumulate in the body. This toxic buildup affects the liver, brain, eyes and kidneys and is particularly bad for mitochondria, the cell's all-important…",
+    "radar"
+  ],
+  "c3e77896d0d8": [
+    "2026-11-19T22:10:05Z",
+    "The surprising cancer connection at the heart of Alzheimer's",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-cancer-heart-alzheimer.html",
+    "People say \"the body keeps score\"—but it might be more accurate to say our neurons do. In healthy people, neurons accumulate about 17 single-nucleotide variants each year, a pattern that holds from birth through a person's final years, according to research from HHMI…",
+    "radar"
+  ],
+  "78841bb37253": [
+    "2026-11-19T20:20:01Z",
+    "An experimental treatment improves the cognitive ability and gut microbiota of mice with fragile X syndrome",
+    "Medical Xpress research",
+    "https://medicalxpress.com/news/2026-11-experimental-treatment-cognitive-ability-gut.html",
+    "Ongoing treatment with a drug that inhibits the endocannabinoid system peripherally improves memory deficits, reduces synaptic alterations, mitigates gut microbiota dysbiosis and restores intestinal barrier integrity markers in fragile X syndrome mouse models. This experimental…",
+    "radar"
+  ],
+  "b19d92564b49": [
+    "2026-11-27T15:01:00Z",
+    "Artemis III Astronaut Andre Douglas Visits VAB",
+    "NASA",
+    "https://www.nasa.gov/image-article/artemis-iii-astronaut-andre-douglas-visits-vab/",
+    "NASA astronaut Andre Douglas, Artemis III mission specialist, stands inside an RS-25 engine test article during a visit to the Vehicle Assembly Building at NASA’s Kennedy Space Center in Florida on Tuesday, Nov. 17…",
+    "science"
+  ],
+  "2cc461468cef": [
+    "2026-11-27T15:00:00Z",
+    "Artemis III astronauts meet their spacecraft | Space photo of the day for Nov. 27, 2026",
+    "Space.com",
+    "https://www.space.com/space-exploration/artemis/artemis-iii-astronauts-meet-their-moonship-space-photo-of-the-day-for-nov-27-2026",
+    "3's up for Artemis!",
+    "science"
+  ],
+  "b80c607cfb59": [
+    "2026-11-23T15:27:11Z",
+    "The Incredible, Elegant DNA Repair System Makes Gene Editing Work",
+    "Quanta Magazine",
+    "https://www.quantamagazine.org/the-incredible-elegant-dna-repair-system-makes-gene-editing-work-20261123/",
+    "Genetic information is sturdy, but its physical structure is sensitive. Natural tools for repairing a cell’s thousands of daily injuries are fundamental to gene-editing technologies.",
+    "science"
+  ],
+  "7389df7e2409": [
+    "2026-11-19T19:00:00Z",
+    "A brain region known for listening helps us speak",
+    "Science News",
+    "https://www.sciencenews.org/article/brain-region-listening-speak-wernickie",
+    "Recording Wernicke’s area as people try to speak could help researchers design brain implants that restore speech.",
+    "science"
+  ],
+  "56b71da858cf": [
+    "2026-11-14T11:30:00Z",
+    "'Flames soon engulfed us': Artemis II astronaut describes the historic mission's riskiest moment",
+    "Live Science",
+    "https://www.livescience.com/space/space-exploration/flames-soon-engulfed-us-artemis-ii-astronaut-jeremy-hansen-describes-what-splashdown-felt-like-from-inside-the-orion-capsule",
+    "After nine days in space, the Artemis II crewmembers faced their final and riskiest challenge: splashdown. In this excerpt from the book \"Earthrise: Inside Artemis II, the Groundbreaking Human Mission into Deep Space,\"…",
+    "science"
   ]
 }
