@@ -686,6 +686,47 @@
       "t": "2026-11-27",
       "why": "not in the open-access dataset",
       "v": 3
+    },
+    "PMC13812211": {
+      "t": "2026-11-28",
+      "fig": {
+        "src": "figs/PMC13812211.webp",
+        "w": 960,
+        "h": 912,
+        "n": "Fig. 2",
+        "cap": "(A) [18F]FDG PET/CT scan and (B) [68Ga]Ga-FAPI-46 PET/CT scan in a representative patient. The [68Ga]Ga-FAPI-46 scan shows an extensive carcinomatous pleuritis. Increased gallbladder uptake on FAPI PET/CT is considered physiological",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13812255": {
+      "t": "2026-11-28",
+      "why": "no picture among 3 figures",
+      "v": 3
+    },
+    "PMC13812117": {
+      "t": "2026-11-28",
+      "why": "no picture among 6 figures",
+      "v": 3
+    },
+    "PMC13812188": {
+      "t": "2026-11-28",
+      "fig": {
+        "src": "figs/PMC13812188.webp",
+        "w": 960,
+        "h": 616,
+        "n": "Fig. 1",
+        "cap": "Maximum intensity projection (MIP) volume-rendered PET images of three patients, demonstrating confluent bone metastases within the cohort. Confluent bone metastases were defined as > 50% of volume involvement on visual assessment. 1 A: PET/CT Ga68 DOTATATE showing confluent osseous metastases and liver involvement in a patient with a renal neuroendocrine tumor (NET). 1B: PET/MR DOTATATE revealing widespread osseous metastases, along with liver and nodal involvement, in a patient with a G2 moderately differentiated small bowel NET. 1 C: PET/CT DOTATATE illustrating extensive somatostatin receptor-avid osseous and liver metastases in a patient with metastatic well-differentiated G1 NET of unknown primary",
+        "lic": "CC BY-NC-ND",
+        "lu": "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+      },
+      "v": 3
+    },
+    "PMC13812236": {
+      "t": "2026-11-28",
+      "why": "no picture among 4 figures",
+      "v": 3
     }
   },
   "idconv": {
@@ -1152,6 +1193,11 @@
     "42972169": "2026-11-27",
     "42969901": "2026-11-27",
     "42963514": "2026-11-27",
-    "42955613": "2026-11-27"
+    "42955613": "2026-11-27",
+    "43104171": "2026-11-28",
+    "43104163": "2026-11-28",
+    "43104130": "2026-11-28",
+    "43103462": "2026-11-28",
+    "43103461": "2026-11-28"
   }
 }
