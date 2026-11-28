@@ -621,6 +621,187 @@
         }
       ],
       "at": "2026-11-27"
+    },
+    "humanoids": {
+      "years": {
+        "2026": 2560,
+        "2025": 1779,
+        "2018": 1256,
+        "2024": 1155,
+        "2016": 1146,
+        "2017": 1120,
+        "2019": 1107,
+        "2015": 1094,
+        "2014": 1091,
+        "2013": 1059,
+        "2012": 955,
+        "2021": 952,
+        "2020": 951,
+        "2023": 951,
+        "2022": 924,
+        "2011": 919,
+        "2010": 865,
+        "2009": 785,
+        "2008": 723,
+        "2006": 670,
+        "2007": 655,
+        "2005": 440,
+        "2004": 358,
+        "2003": 226,
+        "2002": 213,
+        "2001": 98,
+        "2000": 62,
+        "1998": 34,
+        "1999": 32,
+        "1997": 14,
+        "1996": 11,
+        "1995": 3,
+        "1994": 2,
+        "1953": 1,
+        "1971": 1,
+        "1977": 1,
+        "1983": 1,
+        "1986": 1,
+        "1989": 1,
+        "1993": 1
+      },
+      "papers": [
+        {
+          "title": "BeyondMimic: From motion tracking to versatile humanoid control via guided diffusion",
+          "venue": "Science Robotics",
+          "date": "2026-08-26",
+          "cites": 420,
+          "link": "https://doi.org/10.1126/scirobotics.adx8924"
+        },
+        {
+          "title": "ASAP: Aligning Simulation and Real-World Physics for Learning Agile Humanoid Whole-Body Skills",
+          "venue": "Robotics: Science and Systems",
+          "date": "2025-06-21",
+          "cites": 377,
+          "link": "https://doi.org/10.15607/rss.2025.xxi.066"
+        },
+        {
+          "title": "DreamGen: Unlocking Generalization in Robot Learning through Video World Models",
+          "venue": "Conference on Robot Learning",
+          "date": "2025-10-07",
+          "cites": 323,
+          "link": "https://doi.org/10.48550/arxiv.2505.12705"
+        },
+        {
+          "title": "RoboMIND: Benchmark on Multi-embodiment Intelligence Normative Data for Robot Manipulation",
+          "venue": "Robotics: Science and Systems",
+          "date": "2025-06-21",
+          "cites": 310,
+          "link": "https://doi.org/10.15607/rss.2025.xxi.152"
+        },
+        {
+          "title": "Retargeting Matters: General Motion Retargeting for Humanoid Motion Tracking",
+          "venue": "Proceedings - IEEE International Conference on Robotics and Automation/Proceedings",
+          "date": "2026-06-01",
+          "cites": 273,
+          "link": "https://doi.org/10.1109/icra57385.2026.11697263"
+        }
+      ],
+      "at": "2026-11-28"
+    },
+    "moon-mars": {
+      "years": {
+        "2026": 588,
+        "2025": 492,
+        "2024": 427,
+        "2023": 308,
+        "2020": 294,
+        "2021": 255,
+        "2019": 230,
+        "2022": 218,
+        "2010": 189,
+        "2018": 178,
+        "2008": 171,
+        "2012": 167,
+        "2011": 158,
+        "2013": 138,
+        "2009": 127,
+        "2014": 117,
+        "2017": 102,
+        "2015": 93,
+        "2016": 91,
+        "2007": 87,
+        "2002": 68,
+        "2006": 61,
+        "2000": 57,
+        "2003": 50,
+        "1999": 45,
+        "2005": 39,
+        "2004": 38,
+        "1991": 30,
+        "1998": 30,
+        "2001": 30,
+        "1996": 29,
+        "1988": 27,
+        "1997": 25,
+        "1993": 21,
+        "1992": 20,
+        "1995": 18,
+        "1990": 15,
+        "1994": 12,
+        "1989": 10,
+        "1987": 6,
+        "1985": 5,
+        "1986": 5,
+        "1975": 3,
+        "1977": 3,
+        "1978": 3,
+        "1979": 3,
+        "1980": 3,
+        "1981": 3,
+        "1965": 2,
+        "1967": 2,
+        "1969": 2,
+        "1971": 2,
+        "1974": 2,
+        "1984": 2,
+        "1962": 1,
+        "1970": 1,
+        "1976": 1
+      },
+      "papers": [
+        {
+          "title": "In search of signs of life on Mars with China’s sample return mission Tianwen-3",
+          "venue": "Nature Astronomy",
+          "date": "2025-06-19",
+          "cites": 62,
+          "link": "https://doi.org/10.1038/s41550-025-02572-0"
+        },
+        {
+          "title": "Results from NASA’s First Radio Telescope on the Moon: Terrestrial Technosignatures and the Low-frequency Galactic Background Observed by ROLSES-1 on Board the Odysseus Lander",
+          "venue": "The Astronomical Journal",
+          "date": "2025-12-10",
+          "cites": 18,
+          "link": "https://doi.org/10.3847/1538-3881/ae18d8"
+        },
+        {
+          "title": "Integrative focus on the space exposome-integrome: physiological challenges and practical limits of countermeasures beyond low Earth orbit",
+          "venue": "npj Microgravity",
+          "date": "2025-11-20",
+          "cites": 17,
+          "link": "https://doi.org/10.1038/s41526-025-00537-1"
+        },
+        {
+          "title": "Oxychlorine Species on Mars: A Review",
+          "venue": "Reviews of Geophysics",
+          "date": "2025-10-14",
+          "cites": 17,
+          "link": "https://doi.org/10.1029/2024rg000861"
+        },
+        {
+          "title": "Southward impact excavated magma ocean at the lunar South Pole–Aitken basin",
+          "venue": "Nature",
+          "date": "2025-10-08",
+          "cites": 16,
+          "link": "https://doi.org/10.1038/s41586-025-09582-y"
+        }
+      ],
+      "at": "2026-11-28"
     }
   },
   "preprints": {
