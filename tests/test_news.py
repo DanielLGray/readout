@@ -17,7 +17,7 @@ def test_parse_rss_atom_sitemap():
     assert rss[0]["title"] == "CMS finalizes 2027 fee schedule cut for radiology"
     assert "utm_" not in rss[0]["link"]
     assert rss[0]["date"] == "2026-11-22T14:00:00Z"
-    assert len(rss[0]["summary"]) <= 221 and rss[0]["summary"].endswith("…")
+    assert len(rss[0]["summary"]) <= 421 and not rss[0]["summary"].endswith("…")       # a usual-length summary stays whole
     assert "appeared first" not in rss[0]["summary"] and "&amp;" not in rss[0]["summary"]
     atom = news.parse_feed((FIX / "news_atom.xml").read_text(), "Biz", NOW)
     assert atom[0]["link"] == "https://example-business.test/news/fee-schedule-cut"
@@ -245,6 +245,11 @@ def test_summary_boilerplate():
     assert teaser("Listen and subscribe on Apple Podcasts , Spotify , and all major podcast apps. In this episode we explore caves.") == \
         "In this episode we explore caves."
     assert teaser("Readers who listen to experts do better.") == "Readers who listen to experts do better."
+    excerpt = " ".join(["The state's new housing rule would take effect next month."] * 6)            # ~350 characters
+    assert teaser(excerpt) == excerpt                                                                     # an excerpt stays whole
+    long = " ".join(["Lawmakers heard testimony on the water plan for the Truckee Meadows."] * 12)
+    cut = teaser(long)
+    assert cut.endswith("…") and len(cut) <= 421 and long.startswith(cut[:-1])                           # a whole article in the feed is cut
 
 
 def test_hacked_feed_cannot_add_links_or_entity_tricks():
@@ -281,7 +286,7 @@ def test_no_google_news_and_verbatim_outlets():
     v = news.parse_feed(feed, "ScienceDaily", NOW, verbatim=True)[0]
     assert v["summary"] == long and v["link"].endswith("?utm_source=feed")
     t = news.parse_feed(feed, "Other", NOW)[0]
-    assert len(t["summary"]) <= 221 and "utm_source" not in t["link"]
+    assert len(t["summary"]) <= 421 and t["summary"].endswith("…") and "utm_source" not in t["link"]
 
 
 def test_pubmed_contact_email(monkeypatch):

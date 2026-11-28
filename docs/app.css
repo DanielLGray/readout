@@ -1037,9 +1037,13 @@ a { color: inherit; }
 .top-list .top-li > button.top-x:hover, .top-list .top-li > button.top-x:focus-visible { background: var(--line); color: var(--ink); }
 .top-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 .story-acts { margin: 6px 0 10px; }
-/* a story's summary opens the story */
-a.teaser-link { display: block; color: inherit; text-decoration: none; }
-a.teaser-link:active .news-teaser { opacity: .7; }
+/* a story's summary: tap for the whole of it */
+.news-card .news-teaser.tap-more { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.news-card .news-teaser.tap-more:active { opacity: .7; }
+.news-card .news-teaser.open { display: block; -webkit-line-clamp: none; line-clamp: none; overflow: visible; }
+/* one card per screen: an opened summary scrolls inside the card, and the picture makes room */
+.news-card.sum-open .concl { overflow-y: auto; overscroll-behavior: contain; }
+.feed:not(.flow) .news-card.sum-open .headrow > .fig { display: none; }
 
 /* Tune: find a setting, and sections folded to one line */
 .tune-search { margin: 12px 0 4px; }

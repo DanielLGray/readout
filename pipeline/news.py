@@ -115,8 +115,9 @@ def detex(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
-def teaser(s: str, limit: int = 220) -> str:
-    """The outlet's own summary, cut to a teaser so the article stays the place to read it."""
+def teaser(s: str, limit: int = 420) -> str:
+    """The outlet's own summary, kept whole when it's the usual length (a news site's excerpt runs
+    about 55 words), and cut where a feed carries much more, so the article stays the place to read it."""
     s = clean_text(s)
     if len(s) <= limit:
         return s

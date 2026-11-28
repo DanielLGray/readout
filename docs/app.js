@@ -1034,6 +1034,25 @@ function bylineEl(it) {
 }
 // a card's picture beside its headline, a quarter of the card wide
 const headRow = (pic, head) => (pic ? el("div", { class: "headrow" }, pic, el("div", { class: "headtext" }, head)) : head);
+// tap a story's summary: the whole of it when it's cut short, and tap again to fold it back; a summary
+// already shown whole opens the story, like Read
+function teaserTap(p, it) {
+  const card = p.closest(".card");
+  if (p.classList.contains("open")) {
+    p.classList.remove("open"); p.setAttribute("aria-expanded", "false");
+    card?.classList.remove("sum-open");
+    if (card) fitCard(card);
+    return;
+  }
+  if (p.scrollHeight > p.clientHeight + 1) {
+    p.classList.add("open"); p.setAttribute("aria-expanded", "true");
+    p.style.webkitLineClamp = p.style.lineClamp = "none";
+    card?.classList.add("sum-open");
+    return;
+  }
+  bump("open", it);
+  window.open(safeUrl(it.link), "_blank", "noopener");
+}
 function newsCardEl(it) {
   const isNew = S.newsNew.has(it.id);
   const cats = (it.categories || []).map(catLabel).filter(Boolean);
@@ -1054,8 +1073,9 @@ function newsCardEl(it) {
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     headRow(newsImgEl(it), el("h2", { class: "news-headline" }, el("a", { class: "head-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, it.title))),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
-      it.summary ? el("a", { class: "teaser-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
-        el("p", { class: "concl-text news-teaser l3" }, it.summary)) : null)),
+      it.summary ? el("p", { class: "concl-text news-teaser l3 tap-more", role: "button", tabindex: "0", "aria-expanded": "false",
+        "aria-label": `${it.summary} (tap for the whole summary)`, onclick: (e) => teaserTap(e.currentTarget, it),
+        onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); teaserTap(e.currentTarget, it); } } }, it.summary) : null)),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
     el("div", { class: "actions" + (it.audio ? " five" : "") },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
@@ -1361,6 +1381,8 @@ function fitFlow(card) {
   }
 }
 function fitCard(card) {
+  const open = card.querySelector(".news-teaser.open");
+  if (open) { open.style.webkitLineClamp = open.style.lineClamp = "none"; return; }     // a summary you opened stays whole
   if (isFlow()) return fitFlow(card);
   if (card.classList.contains("top-card")) return fitTop(card);
   if (card.classList.contains("brief-card")) return;
@@ -1738,7 +1760,7 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the outlet, its section and why the card is there on one line, the picture the outlet supplies (small, beside the headline), the headline and the outlet’s own short summary; the writers are named only where an outlet’s terms ask for it, unless you turn on Every byline in Tune → Today → Display. Outlets and sections go by their usual short names (NYT, WSJ, Health & Med). Read, the headline or the summary opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week (✕ hides one for two weeks; tap one to rate it): sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the outlet, its section and why the card is there on one line, the picture the outlet supplies (small, beside the headline), the headline and the outlet’s own short summary; the writers are named only where an outlet’s terms ask for it, unless you turn on Every byline in Tune → Today → Display. Outlets and sections go by their usual short names (NYT, WSJ, Health & Med). Read or the headline opens the article (tapping the summary shows the whole of it first), and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week (✕ hides one for two weeks; tap one to rate it): sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
     el("h3", {}, "Your interests"),
     el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Feed you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Radar"),
