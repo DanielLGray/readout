@@ -322,7 +322,7 @@ a { color: inherit; }
 }
 .overlay.open { transform: none; }
 .ov-head {
-  padding: calc(var(--top) + 8px) 8px 8px; display: flex; align-items: center; gap: 4px;
+  padding: calc(var(--top) + 8px) 8px 8px; display: flex; align-items: center; gap: 8px;
   background: linear-gradient(#171b1f, #171b1f) top / 100% var(--top) no-repeat, var(--bg);
   border-bottom: 1px solid var(--line);
 }
@@ -353,7 +353,7 @@ a { color: inherit; }
 /* topic page */
 .chart { margin: 14px 0 6px; }
 .chart-years { display: flex; justify-content: space-between; font-size: 12px; color: var(--faint); }
-.facts { margin: 14px 0 0; display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; font-size: 15px; }
+.facts { margin: 14px 0 0; display: grid; grid-template-columns: minmax(8em, 1fr) auto; gap: 8px 16px; font-size: 15px; }   /* a long value wraps; its name keeps room */
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; font-weight: 700; text-align: right; }
 .ladder { display: grid; gap: 12px; margin-top: 8px; }
@@ -445,7 +445,8 @@ a { color: inherit; }
 .news-item { border-bottom: 1px solid var(--line); }
 .news-item a { display: grid; gap: 4px; padding: 12px 0; text-decoration: none; }
 .news-src { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
-.news-src b { color: var(--ink); }
+.news-src b { color: var(--ink); flex: none; white-space: nowrap; }
+.news-src > span { min-width: 0; }
 .news-src b.near-mag, .news-src b.near-fire { color: var(--heat-text); }   /* quakes and fires near Reno */
 .near-card .news-title { font-size: calc(15px * var(--ts, 1)); }
 .news-src b.near-al, .news-src b.near-cc, .news-src b.near-snow { color: var(--heat-text); }
@@ -462,6 +463,7 @@ a { color: inherit; }
 .news-cats { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--faint); }
 .more-btn { display: block; margin: 16px auto 0; }
 .saved-list .paper:last-child { border-bottom: 0; }
+.saved-list .paper { align-content: start; }      /* side by side, a short card keeps its lines together */
 .saved-tools { display: flex; gap: 8px; padding: 12px 16px 0; }
 
 /* short phones (iPhone SE/mini): give the conclusion the room */
@@ -632,7 +634,7 @@ a { color: inherit; }
 .actions.five .act svg { width: 18px; height: 18px; }
 @media (max-height: 760px) { .actions.five .act { height: 44px; } }
 .lang.classic { border-color: var(--k-soc); color: var(--k-soc); }
-.lang.wide { border-color: var(--k-light); color: var(--k-light); }
+.lang.wide { border-color: var(--k-light); color: color-mix(in srgb, var(--k-light) 78%, var(--ink)); }
 
 /* ── pictures from papers ──────────────────────────────────────────────── */
 .fig { flex: none; position: relative; display: block; width: 100%; height: min(27dvh, 240px);
@@ -866,7 +868,7 @@ a { color: inherit; }
 /* alerts: an orange rule for the FDA, the societies' blue for guidelines */
 .alert-card { --alert: var(--h3); box-shadow: inset 4px 0 0 var(--alert); background: color-mix(in srgb, var(--alert) 7%, var(--bg)); gap: 8px; }
 .alert-card[data-group="uspstf"], .alert-card[data-group="acs"], .alert-card[data-group="societies"] { --alert: var(--k-soc); }
-.alert-card .alert-label { color: var(--alert); font-weight: 800; }
+.alert-card .alert-label { color: color-mix(in srgb, var(--alert) 70%, var(--ink)); font-weight: 800; }   /* the bar keeps the bright color; the word is dark enough to read */
 .alert-card .card-title { font-size: calc(18px * var(--ts, 1)); }
 .alert-src { margin: 0; font-size: 13.5px; color: var(--muted); }
 .alert-acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
@@ -894,7 +896,7 @@ a { color: inherit; }
 .setup-row:first-of-type { border-top: 1px solid var(--line); }
 .setup-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .setup-state { flex: none; font-size: 12.5px; font-weight: 700; color: var(--muted); }
-.setup-state.on { color: var(--k-light); }
+.setup-state.on { color: color-mix(in srgb, var(--k-light) 78%, var(--ink)); }
 .setup-state.off { color: var(--heat-text); }
 .tmdb-credit { display: flex; align-items: center; gap: 8px; }
 .tmdb-credit img { display: block; flex: none; }
@@ -1078,3 +1080,10 @@ details.tfold, .tune-search { scroll-margin-top: 64px; }
 .tune .sect > .sub { -webkit-line-clamp: 3; }
 .tune .switch-row .fine.full, .tune .sect > .sub.full, .tune .ctl > .fine.full { -webkit-line-clamp: unset; display: block; }
 .tune .clamped { cursor: pointer; }
+
+/* small inline buttons (the why line, a topic, "Hide until tomorrow"): a bigger place to tap than they look */
+.card-meta > .why-in, .topic-tag, .more-note, .inline-link, .fb-forget { position: relative; }
+.card-meta > .why-in::after, .topic-tag::after, .more-note::after, .inline-link::after, .fb-forget::after { content: ""; position: absolute; inset: -7px -4px; }
+/* Tune: no empty line under the search box; a group heading's first section gets its top rule */
+.tune-hits:empty { display: none; }
+#view-tune :not(details.tfold) + details.tfold { border-top: 1px solid var(--line); }

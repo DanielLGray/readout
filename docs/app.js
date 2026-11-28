@@ -137,6 +137,20 @@ const S = {
   important: null, impWin: store.get("impWin", "1y"),
   library: null,          // Foundations and the classics (monthly job)
 };
+// saved copies keep the summary they had: tidy what older news jobs let through — a feed's "null", a Drupal byline
+// ("tim.hodson Wed, 11/04/2026 - 16:18 "), a release's dateline, and the space a removed link left before its punctuation
+(() => {
+  let changed = false;
+  for (const it of Object.values(S.saved)) {
+    if (typeof it?.summary !== "string") continue;
+    let t = it.summary.replace(/^[\w.-]{2,40} (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}\s+/, "")
+      .replace(/^(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\.? ?\d{1,2}, \d{4}\s*[—–-]{1,2}\s*/, "")
+      .replace(/(\S) +([,;!?)\]])/g, "$1$2").replace(/([\p{L}\p{N}_]) +\.(?=\s|$)/gu, "$1.");
+    if (/^\s*(null|undefined|none|nan)\s*$/i.test(t)) t = "";
+    if (t !== it.summary) { it.summary = t; changed = true; }
+  }
+  if (changed) store.set("saved", S.saved);
+})();
 
 // earnings dates to watch (Tune → Today → Coming up): market movers, then imaging, radiopharma and structural heart
 const WATCH_DEFAULT = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", "JPM", "BAC", "WFC", "C", "GS",
@@ -943,6 +957,7 @@ function refreshFeed(keepKey, keepIdx) {
 
 function appendCards(n) {
   const view = $("#view-feed");
+  if (!S.list?.length || !view.querySelector(":scope > .sentinel")) return;      // an empty feed shows its own note
   const sentinel = view.lastElementChild;
   const batch = S.list.slice(S.rendered, S.rendered + n);
   const made = batch.map((it) => { const c = cardEl(it); c._it = it; return c; });
@@ -954,10 +969,11 @@ function appendCards(n) {
   if (S.rendered >= S.list.length && S.kind === "today") feedObserver?.disconnect();      // Today ends on its own card
   else if (S.rendered >= S.list.length && !view.querySelector(".feed-end")) {
     feedObserver?.disconnect();
-    const last = S.list.length ? dayOf(S.list[S.list.length - 1]) : "";
+    let last = "";      // the oldest dated card (Top stories and Today's cards have no date)
+    for (let k = S.list.length - 1; k >= 0 && !last; k--) last = S.list[k].type === "news" && !S.list[k].date ? "" : dayOf(S.list[k]);
     const end = el("section", { class: "feed-end" },
       el("h2", { text: "You’re at the end" }),
-      el("p", { text: `${plural(S.list.length, "card")} here, back to ${fmtDate(last)}. Papers arrive every morning and news every few hours.` }),
+      el("p", { text: `${plural(S.list.length, "card")} here${last ? `, back to ${fmtDate(last)}` : ""}. Papers arrive every morning and news every few hours.` }),
       el("button", { class: "btn", onclick: () => { view.scrollTo({ top: 0 }); } }, "Back to newest"));
     view.insertBefore(end, sentinel);
     gridRO?.observe(end);
@@ -2177,7 +2193,7 @@ function renderSaved() {
   }
   const copy = () => copyText(items.map((i, n) => `${n + 1}. ${amaCitation(i)}`).join("\n"),
     `Copied ${plural(items.length, "reference")} (AMA style)`);
-  view.append(
+  view.append(...[
     el("div", { class: "saved-tools" }, el("button", { class: "act", style: "padding:0 14px", onclick: copy }, "Copy list")),
     typeof citeSavedEl === "function" ? citeSavedEl() : null,
     el("div", { class: "saved-list" }, items.map((i) => {
@@ -2185,7 +2201,7 @@ function renderSaved() {
       const line = typeof citeLineEl === "function" ? citeLineEl(i) : null;
       if (line) e.append(line);
       return e;
-    })));
+    }))].filter(Boolean));
   view.scrollTop = keep;
 }
 
@@ -2222,7 +2238,7 @@ function switchTab(tab) {
   }
   if (tab === "explore") renderExplore();
   if (tab === "saved") { renderSaved(); if (typeof citeCheck === "function") citeCheck(); }
-  if (tab === "tune" && typeof renderTune === "function") renderTune();
+  if (tab === "tune" && typeof renderTune === "function") { if (typeof foldAll === "function") foldAll(); renderTune(); }
 }
 
 async function reload(announce) {

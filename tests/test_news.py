@@ -665,3 +665,17 @@ def test_detex_turns_arxiv_latex_into_text_and_leaves_money_alone():
 def test_nature_publishing_line_is_not_the_summary():
     s = "Nature, Published online: 27 November 2026; doi:10.1038/d41586-026-03800-x Wernicke’s area is known for processing spoken words."
     assert news.clean_text(s) == "Wernicke’s area is known for processing spoken words."
+
+
+def test_summary_cleanup():
+    from pipeline.news import clean_summary, clean_text
+    # a link's text and its punctuation: the removed tag leaves no space between them
+    assert clean_text("at Planet <a href='x'>Money</a> , and how") == "at Planet Money, and how"
+    assert clean_text("the ongoing <a>El Niño</a> . It's") == "the ongoing El Niño. It's"
+    assert clean_text("Version .NET 8 and 0.5 mm, he said ... then") == "Version .NET 8 and 0.5 mm, he said ... then"
+    # a Drupal byline and a release's dateline go; a feed's "null" is no summary
+    assert clean_summary("tim.hodson Wed, 11/04/2026 - 16:18 Nov. 2, 2026 — Neurophet and RapidAI have partnered") == "Neurophet and RapidAI have partnered"
+    assert clean_summary("tim.hodson Mon, 11/02/2026 - 14:28 Nov.2, 2026 – SimonMed has") == "SimonMed has"
+    assert clean_summary("null") == "" and clean_summary(" None ") == ""
+    # titles keep a leading date
+    assert clean_text("Jan. 6, 2021 — the day the Capitol was stormed") == "Jan. 6, 2021 — the day the Capitol was stormed"

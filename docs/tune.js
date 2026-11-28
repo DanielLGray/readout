@@ -147,13 +147,22 @@ const TUNE_INDEX = [
 // anchors inside a section: which one to open
 const TUNE_INNER = { "tune-weather": "tune-display", "tune-text": "tune-display", "tune-layout": "tune-display", "tune-hints": null };
 const tuneTab = (id) => (id === "tune-hints" ? "quick" : TUNE_INDEX.find((x) => x[0] === (TUNE_INNER[id] || id))?.[1]);
-TU.open = new Set(store.get("tuneOpen", []) || []);
+// every section starts folded: on coming to Tune and on changing tabs, so the list is short enough to find
+// what you need; one stays open while you work in it (a redraw keeps it), and opening another folds the rest
+TU.open = new Set();
+try { localStorage.removeItem("readout.tuneOpen"); } catch { /* private mode */ }
+function foldAll() {
+  TU.open.clear(); ADV_OPEN.clear(); TU.openKind = null;
+  try { outletOpen.clear(); } catch { /* not drawn yet */ }
+  if (typeof jobOpen === "object") jobOpen.clear();
+}
 function setPane(p, anchor) {
   const tab = (anchor && tuneTab(anchor)) || OLD_PANE[p] || p;
   TU.pane = TUNE_TABS.some(([k]) => k === tab) ? tab : "quick";
   store.set("tunePane", TU.pane);
+  foldAll();
   const sect = anchor ? (anchor in TUNE_INNER ? TUNE_INNER[anchor] : anchor) : null;
-  if (sect) { TU.open.add(`${TU.pane}:${sect}`); store.set("tuneOpen", [...TU.open]); }
+  if (sect) TU.open.add(`${TU.pane}:${sect}`);
   renderTune();
   if (anchor) requestAnimationFrame(() => document.getElementById(anchor)?.scrollIntoView({ block: "start" }));
 }
@@ -196,7 +205,7 @@ const TUNE_SUM = {
   "tune-job-watch": () => (S.watch?.generated ? `updated ${ago(S.watch.generated)}` : ""),
   "tune-job-roads": () => (typeof near === "object" && near.ccAsOf ? `copy from ${ago(new Date(near.ccAsOf).toISOString())}` : ""),
 };
-// each section folded to one line; tap to open (it stays open until you close it)
+// each section folded to one line; tap to open (one at a time: see foldOthers)
 function foldSection(node) {
   if (!(node instanceof Element) || !node.matches("section.sect")) return node;
   const h = node.querySelector(":scope > h2");
@@ -209,8 +218,27 @@ function foldSection(node) {
   node.removeAttribute("id");
   h.remove();
   return el("details", { class: "tfold", id, ...(TU.open.has(key) ? { open: true } : {}),
-    ontoggle: (e) => { if (e.currentTarget.open) TU.open.add(key); else TU.open.delete(key); store.set("tuneOpen", [...TU.open]); } },
-    el("summary", {}, el("span", { class: "tf-title" }, title), el("span", { class: "tf-sum" }, sum)), node);
+    ontoggle: (e) => {
+      const d = e.currentTarget, tapped = TU.tapped === key;
+      TU.tapped = null;
+      if (d.open) { TU.open.add(key); foldOthers(d); if (tapped) showOpened(d); } else TU.open.delete(key);
+    } },
+    el("summary", { onclick: () => { TU.tapped = key; } }, el("span", { class: "tf-title" }, title), el("span", { class: "tf-sum" }, sum)), node);
+}
+// opening a section folds the one that was open, keeping the one you tapped where it was on the screen
+function foldOthers(d) {
+  const others = [...document.querySelectorAll("#view-tune details.tfold[open]")].filter((x) => x !== d);
+  if (!others.length) return;
+  const view = $("#view-tune"), sum = d.querySelector(":scope > summary"), y = sum.getBoundingClientRect().top;
+  others.forEach((x) => { x.open = false; TU.open.delete(`${TU.pane}:${x.id}`); });
+  const dy = sum.getBoundingClientRect().top - y;
+  if (dy) view.scrollTop += dy;
+}
+// a section you open low on the screen comes up, so what it holds is in view
+function showOpened(d) {
+  if (!d.isConnected) return;
+  const view = $("#view-tune"), r = d.getBoundingClientRect(), v = view.getBoundingClientRect();
+  if (r.bottom > v.bottom - 8 && r.top > v.top + v.height * 0.3) d.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
 // find a setting: type a word, tap where it is
 function tuneSearchEl() {
@@ -1495,12 +1523,13 @@ function horizonJob() {
   const H = S.horizon;
   const names = { fed: "Federal Reserve", bls: "BLS (jobs, CPI)", bea: "BEA (GDP, PCE)", fda: "FDA panels", launches: "Launches",
     markets: "Market holidays", seasons: "Earnings seasons (estimated)", meetings: "Your meetings", dates: "Dates checked by hand",
-    money: "Personal finance", culture: "Culture & awards", movies: "Sci-fi & fantasy movies" };
+    money: "Personal finance", culture: "Culture & awards", movies: "Sci-fi & fantasy movies", sky: "Night sky (Moon, meteors, eclipses)",
+    aurora: "Aurora (NOAA forecast)" };
   return el("section", { class: "sect job" }, el("h2", {}, JOBS.horizon.title), el("p", { class: "sub" }, JOBS.horizon.sub),
     jobStatus("horizon", H?.generated),
     !H ? el("p", { class: "nothing" }, "Not built yet.") : el("dl", { class: "facts small" },
       Object.entries(H.sources || {}).map(([k, v]) => [el("dt", {}, names[k] || k),
-        el("dd", { class: v.ok || v.fallback ? "" : "warn-text" }, v.fallback ? "from the published schedule in the config"
+        el("dd", { class: v.ok || v.fallback ? "" : "warn-text" }, v.fallback ? "published schedule"
           : v.ok ? String(v.n) : "couldn’t read; last run’s dates kept")])),
     H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS turns away GitHub’s servers even with a contact email, so the jobs and CPI dates come from BLS’s published schedule, copied into the config (through December 2027).") : null,
     el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Today → Coming up)."),
@@ -1590,7 +1619,7 @@ function exploreJob() {
   const x = S.explore;
   const st = x?.settings || {};
   const papers = Object.values(x?.papers || {});
-  const withAbs = papers.filter((p) => (p.sections || []).length).length;
+  const withAbs = papers.filter((p) => p.abs || (p.sections || []).length).length;
   const notes = Object.keys(x?.query_notes || {});
   const stale = (x?.topics || []).filter((t) => t.stale);
   const mp = st.min_papers || x?.min_recent;

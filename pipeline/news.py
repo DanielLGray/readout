@@ -71,7 +71,19 @@ def clean_text(s: str) -> str:
                flags=re.I)                                                                  # podcast app promo
     s = re.sub(r"^Note that some links may require registration or subscription\.\s*", "", s, flags=re.I)
     s = re.sub(r"^[A-Z][\w .&]{1,40}, Published online: \d{1,2} [A-Z][a-z]+ \d{4}; doi:\S+\s*", "", s)   # Nature's feed: "Nature, Published online: …; doi:…"
+    # a link's text followed by its sentence's punctuation: the tag left a space between them ("Planet Money , and")
+    s = re.sub(r"(\S) +([,;!?)\]])", r"\1\2", s)
+    s = re.sub(r"(\w) +\.(?=\s|$)", r"\1.", s)
     return s.strip()
+
+
+def clean_summary(s: str) -> str:
+    """A summary's text, without what a site puts before it: a Drupal byline and posting time
+    ("tim.hodson Wed, 11/04/2026 - 16:18 "), then a release's dateline ("Nov. 2, 2026 — "); empty for a feed's "null"."""
+    s = clean_text(s)
+    s = re.sub(r"^[\w.-]{2,40} (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2}/\d{2}/\d{4} - \d{2}:\d{2}\s+", "", s)
+    s = re.sub(r"^(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\.? ?\d{1,2}, \d{4}\s*[—–-]{1,2}\s*", "", s)
+    return "" if s.lower() in ("null", "undefined", "none", "nan") else s
 
 
 _TEX_SYM = {"not\\subseteq": "⊈", "subseteq": "⊆", "supseteq": "⊇", "subset": "⊂", "supset": "⊃", "notin": "∉", "in": "∈",
@@ -118,7 +130,7 @@ def detex(s: str) -> str:
 def teaser(s: str, limit: int = 420) -> str:
     """The outlet's own summary, kept whole when it's the usual length (a news site's excerpt runs
     about 55 words), and cut where a feed carries much more, so the article stays the place to read it."""
-    s = clean_text(s)
+    s = clean_summary(s)
     if len(s) <= limit:
         return s
     cut = s[:limit].rsplit(" ", 1)[0].rstrip(",;:—-")
@@ -350,7 +362,7 @@ def parse_feed(text: str, source: str, now: datetime, verbatim: bool = False, st
                 continue
             title, link, summary = got
         item = {"id": item_id(link, title, source), "title": title, "link": link, "source": source,
-                "date": _utc(min(when, now)), "summary": clean_text(summary) if verbatim else teaser(summary)}
+                "date": _utc(min(when, now)), "summary": clean_summary(summary) if verbatim else teaser(summary)}
         by = byline(e, source)
         if by:
             item["by"] = by

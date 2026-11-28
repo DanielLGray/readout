@@ -85,7 +85,7 @@ From then on, the feed updates every night (11:17 PM Eastern, inside NCBI's off-
   - **Today:** Today's parts and order, display (text size, card layout, weather, pictures, bylines, the why line), alerts and notifications, Coming up, the Radar, Watch, Reno & Nevada, Near Reno and meetings.
   - **You:** your reading over 7 or 30 days (counted only on your phone) and what's in your feed right now, library access, back up and restore, and the update jobs: how each is doing, data-quality figures, its settings, and buttons to edit its config file or run it on GitHub.
 
-  In Feed, Today and You each section folds to one line that says how it's set (*Body More · NM Normal*, *2 filters*, *3 of 5 kinds*); tap it to open, and it stays open until you close it.
+  In Feed, Today and You each section folds to one line that says how it's set (*Body More · NM Normal*, *2 filters*, *3 of 5 kinds*); every section starts folded each time you come to Tune or change tabs, so the list fits on a screen or so. Tap one to open it (one low on the screen comes up into view); opening another folds the one you had open, and a change inside keeps it open.
 
 ### What the labels mean
 
