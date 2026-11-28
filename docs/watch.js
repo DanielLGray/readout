@@ -13,7 +13,7 @@ const wTopic = (e) => (e.topic === "shortages" ? "" : S.watch?.topics?.[e.topic]
 const wFollowing = (nct) => !!nct && T.watch.follow.includes(nct);
 
 // ── Rate: what you think of a device type, a company, a kind of change… ────
-// The same Hide, Less, Same and More as on cards (kept with them, in Tune → Interests → What you
+// The same Hide, Less, Same and More as on cards (kept with them, in Tune → Feed → What you
 // like), about these features. pipeline/watch_features.py does the same for notifications.
 const W_CHANGE = { "510k": "510(k) clearances", denovo: "De Novo grants", "pma-new": "New PMA approvals", "pma-ind": "New indications for PMA devices",
   "drug-new": "New drug approvals", "drug-ind": "New indications for drugs", "short-new": "New shortages", "short-end": "Shortages resolved", "short-disc": "Drugs to be discontinued", new: "New trials registered", status: "Trial status changes",
@@ -88,7 +88,7 @@ let wMuteMemo = [null, null];
 const wMuteRe = () => (wMuteMemo[0] === T.watch.mute ? wMuteMemo[1] : (wMuteMemo = [T.watch.mute, wordRe(T.watch.mute)])[1]);
 const wName = (e) => `${e.acr || ""} ${e.title || ""}`;
 const wWordMuted = (e) => { const re = wMuteRe(); return !!re && re.test(wName(e)); };
-// a word hidden from Watch, or a topic filter (Tune → Rules → Topic filters)
+// a word hidden from Watch, or a topic filter (Tune → Feed → Topic filters)
 const wMuted = (e) => wWordMuted(e) || !!ruleHit(wItem(e));
 const wLess = (e) => !wFollowing(e.nct) && wTaste(e) < 0;
 const wMore = (e) => wTaste(e) > 0;
@@ -275,7 +275,7 @@ function alertKindRow(group, redraw) {
     el("div", { class: "fb-name" }, el("b", {}, `${name} alerts`), el("span", {}, "Alerts of this kind")),
     el("div", { class: "seg fb-seg", role: "group", "aria-label": `${name} alerts` },
       [[false, "Off"], [true, "On"]].map(([x, l]) => el("button", { "aria-pressed": String((T.alerts[group] !== false) === x),
-        onclick: () => { setTune({ alerts: { ...T.alerts, [group]: x } }); if (!x) toast(`${name} alerts off. Turn them back on here or in Tune → Rules → Alerts.`); redraw(); } }, l))));
+        onclick: () => { setTune({ alerts: { ...T.alerts, [group]: x } }); if (!x) toast(`${name} alerts off. Turn them back on here or in Tune → Today → Alerts.`); redraw(); } }, l))));
 }
 // words: tap to hide every Watch change and alert with it in the name; your own too
 function hideWordsEl(text, redraw) {
@@ -384,7 +384,7 @@ function watchCardEl(it) {
   return card;
 }
 
-// ── Tune → Interests ───────────────────────────────────────────────────────
+// ── Tune → Today ───────────────────────────────────────────────────────────
 function watchSection() {
   const W = S.watch;
   const setW = (patch) => { setTune({ watch: { ...T.watch, ...patch } }); rerender(); };
@@ -421,5 +421,5 @@ function watchSection() {
         onclick: () => setW({ follow: T.watch.follow.filter((x) => x !== n) }) }, `${titles[n] || n}  ✕`)))) : null,
     advanced("watch", stepRow("Changes on Today’s card", "The rest are a tap away in Watch.", T.brief.watchRows, { min: 1, max: 12 },
       (v) => { setTune({ brief: { ...T.brief, watchRows: v } }); rerender(); })),
-    el("p", { class: "fine" }, "Follow a trial from its page in Watch. To add trial topics of your own, or change which results are alerts, use Tune → Updates → Watch → Change settings."));
+    el("p", { class: "fine" }, "Follow a trial from its page in Watch. To add trial topics of your own, or change which results are alerts, use Tune → You → Watch → Change settings."));
 }

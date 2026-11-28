@@ -110,20 +110,134 @@ function twoTap(id, label, confirmLabel, action) {
 }
 function linkBtn(href, label) { return el("a", { class: "act", href, target: "_blank", rel: "noopener" }, label); }
 
-// ── tab ────────────────────────────────────────────────────────────────────
+// ── tabs: Quick, then Feed, Today and You, each a list of folded sections ──
+const TUNE_TABS = [["quick", "Quick"], ["feed", "Feed"], ["today", "Today"], ["you", "You"]];
+const OLD_PANE = { reading: "quick", interests: "feed", algorithms: "feed", pipeline: "you" };
+// every section: [id, tab, title, words to find it by]
+const TUNE_INDEX = [
+  ["tune-areas", "feed", "Areas", "nuclear medicine body cardiac ct general radiology weight more less off"],
+  ["tune-follow", "feed", "Following", "follow words chip tag"],
+  ["tune-taste", "feed", "What you like", "ratings rate more less hide journals outlets writers authors learned fade"],
+  ["tune-topics", "feed", "Topic filters", "hide subject unless valves exceptions"],
+  ["tune-mute", "feed", "Mute", "mute words outlets headlines block"],
+  ["tune-x-feed-mix", "feed", "Feed mix", "turns kinds news everything outlet limit per day death notices obituaries top stories card seen swipe cleared oldest age"],
+  ["tune-x-paper-order", "feed", "Paper order", "ranked newest score evidence freshness study size"],
+  ["tune-important", "feed", "Most important papers", "reviews meta-analyses guidelines citations"],
+  ["tune-x-filter-chips", "feed", "Filter chips", "organ system chips"],
+  ["tune-hidden", "feed", "What your filters hid", "hidden undo report kept out"],
+  ["tune-trends", "feed", "Explore trend rules", "breakout rising cooling trends"],
+  ["tune-x-change-what-readout-fetches", "feed", "Change what Readout fetches", "journals searches news outlets topics github config"],
+  ["tune-x-start-over", "feed", "Start over", "reset defaults"],
+  ["tune-today", "today", "Today", "open the app on start papers stories classic outside foundations week guess result order watch card"],
+  ["tune-display", "today", "Display", "text size font cards compact one per screen paged layout pictures images figures bylines writers why this card weather"],
+  ["tune-alerts", "today", "Alerts", "pinned fda uspstf cancer society guidelines notifications push phone"],
+  ["tune-horizon", "today", "Coming up", "events calendar earnings stocks alpha vantage fed movies night sky moon meteors aurora"],
+  ["tune-radar", "today", "Radar", "emerging early developments fusion quantum robots"],
+  ["tune-watch", "today", "Watch", "trials fda devices drugs shortages rules follow trial"],
+  ["tune-local", "today", "Reno & Nevada", "local news scope reno nevada"],
+  ["tune-near", "today", "Near Reno", "quakes earthquakes fires smoke roads chains snow tahoe air quality aqi weather alerts"],
+  ["tune-meetings", "today", "Meetings", "rsna snmmi conference banner chip"],
+  ["tune-stats", "you", "Your reading", "stats history opened read clear"],
+  ["tune-x-your-feed-right-now", "you", "Your feed right now", "cards held back kinds"],
+  ["tune-library", "you", "Library access", "ezproxy openathens institution full text"],
+  ["tune-backup", "you", "Back up and restore", "backup restore export new phone"],
+  ["tune-setup", "you", "Set up", "github notifications push secrets"],
+  ["tune-token", "you", "Start updates from this phone", "github token run jobs"],
+];
+// anchors inside a section: which one to open
+const TUNE_INNER = { "tune-weather": "tune-display", "tune-text": "tune-display", "tune-layout": "tune-display", "tune-hints": null };
+const tuneTab = (id) => (id === "tune-hints" ? "quick" : TUNE_INDEX.find((x) => x[0] === (TUNE_INNER[id] || id))?.[1]);
+TU.open = new Set(store.get("tuneOpen", []) || []);
 function setPane(p, anchor) {
-  TU.pane = p;
-  store.set("tunePane", p);
+  const tab = (anchor && tuneTab(anchor)) || OLD_PANE[p] || p;
+  TU.pane = TUNE_TABS.some(([k]) => k === tab) ? tab : "quick";
+  store.set("tunePane", TU.pane);
+  const sect = anchor ? (anchor in TUNE_INNER ? TUNE_INNER[anchor] : anchor) : null;
+  if (sect) { TU.open.add(`${TU.pane}:${sect}`); store.set("tuneOpen", [...TU.open]); }
   renderTune();
   if (anchor) requestAnimationFrame(() => document.getElementById(anchor)?.scrollIntoView({ block: "start" }));
+}
+// a short line beside each folded section: how it's set now
+const AREA_LEVEL_SHORT = ["Off", "Less", "Normal", "More"];
+const onCount = (o, keys) => keys.filter((k) => o[k] !== false).length;
+const TUNE_SUM = {
+  "tune-areas": () => areaList().map(([a, i]) => `${(i.label || a).split(/[ &]/)[0]} ${AREA_LEVEL_SHORT[T.areas[a] ?? 2]}`).join(" · "),
+  "tune-follow": () => (T.follow.length ? T.follow.slice(0, 3).join(", ") + (T.follow.length > 3 ? ` +${T.follow.length - 3}` : "") : "None"),
+  "tune-taste": () => plural(Object.keys(T.taste).filter((f) => T.taste[f]).length, "rating"),
+  "tune-topics": () => ((T.rules || []).length ? (T.rules || []).map(ruleName).join(", ") : "None"),
+  "tune-mute": () => `${plural((T.mutedWords || []).length, "word")}, ${plural((T.mutedSources || []).length, "outlet")}`,
+  "tune-x-feed-mix": () => `${presentKinds().filter((k) => (T.mix[k] ?? 1) > 0).length} kinds on`,
+  "tune-x-paper-order": () => (T.order === "ranked" ? "Ranked" : "Newest first"),
+  "tune-important": () => (T.impReviews ? "With reviews" : "Research only"),
+  "tune-x-filter-chips": () => `${Object.keys(S.feed?.systems || {}).filter((k) => !T.hiddenSystems.includes(k)).length} shown`,
+  "tune-hidden": () => `${hiddenReport(7).hidden} this week`,
+  "tune-trends": () => (T.trend ? "Yours" : "As they came"),
+  "tune-today": () => `${plural(T.brief.papers, "paper")}, ${plural(T.brief.stories, "story", "stories")} · opens on ${{ today: "Today", all: "Everything", papers: "Papers", important: "Most important" }[T.startOn] || "Today"}`,
+  "tune-display": () => [{ 0.9: "Small", 1: "Default", 1.12: "Large", 1.25: "Larger" }[T.textSize] || "Default", WIDE.matches ? "" : T.cardLayout === "paged" ? "one per screen" : "compact",
+    T.pictures ? "pictures" : "no pictures"].filter(Boolean).join(" · "),
+  "tune-alerts": () => `${onCount(T.alerts, Object.keys(ALERT_GROUPS))} of ${Object.keys(ALERT_GROUPS).length} kinds`,
+  "tune-horizon": () => `${onCount(T.horizon.kinds, Object.keys(HZ_KINDS))} of ${Object.keys(HZ_KINDS).length} kinds`,
+  "tune-radar": () => ({ early: "Early", two: "2+ sources", three: "3+ sources" }[T.radar.level] || T.radar.level),
+  "tune-watch": () => `${onCount(T.watch.kinds, Object.keys(WATCH_KINDS))} of ${Object.keys(WATCH_KINDS).length} kinds`,
+  "tune-local": () => ({ reno: "Reno area", nevada: "Nevada", all: "All" }[T.local.scope] || ""),
+  "tune-near": () => ["alerts", "roads", "air", "quakes", "fires"].filter((k) => T.near[k]).map((k) => ({ alerts: "alerts", roads: "roads", air: "air", quakes: "quakes", fires: "fires" }[k])).join(", ") || "Off",
+  "tune-meetings": () => `${(S.news?.meetings || []).filter((m) => meetingOn(m)).length} on`,
+  "tune-stats": () => { const a = statsFor(7); let n = 0; Object.values(a.k).forEach((v) => { n += v[0] || 0; }); return `${plural(n, "card")} this week`; },
+  "tune-library": () => (T.library ? "Set" : "Not set"),
+  "tune-backup": () => plural(Object.keys(S.saved).length, "saved item"),
+  // the update jobs: when each last brought something
+  "tune-job-papers": () => (S.feed?.generated ? `updated ${ago(S.feed.generated)}` : ""),
+  "tune-job-most-important-papers": () => (S.important?.generated ? `updated ${ago(S.important.generated)}` : ""),
+  "tune-job-news": () => (S.news?.generated ? `updated ${ago(S.news.generated)}` : ""),
+  "tune-job-trends": () => (S.explore?.generated ? `updated ${ago(S.explore.generated)}` : ""),
+  "tune-job-foundations-and-classics": () => (S.library?.generated ? `updated ${ago(S.library.generated)}` : ""),
+  "tune-job-coming-up": () => (S.horizon?.generated ? `updated ${ago(S.horizon.generated)}` : ""),
+  "tune-job-radar": () => (S.radar?.generated ? `updated ${ago(S.radar.generated)}` : ""),
+  "tune-job-watch": () => (S.watch?.generated ? `updated ${ago(S.watch.generated)}` : ""),
+};
+// each section folded to one line; tap to open (it stays open until you close it)
+function foldSection(node) {
+  if (!(node instanceof Element) || !node.matches("section.sect")) return node;
+  const h = node.querySelector(":scope > h2");
+  if (!h) return node;
+  const title = h.textContent;
+  const id = node.id || `tune-${node.classList.contains("job") ? "job" : "x"}-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+  const key = `${TU.pane}:${id}`;
+  let sum = "";
+  try { sum = TUNE_SUM[id]?.() || ""; } catch { sum = ""; }
+  node.removeAttribute("id");
+  h.remove();
+  return el("details", { class: "tfold", id, ...(TU.open.has(key) ? { open: true } : {}),
+    ontoggle: (e) => { if (e.currentTarget.open) TU.open.add(key); else TU.open.delete(key); store.set("tuneOpen", [...TU.open]); } },
+    el("summary", {}, el("span", { class: "tf-title" }, title), el("span", { class: "tf-sum" }, sum)), node);
+}
+// find a setting: type a word, tap where it is
+function tuneSearchEl() {
+  const input = el("input", { type: "search", class: "text-in", placeholder: "Find a setting", "aria-label": "Find a setting",
+    value: TU.q || "", autocapitalize: "off", autocomplete: "off", spellcheck: "false", enterkeyhint: "search" });
+  const hits = el("ul", { class: "rows tune-hits" });
+  const tabName = Object.fromEntries(TUNE_TABS);
+  const draw = () => {
+    TU.q = input.value;
+    const words = input.value.trim().toLowerCase().split(/\s+/).filter((w) => w.length > 1);
+    const found = words.length ? TUNE_INDEX.filter(([, , t, kw]) => words.every((w) => `${t} ${kw}`.toLowerCase().includes(w))).slice(0, 8) : [];
+    hits.replaceChildren(...found.map(([id, tab, title]) => el("li", { class: "row" }, el("button", { class: "row-static tune-hit",
+      onclick: () => { TU.q = ""; setPane(tab, id); } }, el("span", { class: "row-name" }, title), el("span", { class: "fine" }, tabName[tab])))));
+    if (words.length && !found.length) hits.append(el("li", { class: "fine" }, "No setting by that name. Try another word."));
+  };
+  input.addEventListener("input", draw);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); hits.querySelector("button")?.click(); } });
+  draw();
+  return el("div", { class: "tune-search" }, input, hits);
 }
 function renderTune(keepScroll) {
   const view = $("#view-tune");
   const top = view.scrollTop;
-  const panes = { reading: readingPane, interests: interestsPane, algorithms: algoPane, pipeline: pipelinePane };
-  if (!panes[TU.pane]) TU.pane = "reading";
+  if (OLD_PANE[TU.pane]) TU.pane = OLD_PANE[TU.pane];
+  const panes = { quick: quickPane, feed: feedPane, today: todayPane, you: youPane };
+  if (!panes[TU.pane]) TU.pane = "quick";
   let body;
-  try { body = panes[TU.pane](); } catch (err) {
+  try { body = [panes[TU.pane]()].flat(3).filter(Boolean); if (TU.pane !== "quick") body = body.map(foldSection); } catch (err) {
     body = el("section", { class: "sect" }, el("h2", {}, "This page didn’t draw"),
       el("p", { class: "sub" }, `${err?.message || err}. Resetting the feed rules usually fixes it; your saved items stay.`),
       el("div", { class: "link-row" }, el("button", { class: "act wide", onclick: () => {
@@ -132,31 +246,82 @@ function renderTune(keepScroll) {
   }
   view.replaceChildren(el("div", { class: "tune" },
     el("div", { class: "seg pane-seg", role: "tablist", "aria-label": "Tune sections" },
-      [["reading", "Reading"], ["interests", "Interests"], ["algorithms", "Rules"], ["pipeline", "Updates"]].map(([k, l]) =>
-        el("button", { role: "tab", "aria-selected": String(TU.pane === k), "aria-pressed": String(TU.pane === k), onclick: () => setPane(k) }, l))),
+      TUNE_TABS.map(([k, l]) => el("button", { role: "tab", "aria-selected": String(TU.pane === k), "aria-pressed": String(TU.pane === k), onclick: () => setPane(k) }, l))),
+    tuneSearchEl(),
     body));
   view.scrollTop = keepScroll ? top : 0;
 }
 const rerender = () => renderTune(true);
+// a folded explanation (two lines) opens to its full length when tapped, and closes again
+document.addEventListener("click", (e) => {
+  const f = e.target.closest?.("#view-tune .switch-row .fine, #view-tune .sect > .sub, #view-tune .ctl > .fine");
+  if (!f || e.target.closest("a, button, input, select")) return;
+  if (f.classList.contains("full") || f.scrollHeight > f.clientHeight + 2) f.classList.toggle("full");
+});
+
+// ── the tabs ───────────────────────────────────────────────────────────────
+// Quick: what you change most, on one screen
+function quickPane() {
+  const b = T.brief;
+  return [hintsSection(),
+    el("section", { class: "sect quick", id: "tune-quick" },
+      segPick("Text size", [[0.9, "Small"], [1, "Default"], [1.12, "Large"], [1.25, "Larger"]], T.textSize, (v) => {
+        setTune({ textSize: Number(v) }); applyTextSize(); requestAnimationFrame(fitAll); rerender();
+      }),
+      segPick("Open the app on", [["today", "Today"], ["all", "Everything"], ["papers", "Papers"], ["important", "Important"]], T.startOn,
+        (v) => { setTune({ startOn: v }); rerender(); }),
+      el("div", { class: "ctl-label" }, "Areas"),
+      areaList().map(([a, info]) => el("div", { class: "q-row" }, el("span", { class: "q-label" }, info.label || a),
+        segPick(null, [[0, "Off"], [1, "Less"], [2, "Normal"], [3, "More"]], T.areas[a] ?? 2, (v) => setArea(a, v)))),
+      segPick("Papers in Today", [[3, "3"], [5, "5"], [8, "8"]], b.papers, (v) => { setTune({ brief: { ...T.brief, papers: Number(v) } }); rerender(); }),
+      wordBox("follow"),
+      wordBox("mute"),
+      switchRow("Top stories card", null, T.topCard, (on) => { setTune({ topCard: on }); rerender(); }),
+      switchRow("Pictures", null, T.pictures, (on) => { setTune({ pictures: on }); rerender(); }),
+      switchRow("Weather", null, T.weather, (on) => { setTune({ weather: on }); if (on) wxRefresh(0); else renderWx(); rerender(); }),
+      switchRow("Why this card", null, T.why, (on) => { setTune({ why: on }); rerender(); })),
+    el("p", { class: "fine" }, "Everything else is under Feed (what goes in it), Today (Today’s cards, alerts, display) and You (your reading, backup, updates), or type above.")];
+}
+// follow or mute a word, in one line, with what's there
+function wordBox(kind) {
+  const follow = kind === "follow", list = follow ? T.follow : T.mutedWords || [];
+  const input = el("input", { type: "text", class: "text-in", placeholder: follow ? "Follow a word, like TAVR" : "Mute a word", "aria-label": follow ? "Word to follow" : "Word to mute",
+    autocapitalize: "off", autocomplete: "off", enterkeyhint: "done" });
+  const add = () => {
+    const w = input.value.trim().replace(/\s+/g, " ");
+    if (!w || !wordRe([w]) || list.some((x) => x.toLowerCase() === w.toLowerCase())) { input.value = ""; return; }
+    setTune(follow ? { follow: [...T.follow, w] } : { mutedWords: [...(T.mutedWords || []), w] });
+    toast(follow ? `Following “${w}”` : `Muted “${w}”`); rerender();
+  };
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
+  return el("div", { class: "q-words" },
+    el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: add }, follow ? "Follow" : "Mute")),
+    list.length ? el("div", { class: "chips wrap" }, list.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `${follow ? "Stop following" : "Unmute"} ${w}`,
+      onclick: () => { setTune(follow ? { follow: T.follow.filter((x) => x !== w) } : { mutedWords: T.mutedWords.filter((x) => x !== w) }); rerender(); } }, `${w}  ✕`))) : null);
+}
+function setArea(a, v) {
+  const next = { ...T.areas, [a]: Number(v) };
+  if (!areaList().some(([k]) => (next[k] ?? 2) > 0)) { toast("Keep at least one area on"); return; }
+  setTune({ areas: next }); if (S.area === a && !v) S.area = "all"; rerender();
+}
+// Feed: what goes into it
+function feedPane() {
+  return [areasSection(), followSection(), tasteSection(), topicFilterSection(), muteSection(), mixSection(), orderSection(),
+    importantSection(), chipsSection(), hiddenSection(), trendSection(), fetchSection(), resetSection()];
+}
+// Today: Today's cards and what feeds them, alerts, and how cards look
+function todayPane() {
+  return [todaySection(), displaySection(), alertsSection(),
+    typeof horizonSection === "function" ? horizonSection() : null, typeof radarSection === "function" ? radarSection() : null,
+    typeof watchSection === "function" ? watchSection() : null, typeof localSection === "function" ? localSection() : null,
+    typeof nearSection === "function" ? nearSection() : null, meetingsSection()];
+}
+// You: your reading, your copy, and the jobs that build Readout
+function youPane() {
+  return [statsSection(), feedNowSection(), librarySection(), backupSection(), pipelinePane()];
+}
 
 // ── reading comfort, library access, your data ─────────────────────────────
-function textSizeSection() {
-  return el("section", { class: "sect", id: "tune-text" }, el("h2", {}, "Text size"),
-    el("p", { class: "sub" }, "For conclusions, headlines and abstracts. Very long conclusions continue in the abstract."),
-    segPick(null, [[0.9, "Small"], [1, "Default"], [1.12, "Large"], [1.25, "Larger"]], T.textSize, (v) => {
-      setTune({ textSize: Number(v) }); applyTextSize(); requestAnimationFrame(fitAll); rerender();
-    }));
-}
-
-// phones only: iPads and computers always show compact cards, in columns
-function layoutSection() {
-  if (WIDE.matches) return null;
-  return el("section", { class: "sect", id: "tune-layout" }, el("h2", {}, "Cards"),
-    segPick(null, [["compact", "Compact"], ["paged", "One per screen"]], T.cardLayout, (v) => {
-      setTune({ cardLayout: v }); S.feedDirty = true; rerender();
-    }, "Compact: each card is as tall as what it holds, so the next one starts right below. One per screen: each card fills the screen and you swipe up card by card. iPads and computers always show compact cards, in columns."));
-}
-
 function librarySection() {
   const input = el("input", { type: "url", class: "text-in wide", placeholder: "https://login.ezproxy.yourlibrary.org/login?url=",
     "aria-label": "Library link prefix", value: T.library || "", autocapitalize: "off", autocomplete: "off", inputmode: "url", enterkeyhint: "done" });
@@ -258,7 +423,7 @@ function todaySection() {
     switchRow("Classic of the day", "A highly cited paper at least five years old from your areas: in Today, and a few cards into Everything.", b.classic, (on) => setB("classic", on)),
     switchRow("Outside your areas", "One paper a day from NEJM, The Lancet, JAMA, BMJ and other big general journals that your areas wouldn’t find: recent, and already being cited. Chosen weekly with the Most important lists.", b.wide, (on) => setB("wide", on)),
     switchRow("Next Foundations paper", "Your next unread paper from the reading path in Explore.", b.foundations, (on) => setB("foundations", on)),
-    switchRow("Coming up", `The next ${b.hzDays} days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Interests.`, b.horizon, (on) => setB("horizon", on)),
+    switchRow("Coming up", `The next ${b.hzDays} days of events you follow: earnings, the Fed, tax dates and sales, meetings, launches, awards and movie releases. Choose which in Tune → Today → Coming up.`, b.horizon, (on) => setB("horizon", on)),
     b.horizon ? segPick("Coming up covers", [[3, "3 days"], [7, "7 days"], [14, "14 days"]], b.hzDays, (v) => setB("hzDays", Number(v))) : null,
     advanced("today",
       stepRow("New papers in Today", null, b.papers, { min: 1, max: 12 }, (v) => setB("papers", v)),
@@ -272,13 +437,24 @@ function todaySection() {
       (v) => { setTune({ guess: v }); rerender(); },
       "The card shows the question and the methods; the authors’ conclusion appears when you tap. In Today: two papers a day. Everywhere: also about one paper in six in Papers and Everything."),
     tried ? el("p", { class: "fine" }, `Last 30 days: you called ${q.r} of ${plural(tried, "result")}${q.p ? `, and nearly ${q.p} more` : ""}.`) : null,
-    el("div", { id: "tune-weather" }, switchRow("Weather for Reno, NV", "Today’s and tomorrow’s highs, lows and forecast under the chips, from the National Weather Service (NOAA). Your phone asks api.weather.gov directly.", T.weather,
+    null);
+}
+// how cards look: text size, layout, pictures, bylines, the why line, the weather strip
+function displaySection() {
+  return el("section", { class: "sect", id: "tune-display" }, el("h2", {}, "Display"),
+    el("div", { id: "tune-text" }, segPick("Text size", [[0.9, "Small"], [1, "Default"], [1.12, "Large"], [1.25, "Larger"]], T.textSize, (v) => {
+      setTune({ textSize: Number(v) }); applyTextSize(); requestAnimationFrame(fitAll); rerender();
+    }, "For conclusions, headlines and abstracts.")),
+    WIDE.matches ? null : el("div", { id: "tune-layout" }, segPick("Cards", [["compact", "Compact"], ["paged", "One per screen"]], T.cardLayout, (v) => {
+      setTune({ cardLayout: v }); S.feedDirty = true; rerender();
+    }, "Compact: each card as tall as what it holds. One per screen: swipe card by card. iPads and computers always show compact columns.")),
+    el("div", { id: "tune-weather" }, switchRow("Weather for Reno", "Today’s and tomorrow’s forecast under the chips, from the National Weather Service.", T.weather,
       (on) => { setTune({ weather: on }); if (on) wxRefresh(0); else renderWx(); rerender(); })),
-    switchRow("Pictures", "A figure from each open-access paper whose license allows it, credited, and the picture each news outlet puts in its feed. Off: no pictures, less data.", T.pictures,
+    switchRow("Pictures", "Open-access paper figures (credited) and the outlets’ own pictures. Off: less data.", T.pictures,
       (on) => { setTune({ pictures: on }); rerender(); }),
-    switchRow("Every byline", "Who wrote each news story, when the outlet’s feed says. Off: only for KFF Health News, The Conversation, the Nevada Current, HCN, CalMatters and the Sierra Nevada Ally, whose terms ask that writers be credited. Rate can hide or favor a writer you see.", T.allBylines,
+    switchRow("Every byline", "Off: writers named only where an outlet’s terms ask for it (KFF Health News, The Conversation, Nevada Current, HCN, CalMatters, Sierra Nevada Ally).", T.allBylines,
       (on) => { setTune({ allBylines: on }); rerender(); }),
-    switchRow("Why this card", "In each card’s top line, after the outlet or journal: what put it there (the section, the list, words you follow, what you’ve rated, its area). Tap it for the whole account, with the paper’s score.", T.why,
+    switchRow("Why this card", "What put each card there, in its top line; tap it for the whole account.", T.why,
       (on) => { setTune({ why: on }); rerender(); }));
 }
 
@@ -302,24 +478,16 @@ function todayOrderEl() {
 }
 
 // ── your reading ───────────────────────────────────────────────────────────
-function readingPane() {
+function statsSection() {
   const days = Number(TU.span);
   const agg = statsFor(days);
   const kinds = ["paper", ...Object.keys(newsKinds())];
   const sum = [0, 0, 0, 0];
   kinds.forEach((k) => (agg.k[k] || [0, 0, 0, 0]).forEach((n, i) => { sum[i] += n; }));
   const [seen, opened, saved, listened] = sum;
-  const out = [
-    hintsSection(),
-    textSizeSection(),
-    layoutSection(),
-    todaySection(),
-    el("section", { class: "sect", id: "tune-stats" }, el("h2", {}, "Your reading"),
-      segPick(null, [["7", "Last 7 days"], ["30", "Last 30 days"]], TU.span, (v) => { TU.span = v; rerender(); })),
-  ];
+  const out = [segPick(null, [["7", "Last 7 days"], ["30", "Last 30 days"]], TU.span, (v) => { TU.span = v; rerender(); })];
   if (!seen && !opened) {
-    out.push(el("section", { class: "sect" }, el("h2", {}, "Nothing counted yet"),
-      el("p", { class: "sub" }, "Scroll the feed for a while and come back. A card counts as read once it stays on screen for about a second; opening an abstract, article or PubMed page counts as opened.")));
+    out.push(el("div", {}, el("p", { class: "sub" }, "Nothing counted yet. Scroll the feed for a while and come back. A card counts as read once it stays on screen for about a second; opening an abstract, article or PubMed page counts as opened.")));
   } else {
     out.push(el("p", { class: "lede" },
       `You read ${plural(seen, "card")} and opened ${opened.toLocaleString()}`, seen ? ` (${pctOf(opened, seen)}%)` : "", ". ",
@@ -359,13 +527,11 @@ function readingPane() {
           el("span", {}, sys[y]), el("b", {}, `${agg.y[y][1]} of ${agg.y[y][0]}`), hbar(agg.y[y][0] / maxS, "var(--faint)"))))));
     }
   }
-  out.push(feedNowSection());
   out.push(el("p", { class: "fine" }, "Counted on this phone only, never sent anywhere. History older than 120 days is dropped."),
     el("div", { class: "link-row" }, twoTap("clear", "Clear reading history", "Tap again to clear", () => {
       stats = { days: {} }; seenToday = { d: "" }; saveStats(); toast("Reading history cleared"); rerender();
     })));
-  out.push(librarySection(), backupSection());
-  return out;
+  return el("section", { class: "sect", id: "tune-stats" }, el("h2", {}, "Your reading"), out);
 }
 
 // Suggestions from your reading (the last 30 days): each says what it noticed and offers one change.
@@ -404,12 +570,12 @@ function readingHints() {
     // an outlet you keep clearing and never open
     if (outlets.has(name) && !muted.has(name) && c >= 6 && !o && !sv && !l && T.taste[f] == null) {
       out.push({ id: `drop:${name}`, text: `You cleared ${c} stories from ${name} this month and opened none.`,
-        label: `Less from ${name}`, apply: () => { setTaste(f, -1); toast(`Less from ${name}. Undo in Tune → Interests.`); } });
+        label: `Less from ${name}`, apply: () => { setTaste(f, -1); toast(`Less from ${name}. Undo in Tune → Feed → What you like.`); } });
     }
     // a journal or outlet you save from often
     if (sv >= 3 && (T.taste[f] ?? 0) < 1 && tasteW(f) < 1) {
       out.push({ id: `keep:${name}`, text: `You saved ${sv} ${outlets.has(name) ? "stories" : "papers"} from ${name} this month.`,
-        label: `More from ${name}`, apply: () => { setTaste(f, 1); toast(`More from ${name}. Undo in Tune → Interests.`); } });
+        label: `More from ${name}`, apply: () => { setTaste(f, 1); toast(`More from ${name}. Undo in Tune → Feed → What you like.`); } });
     }
   }
   if ((whyTally.weak || 0) >= 5 && T.order !== "ranked") {
@@ -454,15 +620,19 @@ function feedNowSection() {
 
 // ── interests ──────────────────────────────────────────────────────────────
 const FOLLOW_IDEAS = ["TAVR", "PSMA", "FAPI", "theranostics", "LI-RADS", "CAD-RADS", "photon-counting", "appropriateness criteria", "amyloid", "incidental"];
-function interestsPane() {
+function areasSection() {
   const feedN = {}, impN = {};
   (S.feed?.items || []).forEach((p) => areasOf(p).forEach((a) => { feedN[a] = (feedN[a] || 0) + 1; }));
   Object.values(S.important?.papers || {}).forEach((p) => areasOf(p).forEach((a) => { impN[a] = (impN[a] || 0) + 1; }));
-  const setArea = (a, v) => {
-    const next = { ...T.areas, [a]: Number(v) };
-    if (!areaList().some(([k]) => (next[k] ?? 2) > 0)) { toast("Keep at least one area on"); return; }
-    setTune({ areas: next }); if (S.area === a && !v) S.area = "all"; rerender();
-  };
+  return el("section", { class: "sect", id: "tune-areas" }, el("h2", {}, "Areas"),
+      el("p", { class: "sub" }, "How much of your feed each area gets. Off hides it everywhere: Everything, Papers and Most important."),
+      areaList().map(([a, info]) => el("div", { class: "area" },
+        el("div", { class: "area-head" }, el("b", {}, info.label || a),
+          el("span", { class: "fine", style: "margin:0" }, `${(feedN[a] || 0).toLocaleString()} in the feed · ${(impN[a] || 0).toLocaleString()} most important`)),
+        info.about ? el("p", { class: "fine", style: "margin:2px 0 0" }, info.about) : null,
+        segPick(null, [[0, "Off"], [1, "Less"], [2, "Normal"], [3, "More"]], T.areas[a] ?? 2, (v) => setArea(a, v)))));
+}
+function followSection() {
   const re = followRe();
   const count = (term) => {
     const r = wordRe([term]);
@@ -480,17 +650,7 @@ function interestsPane() {
   };
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
   input.addEventListener("input", () => { TU.followDraft = input.value; });
-  const systems = S.feed?.systems || {};
-  return [
-    el("p", { class: "lede small" }, "What Readout brings you. Changes here apply on this phone right away."),
-    el("section", { class: "sect", id: "tune-areas" }, el("h2", {}, "Areas"),
-      el("p", { class: "sub" }, "How much of your feed each area gets. Off hides it everywhere: Everything, Papers and Most important."),
-      areaList().map(([a, info]) => el("div", { class: "area" },
-        el("div", { class: "area-head" }, el("b", {}, info.label || a),
-          el("span", { class: "fine", style: "margin:0" }, `${(feedN[a] || 0).toLocaleString()} in the feed · ${(impN[a] || 0).toLocaleString()} most important`)),
-        info.about ? el("p", { class: "fine", style: "margin:2px 0 0" }, info.about) : null,
-        segPick(null, [[0, "Off"], [1, "Less"], [2, "Normal"], [3, "More"]], T.areas[a] ?? 2, (v) => setArea(a, v))))),
-    el("section", { class: "sect", id: "tune-follow" }, el("h2", {}, "Following"),
+  return el("section", { class: "sect", id: "tune-follow" }, el("h2", {}, "Following"),
       el("p", { class: "sub" }, "Papers and news that mention these get a Following chip of their own and a tag on the card. Whole words; end one with * for any ending, like radiolog*."),
       el("div", { class: "word-add" }, input, el("button", { class: "act", onclick: () => add() }, "Follow")),
       T.follow.length ? el("div", { class: "chips wrap" }, T.follow.map((w) => el("button", { class: "chip", "aria-pressed": "true", "aria-label": `Stop following ${w}`,
@@ -498,22 +658,17 @@ function interestsPane() {
       el("div", { class: "ctl-label" }, "Ideas"),
       el("div", { class: "chips wrap" }, FOLLOW_IDEAS.filter((w) => !T.follow.some((x) => x.toLowerCase() === w.toLowerCase()))
         .map((w) => el("button", { class: "chip", onclick: () => add(w) }, `+ ${w}`))),
-      re ? el("p", { class: "fine" }, `${plural(followingList(null).length, "item")} match right now.`) : null),
-    tasteSection(),
-    meetingsSection(),
-    typeof horizonSection === "function" ? horizonSection() : null,
-    typeof radarSection === "function" ? radarSection() : null,
-    typeof watchSection === "function" ? watchSection() : null,
-    typeof localSection === "function" ? localSection() : null,
-    typeof nearSection === "function" ? nearSection() : null,
-    el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
+      re ? el("p", { class: "fine" }, `${plural(followingList(null).length, "item")} match right now.`) : null);
+}
+function chipsSection() {
+  const systems = S.feed?.systems || {};
+  return el("section", { class: "sect" }, el("h2", {}, "Filter chips"),
       el("p", { class: "sub" }, "Which organ-system chips appear at the top of the feed."),
       el("div", { class: "chips wrap" }, Object.entries(systems).map(([k, label]) => el("button", { class: "chip", "aria-pressed": String(!T.hiddenSystems.includes(k)),
-        onclick: () => { setTune({ hiddenSystems: T.hiddenSystems.includes(k) ? T.hiddenSystems.filter((x) => x !== k) : [...T.hiddenSystems, k] }); rerender(); } }, label)))),
-    el("section", { class: "sect" }, el("h2", {}, "News"),
-      el("p", { class: "sub" }, `${Object.values(newsKinds()).join(", ")}. Turn kinds up, down or off in Rules → Feed mix; mute single outlets in Rules → Mute.`),
-      el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => setPane("algorithms") }, "Open Rules"))),
-    el("section", { class: "sect" }, el("h2", {}, "Change what Readout fetches"),
+        onclick: () => { setTune({ hiddenSystems: T.hiddenSystems.includes(k) ? T.hiddenSystems.filter((x) => x !== k) : [...T.hiddenSystems, k] }); rerender(); } }, label))));
+}
+function fetchSection() {
+  return el("section", { class: "sect" }, el("h2", {}, "Change what Readout fetches"),
       el("p", { class: "sub" }, "The areas’ journals and searches, the news outlets and the Explore topics live in files on GitHub. Edit one there and the next update uses it."),
       settingsList([
         ...areaList().map(([a, info]) => `${info.label || a}: ${(info.streams || []).length || "—"} PubMed searches; papers stay ${info.keep_days || 180} days.`),
@@ -522,8 +677,7 @@ function interestsPane() {
       el("div", { class: "link-row" },
         linkBtn(`${GH}/edit/main/config/feeds.yaml`, "Areas and journals"),
         linkBtn(`${GH}/edit/main/config/news.yaml`, "News outlets"),
-        linkBtn(`${GH}/edit/main/config/topics.yaml`, "Explore topics"))),
-  ];
+        linkBtn(`${GH}/edit/main/config/topics.yaml`, "Explore topics")));
 }
 
 // what you've told Readout you like (learn.js), every rating in one place
@@ -617,7 +771,7 @@ function alertsSection() {
         (v) => { setTune({ alertMax: v }); rerender(); }),
       switchRow("Two of one kind", "Off: one alert per kind at the top (two FDA actions: the newest, and “1 more”).", T.alertTwo,
         (on) => { setTune({ alertTwo: on }); rerender(); }),
-      el("p", { class: "fine" }, "How big a story must be to be an alert (independent sources, which agents and societies count, which trial results) is in Tune → Updates → News and Watch → Change settings.")),
+      el("p", { class: "fine" }, "How big a story must be to be an alert (independent sources, which agents and societies count, which trial results) is in Tune → You → News and Watch → Change settings.")),
     typeof pushSectionEl === "function" ? pushSectionEl() : null,
     typeof citeSettingEl === "function" ? citeSettingEl() : null);
 }
@@ -718,16 +872,15 @@ function hiddenSection() {
         el("span", { class: "hid-n" }, String(g.items.length)))))) : null);
 }
 
-function algoPane() {
-  return [alertsSection(), hiddenSection(), importantSection(), mixSection(), orderSection(), topicFilterSection(), muteSection(), trendSection(),
-    el("section", { class: "sect" }, el("h2", {}, "Start over"),
+function resetSection() {
+  return el("section", { class: "sect" }, el("h2", {}, "Start over"),
       el("p", { class: "sub" }, "Puts areas, following, the mix, paper order, mutes and trend rules back to how they came. Your reading history, saved items, ratings and reading settings stay."),
       el("div", { class: "link-row" }, twoTap("reset", "Reset feed rules", "Tap again to reset", () => {
         const keep = { mutedSources: [], mutedWords: [], rules: RULE_DEFAULTS };
         const mine = Object.fromEntries(["textSize", "library", "startOn", "brief", "guess", "pictures", "allBylines", "meetings", "taste", "learned", "reacts", "learnedAt", "learnImplicit", "learnRate", "fade"].map((k) => [k, T[k]]));
         T = { ...TUNE_DEFAULTS, ...keep, ...mine }; store.set("tune", T); S.feedDirty = true; S.exploreKey = null;
         toast("Feed rules reset"); rerender();
-      })))];
+      })));
 }
 
 function importantSection() {
@@ -769,7 +922,7 @@ function outletsEl() {
   const byKind = {};
   sources.forEach((x) => { (byKind[x.kind || "industry"] ||= []).push(x); });
   return el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Each outlet"),
-    el("p", { class: "fine", style: "margin:2px 0 6px" }, "Stories a day in Everything (0 keeps it to its own chip), and Hide, Less, Same or More, as in Rate. What the job fetches is in Tune → Updates → News → Change settings."),
+    el("p", { class: "fine", style: "margin:2px 0 6px" }, "Stories a day in Everything (0 keeps it to its own chip), and Hide, Less, Same or More, as in Rate. What the job fetches is in Tune → You → News → Change settings."),
     Object.keys(newsKinds()).filter((k) => byKind[k]).map((k) => el("details", { class: "outlets", ...(outletOpen.has(k) ? { open: true } : {}),
       ontoggle: (e) => { if (e.currentTarget.open) outletOpen.add(k); else outletOpen.delete(k); } },
       el("summary", {}, swatch(k), kindLabel(k), el("span", { class: "fine" }, String(byKind[k].length))),
@@ -1002,7 +1155,7 @@ async function loadRuns() {
       if (r.ok) S.runs.wf[j.wf] = (await r.json()).workflow_runs?.[0] || null;
     } catch { /* offline or rate-limited: show what the data files say */ }
   }));
-  if (S.tab === "tune" && TU.pane === "pipeline") rerender();
+  if (S.tab === "tune" && TU.pane === "you") rerender();
 }
 
 function jobStatus(key, generated) {
@@ -1107,7 +1260,7 @@ function ghFetch(path, opts = {}, token = ghToken()) {
     headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28",
       ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(opts.headers || {}) } });
 }
-const ghProblem = (status) => (status === 401 ? "GitHub refused the token: it may have expired or been mistyped. Add a new one in Tune → Updates."
+const ghProblem = (status) => (status === 401 ? "GitHub refused the token: it may have expired or been mistyped. Add a new one in Tune → You."
   : status === 403 || status === 404 ? "The token can’t run this repository’s jobs. It needs Actions: Read and write, for the readout repository."
   : `GitHub answered ${status}. Try again in a minute.`);
 async function runJob(key) {
@@ -1140,7 +1293,7 @@ function updateNewsNow() {
       if (run?.status === "completed") break;
     }
     if (run?.status !== "completed") return null;
-    if (run.conclusion !== "success") throw new Error(`The news job ${run.conclusion === "cancelled" ? "was cancelled" : "failed"} on GitHub. Its log is in Tune → Updates.`);
+    if (run.conclusion !== "success") throw new Error(`The news job ${run.conclusion === "cancelled" ? "was cancelled" : "failed"} on GitHub. Its log is in Tune → You.`);
     const r = await ghFetch("/contents/docs/data/news.json?ref=main", { headers: { Accept: "application/vnd.github.raw+json" } });
     if (!r.ok) throw new Error(ghProblem(r.status));
     const text = await r.text();
@@ -1217,7 +1370,8 @@ function tokenSection() {
 function pipelinePane() {
   loadRuns();
   return [
-    el("p", { class: "lede small" }, `${["", "", "", "", "", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven"][Object.keys(JOBS).length] || Object.keys(JOBS).length} jobs on GitHub build what you read. Their settings live in files on GitHub; the News, Watch, Radar and Coming up jobs’ main ones can also be changed here (Change settings, in each), and apply at the next run.`),
+    el("h3", { class: "tune-group" }, "Update jobs"),
+    el("p", { class: "fine", style: "margin:2px 0 0" }, "The jobs on GitHub that build what you read. Change settings, in News, Watch, Radar and Coming up, applies at the next run."),
     typeof jobPendingTop === "function" ? jobPendingTop() : null,
     setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(), radarJob(), watchJob(),
     el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
@@ -1337,7 +1491,7 @@ function horizonJob() {
         el("dd", { class: v.ok || v.fallback ? "" : "warn-text" }, v.fallback ? "from the published schedule in the config"
           : v.ok ? String(v.n) : "couldn’t read; last run’s dates kept")])),
     H?.sources?.bls?.fallback ? el("p", { class: "fine" }, "BLS turns away GitHub’s servers even with a contact email, so the jobs and CPI dates come from BLS’s published schedule, copied into the config (through December 2027).") : null,
-    el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Interests → Coming up)."),
+    el("p", { class: "fine" }, "Earnings dates don’t come through this job: your phone gets them from Alpha Vantage with your key (Tune → Today → Coming up)."),
     typeof jobSettingsEl === "function" ? jobSettingsEl("horizon") : null,
     jobLinks("horizon", "Edit dates and filters"));
 }

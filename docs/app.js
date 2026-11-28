@@ -138,7 +138,7 @@ const S = {
   library: null,          // Foundations and the classics (monthly job)
 };
 
-// earnings dates to watch (Tune → Interests → Coming up): market movers, then imaging, radiopharma and structural heart
+// earnings dates to watch (Tune → Today → Coming up): market movers, then imaging, radiopharma and structural heart
 const WATCH_DEFAULT = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", "JPM", "BAC", "WFC", "C", "GS",
   "GEHC", "SMMNY", "PHG", "EW", "MDT", "LNTH", "RDNT"];
 const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "Amazon", GOOGL: "Alphabet", META: "Meta", TSLA: "Tesla",
@@ -146,10 +146,10 @@ const WATCH_NAMES = { AAPL: "Apple", MSFT: "Microsoft", NVDA: "Nvidia", AMZN: "A
   SMMNY: "Siemens Healthineers", PHG: "Philips", EW: "Edwards Lifesciences", MDT: "Medtronic", LNTH: "Lantheus", RDNT: "RadNet" };
 const HZ_KINDS = { markets: "Markets & economy", money: "Personal finance", medicine: "Medicine & imaging", science: "Science & space",
   sky: "Night sky", movies: "Sci-fi & fantasy movies", culture: "Culture & awards", news: "Big scheduled news" };
-// Today's parts, in their usual order (Tune → Reading → Today → Advanced can put them in yours)
+// Today's parts, in their usual order (Tune → Today → Advanced can put them in yours)
 const BRIEF_PARTS = { near: "Near Reno", horizon: "Coming up", radar: "Radar", watch: "Watch", local: "Reno & Nevada", cites: "New citations", papers: "New papers", stories: "Stories",
   classic: "Classic of the day", wide: "Outside your areas", foundations: "Next Foundations paper" };
-// alerts: which switch in Tune → Rules turns each kind off
+// alerts: which switch in Tune → Today → Alerts turns each kind off
 const ALERT_GROUPS = {
   fda: ["FDA", "Approvals and safety warnings for radiopharmaceuticals and imaging agents (contrast, PET and SPECT tracers, radioligand therapy), new heart-valve approvals and indications, and new shortages of contrast and the key radiopharmaceuticals."],
   trials: ["Trial results", "Results posted for a Phase 3 trial in your Watch topics (ClinicalTrials.gov)."],
@@ -484,7 +484,7 @@ function unclump(list, alike, look = 5) {
 const feedAlike = (a, b) => (a.type === "paper" && b.type === "paper")
   || (a.type === "news" && b.type === "news" && (a.kind === b.kind || a.source === b.source));
 
-// ── interest areas (Tune → Interests) ──────────────────────────────────────
+// ── interest areas (Tune → Feed → Areas) ──────────────────────────────────────────────────────────────────────────
 const AREA_DEFAULTS = { body: { label: "Body imaging", short: "Body" }, nm: { label: "Nuclear medicine", short: "NM" },
   cardiac: { label: "Cardiac & vascular CT", short: "Cardiac CT" }, general: { label: "General radiology", short: "General" } };
 function areaList() {
@@ -578,7 +578,7 @@ function impactEl(it) {
 function mutedRe() { const w = wordRe(T.mutedWords), r = compiledRules(); return w || r.length ? { w, r } : null; }
 // the text a card shows under its headline: a paper's conclusion, a story's summary
 const shownText = (it) => it?.conclusion?.text || it?.summary || "";
-// a muted word in the headline, or (Tune → Rules → Mute, the default) in the text on the card too
+// a muted word in the headline, or (Tune → Feed → Mute, the default) in the text on the card too
 const wordHit = (it, re) => re.test(T.muteIn === "title" ? it.title || "" : `${it.title || ""} ${shownText(it)}`);
 // m: what mutedRe() returns, or one word's regex
 const mutedHit = (it, m = mutedRe()) => !!m && !!it
@@ -689,7 +689,7 @@ const obitHidden = (it) => {
 };
 
 // The feed for the current chips. `f` overrides the chips; `report` (optional) counts what was left out.
-// cards you swiped away (key → day), kept 90 days; Tune → Rules can bring them back.
+// cards you swiped away (key → day), kept 90 days; Tune → Feed → Feed mix can bring them back.
 // A card put off with "Not now" is stored as "z:" + the day it comes back.
 let cleared = store.get("cleared", null);
 if (!cleared || typeof cleared !== "object" || Array.isArray(cleared)) cleared = {};
@@ -751,7 +751,7 @@ function buildList(f = {}, report = null) {
   papers = papers.filter((i) => homeArea(i, onlyArea) || (!onlyArea && drop("areaOff"), false));
   if (T.order === "ranked") papers = rankPapers(papers);
   else if (taste) papers = byTaste(papers, (p) => Date.parse(p.added || p.epub || "") || 0, 864e5);   // more like this: up to a few days higher
-  // take turns between areas by the weights you set (Tune → Interests)
+  // take turns between areas by the weights you set (Tune → Feed → Areas)
   const byArea = {};
   for (const p of papers) { const a = homeArea(p, onlyArea); (byArea[a] = byArea[a] || []).push(p); }
   for (const a of Object.keys(byArea)) byArea[a] = spreadOut(byArea[a], paperClash);    // journals and organ systems take turns
@@ -771,7 +771,7 @@ function buildList(f = {}, report = null) {
     (n) => Date.parse(n.date) || 0, 6 * 36e5);                       // an outlet you like: its stories a few hours higher
   if (system !== "all") news = news.filter((i) => (i.systems || []).includes(system));
   const only = kind === "all" ? null : kind;
-  const tops = T.topCard && system === "all" && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
+  const tops = T.topCard && system === "all" && store.get("topOff", "") !== localDay() && topStoryLists(only).length ? [{ type: "top", key: "top", only }] : [];
   const sameTitle = new Set();               // one press release (or wire story) under two names: one card
   const once = (i) => { const k = i.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); if (sameTitle.has(k)) { drop("dupes"); return false; } sameTitle.add(k); return true; };
   if (kind !== "all") return tops.concat(spreadOut(news.filter((i) => (i.kind === kind || (i.also || []).includes(kind)) && once(i)), outletClash(1)));
@@ -782,7 +782,7 @@ function buildList(f = {}, report = null) {
   const byTime = taste ? () => 0 : (a, b) => (a.date < b.date ? 1 : -1);      // already in order, rated outlets shifted
   const queues = { paper: papers };
   for (const n of news.sort(byTime)) {
-    const own = T.capBy[n.source];                  // your own number for this outlet (Tune → Rules → Feed mix → Advanced)
+    const own = T.capBy[n.source];                  // your own number for this outlet (Tune → Feed → Feed mix → Advanced)
     if (own != null || (T.cap && n.kind !== "industry")) {   // busy outlets: a few a day in Everything (more or fewer for outlets you rated)
       const k = `${dayOf(n)}|${n.source}`;
       const c = perSource.get(k) || 0;
@@ -1024,7 +1024,7 @@ function newsImgEl(it) {
 }
 const bylineText = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0] || "");
 // writers' names: only where an outlet's license or terms ask that they be credited (credit, from
-// the news job), unless you turn on every byline in Tune → Reading
+// the news job), unless you turn on every byline in Tune → Today → Display
 let creditMemo = [null, new Set()];
 const creditOutlets = () => (creditMemo[0] === S.news ? creditMemo[1]
   : (creditMemo = [S.news, new Set((S.news?.sources || []).filter((s) => s.credit).map((s) => s.name))])[1]);
@@ -1054,7 +1054,8 @@ function newsCardEl(it) {
       isNew ? el("span", { class: "tag-new" }, "New") : null),
     headRow(newsImgEl(it), el("h2", { class: "news-headline" }, el("a", { class: "head-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) }, it.title))),
     el("div", { class: "concl" }, el("div", { class: "concl-inner" },
-      it.summary ? el("p", { class: "concl-text news-teaser l3" }, it.summary) : null)),
+      it.summary ? el("a", { class: "teaser-link", href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
+        el("p", { class: "concl-text news-teaser l3" }, it.summary)) : null)),
     cats.length ? el("div", { class: "news-cats" }, cats.map((c) => el("span", {}, c))) : null,
     el("div", { class: "actions" + (it.audio ? " five" : "") },
       it.audio ? el("button", { class: "act", onclick: () => play(it) }, icon(ICONS.listen), "Listen") : null,
@@ -1122,7 +1123,7 @@ function topStoryLists(only) {
   const mute = mutedRe();
   const mutedSrc = new Set(T.mutedSources || []);
   const byId = new Map((S.news?.items || []).map((i) => [i.id, i]));
-  const keep = (l) => l.filter((st) => !mutedHit({ title: st.title, summary: byId.get(st.items?.[st.items.length - 1])?.summary }, mute)
+  const keep = (l) => l.filter((st) => !topHidden[storyKey(st)] && !mutedHit({ title: st.title, summary: byId.get(st.items?.[st.items.length - 1])?.summary }, mute)
     && st.sources.some((x) => !mutedSrc.has(x))
     && !obitHidden(byId.get(st.items?.[0])));
   if (Array.isArray(t)) return keep(t).length ? [["Industry news", keep(t)]] : [];
@@ -1136,6 +1137,31 @@ function topStoryLists(only) {
 let topSeen = store.get("topSeen", null);
 if (!topSeen || typeof topSeen !== "object" || Array.isArray(topSeen)) topSeen = {};
 const storyKey = (st) => st.items?.[st.items.length - 1] || st.title;       // its first headline: the key stays as outlets join
+// stories you hid (✕ on Top stories or Today's stories, or Hide in a story's sheet): gone for two weeks
+let topHidden = store.get("topHidden", null);
+if (!topHidden || typeof topHidden !== "object" || Array.isArray(topHidden)) topHidden = {};
+function hideStory(st) {
+  const k = storyKey(st), now = Date.now();
+  topHidden[k] = now;
+  for (const [x, t] of Object.entries(topHidden)) if (!(t > now - 14 * 864e5)) delete topHidden[x];
+  store.set("topHidden", topHidden);
+  S.topPick = null;
+  storiesChanged();
+  toastAction("Story hidden for two weeks", "Undo", () => { delete topHidden[k]; store.set("topHidden", topHidden); S.topPick = null; storiesChanged(); });
+}
+// redraw what shows stories, keeping your place
+function storiesChanged() {
+  if (S.tab !== "feed") { S.feedDirty = true; return; }
+  const top = $("#view-feed")?.querySelector('[data-key="top"]');
+  if (top && !$("#view-feed").querySelector('[data-key="brief:stories"]')) {
+    const only = (S.list || []).find((x) => x.type === "top")?.only;
+    if (topStoryLists(only).length) { top.replaceWith(topCardEl(only)); requestAnimationFrame(fitAll); return; }
+  }
+  refreshFeed(currentKey(true), currentIdx());
+}
+// the story's own headline that best stands for it, to rate or react to
+const storyLead = (st, byId) => (st.items || []).map((id) => (byId instanceof Map ? byId.get(id) : byId?.[id])).filter(Boolean)
+  .sort((a, b) => (b.summary ? 1 : 0) - (a.summary ? 1 : 0))[0] || null;
 function topPicks(only) {
   const slot = only || "";
   if (!S.topPick || S.topPick.at !== S.topFresh) S.topPick = { at: S.topFresh, lists: {} };
@@ -1157,6 +1183,7 @@ function topPicks(only) {
   store.set("topSeen", topSeen);
   return (S.topPick.lists[slot] = picked);
 }
+const storyX = (st) => el("button", { class: "top-x", "aria-label": `Hide this story: ${st.title}`, title: "Hide this story", onclick: () => hideStory(st) }, "✕");
 function topCardEl(only) {
   const byId = Object.fromEntries((S.news?.items || []).map((i) => [i.id, i]));
   const lists = topPicks(only);
@@ -1169,10 +1196,14 @@ function topCardEl(only) {
       lists.map(([label, list]) => el("section", {},
         el("h3", { class: "top-h" }, label),
         el("ol", { class: "top-list" }, list.map((st) =>
-          el("li", {}, el("button", { onclick: () => openStory(st, byId) },
+          el("li", { class: "top-li" }, el("button", { class: "top-open", onclick: () => openStory(st, byId) },
             el("span", { class: "top-title" }, st.title),
-            el("span", { class: "top-meta" }, coverageText(st, true))))))))),
-    el("p", { class: "fine swipe-hint", style: "margin:0" }, "Swipe up for the latest papers and news."));
+            el("span", { class: "top-meta" }, coverageText(st, true))),
+            storyX(st))))))),
+    el("div", { class: "top-foot" },
+      el("p", { class: "fine", style: "margin:0" }, "Tap a story to read or rate it; ✕ hides it."),
+      el("button", { class: "inline-link", onclick: () => { store.set("topOff", localDay()); toastAction("Top stories hidden until tomorrow", "Undo", () => { store.set("topOff", ""); refreshFeed(currentKey(true)); });
+        refreshFeed(currentKey(true), currentIdx()); } }, "Hide until tomorrow")));
 }
 
 // Independent sources (the news job works them out): sister outlets of one publisher, copies of one
@@ -1189,9 +1220,16 @@ function copiesNote(st) {
   return c.length ? el("p", { class: "fine" }, "Counted once: ", c.map((g) => `${andList(g.sources.map(srcName))} (${(g.why || []).join("; ")})`).join("; "), ".") : null;
 }
 function openStory(st, byId) {
+  const lead = storyLead(st, byId);
+  const asNews = lead ? { ...lead, type: "news", kind: kindOf(lead) } : null;
   openSheet(
     el("h2", { id: "sheet-title" }, st.title),
     el("p", { class: "sheet-meta" }, el("span", {}, coverageText(st)), el("span", {}, agoShort(st.date))),
+    el("div", { class: "link-row story-acts" },
+      lead && st.items.length === 1 ? el("a", { class: "act", href: safeUrl(lead.link), target: "_blank", rel: "noopener", onclick: () => bump("open", lead) }, icon(ICONS.read), "Read") : null,
+      asNews ? el("button", { class: "act", onclick: () => { const on = react(asNews, -1); toast(on ? "Got it: a little less like this" : "Taken back"); } }, icon(ICONS.down), "Less like this") : null,
+      asNews ? el("button", { class: "act", onclick: () => openFeedback(asNews) }, icon(ICONS.react), "Rate") : null,
+      el("button", { class: "act", onclick: () => { closeSheet(); hideStory(st); } }, "✕ Hide")),
     copiesNote(st),
     el("ul", { class: "rows" }, st.items.map((id) => byId[id]).filter(Boolean).map((it) =>
       el("li", { class: "news-item" }, el("a", { href: safeUrl(it.link), target: "_blank", rel: "noopener", onclick: () => bump("open", it) },
@@ -1700,50 +1738,50 @@ function openInfo() {
     el("h3", {}, "Explore"),
     el("p", {}, "Topic trends compare paper counts in PubMed for the last 1, 2 or 5 years with the same span before, adjusted for how fast imaging research grew overall. Citation figures come from NIH iCite; new trial counts from ClinicalTrials.gov. Citations take a year or two to build up, so the 1-year view leans on paper counts."),
     el("h3", {}, "News in the feed"),
-    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the outlet, its section and why the card is there on one line, the picture the outlet supplies (small, beside the headline), the headline and the outlet’s own short summary; the writers are named only where an outlet’s terms ask for it, unless you turn on Every byline in Tune → Reading. Outlets and sections go by their usual short names (NYT, WSJ, Health & Med). Read opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week: sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
+    el("p", {}, "The feed mixes papers with news of several kinds: radiology industry (AuntMinnie, Radiology Business, ITN, The Imaging Wire…), ACR & societies, health & medicine (STAT, KFF Health News, NPR Health, MedPage Today…), science (NPR Short Wave and Science, Science Friday, Radiolab, Quanta, Live Science, NASA…), Reno & Nevada (the Nevada Current, the Sierra Nevada Ally, Renown Health…), U.S. & world news (NPR, The New York Times, The Wall Street Journal, BBC), business & markets (WSJ, MarketWatch, NYT Business, NPR, Planet Money) and sci-fi & fantasy (Reactor, Locus, File 770, Strange Horizons…). The full list is in config/news.yaml. In Everything they take turns with papers (papers get two turns per round, each news kind one, in an order that changes from round to round and day to day), each busy outlet adds at most two stories a day, and a kind’s outlets, like the papers’ journals and organ systems, take turns rather than coming in runs; tap a chip to see one kind in full. You can change the mix, the outlet limit and the paper order in the Tune tab. Cards show the outlet, its section and why the card is there on one line, the picture the outlet supplies (small, beside the headline), the headline and the outlet’s own short summary; the writers are named only where an outlet’s terms ask for it, unless you turn on Every byline in Tune → Today → Display. Outlets and sections go by their usual short names (NYT, WSJ, Health & Med). Read, the headline or the summary opens the article, and podcast episodes have Listen, which keeps playing while you scroll. The first card lists stories more than one independent source covered this week (✕ hides one for two weeks; tap one to rate it): sister outlets of one publisher (NPR’s feeds, The New York Times’s sections), copies of one press release (ScienceDaily, Medical Xpress, Phys.org), wire copies and articles republished from another outlet count once, and a story’s page says which were counted together. Alerts and the Radar count the same way."),
     el("h3", {}, "Your interests"),
-    el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Interests you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
+    el("p", {}, "Papers come from four areas: nuclear medicine (every paper in the NM journals), body imaging, cardiac & vascular CT (TAVR planning, CCTA, CT-FFR, calcium), and general radiology (Radiology, AJR, RadioGraphics, JACR). In Tune → Feed you turn areas on or off, set how much of the feed each gets, follow words like “TAVR” (they get their own chip), and pick which organ-system chips show. ACR, SNMMI, RSNA and SCCT news arrive as “ACR & societies”, along with industry stories that mention them."),
     el("h3", {}, "Radar"),
-    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two independent sources do; Tune can ask for 2+ or 3+ independent sources instead. Each topic shows headlines this month against the usual (Heating up at twice the usual, or what you set in Tune → Interests → Radar) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
+    el("p", {}, "Explore → Radar follows emerging ideas before they’re mainstream: research news (Phys.org and Tech Xplore), new arXiv preprints and the outlets you read. At the Early setting a development counts when one credible source reports it (research news, a preprint, a journal’s news desk or a major newsroom) or when two independent sources do; Tune can ask for 2+ or 3+ independent sources instead. Each topic shows headlines this month against the usual (Heating up at twice the usual, or what you set in Tune → Today → Radar) and research papers a year from OpenAlex. The Radar also spots phrases new to science, health and markets headlines; one that keeps turning up for three weeks joins by itself, unless it’s an established field that just happens to be in the news, and one that never heats up retires after a year and a half."),
     el("h3", {}, "Watch"),
     el("p", {}, "Explore → Watch lists what changed in the public records: trials on ClinicalTrials.gov in your topics (radioligand therapy, PET and SPECT tracers, TAVR, cardiac CT, screening, AI) that registered, changed status, posted results, or reached or moved their primary completion; the FDA’s radiology-panel device clearances (AI software marked) and new heart-valve approvals; new radiopharmaceuticals and contrast agents and new indications for them; the FDA’s drug shortages for contrast, radiopharmaceuticals and their kits and the drugs imaging leans on, with what’s in shortage now; and Medicare payment, NRC Part 35 and FDA radiology rules and guidance. A card in Today shows what’s new once. Major changes are alerts. Phase 3 readouts ahead and rule deadlines appear in Coming up. Follow a trial from its page to see every change to it. Rate on a change’s page, or on any alert, hides or moves down ones like it (a device type, a company, 510(k) clearances, a topic, words in the name) or moves them up; Less keeps them out of Today’s card and alerts, and notifications follow the same choices."),
     el("h3", {}, "Death notices"),
-    el("p", {}, "Obituaries show only when at least 3 news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice), so a head of state's death always shows and a less-known person's doesn't. Tune → Rules → Death notices can show all or none. Industry and society news always keep theirs."),
+    el("p", {}, "Obituaries show only when at least 3 news organizations reported the death within 3 days, or the person held high office (a president, prime minister, pope or chief justice), so a head of state's death always shows and a less-known person's doesn't. Tune → Feed → Feed mix → Death notices can show all or none. Industry and society news always keep theirs."),
     el("h3", {}, "Alerts"),
-    el("p", {}, "Rare cards pinned at the top of Everything and Today for a week: FDA approvals and safety warnings for radiopharmaceuticals and imaging agents, and guideline changes from the USPSTF, the American Cancer Society and the imaging and cardiac societies. A news story makes one only when two different publishers carry it, or when the FDA or the society says it itself; new guidelines also come straight from PubMed (USPSTF statements in JAMA, American Cancer Society guidelines in CA, and the ACR, SAR, SNMMI, EANM, SCCT, Fleischner, ACC/AHA, ESC and AASLD). Dismiss one and it’s gone; Tune → Rules → Alerts turns each kind off."),
+    el("p", {}, "Rare cards pinned at the top of Everything and Today for a week: FDA approvals and safety warnings for radiopharmaceuticals and imaging agents, and guideline changes from the USPSTF, the American Cancer Society and the imaging and cardiac societies. A news story makes one only when two different publishers carry it, or when the FDA or the society says it itself; new guidelines also come straight from PubMed (USPSTF statements in JAMA, American Cancer Society guidelines in CA, and the ACR, SAR, SNMMI, EANM, SCCT, Fleischner, ACC/AHA, ESC and AASLD). Dismiss one and it’s gone; Tune → Today → Alerts turns each kind off."),
     el("h3", {}, "Outside your areas"),
     el("p", {}, "One paper a day in Today from NEJM, The Lancet, JAMA, BMJ, Nature Medicine, Annals and the big oncology and cardiology journals: papers from the last six months that none of your area searches found, ranked weekly by early citations (NIH iCite) and study design, so a large trial beats a cohort study cited as often. Imaging papers are left out because your areas already have them. Each paper shows once."),
     el("h3", {}, "Most important"),
     el("p", {}, "Every paper from the same journals over the last three years, ranked by how often it’s cited compared with body-imaging papers published in the same quarter (citations from NIH iCite). “1 year” and “3 years” list original research at least four months old, by that percentile. “New” covers the last six months: early citations count for more as a paper ages, and until then its journal’s record stands in. Case reports, editorials and letters are left out; reviews and guidelines can be added in Tune. Readership counts aren’t publicly available, so citations are the measure."),
     el("h3", {}, "Tune"),
-    el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub. Text size, your library’s off-campus link and Back up and restore are under Tune → Reading."),
+    el("p", {}, "The Tune tab shows what you read (counted only on this phone), lets you change how the feed and Explore are put together, and reports how each update job is doing, with links to edit its settings on GitHub. Text size, your library’s off-campus link and Back up and restore are under Tune → You."),
     el("h3", {}, "Today"),
     el("p", {}, "Readout opens on Today: a short stack with the best new papers for your areas, the stories most outlets covered, the classic of the day and your next Foundations paper, with Coming up, the Radar, Watch and Reno & Nevada cards spread between the papers, ending with “You’re caught up.” Two of the papers are Guess the result: the card shows the question and methods, and the authors’ conclusion appears when you tap. The classic of the day is a highly cited paper at least five years old from your areas (NIH iCite), different each day. Foundations, under Explore, is a reading path of the guidelines and landmark studies of body imaging, with your progress."),
     el("h3", {}, "General and business news"),
-    el("p", {}, "U.S. & world news is the day’s top and national stories from NPR, The New York Times, The Wall Street Journal and the BBC; Business & markets comes from WSJ, MarketWatch, NYT Business and NPR. AP and Reuters no longer publish feeds Readout may use. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Rules → Feed mix."),
+    el("p", {}, "U.S. & world news is the day’s top and national stories from NPR, The New York Times, The Wall Street Journal and the BBC; Business & markets comes from WSJ, MarketWatch, NYT Business and NPR. AP and Reuters no longer publish feeds Readout may use. Each has its own chip, takes one turn per round in Everything, and can be turned up, down or off in Tune → Feed → Feed mix."),
     el("h3", {}, "Pictures"),
-    el("p", {}, "News cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Reading."),
+    el("p", {}, "News cards show the picture the outlet puts in its own feed, loaded from the outlet’s servers (Readout tells them nothing about where you came from). Papers that are open access under a Creative Commons license show one figure, chosen to be an image (CT, MRI, ultrasound, PET) rather than a chart or flowchart. It comes from NLM’s PMC Open Access dataset, resized for a phone, and is credited with the figure number, the license and a link to the article. Turn pictures off in Tune → Today → Display."),
     el("h3", {}, "Telling Readout what you like"),
-    el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it; the same for the story’s writers or the paper’s first listed authors. “More like this” and “Less like this” nudge all of them a little, but not names. Below that, words from the headline and from the summary or conclusion can be followed (their own chip) or muted (by default a muted word hides cards with it in the headline or the text; Tune → Rules → Mute can limit that to headlines). Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Interests, where you can change or undo it."),
+    el("p", {}, "Rate on a card opens a page where you choose, for each thing about the card (organ system, topic, journal, kind of study, outlet, subjects like AI or children), whether you want more, less, the same or none of it; the same for the story’s writers or the paper’s first listed authors. “More like this” and “Less like this” nudge all of them a little, but not names. Below that, words from the headline and from the summary or conclusion can be followed (their own chip) or muted (by default a muted word hides cards with it in the headline or the text; Tune → Feed → Mute can limit that to headlines). Cards you’d like more of move up; less, down; hidden ones leave every list. All of it is in Tune → Feed → What you like, where you can change or undo it."),
     el("h3", {}, "Meetings"),
     el("p", {}, "Four months before a meeting you follow (RSNA, SNMMI, SCCT and others in config/meetings.yaml), a banner under the chips counts down; close it with ✕. From a week before until a week after, a chip gathers every story that mentions the meeting."),
     el("h3", {}, "Weather"),
-    el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Reading."),
+    el("p", {}, "Today’s and tomorrow’s highs, lows and forecast for Reno come from the National Weather Service (NOAA), fetched by your phone straight from api.weather.gov about every half hour, and on pull-down. Tap it for the detailed forecast; turn it off in Tune → Today → Display."),
     el("h3", {}, "Near Reno"),
     el("p", {}, "A card in Today while something nearby is worth knowing, and nothing when it\u2019s quiet. Weather alerts: National Weather Service warnings, watches and advisories for Reno, Donner Summit and South Lake Tahoe; tap one for the NWS\u2019s own text. Sierra roads (October to May): Caltrans chain controls on I-80, US-50 and the Tahoe and Truckee roads, from Caltrans\u2019s own feed when your phone can reach it, else from the copy a roads job makes every half hour; and new snow in Donner Summit\u2019s NWS forecast. Air: the U.S. AQI for Reno from the CAMS model via Open-Meteo, an estimate that tracks smoke (AirNow has monitor readings), when it reaches the level you choose. Earthquakes (USGS, magnitude 2.5 and up) and active fires (the interagency data NIFC publishes) within reach: 100 miles unless you change it. A quake opens its USGS page; a fire opens on a map, and the card links to InciWeb for the crews\u2019 updates. Tune \u2192 Interests \u2192 Near Reno turns each part on or off and sets its limits."),
     el("h3", {}, "Coming up"),
     el("p", {}, "A card in Today shows the next 7 days of events you follow; Explore → Coming up shows 90 days, by week. Markets and the economy: Fed decisions (Federal Reserve calendar), jobs and CPI reports (Bureau of Labor Statistics), GDP and PCE reports (Bureau of Economic Analysis), stock market holidays (NYSE rules) and earnings for the companies you watch. Medicine: your meetings, FDA advisory panels on imaging and heart devices (from their Federal Register notices), J.P. Morgan Healthcare week. Science: notable launches (Launch Library 2, The Space Devs). Night sky: full and new moons and meteor shower peaks with how much of the Moon is lit (worked out by the job), eclipses (NASA), and nights NOAA forecasts a geomagnetic storm strong enough for aurora low in Reno\u2019s northern sky. News: CES and other set dates, plus a list of events expected without a date yet. A daily job reads the calendars; times show in your phone’s time zone."),
     el("p", {}, "Personal finance: IRS deadlines (worked out each year from the IRS’s rules, so a weekend or holiday moves them), each year’s new contribution limits, the big sales weekends, and at the start of each month the things usually discounted then. Culture: awards nights, festivals, Comic-Con and Burning Man, and a list of events expected without a date yet. Sci-fi and fantasy movies: the big theatrical releases, from the studios’ announced dates; Explore → Coming up can show the next 12 months."),
-    el("p", {}, "Sci-fi and fantasy release dates come from TMDB (The Movie Database) once its token is added on GitHub (Tune → Updates → Set up), checked daily and linked to each film’s IMDb page; IMDb itself doesn’t allow automated use. Until then, a hand-checked list is used."),
+    el("p", {}, "Sci-fi and fantasy release dates come from TMDB (The Movie Database) once its token is added on GitHub (Tune → You → Set up), checked daily and linked to each film’s IMDb page; IMDb itself doesn’t allow automated use. Until then, a hand-checked list is used."),
     typeof tmdbCredit === "function" ? tmdbCredit() : null,
-    el("p", {}, "Earnings dates come from Alpha Vantage, straight to your phone, with your own free key (Tune → Interests → Coming up). The key stays on this phone, out of backups, and goes only to alphavantage.co about once a day. Until you add one, each earnings season’s start is estimated. Tap any event for details and Add to Calendar; Subscribe in Calendar adds them all (not earnings) as a calendar that keeps itself up to date."),
+    el("p", {}, "Earnings dates come from Alpha Vantage, straight to your phone, with your own free key (Tune → Today → Coming up). The key stays on this phone, out of backups, and goes only to alphavantage.co about once a day. Until you add one, each earnings season’s start is estimated. Tap any event for details and Add to Calendar; Subscribe in Calendar adds them all (not earnings) as a calendar that keeps itself up to date."),
     el("h3", {}, "Moving around"),
-    el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Reading → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
-    el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back. Why? after a clear lets you say why: Already know it, Not for me (fewer like this, the same as Less in Rate), Weak study, or Not now (back in 3 days); only Not for me changes what you see (Tune → Rules → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → Updates, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Rules."),
-    el("p", {}, "Reno & Nevada is local news from the Nevada Current, the Sierra Nevada Ally and High Country News (its stories about Nevada and the Sierra). Each story is tagged with where it is and what it’s about; Tune → Interests → Reno & Nevada keeps to the Reno area or all of Nevada, sets its turns in Everything and Today’s card, and moves each topic and outlet up, down or out."),
-    el("p", {}, "Tune has two levels. Each section’s main switches are up front; Advanced, under them, holds exact numbers: how many papers and stories Today holds and the order of its parts, each outlet’s stories a day and rating, the oldest story shown per kind, how long alerts stay pinned, how far Coming up looks. What the jobs on GitHub do (outlets, what counts as a top story or an alert, Watch’s trial topics, the Radar’s topics, including ones of your own) is in Tune → Updates → each job → Change settings; changes are sent to GitHub, checked, and used from each job’s next run."),
+    el("p", {}, "Cards are compact: each is as tall as what it holds, so the next one starts right below, and very long conclusions continue in the abstract. Tune → Today → Display → Cards switches a phone back to one card per screen. On an iPad or a computer, Readout lays the feed out in columns by itself, with the tabs down the left side on wide screens; with a mouse, a small ✕ on the card you point at clears it."),
+    el("p", {}, "Swipe a card left to save it, right to clear it: the next card takes its place, and Undo brings it back. Why? after a clear lets you say why: Already know it, Not for me (fewer like this, the same as Less in Rate), Weak study, or Not now (back in 3 days); only Not for me changes what you see (Tune → Feed → Feed mix can bring back every card you cleared). Tap a headline to open it: a story opens the article, a paper its abstract. Pull the feed down from the first card to check for new papers and news; with a GitHub token in Tune → You, that also runs the news update on GitHub (about 2 minutes). Cards you’ve already seen go to the end of each list, marked Seen, whenever a list starts fresh (opening the app, a chip, a refresh); turn that off in Tune → Feed → Feed mix."),
+    el("p", {}, "Reno & Nevada is local news from the Nevada Current, the Sierra Nevada Ally and High Country News (its stories about Nevada and the Sierra). Each story is tagged with where it is and what it’s about; Tune → Today → Reno & Nevada keeps to the Reno area or all of Nevada, sets its turns in Everything and Today’s card, and moves each topic and outlet up, down or out."),
+    el("p", {}, "Tune has two levels. Each section’s main switches are up front; Advanced, under them, holds exact numbers: how many papers and stories Today holds and the order of its parts, each outlet’s stories a day and rating, the oldest story shown per kind, how long alerts stay pinned, how far Coming up looks. What the jobs on GitHub do (outlets, what counts as a top story or an alert, Watch’s trial topics, the Radar’s topics, including ones of your own) is in Tune → You → each job → Change settings; changes are sent to GitHub, checked, and used from each job’s next run."),
     el("h3", {}, "Full text, citations and notifications"),
-    el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → Reading), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Rules → Alerts and paste the setup into GitHub once. Tune → Rules → Topic filters hides a subject everywhere unless it mentions what you choose (Heart valves, unless CT or radiology, comes on): no AI, just lists of the words, abbreviations and device names each subject goes by. Tune → Rules → What your filters hid lists what each filter, mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
+    el("p", {}, "Full text on a paper opens a free copy when there is one (PubMed Central, the journal’s own free version, or a repository copy Unpaywall knows, found nightly through Europe PMC and marked Free full text), else your library’s link (Tune → You), else PubMed. Saved papers are watched for new papers citing them: once a day your phone asks NIH iCite (PubMed’s links if iCite doesn’t answer), sending only their PubMed IDs, and new ones show in Today and at the top of Saved. Alerts can also arrive as notifications on this phone: turn them on in Tune → Today → Alerts and paste the setup into GitHub once. Tune → Feed → Topic filters hides a subject everywhere unless it mentions what you choose (Heart valves, unless CT or radiology, comes on): no AI, just lists of the words, abbreviations and device names each subject goes by. Tune → Feed → What your filters hid lists what each filter, mute, Hide rating and death-notice setting kept out in the last week, with a one-tap undo."),
     el("h3", {}, "Search and citations"),
     el("p", {}, "The magnifier searches every paper and story on this phone (titles, conclusions, authors, journals). Copy citation in an abstract, and Copy list in Saved, give AMA-style references."),
     el("h3", {}, "Sources"),
@@ -2395,7 +2433,7 @@ function openClearWhy(it, key, undo) {
     el("p", { class: "sheet-meta fb-title" }, el("span", {}, it.title)),
     el("div", { class: "why-list" }, Object.entries(WHY).filter(([k]) => paper || k !== "weak").map(([k, [label, what]]) =>
       el("button", { class: "why-btn", onclick: () => pick(k) }, el("b", {}, label), el("span", {}, what)))),
-    el("p", { class: "fine" }, "Only “Not for me” changes what Readout shows you. The tally is in Tune → Rules."));
+    el("p", { class: "fine" }, "Only “Not for me” changes what Readout shows you. The tally is in Tune → Feed → Feed mix."));
 }
 
 // pull the feed down from its first card to check for new papers and news

@@ -134,6 +134,6 @@ function drawWeek() {
         : el("p", { class: "fine" }, "Nothing counted on this phone this week."),
       w.filters?.hidden ? el("p", {}, `Your filters kept ${plural(w.filters.hidden, "card")} out. `,
         el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("algorithms", "tune-hidden"); } }, "See what")) : null),
-    el("p", { class: "fine" }, T.brief.week < 0 ? "The weekly card in Today is off (Tune → Reading → Today)."
-      : `Today shows this as a card each ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][T.brief.week]} (Tune → Reading → Today).`)));
+    el("p", { class: "fine" }, T.brief.week < 0 ? "The weekly card in Today is off (Tune → Today)."
+      : `Today shows this as a card each ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][T.brief.week]} (Tune → Today).`)));
 }

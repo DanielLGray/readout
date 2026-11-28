@@ -118,7 +118,7 @@ function react(it, dir) {
 }
 // What you open, save or listen to teaches a little too (a tenth, or a quarter for a save, of a
 // More like this), once per card. Nothing you skip or clear counts against anything: only Less like
-// this and Not for me do. Tune → Interests → What you like can turn this off.
+// this and Not for me do. Tune → Feed → What you like can turn this off.
 const NUDGE = { open: 0.1, listen: 0.1, save: 0.25 };
 let taught = store.get("taught", null);
 if (!taught || typeof taught !== "object" || Array.isArray(taught)) taught = {};
@@ -138,7 +138,7 @@ function learnFrom(it, type) {
   T = { ...T, learned };                 // not setTune: the feed you're reading stays put; this counts from the next fresh start
   store.set("tune", T);
 }
-// Learned leanings fade (they halve over about four months, or what Tune → Interests says), so an
+// Learned leanings fade (they halve over about four months, or what Tune → Feed → What you like says), so an
 // old phase or a one-off rating doesn't steer the feed for good. Your own choices in Rate don't fade.
 (function fadeLearned() {
   const today = localDay();
@@ -190,7 +190,7 @@ function rateRow(f, redraw) {
       T.taste[f] == null && lw ? el("span", { class: "fb-learned" }, lw > 0 ? "leaning more" : "leaning less") : null),
     el("div", { class: "seg fb-seg", role: "group", "aria-label": name },
       [[HIDE, "Hide"], [-1, "Less"], [0, "Same"], [1, "More"]].map(([x, l]) => el("button", { "aria-pressed": String(tastePressed(f, x)),
-        onclick: () => { setTaste(f, x); if (x === HIDE) toast(`${name} hidden. Undo here or in Tune → Interests.`); redraw(); } }, l))));
+        onclick: () => { setTaste(f, x); if (x === HIDE) toast(`${name} hidden. Undo here or in Tune → Feed → What you like.`); redraw(); } }, l))));
 }
 function openFeedback(it, picked = null) {
   const news = isNewsItem(it);
@@ -260,8 +260,8 @@ function openFeedback(it, picked = null) {
         el("div", { class: "ctl-label" }, isNewsItem(it) ? "From the summary" : "From the conclusion"),
         el("div", { class: "chips wrap" }, textPhrases.map(wordChip)),
         picked && textPhrases.includes(picked) ? wordPicker(picked, () => redraw(null)) : null,
-        T.muteIn === "title" ? el("p", { class: "fine" }, "Muted words match headlines only (Tune → Rules → Mute), so muting one of these hides only cards with it in the headline.") : null) : null,
-      el("p", { class: "fine" }, "Changes apply at once, on this phone. Everything you’ve told Readout is in Tune → Interests, where you can change or undo it."),
+        T.muteIn === "title" ? el("p", { class: "fine" }, "Muted words match headlines only (Tune → Feed → Mute), so muting one of these hides only cards with it in the headline.") : null) : null,
+      el("p", { class: "fine" }, "Changes apply at once, on this phone. Everything you’ve told Readout is in Tune → Feed → What you like, where you can change or undo it."),
       el("div", { class: "link-row" },
         el("button", { class: "act", onclick: closeSheet }, "Done"),
         el("button", { class: "act", onclick: () => { closeSheet(); switchTab("tune"); setPane("interests", "tune-taste"); } }, "See all")));
@@ -345,7 +345,7 @@ function whyParts(it) {
     const many = topStoryLists(null).some(([, l]) => l.some((st) => (st.items || []).includes(it.id)));
     if (many) out.push({ s: "Several outlets", l: "Other outlets covered this story too: it’s in Top stories." });
   }
-  if (isRead(it)) out.push({ s: "Seen", l: "You’ve seen it before, so it comes after cards you haven’t (Tune → Rules → Cards you’ve seen go to the end)." });
+  if (isRead(it)) out.push({ s: "Seen", l: "You’ve seen it before, so it comes after cards you haven’t (Tune → Feed → Feed mix → Cards you’ve seen go to the end)." });
   return out;
 }
 // the why, in the card's top line: for a story its section leads (and is part of the why); the
@@ -379,8 +379,8 @@ function openWhy(it) {
         row("Your ratings", t ? `× ${n2(Math.pow(1.5, t))}` : "none", t ? `(${t > 0 ? "+" : ""}${n2(t)})` : null),
         row("Score", n2(sc.score * Math.pow(1.5, t)))),
       el("p", { class: "fine" }, T.order === "ranked" || S.kind === "today"
-        ? "Freshness × (1 + the rest), then your ratings. Weights are in Tune → Rules → Paper order."
-        : "Papers is set to newest first, so the score doesn’t order this list (Tune → Rules → Paper order); Today still uses it.")) : null,
+        ? "Freshness × (1 + the rest), then your ratings. Weights are in Tune → Feed → Paper order."
+        : "Papers is set to newest first, so the score doesn’t order this list (Tune → Feed → Paper order); Today still uses it.")) : null,
     !news || t ? el("p", { class: "fine" }, t === -Infinity ? "" : t ? `Your ratings add up to ${t > 0 ? "+" : ""}${n2(t)} for this card (kept within ±3): ${news ? "news moves up or down a few hours per point" : "each point moves a paper about a day in Newest first"}.` : "") : null,
     el("div", { class: "link-row" },
       el("button", { class: "act", onclick: () => openFeedback(it) }, icon(ICONS.react), "Rate"),
@@ -468,7 +468,7 @@ function activeAlerts() {
 function alertCards() {
   const live = activeAlerts().filter((a) => !isCleared(`alert:${a.id}`));
   const rules = new Set(), shown = [];
-  for (const a of live) {                      // at most two (Tune → Rules → Alerts), and not two of one kind unless you say so
+  for (const a of live) {                      // at most two (Tune → Today → Alerts), and not two of one kind unless you say so
     if (shown.length >= T.alertMax) break;
     if (rules.has(a.rule) && !T.alertTwo) continue;
     rules.add(a.rule);
@@ -532,7 +532,7 @@ function openAlerts() {
         el("span", { class: "news-title" }, a.title),
         el("span", { class: "alert-src" }, alertSrc(a))))))
       : el("p", { class: "fine" }, "None this week. Most weeks have none: they’re meant to be rare."),
-    el("p", { class: "fine" }, "Tap Rate on an alert to hide alerts like it, or choose which kinds in Tune → Rules → Alerts."));
+    el("p", { class: "fine" }, "Tap Rate on an alert to hide alerts like it, or choose which kinds in Tune → Today → Alerts."));
 }
 
 // ── Outside your areas: one paper a day from the big general journals ─────
@@ -814,7 +814,7 @@ function closeBanner(m) {
   gone[m.id] = localDay();
   store.set("meetingsClosed", gone);
   renderBanner();
-  toast(`${m.name} banner closed. Turn meetings on or off in Tune → Interests.`);
+  toast(`${m.name} banner closed. Turn meetings on or off in Tune → Today → Meetings.`);
 }
 function renderBanner() {
   renderWx();
@@ -1073,7 +1073,7 @@ function briefList() {
   const classic = T.brief.classic ? classicToday() : null;
   const wide = T.brief.wide ? wideToday() : null;
   const fd = T.brief.foundations ? fdState() : null;
-  const stories = (plan.stories || []).filter((s) => s.items?.length);
+  const stories = (plan.stories || []).filter((s) => s.items?.length && !topHidden[storyKey(s)]);
   const sig = [plan.papers.join(","), plan.guess.join(","), stories.length, classic?.pmid, wide?.pmid, fd?.read, fd?.next].join("|");
   const out = [...alertCards(), { type: "brief-cover", key: "brief:cover", sig, plan, classic, wide, fd, stories }];
   const soon = T.brief.horizon && typeof hzEvents === "function" ? hzEvents(T.brief.hzDays || 7) : [];
@@ -1155,12 +1155,12 @@ function briefStoriesEl(it) {
       el("span", {}, "the ones the most independent sources covered")),
     el("div", { class: "top-lists" }, el("ol", { class: "top-list brief-stories" }, it.stories.map((st) => {
       const first = byId[st.items[0]];
-      return el("li", {}, el("button", { onclick: () => (st.items.length > 1 ? openStory(st, byId) : first && window.open(safeUrl(first.link), "_blank", "noopener")) },
+      return el("li", { class: "top-li" }, el("button", { class: "top-open", onclick: () => openStory(st, byId) },
         el("span", { class: "top-meta" }, `${st.label} · ${st.sources.length > 1 ? coverageText(st) : st.sources[0]}`),
         el("span", { class: "top-title" }, st.title),
-        first?.summary ? el("span", { class: "news-teaser clamp2" }, first.summary) : null));
+        first?.summary ? el("span", { class: "news-teaser clamp2" }, first.summary) : null), storyX(st));
     }))),
-    el("p", { class: "fine", style: "margin:0" }, "Tap one for every outlet’s take."));
+    el("p", { class: "fine", style: "margin:0" }, "Tap one to read, rate or see every outlet’s take; ✕ hides it."));
 }
 function fdNextEl(it) {
   const L = S.library, p = it.fd.next, c = L.papers[p], m = fdMeta(p) || {};

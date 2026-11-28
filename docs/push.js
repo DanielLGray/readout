@@ -115,7 +115,7 @@ async function sendChoices(force = false) {
 function choicesNote() {
   if (!pushState) return "Changes apply at once, on this phone.";
   return ghToken() ? "Changes apply at once here, and reach notifications a minute or two later."
-    : "Changes apply at once here. For notifications, send them from Tune → Rules → Alerts.";
+    : "Changes apply at once here. For notifications, send them from Tune → Today → Alerts.";
 }
 function choicesStatusEl(st) {
   const c = alertChoices();
@@ -150,7 +150,7 @@ async function loadNotifyStatus() {
     const r = await fetch("data/notify.json", { cache: "no-cache" });
     notifyStatus = r.ok ? await r.json() : null;
   } catch { notifyStatus = null; }
-  if (S.tab === "tune" && TU.pane === "algorithms") rerender();
+  if (S.tab === "tune" && TU.pane === "today") rerender();
 }
 function pushSectionEl() {
   if (notifyStatus === null && pushState) { notifyStatus = false; loadNotifyStatus(); }

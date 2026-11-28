@@ -236,7 +236,7 @@ function subjectOffer(it, redraw) {
   const draw = (pick) => sect.replaceChildren(...[
     el("div", { class: "ctl-label" }, "Topic filter"),
     kept ? el("p", { class: "fine", style: "margin-top:2px" },
-      `Your ${ruleName(kept.x.r)} filter let this through: ${kept.from ? "it’s from" : "it mentions"} “${kept.word}”. Change it in Tune → Rules → Topic filters.`) : null,
+      `Your ${ruleName(kept.x.r)} filter let this through: ${kept.from ? "it’s from" : "it mentions"} “${kept.word}”. Change it in Tune → Feed → Topic filters.`) : null,
     subs.length ? el("div", {},
       el("p", { class: "fine", style: "margin-top:2px" }, "Hide everything on this subject, unless it mentions what you choose:"),
       el("div", { class: "chips wrap" }, subs.map((s) => el("button", { class: "chip" + (pick === s ? " chip-topic" : ""), "aria-expanded": String(pick === s),

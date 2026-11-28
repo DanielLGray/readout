@@ -1,4 +1,4 @@
-/* Readout — job settings from the phone (Tune → Updates → a job → Change settings): what the jobs
+/* Readout — job settings from the phone (Tune → You → a job → Change settings): what the jobs
    on GitHub read from config/*.yaml (outlets, topics, thresholds), changed here and sent to the
    settings job (settings.yml), which checks them against pipeline/overrides.py and saves
    config/overrides.json. data/config.json lists what can change and what the files say.
@@ -23,7 +23,7 @@ async function loadJobCfg(force = false) {
   if (jobCfg && jobSent && jobCfg.last && Date.parse(jobCfg.last.at) >= jobSent.at - 5000) {
     if (jobCfg.last.ok && jobDraft && jCanon(jobDraft) === jobSent.canon) { jobDraft = null; store.set("jobDraft", null); }
   }
-  if (S.tab === "tune" && TU.pane === "pipeline") rerender();
+  if (S.tab === "tune" && TU.pane === "you") rerender();
 }
 
 // ── the document you're editing ────────────────────────────────────────────
@@ -203,7 +203,7 @@ function listEl(name, L) {
     body, L.add ? [addedEl(name, L), addFormEl(name, L)] : null);
 }
 
-// ── a job's settings, in its section of Tune → Updates ─────────────────────
+// ── a job's settings, in its section of Tune → You ─────────────────────
 function jobSettingsEl(name) {
   if (!jobCfg) { loadJobCfg(); return el("p", { class: "fine" }, "Settings you can change here appear after the settings job’s first run."); }
   const F = jobCfg.files?.[name];
@@ -251,9 +251,9 @@ function jobChangesBar() {
         twoTap("jobDiscard", "Discard", "Tap again to discard", () => { jobDraft = null; store.set("jobDraft", null); Object.keys(jobForms).forEach((k) => delete jobForms[k]); toast("Changes discarded"); rerender(); })),
       ghToken() ? null : el("p", { class: "fine" }, "Then on GitHub, ",
         el("a", { class: "inline-link", href: `https://github.com/${REPO}/actions/workflows/${JOBS.settings.wf}`, target: "_blank", rel: "noopener" }, "run “Apply settings”"),
-        ", paste them under Settings from the app, and run it. With a GitHub token (Tune → Updates, at the top) Send does this for you.")] : null);
+        ", paste them under Settings from the app, and run it. With a GitHub token (Tune → You, at the top) Send does this for you.")] : null);
 }
-// at the top of Tune → Updates: changes not sent, from any job
+// at the top of Tune → You: changes not sent, from any job
 function jobPendingTop() {
   if (!jobCfg) { loadJobCfg(); return null; }
   const n = jChanges();

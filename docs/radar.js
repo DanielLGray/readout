@@ -120,7 +120,7 @@ function drawRadar() {
     (R?.retired || []).length ? el("details", { class: "outlets" }, el("summary", {}, "Retired", el("span", { class: "fine" }, String(R.retired.length))),
       el("ul", { class: "rows plain" }, R.retired.map((r) => el("li", { class: "fine" }, el("b", {}, r.name), ` · added ${fmtDate(r.added)}, retired ${fmtDate(r.retired)}: ${r.reason}.`)))) : null,
     R ? el("p", { class: "fine" }, "Research news from Phys.org and Tech Xplore; preprints from arXiv; research counts from OpenAlex (CC0)",
-      R.settings?.openalex_key ? "" : ", a few topics a day until an OpenAlex key is added (Tune → Updates)",
+      R.settings?.openalex_key ? "" : ", a few topics a day until an OpenAlex key is added (Tune → You)",
       `. Updated ${ago(R.generated)}.`) : null));
   body.scrollTop = keep;
 }
@@ -182,7 +182,7 @@ function drawRadarTopic(id) {
     el("p", { class: "fine" }, "Matches: ", (t.words || []).join(", "), "."),
     el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => {
       setTune({ radar: { ...T.radar, hidden: [...new Set([...T.radar.hidden, t.id])] } });
-      toast(`${t.name} hidden. Bring it back in Tune → Interests → Radar.`); S.radarTopic = null; drawRadar();
+      toast(`${t.name} hidden. Bring it back in Tune → Today → Radar.`); S.radarTopic = null; drawRadar();
     } }, "Hide this topic"))));
 }
 
@@ -212,7 +212,7 @@ function radarCardEl(it) {
   return card;
 }
 
-// ── Tune → Interests ───────────────────────────────────────────────────────
+// ── Tune → Today ───────────────────────────────────────────────────────────
 function radarSection() {
   const R = S.radar;
   const hidden = (T.radar.hidden || []).map((id) => (R?.topics || []).find((t) => t.id === id) || { id, name: id });
@@ -228,5 +228,5 @@ function radarSection() {
     hidden.length ? el("div", { class: "chips wrap" }, hidden.map((t) => el("button", { class: "chip", "aria-pressed": "true",
       onclick: () => { setTune({ radar: { ...T.radar, hidden: T.radar.hidden.filter((x) => x !== t.id) } }); rerender(); } }, `${t.name}  ✕`))) : null,
     hidden.length ? el("p", { class: "fine" }, "Hidden topics: tap one to bring it back.") : null,
-    el("p", { class: "fine" }, "To add your own topics, or change how the Radar spots new ones, use Tune → Updates → Radar → Change settings."));
+    el("p", { class: "fine" }, "To add your own topics, or change how the Radar spots new ones, use Tune → You → Radar → Change settings."));
 }

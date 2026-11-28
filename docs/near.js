@@ -451,7 +451,7 @@ function airLine() {
     el("a", { href: AIRNOW, target: "_blank", rel: "noopener" }, "AirNow"), ".");
 }
 
-// ── Tune → Interests ───────────────────────────────────────────────────────
+// ── Tune → Today ───────────────────────────────────────────────────────────
 function nearSection() {
   const N = T.near, set = (p) => { setTune({ near: { ...T.near, ...p } }); if (p.quakes || p.fires || p.alerts || p.roads || p.air || p.mi > near.fMi) nearRefresh(0); rerender(); };
   const week = near.q.filter((q) => q.m >= N.mag - 1e-9 && milesFrom(q.lat, q.lon) <= N.mi).length;

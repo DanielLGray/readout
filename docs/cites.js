@@ -174,7 +174,7 @@ async function openCiting(p) {
     el("p", { class: "fine" }, `The ${Math.min(15, ids.length)} newest, by PubMed ID. Source: ${citeWatch.src || "NIH iCite"}.`),
     el("div", { class: "link-row" }, el("a", { class: "act", href: `https://pubmed.ncbi.nlm.nih.gov/?linkname=pubmed_pubmed_citedin&from_uid=${p.pmid}`, target: "_blank", rel: "noopener" }, "All in PubMed")));
 }
-// Tune → Rules → Alerts
+// Tune → Today → Alerts
 function citeSettingEl() {
   const n = savedPmids().length;
   const status = !T.citeAlerts ? "" : citeWatch.err ? `Last check (${citeWatch.at}) couldn’t reach NIH iCite or PubMed: ${citeWatch.err}.`

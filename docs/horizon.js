@@ -1,4 +1,4 @@
-/* Readout — Coming up: events on the horizon (Today card, Explore → Coming up, Tune → Interests).
+/* Readout — Coming up: events on the horizon (Today card, Explore → Coming up, Tune → Today).
    Most events come from data/horizon.json, built daily from official calendars. Earnings dates come
    straight to this phone from Alpha Vantage with your own free key, kept only here. */
 "use strict";
@@ -225,7 +225,7 @@ function drawHorizon() {
     H && T.horizon.range < 366 ? el("div", { class: "link-row" }, el("button", { class: "act", onclick: () => { S.hzDays = days < 366 ? 366 : T.horizon.range; drawHorizon(); } },
       days < 366 ? "Show the next 12 months" : `Back to the next ${hzRangeText()}`)) : null,
     T.horizon.kinds.markets && (f === "all" || f === "markets") ? el("div", { class: "fd-note" },
-      !key ? [el("b", {}, "Earnings dates: "), "add your free Alpha Vantage key in Tune → Interests → Coming up. Until then, the start of each earnings season is estimated. ",
+      !key ? [el("b", {}, "Earnings dates: "), "add your free Alpha Vantage key in Tune → Today → Coming up. Until then, the start of each earnings season is estimated. ",
         el("button", { class: "inline-link", onclick: () => { closeTopic(); switchTab("tune"); setPane("interests", "tune-horizon"); } }, "Add a key")]
         : earn?.err && (!earn.at || earn.errAt > earn.at) ? [el("b", {}, "Earnings: "), earn.err, earn.at ? ` Showing the dates from ${ago(new Date(earn.at).toISOString())}.` : ""]
           : [el("b", {}, "Earnings: "), `${plural(T.horizon.watch.length, "company", "companies")} you watch, from Alpha Vantage${earn?.at ? `, updated ${ago(new Date(earn.at).toISOString())}` : ""}. `,
@@ -287,7 +287,7 @@ function openHzEvent(e) {
     e.src === "TMDB" ? tmdbCredit() : e.src ? el("p", { class: "fine" }, `Source: ${e.src}.`) : null);
 }
 
-// ── Tune → Interests → Coming up ───────────────────────────────────────────
+// ── Tune → Today → Coming up ───────────────────────────────────────────
 function horizonSection() {
   const key = store.get("avKey", "");
   const earn = store.get("earn", null);
@@ -321,7 +321,7 @@ function horizonSection() {
       news: "CES, the State of the Union, the end of the Supreme Court term, Apple’s WWDC, once their dates are set.",
       money: "IRS deadlines, new contribution limits, the big sales weekends, and each month’s usual good buys.",
       culture: "Awards nights, Sundance, the Super Bowl, Comic-Con, Burning Man and Reno’s big events.",
-      movies: "Big theatrical releases in the next year, from TMDB with your token (see Tune → Updates → Set up), each linked to IMDb.",
+      movies: "Big theatrical releases in the next year, from TMDB with your token (see Tune → You → Set up), each linked to IMDb.",
     }[k], kinds[k], (v) => setKinds(k, v))),
     advanced("horizon",
       segPick("Explore → Coming up shows", [[30, "30 days"], [60, "2 months"], [90, "3 months"], [180, "6 months"], [366, "A year"]], T.horizon.range,

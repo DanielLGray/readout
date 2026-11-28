@@ -52,7 +52,7 @@ function localCardEl(it) {
   return card;
 }
 
-// ── Tune → Interests ───────────────────────────────────────────────────────
+// ── Tune → Today ───────────────────────────────────────────────────────────
 function localSection() {
   const N = S.news;
   if (!N?.kinds?.local) return null;
@@ -66,7 +66,7 @@ function localSection() {
     el("p", { class: "fine" }, `Last 7 days: ${plural(week.length, "story", "stories")}; ${reno} about Reno and northern Nevada, ${nv} elsewhere in Nevada, ${week.length - reno - nv} naming neither.`),
     segPick("Which stories", LOCAL_SCOPES, T.local.scope, (v) => { setTune({ local: { ...T.local, scope: v } }); rerender(); },
       "Reno area: stories naming Reno, Washoe, Tahoe, Carson City, the Truckee Meadows and nearby. Nevada: also Las Vegas and the rest of the state. Everything: also the outlets’ stories that name neither."),
-    stepRow("Turns in Everything", "Per round, like the other kinds (Tune → Rules → Feed mix). 0 keeps local news to its own chip and Today’s card.",
+    stepRow("Turns in Everything", "Per round, like the other kinds (Tune → Feed → Feed mix). 0 keeps local news to its own chip and Today’s card.",
       T.mix.local ?? 1, { min: 0, max: 6 }, (v) => { setTune({ mix: { ...T.mix, local: v } }); rerender(); }),
     stepRow("Stories on Today’s card", "New ones since the card last showed, best-rated first. 0 turns the card off.",
       T.brief.local, { min: 0, max: 8 }, (v) => { setTune({ brief: { ...T.brief, local: v } }); rerender(); }),
@@ -76,5 +76,5 @@ function localSection() {
     outlets.length ? el("div", { class: "ctl" }, el("div", { class: "ctl-label" }, "Outlets"),
       el("p", { class: "fine", style: "margin:2px 0 6px" }, "What you think of each, and how many of its stories a day Everything shows."),
       el("section", { class: "fb-sect" }, outlets.map((o) => [rateRow(`src:${o.name}`, redraw), outletRowEl(o, true)]))) : null,
-    el("p", { class: "fine" }, "Turn an outlet off, change how many stories it keeps or add place names: Tune → Updates → News → Change settings. Left out for their terms: Reno News & Review, KOLO 8, UNR’s Nevada Today and The Nevada Independent don’t allow it; KUNR and This Is Reno don’t say, and can be added once they do. Pictures stay out: the outlets’ photo rights are separate."));
+    el("p", { class: "fine" }, "Turn an outlet off, change how many stories it keeps or add place names: Tune → You → News → Change settings. Left out for their terms: Reno News & Review, KOLO 8, UNR’s Nevada Today and The Nevada Independent don’t allow it; KUNR and This Is Reno don’t say, and can be added once they do. Pictures stay out: the outlets’ photo rights are separate."));
 }
