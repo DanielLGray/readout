@@ -194,6 +194,7 @@ const TUNE_SUM = {
   "tune-job-coming-up": () => (S.horizon?.generated ? `updated ${ago(S.horizon.generated)}` : ""),
   "tune-job-radar": () => (S.radar?.generated ? `updated ${ago(S.radar.generated)}` : ""),
   "tune-job-watch": () => (S.watch?.generated ? `updated ${ago(S.watch.generated)}` : ""),
+  "tune-job-roads": () => (typeof near === "object" && near.ccAsOf ? `copy from ${ago(new Date(near.ccAsOf).toISOString())}` : ""),
 };
 // each section folded to one line; tap to open (it stays open until you close it)
 function foldSection(node) {
@@ -1143,6 +1144,7 @@ const JOBS = {
   horizon: { wf: "horizon.yml", cfg: "horizon.yaml", every: 30, title: "Coming up", sub: "Fed, BLS, BEA, Federal Register (FDA) and launch calendars, every morning" },
   radar: { wf: "radar.yml", cfg: "radar.yaml", every: 30, title: "Radar", sub: "Research news, arXiv preprints and OpenAlex research counts, every day" },
   watch: { wf: "watch.yml", cfg: "watch.yaml", every: 30, title: "Watch", sub: "ClinicalTrials.gov, openFDA and the Federal Register, every morning" },
+  roads: { wf: "roads.yml", cfg: "", every: 7, title: "Roads", sub: "Caltrans chain controls, every half hour October to May (GitHub often runs it later)" },
   notify: { wf: "notify.yml", cfg: "", every: 24 * 30, title: "Notifications", sub: "New alerts to your phone, after each news, papers and watch update" },
   settings: { wf: "settings.yml", cfg: "", every: 24 * 365, title: "Settings", sub: "Job settings sent from this phone, checked and saved" },
 };
@@ -1198,7 +1200,7 @@ function jobLinks(key, editLabel) {
         finally { b.disabled = false; }
       } }, "Run now")
     : linkBtn(`${GH}/actions/workflows/${j.wf}`, "Run now");
-  return el("div", { class: "link-row" }, linkBtn(`${GH}/edit/main/config/${j.cfg}`, editLabel), run);
+  return el("div", { class: "link-row" }, linkBtn(j.cfg ? `${GH}/edit/main/config/${j.cfg}` : `${GH}/blob/main/.github/workflows/${j.wf}`, editLabel), run);
 }
 
 // ── set up: the keys and settings Readout can use, and which are in place ──
@@ -1373,7 +1375,7 @@ function pipelinePane() {
     el("h3", { class: "tune-group" }, "Update jobs"),
     el("p", { class: "fine", style: "margin:2px 0 0" }, "The jobs on GitHub that build what you read. Change settings, in News, Watch, Radar and Coming up, applies at the next run."),
     typeof jobPendingTop === "function" ? jobPendingTop() : null,
-    setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(), radarJob(), watchJob(),
+    setupSection(), tokenSection(), papersJob(), importantJob(), newsJob(), exploreJob(), libraryJob(), horizonJob(), radarJob(), watchJob(), roadsJob(),
     el("p", { class: "fine" }, ghToken() ? "Edit opens the settings file on GitHub. Run now starts the job on GitHub from here." : "Edit opens the settings file on GitHub. Sign in, tap the pencil, change a value and commit. Run now opens the job; tap Run workflow to start it instead of waiting."),
   ];
 }
@@ -1479,6 +1481,16 @@ function newsJob() {
     jobLinks("news", "Edit outlets and settings"));
 }
 
+// the roads job: Caltrans chain controls, copied for phones that can't ask Caltrans directly (near.js)
+function roadsJob() {
+  const via = typeof near === "object" ? near.ccVia : "";
+  return el("section", { class: "sect job" }, el("h2", {}, JOBS.roads.title), el("p", { class: "sub" }, JOBS.roads.sub),
+    via === "readout" && near.ccAsOf ? jobStatus("roads", new Date(near.ccAsOf).toISOString()) : null,
+    el("p", { class: "fine" }, via === "caltrans" ? "This phone reads Caltrans directly, so it doesn’t need this copy."
+      : via === "readout" ? "This phone reads the job’s copy, because Caltrans’s feed didn’t answer it directly. The copy changes only when a chain control does, and every 6 hours anyway. With the GitHub token on this phone, Readout starts the job itself when the copy is over 45 minutes old during chain controls."
+        : "Chain controls are read October to May, when Sierra roads & snow is on (Tune → Today → Near Reno)."),
+    jobLinks("roads", "See the job"));
+}
 function horizonJob() {
   const H = S.horizon;
   const names = { fed: "Federal Reserve", bls: "BLS (jobs, CPI)", bea: "BEA (GDP, PCE)", fda: "FDA panels", launches: "Launches",

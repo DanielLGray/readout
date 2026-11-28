@@ -192,7 +192,7 @@ function drawWatch() {
         el("span", { class: "news-src" }, el("b", {}, `~${fmtDate(d.start.slice(0, 10))}`), d.sub ? el("span", {}, d.sub) : null),
         el("span", { class: "news-title" }, d.title.replace(/: primary completion \(estimated\)$/, ""))))))) : null,
     (f === "all" || f === "shortage") && T.watch.kinds.shortage !== false ? shortageNowEl() : null,
-    W && !list.length ? el("p", { class: "nothing" }, f === "follow" ? "No changes yet in the trials you follow." : "Nothing here in the last four months.") : null,
+    W && !list.length ? el("p", { class: "nothing" }, f === "follow" ? "No changes yet in the trials you follow." : f === "shortage" ? "No new, resolved or discontinued shortages in the last four months." : "Nothing here in the last four months.") : null,
     groups.map(([label, test]) => {
       const g = shown.filter(test);
       return g.length ? el("section", {}, el("h3", { class: "sys-head" }, label), el("ul", { class: "rows" }, g.slice(0, 60).map(wEventEl))) : null;

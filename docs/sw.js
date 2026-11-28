@@ -1,6 +1,6 @@
 /* Readout service worker: app shell from cache, data from network (cache as fallback).
    On each app change, bump BUILD here and the ?v= numbers in index.html together. */
-const BUILD = "59";
+const BUILD = "60";
 const VERSION = `readout-v${BUILD}`;
 const DATA = "readout-data";        // last copy of each data file; kept across app updates (the app reads it too)
 const FIGS = "readout-figs";        // pictures from papers: kept once fetched, the newest 400 or so
@@ -85,7 +85,7 @@ self.addEventListener("fetch", (e) => {
   if (url.pathname.includes("/data/")) {
     // newest data when online, last copy when offline
     e.respondWith(fetch(e.request).then((res) => {
-      if (res.ok) { const copy = res.clone(); caches.open(DATA).then((c) => c.put(e.request, copy)); }
+      if (res.ok) { const copy = res.clone(); caches.open(DATA).then((c) => c.put(url.origin + url.pathname, copy)); }   // one copy per file
       return res;
     }).catch(() => caches.open(DATA).then((c) => c.match(e.request, { ignoreSearch: true })).then(offlineCopy)));
     return;

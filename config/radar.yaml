@@ -85,7 +85,7 @@ sources:
     stale_days: 60
     urls:
       - https://medicalxpress.com/rss-feed/genetics-news/
-      - https://medicalxpress.com/rss-feed/neuroscience-news/
+      - https://medicalxpress.com/rss-feed/neurology-news/
 
 # Topics you chose. words: any of these in a headline or summary (case doesn't matter; whole words).
 # require: optional, must also match (for short words with other meanings). exclude: never these.

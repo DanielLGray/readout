@@ -5,6 +5,7 @@ on:
     - cron: "37 5 * * 2"       # Tuesdays, 05:37 UTC
     - cron: "7 9 * * 2"        # backups if GitHub drops the run; they skip when the list is under 5 days old
     - cron: "37 5 * * 3"
+    - cron: "7 15 * * 6"      # Saturday: catches up only if every weekday time was dropped or fell in peak hours
   workflow_dispatch: {}
 
 permissions: {}                 # each job below asks for only what it needs
@@ -28,7 +29,9 @@ jobs:
           persist-credentials: false # this job can't push at all; the save job below does
       - name: Already up to date?          # a backup run skips when the data is fresh
         id: due
-        run: python3 -m pipeline.due docs/data/important.json 120
+        env:
+          CRON: ${{ github.event.schedule }}
+        run: python3 -m pipeline.due docs/data/important.json "$([ "$CRON" = '7 15 * * 6' ] && echo 160 || echo 120)" offpeak   # a late scheduled run waits for NCBI's off-peak hours
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.due.outputs.run == 'true'
         with:

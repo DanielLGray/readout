@@ -204,13 +204,23 @@ const AQI_CATS = [[50, "Good", "#00e400"], [100, "Moderate", "#ffff00"], [150, "
   [200, "Unhealthy", "#ff0000"], [300, "Very unhealthy", "#8f3f97"], [Infinity, "Hazardous", "#7e0023"]];
 const aqiCat = (v) => AQI_CATS.find(([hi]) => v <= hi);
 
+// GitHub runs scheduled jobs late or skips them when it's busy. When the roads job's copy is over
+// 45 minutes old and this phone has the GitHub token (Tune → You), start the job (once in 30 minutes);
+// a quiet copy stays up to 6 hours old by design, so only a copy older than that counts then.
+function kickRoads(now) {
+  if (typeof ghToken !== "function" || !ghToken() || typeof runJob !== "function" || !JOBS.roads) return;
+  const age = now - (near.ccAsOf || 0), last = Number(store.get("roadsKick", 0)) || 0;
+  if (now - last < 30 * 60e3 || age < (near.cc.length ? 45 * 60e3 : 6.5 * 36e5)) return;
+  store.set("roadsKick", now);
+  runJob("roads").catch(() => {});
+}
 async function nearRefresh(maxAgeMin = 15) {
   const N = T.near;
   if (nearBusy || !(N.quakes || N.fires || N.alerts || N.roads || N.air)) return;
   const now = Date.now(), season = inSnowSeason();
   const wantQ = N.quakes && now - near.qAt >= maxAgeMin * 60e3;
   const wantF = N.fires && (now - near.fAt >= Math.max(maxAgeMin, 30) * 60e3 || near.fMi < N.mi);
-  const wantAl = N.alerts && now - near.alAt >= Math.max(maxAgeMin, 10) * 60e3;
+  const wantAl = (N.alerts || N.air || N.fires) && now - near.alAt >= Math.max(maxAgeMin, 10) * 60e3;
   const wantCc = N.roads && season && now - near.ccAt >= maxAgeMin * 60e3;
   const wantSn = N.roads && season && now - near.snAt >= Math.max(maxAgeMin, 60) * 60e3;
   const wantAir = N.air && now - near.airAt >= Math.max(maxAgeMin, 30) * 60e3;
@@ -260,11 +270,12 @@ async function nearRefresh(maxAgeMin = 15) {
     if (wantCc) {
       // Caltrans directly when this phone can reach it; else the roads job's copy (a day before trying Caltrans again)
       const direct = now - near.ccDirectFail > 864e5;
-      const viaReadout = () => get(`data/roads.json?t=${Math.floor(now / 6e4)}`).then((d) => {
+      const viaReadout = () => get("data/roads.json").then((d) => {
         if (!Array.isArray(d?.controls)) throw new Error("roads");
         near.cc = parseControls({ data: d.controls.map((c) => ({ cc: { location: { route: c.r, direction: c.dir, locationName: c.loc, nearbyPlace: c.near, postmile: c.pm },
           statusData: { status: c.s, statusDescription: c.d, statusTimestamp: { statusDate: String(c.t || "").slice(0, 10), statusTime: String(c.t || "").slice(11, 19) } } } })) });
         near.ccAsOf = Date.parse(d.checked || "") || 0; near.ccVia = "readout";
+        kickRoads(now);
       });
       jobs.push((direct ? get(CC_URL).then((d) => {
         if (!Array.isArray(d?.data)) throw new Error("caltrans");
